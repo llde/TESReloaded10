@@ -1,0 +1,25 @@
+Copyright 2021 Alessio Tamburini (aletamburini78@gmail.com) AKA Alenet.
+All rights reserved.
+Unauthorized copying of the files included with this licence, via any medium is strictly prohibited.
+
+OFFICIAL SITE: https://www.tesreloaded.com
+
+Contributor(s):
+ - Timeslip
+ - scanti
+ - ShadeMe
+ - Ethatron
+Additional contributions MUST be approved from the author.
+
+The source code is available only to a limited group of individuals, approved by the author and it CANNOT be published and it CANNOT be get public in any way.
+The redistribution and use of the binaries, with or without modification, are NOT permitted out of the official site and publishing binaries out of the official site is strictly prohibited.
+The author can allow a limited group of individuals to redistribute the binaries, with or without modification, but the following conditions MUST be met:
+ - the current license MUST be included in the redistribution of the binaries and it cannot be modified
+ - the distributed binaries MUST report the word "UNOFFICIAL" in the product description
+ - the distribution MUST be authorized by the author with a certified email
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER (AUTHOR) 'AS IT IS', WITHOUT WARRANTY OF ANY KIND.
+THIS SOFTWARE IS DISTRIBUTED FOR FREE AND ANY EXPRESS OR IMPLIED MONEY REQUEST IS DISCLAIMED BY THE AUTHOR. YOU CANNOT EARN MONEY (DIRECTLY OR INDIRECTLY) WITH ITS DISTRIBUTION.
+YOU ARE FREE TO DONATE MONEY TO THE AUTHOR IF YOU APPRECIATE THE WORK DONE, USING EXCLUSIVELY THE OFFICIAL SITE.
+
+The license terms can be changed ONLY by the author.
