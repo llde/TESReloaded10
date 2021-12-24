@@ -441,7 +441,7 @@ static __declspec(naked) void DetectorWindowCreateTreeViewHook() {
 
 void DetectorWindowDumpAttributes(HWND TreeView, UInt32 Msg, WPARAM wParam, LPTVINSERTSTRUCTA lParam) {
 
-	TVITEMEXA Item;
+	TVITEMEXA Item = { NULL };
 	char T[260] = { '\0' };
 
 	Item.pszText = T;

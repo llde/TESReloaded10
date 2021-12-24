@@ -79,3 +79,27 @@ public:
 	}
 
 };
+
+
+
+bool(__thiscall Settings::* LoadGame)(char*, UInt8);
+bool(__thiscall Settings::* TrackLoadGame)(char*, UInt8);
+bool Settings::TrackLoadGame(char* FileName, UInt8 Arg2) {
+
+	bool r;
+
+	TheSettingManager->GameLoading = true;
+	r = (this->*LoadGame)(FileName, Arg2);
+	TheSettingManager->GameLoading = false;
+	if (r) TheShaderManager->InitializeConstants();
+	return r;
+
+}
+
+
+SafeWrite32(0x00CDB659, sizeof(RenderManager));
+
+
+TES* (__thiscall GameInitialization::* NewTES)(char*, NiNode*, NiNode*, Sky*, NiNode*);
+TES* (__thiscall GameInitialization::* TrackNewTES)(char*, NiNode*, NiNode*, Sky*, NiNode*);
+TES* GameInitialization::TrackNewTES(char* RootData, NiNode* ObjectLODRoot, NiNode* LandLOD, Sky* Sky, NiNode* WaterLOD) { Tes = (TES*)(this->*NewTES)(RootData, ObjectLODRoot, LandLOD, Sky, WaterLOD); SceneNode = *(ShadowSceneNode**)kShadowSceneNode; return Tes; }

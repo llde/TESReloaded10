@@ -13,6 +13,7 @@
 #include "PluginVersion.h"
 #include "MemoryManagement.h"
 #include "D3D9Hook.h"
+#include "Hooks/Oblivion/Hooks.h"
 
 extern "C" {
 
@@ -20,7 +21,7 @@ extern "C" {
 
 		Info->InfoVersion = PluginInfo::kInfoVersion;
 		Info->Name = "OblivionReloaded";
-		Info->Version = 9;
+		Info->Version = 10;
 		return true;
 
 	}
@@ -43,7 +44,7 @@ extern "C" {
 			PluginVersion::CreateVersionString();
 			SettingManager::Initialize();
 			if (TheSettingManager->LoadSettings(true)) {
-				CreateGameInitializationHook();
+				AttachHooks();
 				CreateShaderIOHook();
 				CreateRenderHook();
 				CreateFormLoadHook();

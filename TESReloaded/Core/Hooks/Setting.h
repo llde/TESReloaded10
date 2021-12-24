@@ -1,11 +1,7 @@
-#include <sstream>
-#include <fstream>
-#include <algorithm>
-#include "WindowedMode.h"
-#include "PluginVersion.h"
+#pragma once
 
-bool (__thiscall* ReadSetting)(INISettingCollection*, GameSetting*) = (bool (__thiscall*)(INISettingCollection*, GameSetting*))Hooks::ReadSetting;
-bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, GameSetting* Setting) {
+static bool (__thiscall* ReadSetting)(INISettingCollection*, GameSetting*) = (bool (__thiscall*)(INISettingCollection*, GameSetting*))Hooks::ReadSetting;
+static bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, GameSetting* Setting) {
 	
 	bool r = (*ReadSetting)(This, Setting);
 
@@ -37,8 +33,8 @@ bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, GameSett
 
 }
 
-bool (__thiscall* WriteSetting)(INISettingCollection*, GameSetting*) = (bool (__thiscall*)(INISettingCollection*, GameSetting*))Hooks::WriteSetting;
-bool __fastcall WriteSettingHook(INISettingCollection* This, UInt32 edx, GameSetting* Setting) {
+static bool (__thiscall* WriteSetting)(INISettingCollection*, GameSetting*) = (bool (__thiscall*)(INISettingCollection*, GameSetting*))Hooks::WriteSetting;
+static bool __fastcall WriteSettingHook(INISettingCollection* This, UInt32 edx, GameSetting* Setting) {
 
 	if (!strcmp(Setting->Name, "fNearDistance:Display") || !strcmp(Setting->Name, "fNear1stPersonDistance:Display"))
 		return true;
@@ -52,44 +48,4 @@ bool __fastcall WriteSettingHook(INISettingCollection* This, UInt32 edx, GameSet
 		return true;
 	return (*WriteSetting)(This, Setting);
 	
-}
-
-#if defined(OBLIVION)
-bool (__thiscall* LoadGame)(TESSaveLoadGame*, BSFile*, char*, UInt8) = (bool (__thiscall*)(TESSaveLoadGame*, BSFile*, char*, UInt8))Hooks::LoadGame;
-bool __fastcall LoadGameHook(TESSaveLoadGame* This, UInt32 edx, BSFile* GameFile, char* FileName, UInt8 Arg3) {
-
-	bool r;
-	
-	TheSettingManager->GameLoading = true;
-	r = (*LoadGame)(This, GameFile, FileName, Arg3);
-	TheSettingManager->GameLoading = false;
-	if (r) TheShaderManager->InitializeConstants();
-	return r;
-
-}
-#elif defined(SKYRIM)
-bool (__thiscall Settings::* LoadGame)(char*, UInt8);
-bool (__thiscall Settings::* TrackLoadGame)(char*, UInt8);
-bool Settings::TrackLoadGame(char* FileName, UInt8 Arg2) {
-
-	bool r;
-
-	TheSettingManager->GameLoading = true;
-	r = (this->*LoadGame)(FileName, Arg2);
-	TheSettingManager->GameLoading = false;
-	if (r) TheShaderManager->InitializeConstants();
-	return r;
-
-}
-#endif
-
-void CreateSettingsHook() {
-
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&(PVOID&)ReadSetting,		&ReadSettingHook);
-	DetourAttach(&(PVOID&)WriteSetting,		&WriteSettingHook);
-	DetourAttach(&(PVOID&)LoadGame,			&LoadGameHook);
-	DetourTransactionCommit();
-
 }

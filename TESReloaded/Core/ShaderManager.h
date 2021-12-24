@@ -262,9 +262,11 @@ public:
 typedef std::map<std::string, EffectRecord*> ExtraEffectsList;
 typedef std::map<std::string, D3DXVECTOR4> CustomConstants;
 
-class ShaderManager { // Never disposed
+__declspec(align(16)) class ShaderManager { // Never disposed
 public:
 	ShaderManager();
+
+	void* operator new(size_t i) { return _mm_malloc(i, 16); }
 
 	void					CreateFrameVertex(UInt32 Width, UInt32 Height, IDirect3DVertexBuffer9** FrameVertex);
 	void					CreateEffects();

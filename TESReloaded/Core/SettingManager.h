@@ -630,7 +630,7 @@ public:
 
 		SectionPosition	GoToSection(const char* Section, const char* FromPosition = NULL) {
 
-			SectionPosition SectionPosition;
+			SectionPosition SectionPosition = {NULL, NULL};
 			char* Finder = NULL;
 			char* KeyPositionR = NULL;
 			char SectionB[80];
@@ -805,7 +805,6 @@ public:
 			char* AttributePositionStart = NULL;
 			char* AttributePositionEnd = NULL;
 			char ToFind[80];
-			char AttributeValue[80] = { NULL };
 
 			strcpy(ToFind, Attribute);
 			strcat(ToFind, "=");
@@ -826,7 +825,7 @@ public:
 
 			char Section[4096];
 			char SectionNode[256];
-			char Value[80];
+			char Value[80] = { NULL };
 			SettingManager::Configuration::SectionPosition SectionPosition = GoToSection("Weathers");
 
 			strcpy(Section, "<");
@@ -897,9 +896,9 @@ public:
 
 		StringList List;
 		StringList InnerList;
-		SettingsWaterStruct SW;
-		SettingsColoringStruct SC;
-		SettingsWeatherStruct SE;
+		SettingsWaterStruct SW {};
+		SettingsColoringStruct SC {};
+		SettingsWeatherStruct SE {};
 		char Value[80];
 
 		if (Init) Config.Init();
@@ -1598,7 +1597,7 @@ public:
 		const char* WeatherName = NULL;
 		TESWeather* Weather = NULL;
 		StringList Values;
-		char AttributeValue[80];
+		char AttributeValue[80] = { NULL };
 		char ColorSection[40];
 		char ColorNode[8];
 

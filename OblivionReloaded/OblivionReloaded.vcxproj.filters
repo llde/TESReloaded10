@@ -27,6 +27,12 @@
     <Filter Include="Framework\Common\Base">
       <UniqueIdentifier>{a7e2dfbf-6f70-4169-9770-30913f9e9554}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Hooks">
+      <UniqueIdentifier>{a6515936-5dae-4b77-ab06-300bcbd940a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Hooks\Oblivion">
+      <UniqueIdentifier>{9448ea77-c579-44fe-a667-297e2132562e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TESReloaded\Core\Animation.h">
@@ -66,9 +72,6 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\KeyboardManager.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Managers.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\MemoryManagement.h">
@@ -152,6 +155,24 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h">
       <Filter>Framework\Common\Base</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Common\Managers.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Setting.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Setting.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Hooks.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Game.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TESReloaded\Core\Animation.cpp">
@@ -193,9 +214,6 @@
     <ClCompile Include="..\TESReloaded\Core\KeyboardManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\Managers.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\MemoryManagement.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -212,9 +230,6 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\ScriptManager.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\SettingManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\ShaderIOHook.cpp">
@@ -234,9 +249,6 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\WindowedMode.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Framework\Game.cpp">
-      <Filter>Framework</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Main</Filter>
@@ -261,6 +273,9 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\SafeWrite.cpp">
       <Filter>Framework\Common\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Common\Managers.cpp">
+      <Filter>Framework\Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

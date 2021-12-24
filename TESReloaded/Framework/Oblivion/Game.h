@@ -4045,14 +4045,3 @@ static ShaderDefinition* (__cdecl* GetShaderDefinition)(UInt32) = (ShaderDefinit
 static char* (__cdecl* GetPassDescription)(UInt32) = (char* (__cdecl*)(UInt32))0x007B4920;
 static void  (__cdecl* BeginRendering)(UInt32, NiRenderTargetGroup*) = (void (__cdecl*)(UInt32, NiRenderTargetGroup*))0x007D7280;
 static void  (* EndRendering)() = (void (*)())0x007D72D0;
-
-extern Main*					Global;
-extern TES*						Tes;
-extern PlayerCharacter*			Player;
-extern SceneGraph*				WorldSceneGraph;
-extern MasterDataHandler*		DataHandler;
-extern MenuInterfaceManager*	MenuManager;
-extern QueuedModelLoader*		ModelLoader;
-extern ShadowSceneNode*			SceneNode;
-
-void CreateGameInitializationHook();
