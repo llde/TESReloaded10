@@ -216,14 +216,14 @@ void CommandManager::PluginCommands::IsThirdPerson(double* result) {
 
 void CommandManager::PluginCommands::GetVersion(double* result) {
 
-	if (MenuManager->IsActive(Menu::MenuType::kMenuType_Console)) PrintToConsole(PluginVersion::VersionString);
+	if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_Console)) PrintToConsole(PluginVersion::VersionString);
 	*result = 1;
 
 }
 
 void CommandManager::PluginCommands::GetLocationName(double* result) {
 
-	if (MenuManager->IsActive(Menu::MenuType::kMenuType_Console)) {
+	if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_Console)) {
 		const char* worldName = NULL;
 		const char* regionName = NULL;
 		const char* cellName = Player->parentCell->GetEditorName();
@@ -264,7 +264,7 @@ void CommandManager::PluginCommands::SetCustomConstant(double* result, const cha
 
 void CommandManager::PluginCommands::GetWeatherName(double* result) {
 
-	if (MenuManager->IsActive(Menu::MenuType::kMenuType_Console)) {
+	if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_Console)) {
 		const char* weatherName = NULL;
 
 		if (TESWeatherEx* currentWE = (TESWeatherEx*)TheShaderManager->ShaderConst.pWeather) weatherName = currentWE->EditorName;

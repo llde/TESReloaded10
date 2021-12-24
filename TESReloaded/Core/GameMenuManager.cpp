@@ -53,7 +53,7 @@ void GameMenuManager::Render() {
 	char MidSection[40];
 	size_t ListSize = 0;
 
-	if (MenuManager->IsActive(Menu::MenuType::kMenuType_Main)) {
+	if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_Main)) {
 		SetRect(&Rect, 0, TheRenderManager->height - MenuSettings->TextSize - 10, TheRenderManager->width, TheRenderManager->height + MenuSettings->TextSize);
 		SetRect(&RectShadow, Rect.left + 1, Rect.top + 1, Rect.right + 1, Rect.bottom + 1);
 		FontNormal->DrawTextA(NULL, PluginVersion::VersionString, -1, &RectShadow, DT_CENTER, TextShadowColorNormal);
@@ -64,7 +64,7 @@ void GameMenuManager::Render() {
 			Enabled = !Enabled;
 			EditingMode = false;
 		}
-		if (!MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
+		if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
 			Enabled = false;
 			EditingMode = false;
 		}
@@ -169,7 +169,7 @@ void GameMenuManager::Render() {
 					}
 					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeySave)) {
 						TheSettingManager->SaveSettings();
-						MenuManager->ShowMessage("Settings saved.");
+						InterfaceManager->ShowMessage("Settings saved.");
 					}
 				}
 			}

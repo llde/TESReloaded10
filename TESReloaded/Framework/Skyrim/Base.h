@@ -1,39 +1,21 @@
 #pragma once
 
-CommandTable	commandTable;
+class Hooks {
+public:
+	static const UInt32 ReadSetting				= 0x00AFED60;
+	static const UInt32 WriteSetting			= 0x00AFEB50;
+	static const UInt32 LoadGame				= 0x0067B720;
+	static const UInt32 NewMain					= 0x0069BFE0;
+	static const UInt32 InitializeRenderer		= 0x00691030;
+	static const UInt32 NewTES					= 0x00435C10;
+	static const UInt32 NewPlayerCharacter		= 0x0074DB40;
+	static const UInt32 NewSceneGraph			= 0x0069F1F0;
+	static const UInt32 NewMainDataHandler		= 0x0043DE50;
+	static const UInt32 NewMenuInterfaceManager = 0x00000000;
+	static const UInt32 NewQueuedModelLoader	= 0x00430470;
+};
 
-namespace SRPapyrus {
-
-	const char* SRClass = "SRCommands";
-
-	bool SetExtraEffectEnabled(BSFixedString Name, bool Value) {
-
-		double result;
-
-		TheCommandManager->Commands.SetExtraEffectEnabled(&result, Name.m_data, Value);
-		return result;
-
-	}
-
-	bool SetCustomConstant(BSFixedString Name, float Value1, float Value2, float Value3, float Value4) {
-
-		double result;
-		float Value[4] = { Value1, Value2, Value3, Value4 };
-
-		TheCommandManager->Commands.SetCustomConstant(&result, Name.m_data, Value);
-		return result;
-
-	}
-
-	bool RegisterCommands(VMClassRegistry* registry) {
-
-		registry->RegisterFunction(new PapyrusFunction2<BSFixedString, bool>("SetExtraEffectEnabled", SRClass, SetExtraEffectEnabled, registry));
-		registry->RegisterFunction(new PapyrusFunction5<BSFixedString, float, float, float, float>("SetCustomConstant", SRClass, SetCustomConstant, registry));
-		return true;
-
-	}
-
-}
+static CommandTable	commandTable;
 
 void (__cdecl* ToggleConsole)() = (void (__cdecl*)())0x00847210;
 void __cdecl TrackToggleConsole() {
@@ -58,7 +40,7 @@ public:
 	void RegisterCommands(const PluginInterface* Interface, void* CommandExecuters[], CommandInfo* CommandInfos[], int CommandInfoSize) {
 
 		PapyrusInterface* PInterface = (PapyrusInterface*)Interface->QueryInterface(PluginInterface::InterfaceType::kInterface_Papyrus);
-		PInterface->Register(SRPapyrus::RegisterCommands);
+		PInterface->Register(RegisterPapyrusCommands);
 		
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
@@ -80,26 +62,13 @@ public:
 
 };
 
+class ShadowManagerBase {
+public:
 
+	enum ShadowMapTypeEnum {
+		MapNear = 0,
+		MapFar = 1,
+		MapOrtho = 2,
+	};
 
-bool(__thiscall Settings::* LoadGame)(char*, UInt8);
-bool(__thiscall Settings::* TrackLoadGame)(char*, UInt8);
-bool Settings::TrackLoadGame(char* FileName, UInt8 Arg2) {
-
-	bool r;
-
-	TheSettingManager->GameLoading = true;
-	r = (this->*LoadGame)(FileName, Arg2);
-	TheSettingManager->GameLoading = false;
-	if (r) TheShaderManager->InitializeConstants();
-	return r;
-
-}
-
-
-SafeWrite32(0x00CDB659, sizeof(RenderManager));
-
-
-TES* (__thiscall GameInitialization::* NewTES)(char*, NiNode*, NiNode*, Sky*, NiNode*);
-TES* (__thiscall GameInitialization::* TrackNewTES)(char*, NiNode*, NiNode*, Sky*, NiNode*);
-TES* GameInitialization::TrackNewTES(char* RootData, NiNode* ObjectLODRoot, NiNode* LandLOD, Sky* Sky, NiNode* WaterLOD) { Tes = (TES*)(this->*NewTES)(RootData, ObjectLODRoot, LandLOD, Sky, WaterLOD); SceneNode = *(ShadowSceneNode**)kShadowSceneNode; return Tes; }
+};

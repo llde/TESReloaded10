@@ -3,7 +3,6 @@
 #include "RenderHook.h"
 #include "ShaderIOHook.h"
 #include "FormHook.h"
-#include "CameraMode.h"
 #include "SleepingMode.h"
 #include "PluginVersion.h"
 #include "D3D9Hook.h"
@@ -14,7 +13,7 @@ extern "C" {
 		
 		Info->InfoVersion = PluginInfo::kInfoVersion;
 		Info->Name = "SkyrimReloaded";
-		Info->Version = 4;
+		Info->Version = 5;
 		return true;
 
 	}

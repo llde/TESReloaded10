@@ -35,7 +35,6 @@ static const char* MainMenuMusic = "Special\\ORMainMenu.mp3";
 #define kSettingWorldFoV 0x012C8D78
 #define kSetting1stPersonFoV 0x012C8D84
 #define kSettingNearDistance 0x012C8D54
-#define ColorData ColorType
 static const char* IntroMovie = "";
 static const char* MainMenuMovie = "";
 static const char* MainMenuMusic = "";

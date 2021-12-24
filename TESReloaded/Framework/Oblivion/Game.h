@@ -942,7 +942,7 @@ public:
 	};
 
 	struct ColorData {
-		RGBA colors[4];
+		RGBA colors[kNumTimeOfDay];
 	};
 
 	struct SoundData {
@@ -980,7 +980,7 @@ assert(sizeof(TESWeather) == 0x148);
 
 class TESWeatherEx : public TESWeather {
 public:
-	ColorData	colorsb[TESWeather::kNumColorTypes];
+	ColorData	colorsb[kNumColorTypes];
 	char		EditorName[40];
 };
 assert(sizeof(TESWeatherEx) == 0x210);
@@ -3729,7 +3729,7 @@ public:
 };
 assert(sizeof(ModList) == 0x408);
 
-class MasterDataHandler {
+class MainDataHandler {
 public:
 	TESForm*				CreateForm(UInt8 FormType) { TESForm* (__cdecl* CreateForm)(UInt8) = (TESForm* (__cdecl*)(UInt8))0x00447DF0; return CreateForm(FormType); }
 	bool					AddData(TESForm* Form) { return ThisCall(0x0044D950, this, Form); }
@@ -3797,7 +3797,7 @@ public:
 	TESRegionDataManager*	regionDataManager;				// CD8
 	UInt32					unkCDC;							// CDC
 };
-assert(sizeof(MasterDataHandler) == 0xCE0);
+assert(sizeof(MainDataHandler) == 0xCE0);
 
 class InputControl {
 public:

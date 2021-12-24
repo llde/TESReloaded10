@@ -17,6 +17,6 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)NewQueuedModelLoader,		&NewQueuedModelLoaderHook);
 	DetourTransactionCommit();
 
-	SafeWrite32(0x0076BD75, sizeof(RenderManager));
+	SafeWrite32(0x00CDB659, sizeof(RenderManager));
 
 }

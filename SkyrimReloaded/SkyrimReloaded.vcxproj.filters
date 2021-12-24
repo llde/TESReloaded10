@@ -27,6 +27,12 @@
     <Filter Include="Framework\Common\Lib\Detours">
       <UniqueIdentifier>{fe272696-09d4-4cb8-afce-de9f27c292c3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Hooks">
+      <UniqueIdentifier>{13959ff3-2373-405e-84ba-7f44b69c04c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Hooks\Skyrim">
+      <UniqueIdentifier>{9e4d943f-b63c-4f88-ac81-4554b6015be3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -53,6 +59,36 @@
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Defines.h">
       <Filter>Framework\Skyrim</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Common\Managers.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Skyrim\Framework.h">
+      <Filter>Framework\Skyrim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Skyrim\Game.h">
+      <Filter>Framework\Skyrim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Skyrim\GameNi.h">
+      <Filter>Framework\Skyrim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Skyrim\Papyrus.h">
+      <Filter>Framework\Skyrim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Game.h">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Hooks.h">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Settings.h">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -72,6 +108,9 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\modules.cpp">
       <Filter>Framework\Common\Lib\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Common\Managers.cpp">
+      <Filter>Framework\Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

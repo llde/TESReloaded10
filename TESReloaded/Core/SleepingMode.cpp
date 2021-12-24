@@ -66,7 +66,7 @@ void __cdecl TrackCloseSleepWaitMenu() {
 	CloseSleepWaitMenu();
 	if (Served) {
 		Served = false;
-		MenuManager->ShowMessageBox(*MessageBoxServeSentenceText, (void*)0x00671600, *MessageBoxButtonYes, *MessageBoxButtonNo);
+		InterfaceManager->ShowMessageBox(*MessageBoxServeSentenceText, (void*)0x00671600, *MessageBoxButtonYes, *MessageBoxButtonNo);
 	}
 
 }
@@ -125,7 +125,7 @@ void __cdecl TrackShowSleepWaitMenu(bool IsSleeping) {
 	if (Rest)
 		ShowSleepWaitMenu(SitSleepState == SleepingState);
 	else
-		MenuManager->ShowMessage("You cannot rest now.");
+		InterfaceManager->ShowMessage("You cannot rest now.");
 
 }
 

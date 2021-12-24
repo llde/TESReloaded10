@@ -42,7 +42,7 @@ void CameraManager::SetSceneGraph() {
 	float FoV = TheSettingManager->SettingsMain.CameraMode.FoV;
 	
 	*SettingNearDistance = 2.5f;
-	if (FoV != WorldSceneGraph->cameraFOV && !Player->IsAiming() && MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
+	if (FoV != WorldSceneGraph->cameraFOV && !Player->IsAiming() && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
 		WorldSceneGraph->UpdateParticleShaderFoVData(FoV);
 		Player->worldFoV = *SettingWorldFoV = *Setting1stPersonFoV = FoV;
 	}
@@ -196,17 +196,17 @@ void CameraMode::TrackUpdateCameraCollisions(NiPoint3* CameraPosition, NiPoint3*
 	(this->*UpdateCameraCollisions)(CameraPosition, PlayerPosition, CameraChasing);
 	Player->DisableFading = DisableFading;
 	if (Crosshair == 0) {
-		if (!TheCameraManager->FirstPersonView) MenuManager->SetCrosshair(0); else MenuManager->SetCrosshair(1);
+		if (!TheCameraManager->FirstPersonView) InterfaceManager->SetCrosshair(0); else InterfaceManager->SetCrosshair(1);
 	}
 	else {
 		if (Crosshair == 1) {
-			MenuManager->SetCrosshair(0);
+			InterfaceManager->SetCrosshair(0);
 		}
 		else {
 			if (Player->IsAiming())
-				MenuManager->SetCrosshair(1);
+				InterfaceManager->SetCrosshair(1);
 			else
-				MenuManager->SetCrosshair(0);
+				InterfaceManager->SetCrosshair(0);
 		}
 	}
 
@@ -275,7 +275,7 @@ void UpdateCamera(NiAVObject* CameraNode, NiPoint3* LocalPosition) {
 		CameraNode->m_worldTransform.rot = mw;
 		CameraNode->m_localTransform.rot = ml;
 	}
-	else if (MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) || MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) {
+	else if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog) || InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) {
 		HighProcess* DialogTargetProcess = (HighProcess*)TheCameraManager->DialogTarget->process;
 		Offset = { CameraMode->DialogOffset.z * Player->scale, CameraMode->DialogOffset.y * Player->scale, CameraMode->DialogOffset.x * Player->scale };
 		Offset = Process->animData->nHead->m_worldTransform.rot * Offset;

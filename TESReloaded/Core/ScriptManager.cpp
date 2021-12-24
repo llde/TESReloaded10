@@ -22,7 +22,7 @@ LowHSoundScript::LowHSoundScript() {
 
 void LowHSoundScript::Run() {
 
-	if (MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
+	if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
 		if (TheShaderManager->ShaderConst.LowHF.Data.x || ElapsedTime != -1.0f) {
 			float HealthCoeff = TheShaderManager->ShaderConst.LowHF.HealthCoeff;
 
@@ -53,7 +53,7 @@ LowFSoundScript::LowFSoundScript() {
 
 void LowFSoundScript::Run() {
 
-	if (MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
+	if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
 		if (TheShaderManager->ShaderConst.LowHF.Data.x || ElapsedTime != -1.0f) {
 			float FatigueCoeff = TheShaderManager->ShaderConst.LowHF.FatigueCoeff;
 
@@ -85,7 +85,7 @@ PurgerScript::PurgerScript() { }
 
 void PurgerScript::Run() {
 
-	if (MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
+	if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
 		int PurgerTime = TheSettingManager->SettingsMain.Purger.Time;
 		bool PurgerKeyPressed = TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Purger.Key);
 
@@ -113,7 +113,7 @@ void GravityScript::Run() {
 
 void EquipmentSetupChoice() {
 
-	TheScriptManager->EquipmentSetup->ConfigStep = (EquipmentSetupScript::StepType)(MenuManager->GetMessageBoxButton() + EquipmentSetupScript::StepType::Normal);
+	TheScriptManager->EquipmentSetup->ConfigStep = (EquipmentSetupScript::StepType)(InterfaceManager->GetMessageBoxButton() + EquipmentSetupScript::StepType::Normal);
 	if (TheScriptManager->EquipmentSetup->ConfigStep <= EquipmentSetupScript::StepType::Swimming)
 		TheScriptManager->EquipmentSetup->EquipItems(EquipmentSetupScript::StepType::Normal, TheScriptManager->EquipmentSetup->ConfigStep);
 	else
@@ -132,7 +132,7 @@ EquipmentSetupScript::EquipmentSetupScript() {
 
 void EquipmentSetupScript::Run() {
 
-	if (ConfigStep == None && MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
+	if (ConfigStep == None && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
 		StepType CurrentStep = GetCurrentEquipmentType();
 		if (CurrentStep != GameStep) {
 			if (CurrentStep == Normal || CurrentStep == Combat || (TheSettingManager->SettingsMain.EquipmentMode.SleepingEquipment && CurrentStep == Sleeping) || (TheSettingManager->SettingsMain.EquipmentMode.SwimmingEquipment && CurrentStep == Swimming)) {
@@ -144,14 +144,14 @@ void EquipmentSetupScript::Run() {
 	else if (ConfigStep == Request) {
 		if (GameStep == EquipmentSetupScript::StepType::Normal && !CombatState) {
 			ConfigStep = Choice;
-			MenuManager->ShowMessageBox("Equipment setup", EquipmentSetupChoice, "Combat", "Sleeping", "Swimming", "Cancel");
+			InterfaceManager->ShowMessageBox("Equipment setup", EquipmentSetupChoice, "Combat", "Sleeping", "Swimming", "Cancel");
 		}
 		else {
 			ConfigStep = EquipmentSetupScript::StepType::None;
-			MenuManager->ShowMessage("You cannot use the equipment menu now.");
+			InterfaceManager->ShowMessage("You cannot use the equipment menu now.");
 		}
 	}
-	else if (ConfigStep >= Combat && MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
+	else if (ConfigStep >= Combat && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
 		EquipItems(ConfigStep, Normal);
 		ConfigStep = None;
 	}

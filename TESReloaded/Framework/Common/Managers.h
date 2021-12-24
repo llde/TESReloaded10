@@ -19,8 +19,8 @@ class Main;					extern Main*					Global;
 class TES;					extern TES*						Tes;
 class PlayerCharacter;		extern PlayerCharacter*			Player;
 class SceneGraph;			extern SceneGraph*				WorldSceneGraph;
-class MasterDataHandler;	extern MasterDataHandler*		DataHandler;
-class MenuInterfaceManager; extern MenuInterfaceManager*	MenuManager;
+class MainDataHandler;		extern MainDataHandler*			DataHandler;
+class MenuInterfaceManager; extern MenuInterfaceManager*	InterfaceManager;
 class QueuedModelLoader;	extern QueuedModelLoader*		ModelLoader;
 class ShadowSceneNode;		extern ShadowSceneNode*			SceneNode;
 

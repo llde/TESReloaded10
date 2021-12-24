@@ -1,28 +1,56 @@
 #pragma once
 
-Main* (__thiscall* NewMain)(HWND, HINSTANCE) = (Main* (__thiscall*)(HWND, HINSTANCE))Hooks::NewMain;
-Main* __fastcall NewMainHook(HWND Window, HINSTANCE Instance) { SetMenuManager; Global = (Main*)(this->*NewMain)(Window, Instance); return Global; }
+static NiDX9Renderer* (__thiscall* InitializeRenderer)(NiDX9Renderer*) = (NiDX9Renderer* (__thiscall*)(NiDX9Renderer*))Hooks::InitializeRenderer;
+static NiDX9Renderer* __fastcall InitializeRendererHook(NiDX9Renderer* This, UInt32 edx) {
 
-NiDX9Renderer* (__thiscall GameInitialization::* InitializeRenderer)();
-NiDX9Renderer* (__thiscall GameInitialization::* TrackInitializeRenderer)();
-NiDX9Renderer* GameInitialization::TrackInitializeRenderer() { TheRenderManager = (RenderManager*)(this->*InitializeRenderer)(); TheRenderManager->Initialize(); InitializeManagers(); TheShaderManager->CreateEffects(); return TheRenderManager; }
+	TheRenderManager = (RenderManager*)(*InitializeRenderer)(This);
+	TheRenderManager->Initialize();
+	InitializeManagers();
+	TheShaderManager->CreateEffects();
+	return TheRenderManager;
 
-PlayerCharacter* (__thiscall GameInitialization::* NewPlayerCharacter)();
-PlayerCharacter* (__thiscall GameInitialization::* TrackNewPlayerCharacter)();
-PlayerCharacter* GameInitialization::TrackNewPlayerCharacter() { Player = (PlayerCharacter*)(this->*NewPlayerCharacter)(); return Player; }
+}
 
-SceneGraph* (__thiscall GameInitialization::* NewSceneGraph)(char*, UInt8, NiCamera*);
-SceneGraph* (__thiscall GameInitialization::* TrackNewSceneGraph)(char*, UInt8, NiCamera*);
-SceneGraph* GameInitialization::TrackNewSceneGraph(char* Name, UInt8 IsMinFarPlaneDistance, NiCamera* Camera) { SceneGraph* SG = (SceneGraph*)(this->*NewSceneGraph)(Name, IsMinFarPlaneDistance, Camera); if (!strcmp(Name, "World")) WorldSceneGraph = SG; return SG; }
+static PlayerCharacter* (__thiscall* NewPlayerCharacter)(PlayerCharacter*) = (PlayerCharacter* (__thiscall*)(PlayerCharacter*))Hooks::NewPlayerCharacter;
+static PlayerCharacter* __fastcall NewPlayerCharacterHook(PlayerCharacter* This, UInt32 edx) {
 
-MasterDataHandler* (__thiscall GameInitialization::* NewMasterDataHandler)();
-MasterDataHandler* (__thiscall GameInitialization::* TrackNewMasterDataHandler)();
-MasterDataHandler* GameInitialization::TrackNewMasterDataHandler() { DataHandler = (MasterDataHandler*)(this->*NewMasterDataHandler)(); TheScriptManager->LoadForms(); TheEquipmentManager->LoadForms(); return DataHandler; }
+	Player = (*NewPlayerCharacter)(This);
+	return Player;
 
-MenuInterfaceManager* (__thiscall GameInitialization::* NewMenuInterfaceManager)();
-MenuInterfaceManager* (__thiscall GameInitialization::* TrackNewMenuInterfaceManager)();
-MenuInterfaceManager* GameInitialization::TrackNewMenuInterfaceManager() { MenuManager = (MenuInterfaceManager*)(this->*NewMenuInterfaceManager)(); return MenuManager; }
+}
 
-QueuedModelLoader* (__thiscall GameInitialization::* NewQueuedModelLoader)();
-QueuedModelLoader* (__thiscall GameInitialization::* TrackNewQueuedModelLoader)();
-QueuedModelLoader* GameInitialization::TrackNewQueuedModelLoader() { ModelLoader = (QueuedModelLoader*)(this->*NewQueuedModelLoader)(); return ModelLoader; }
+static SceneGraph* (__thiscall* NewSceneGraph)(SceneGraph*, char*, UInt8, NiCamera*) = (SceneGraph* (__thiscall*)(SceneGraph*, char*, UInt8, NiCamera*))Hooks::NewSceneGraph;
+static SceneGraph* __fastcall NewSceneGraphHook(SceneGraph* This, UInt32 edx, char* Name, UInt8 IsMinFarPlaneDistance, NiCamera* Camera) {
+	
+	SceneGraph* SG = (*NewSceneGraph)(This, Name, IsMinFarPlaneDistance, Camera);
+	
+	if (!strcmp(Name, "World")) WorldSceneGraph = SG;
+	return SG;
+
+}
+
+static MainDataHandler* (__thiscall* NewMainDataHandler)(MainDataHandler*) = (MainDataHandler* (__thiscall*)(MainDataHandler*))Hooks::NewMainDataHandler;
+static MainDataHandler* __fastcall NewMainDataHandlerHook(MainDataHandler* This, UInt32 edx) {
+	
+	DataHandler = (*NewMainDataHandler)(This);
+	TheScriptManager->LoadForms();
+	TheEquipmentManager->LoadForms();
+	return DataHandler;
+
+}
+
+static MenuInterfaceManager* (__thiscall* NewMenuInterfaceManager)(MenuInterfaceManager*) = (MenuInterfaceManager* (__thiscall*)(MenuInterfaceManager*))Hooks::NewMenuInterfaceManager;
+static MenuInterfaceManager* __fastcall NewMenuInterfaceManagerHook(MenuInterfaceManager* This, UInt32 edx) {
+
+	InterfaceManager = (*NewMenuInterfaceManager)(This);
+	return InterfaceManager;
+
+}
+
+static QueuedModelLoader* (__thiscall* NewQueuedModelLoader)(QueuedModelLoader*) = (QueuedModelLoader* (__thiscall*)(QueuedModelLoader*))Hooks::NewQueuedModelLoader;
+static QueuedModelLoader* __fastcall NewQueuedModelLoaderHook(QueuedModelLoader* This, UInt32 edx) {
+
+	ModelLoader = (*NewQueuedModelLoader)(This);
+	return ModelLoader;
+
+}

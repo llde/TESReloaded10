@@ -35,7 +35,7 @@ void FlyCam::TrackUpdateFlyCam() {
 	if (ScrollMultiplier != FlyCam->ScrollMultiplier) {
 		char Message[64];
 		sprintf(Message, "Fly cam scroll multiplier: %.1f", FlyCam->ScrollMultiplier);
-		MenuManager->ShowMessage(Message);
+		InterfaceManager->ShowMessage(Message);
 	}
 	(this->*UpdateFlyCam)();
 

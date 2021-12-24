@@ -122,8 +122,8 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Game.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Hooks.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Setting.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Setting.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Settings.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\OcclusionManager.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Plugin.h" />

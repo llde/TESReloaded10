@@ -1223,16 +1223,16 @@ void ShaderManager::UpdateConstants() {
 			else
 				sds = &TheSettingManager->SettingsDepthOfFieldFirstPersonView;
 			if (sds->Mode == 1) {
-				if (MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) || MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) sds->Enabled = false;
+				if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog) || InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) sds->Enabled = false;
 			}
 			else if (sds->Mode == 2) {
-				if (!MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog)) sds->Enabled = false;
+				if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog)) sds->Enabled = false;
 			}
 			else if (sds->Mode == 3) {
-				if (!MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) sds->Enabled = false;
+				if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) sds->Enabled = false;
 			}
 			else if (sds->Mode == 4) {
-				if (!MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) && !MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) sds->Enabled = false;
+				if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog) && !InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) sds->Enabled = false;
 			}
 			if (ShaderConst.DepthOfField.Enabled = sds->Enabled) {
 				ShaderConst.DepthOfField.Blur.x = sds->DistantBlur;
@@ -1252,16 +1252,16 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Cinema.Data.x = TheSettingManager->SettingsCinema.AspectRatio;
 			ShaderConst.Cinema.Data.y = TheSettingManager->SettingsCinema.VignetteRadius;
 			if (Mode == 1) {
-				if (MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) || MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) Mode = -1;
+				if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog) || InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) Mode = -1;
 			}
 			else if (Mode == 2) {
-				if (!MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog)) Mode = -1;
+				if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog)) Mode = -1;
 			}
 			else if (Mode == 3) {
-				if (!MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) Mode = -1;
+				if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) Mode = -1;
 			}
 			else if (Mode == 4) {
-				if (!MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) && !MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) Mode = -1;
+				if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog) && !InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) Mode = -1;
 			}
 			if (Mode == -1) {
 				ShaderConst.Cinema.Data.x = 0.0f;
@@ -1844,7 +1844,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		strcat(Filename, Name);
 		strcat(Filename, ".jpg");
 		D3DXSaveSurfaceToFileA(Filename, D3DXIFF_JPG, RenderTarget, NULL, NULL);
-		MenuManager->ShowMessage("Screenshot taken!");
+		InterfaceManager->ShowMessage("Screenshot taken!");
 	}
 
 }

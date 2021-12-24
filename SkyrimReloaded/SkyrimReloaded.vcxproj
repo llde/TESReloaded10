@@ -66,15 +66,15 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;SKYRIM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)TESReloaded\Framework;$(SolutionDir)TESReloaded\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>$(SolutionDir)TESReloaded\Framework\Framework.h</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>$(SolutionDir)TESReloaded\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>$(SolutionDir)TESReloaded\Framework\Skyrim\Framework.h</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
-      <AdditionalDependencies>d3dx9.lib;dxguid.lib;version.lib;$(SolutionDir)\TESReloaded\Framework\NVAPI\x86\nvapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dx9.lib;dxguid.lib;version.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Nvidia\x86\nvapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetPath)" "C:\Program Files (x86)\Steam\SteamApps\common\skyrim\Data\SKSE\Plugins\$(TargetName).dll"</Command>
@@ -109,13 +109,23 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Game.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Hooks.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Settings.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Plugin.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Common\Managers.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Base.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Defines.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Skyrim\Framework.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Skyrim\Game.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Skyrim\GameNi.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Skyrim\Papyrus.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -124,6 +134,7 @@
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\disasm.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\modules.cpp" />
+    <ClCompile Include="..\TESReloaded\Framework\Common\Managers.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
