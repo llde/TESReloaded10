@@ -855,10 +855,10 @@ public:
 			strcat(Section, "<Main>");
 			sprintf(SectionNode, "<CloudSpeedLower Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->cloudSpeedLower); strcat(Section, SectionNode);
 			sprintf(SectionNode, "<CloudSpeedUpper Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->cloudSpeedUpper); strcat(Section, SectionNode);
-			sprintf(SectionNode, "<FogFarDay Value=\"%.1f\" Type=\"2\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->WeatherFogFarDay); strcat(Section, SectionNode);
-			sprintf(SectionNode, "<FogFarNight Value=\"%.1f\" Type=\"2\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->WeatherFogFarNight); strcat(Section, SectionNode);
-			sprintf(SectionNode, "<FogNearDay Value=\"%.1f\" Type=\"2\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->WeatherFogNearDay); strcat(Section, SectionNode);
-			sprintf(SectionNode, "<FogNearNight Value=\"%.1f\" Type=\"2\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->WeatherFogNearNight); strcat(Section, SectionNode);
+			sprintf(SectionNode, "<FogFarDay Value=\"%.1f\" Type=\"2\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetFogDayFar()); strcat(Section, SectionNode);
+			sprintf(SectionNode, "<FogFarNight Value=\"%.1f\" Type=\"2\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetFogNightFar()); strcat(Section, SectionNode);
+			sprintf(SectionNode, "<FogNearDay Value=\"%.1f\" Type=\"2\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetFogDayNear()); strcat(Section, SectionNode);
+			sprintf(SectionNode, "<FogNearNight Value=\"%.1f\" Type=\"2\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetFogNightNear()); strcat(Section, SectionNode);
 			sprintf(SectionNode, "<SunDamage Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->sunDamage); strcat(Section, SectionNode);
 			sprintf(SectionNode, "<SunGlare Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->sunGlare); strcat(Section, SectionNode);
 			sprintf(SectionNode, "<TransDelta Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->transDelta); strcat(Section, SectionNode);
@@ -1770,13 +1770,13 @@ public:
 					Settings->push_back(Node);
 					CreateNodeF(&Node, Section, "CloudSpeedUpper", Weather->cloudSpeedUpper, "111", 0, Configuration::NodeType::Integer);
 					Settings->push_back(Node);
-					CreateNodeF(&Node, Section, "FogFarDay", Weather->WeatherFogFarDay, "111", 0, Configuration::NodeType::Float);
+					CreateNodeF(&Node, Section, "FogFarDay", Weather->GetFogDayFar(), "111", 0, Configuration::NodeType::Float);
 					Settings->push_back(Node);
-					CreateNodeF(&Node, Section, "FogFarNight", Weather->WeatherFogFarNight, "111", 0, Configuration::NodeType::Float);
+					CreateNodeF(&Node, Section, "FogFarNight", Weather->GetFogNightFar(), "111", 0, Configuration::NodeType::Float);
 					Settings->push_back(Node);
-					CreateNodeF(&Node, Section, "FogNearDay", Weather->WeatherFogNearDay, "111", 0, Configuration::NodeType::Float);
+					CreateNodeF(&Node, Section, "FogNearDay", Weather->GetFogDayNear(), "111", 0, Configuration::NodeType::Float);
 					Settings->push_back(Node);
-					CreateNodeF(&Node, Section, "FogNearNight", Weather->WeatherFogNearNight, "111", 0, Configuration::NodeType::Float);
+					CreateNodeF(&Node, Section, "FogNearNight", Weather->GetFogNightNear(), "111", 0, Configuration::NodeType::Float);
 					Settings->push_back(Node);
 					CreateNodeF(&Node, Section, "SunDamage", Weather->sunDamage, "111", 0, Configuration::NodeType::Integer);
 					Settings->push_back(Node);
@@ -1965,10 +1965,10 @@ public:
 			WeatherEx->transDelta = SettingsWeather->TransDelta;
 			WeatherEx->sunGlare = SettingsWeather->SunGlare;
 			WeatherEx->sunDamage = SettingsWeather->SunDamage;
-			WeatherEx->WeatherFogNearDay = SettingsWeather->FogNearDay;
-			WeatherEx->WeatherFogFarDay = SettingsWeather->FogFarDay;
-			WeatherEx->WeatherFogNearNight = SettingsWeather->FogNearNight;
-			WeatherEx->WeatherFogFarNight = SettingsWeather->FogFarNight;
+			WeatherEx->SetFogDayNear(SettingsWeather->FogNearDay);
+			WeatherEx->SetFogDayFar(SettingsWeather->FogFarDay);
+			WeatherEx->SetFogNightNear(SettingsWeather->FogNearNight);
+			WeatherEx->SetFogNightFar(SettingsWeather->FogFarNight);
 			memcpy(WeatherEx->colors, SettingsWeather->Colors, WeatherColorsSize);
 			memcpy(WeatherEx->colorsb, SettingsWeather->Colors, WeatherColorsSize);
 		}

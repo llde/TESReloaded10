@@ -2,7 +2,6 @@
 #define HookDevice 0
 
 #include "RenderHook.h"
-#include "ShaderIOHook.h"
 #include "FormHook.h"
 #include "GrassMode.h"
 #include "MountedCombat.h"
@@ -10,7 +9,6 @@
 #include "Animation.h"
 #include "Dodge.h"
 #include "FlyCam.h"
-#include "PluginVersion.h"
 #include "MemoryManagement.h"
 #include "D3D9Hook.h"
 #include "Hooks/Oblivion/Hooks.h"
@@ -45,7 +43,6 @@ extern "C" {
 			SettingManager::Initialize();
 			if (TheSettingManager->LoadSettings(true)) {
 				AttachHooks();
-				CreateShaderIOHook();
 				CreateRenderHook();
 				CreateFormLoadHook();
 				CreateGameEventHook();

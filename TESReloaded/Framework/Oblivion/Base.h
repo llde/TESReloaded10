@@ -13,6 +13,8 @@ public:
 	static const UInt32 NewMainDataHandler		= 0x00446D80;
 	static const UInt32 NewMenuInterfaceManager = 0x005802B0;
 	static const UInt32 NewQueuedModelLoader	= 0x0043E950;
+	static const UInt32 CreateVertexShader		= 0x008014E0;
+	static const UInt32 CreatePixelShader		= 0x00801C90;
 };
 
 class CommandManagerBase {

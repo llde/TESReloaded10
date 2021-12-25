@@ -127,6 +127,7 @@ class BSAnimGroupSequence;
 class BSFile;
 class BSGameSound;
 class BSSoundInfo;
+class BSIStream;
 
 class BGSHeadPart;
 class BGSEncounterZone;
@@ -578,7 +579,7 @@ struct CommandInfo {
 };
 assert(sizeof(CommandInfo) == 0x028);
 
-class CommandTable {	// Only for Skyrim. SR auto-patches the command table because it is no more supported by SKSE due to the use of Papyrus
+class CommandTable {
 public:
 	struct PatchLocation {
 		UInt32	Ptr;
@@ -587,14 +588,14 @@ public:
 	};
 
 	std::vector<CommandInfo>	Commands;
-	UInt32						BaseID;	// should be the same as Commands[0].opcode when the table is filled
+	UInt32						BaseID;
 	UInt32						CurID;
 	bool						Patched;
 
 	void Initialize() {
 
-		this->BaseID = 0x1000;
-		this->CurID = 0x1000;
+		BaseID = 0x1000;
+		CurID = 0x1000;
 		Commands.reserve(0x1480);
 		for (const CommandInfo* Cmd = (CommandInfo*)0x0124E880; Cmd != (CommandInfo*)0x01255B30; ++Cmd) {
 			Commands.push_back(*Cmd); CurID++;

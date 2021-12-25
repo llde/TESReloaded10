@@ -123,10 +123,10 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Game.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Hooks.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Settings.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\ShaderIO.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\OcclusionManager.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h" />
-    <ClInclude Include="..\TESReloaded\Framework\Common\Base\Plugin.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.h" />
@@ -148,12 +148,12 @@
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />
     <ClInclude Include="..\TESReloaded\Core\ScriptManager.h" />
     <ClInclude Include="..\TESReloaded\Core\SettingManager.h" />
-    <ClInclude Include="..\TESReloaded\Core\ShaderIOHook.h" />
     <ClInclude Include="..\TESReloaded\Core\ShaderManager.h" />
     <ClInclude Include="..\TESReloaded\Core\ShadowManager.h" />
     <ClInclude Include="..\TESReloaded\Core\SleepingMode.h" />
     <ClInclude Include="..\TESReloaded\Core\TextureManager.h" />
     <ClInclude Include="..\TESReloaded\Core\WindowedMode.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Oblivion\Plugin.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -184,7 +184,6 @@
     <ClCompile Include="..\TESReloaded\Core\RenderHook.cpp" />
     <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ScriptManager.cpp" />
-    <ClCompile Include="..\TESReloaded\Core\ShaderIOHook.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ShadowManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\SleepingMode.cpp" />

@@ -114,8 +114,8 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Game.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Hooks.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Settings.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\ShaderIO.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h" />
-    <ClInclude Include="..\TESReloaded\Framework\Common\Base\Plugin.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.h" />
@@ -126,6 +126,7 @@
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Game.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\GameNi.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Papyrus.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Skyrim\Plugin.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

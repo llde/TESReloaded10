@@ -954,6 +954,10 @@ public:
 	float			GetFogDayFar() { return fogDay.farFog; }
 	float			GetFogNightNear() { return fogNight.nearFog; }
 	float			GetFogNightFar() { return fogNight.farFog; }
+	void			SetFogDayNear(float Value) { fogDay.nearFog = Value; }
+	void			SetFogDayFar(float Value) { fogDay.farFog = Value; }
+	void			SetFogNightNear(float Value) { fogNight.nearFog = Value; }
+	void			SetFogNightFar(float Value) { fogNight.farFog = Value; }
 
 	TESTexture			textureLayers[2];			// 018
 	TESModel			model;						// 030

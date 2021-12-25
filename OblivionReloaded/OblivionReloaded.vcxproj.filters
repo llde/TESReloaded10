@@ -95,9 +95,6 @@
     <ClInclude Include="..\TESReloaded\Core\SettingManager.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\ShaderIOHook.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\ShaderManager.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -146,9 +143,6 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h">
       <Filter>Framework\Common\Base</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Framework\Common\Base\Plugin.h">
-      <Filter>Framework\Common\Base</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h">
       <Filter>Framework\Common\Base</Filter>
     </ClInclude>
@@ -171,6 +165,12 @@
       <Filter>Core\Hooks</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Game.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Oblivion\Plugin.h">
+      <Filter>Framework\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\ShaderIO.h">
       <Filter>Core\Hooks\Oblivion</Filter>
     </ClInclude>
   </ItemGroup>
@@ -230,9 +230,6 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\ScriptManager.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\ShaderIOHook.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp">

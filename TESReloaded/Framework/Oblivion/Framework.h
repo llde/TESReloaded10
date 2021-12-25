@@ -18,7 +18,7 @@
 #include "../Common/Base/Logger.h"
 #include "../Common/Base/Types.h"
 #include "../Common/Base/SafeWrite.h"
-#include "../Common/Base/Plugin.h"
+#include "Plugin.h"
 #include "Game.h"
 #include "Defines.h"
 #include "Base.h"
@@ -27,3 +27,4 @@
 #include "../Core/Hooks/Game.h"
 #include "../Core/Hooks/Oblivion/Settings.h"
 #include "../Core/Hooks/Oblivion/Game.h"
+#include "../Core/Hooks/Oblivion/ShaderIO.h"

@@ -35,9 +35,6 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h">
       <Filter>Framework\Common\Base</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Framework\Common\Base\Plugin.h">
-      <Filter>Framework\Common\Base</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h">
       <Filter>Framework\Common\Base</Filter>
     </ClInclude>

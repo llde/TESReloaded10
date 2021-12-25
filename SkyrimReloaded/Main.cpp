@@ -1,11 +1,12 @@
-#define WaitForDebugger 0
+#define WaitForDebugger 1
+#define HookDevice 0
 
 #include "RenderHook.h"
 #include "ShaderIOHook.h"
 #include "FormHook.h"
 #include "SleepingMode.h"
-#include "PluginVersion.h"
 #include "D3D9Hook.h"
+#include "Hooks/Skyrim/Hooks.h"
 
 extern "C" {
 
@@ -20,26 +21,29 @@ extern "C" {
 
 	bool SKSEPlugin_Load(const PluginInterface* Interface) {
 
-#if WaitForDebugger
+#if _DEBUG
+	#if WaitForDebugger
 		while (!IsDebuggerPresent()) Sleep(10);
+	#endif
+	#if HookDevice
+		CreateD3D9Hook();
+	#endif
 #endif
-		Logger::CreateLog("SkyrimReloaded.log");
-		new CommandManager();
-		TheCommandManager->AddCommands(Interface);
+
+		Logger::Initialize("SkyrimReloaded.log");
+		CommandManager::Initialize(Interface);
 
 		if (!Interface->IsEditor) {
 			PluginVersion::CreateVersionString();
-			new SettingManager();
-			TheSettingManager->LoadSettings();
-			PerformGameInitialization();
-			CreateShaderIOHook();
-			CreateRenderHook();
-			CreateFormLoadHook();
-			CreateSettingsHook();
-			CreateGameEventHook();
-			if (TheSettingManager->SettingsMain.CameraMode.Enabled) CreateCameraModeHook();
-			if (TheSettingManager->SettingsMain.SleepingMode.Enabled) CreateSleepingModeHook();
-			if (TheSettingManager->SettingsMain.Develop.LogShaders) CreateD3D9Hook();
+			SettingManager::Initialize();
+			if (TheSettingManager->LoadSettings(true)) {
+				AttachHooks();
+				CreateRenderHook();
+				CreateFormLoadHook();
+				CreateGameEventHook();
+				CreateCameraModeHook();
+				if (TheSettingManager->SettingsMain.SleepingMode.Enabled) CreateSleepingModeHook();
+			}
 		}
 		return true;
 

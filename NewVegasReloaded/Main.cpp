@@ -1,4 +1,4 @@
-#define WaitForDebugger 0
+#define WaitForDebugger 1
 #define HookDevice 0
 
 #include "RenderHook.h"
