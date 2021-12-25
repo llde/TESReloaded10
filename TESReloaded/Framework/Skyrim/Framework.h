@@ -26,6 +26,8 @@
 #include "../Common/Managers.h"
 #include "../Core/Hooks/Settings.h"
 #include "../Core/Hooks/Game.h"
+#include "../Core/Hooks/Render.h"
 #include "../Core/Hooks/Skyrim/Settings.h"
 #include "../Core/Hooks/Skyrim/Game.h"
 #include "../Core/Hooks/Skyrim/ShaderIO.h"
+#include "../Core/Hooks/Skyrim/Render.h"

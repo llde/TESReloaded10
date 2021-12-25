@@ -51,10 +51,13 @@ class NiDX9Renderer;
 class NiDX9RenderState;
 class NiDX92DBufferData;
 
+class BSShaderAccumulator;
+
 class ShadowSceneLight;
 class AnimSequenceBase;
 
 class TESObjectREFR;
+class TESWaterCullingProcess;
 
 class bhkCollisionObject;
 

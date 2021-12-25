@@ -110,9 +110,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Game.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Hooks.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\ShaderIO.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h" />

@@ -122,8 +122,10 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Game.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Hooks.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\ShaderIO.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\OcclusionManager.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h" />
@@ -144,7 +146,6 @@
     <ClInclude Include="..\TESReloaded\Core\MemoryManagement.h" />
     <ClInclude Include="..\TESReloaded\Core\MountedCombat.h" />
     <ClInclude Include="..\TESReloaded\Core\PluginVersion.h" />
-    <ClInclude Include="..\TESReloaded\Core\RenderHook.h" />
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />
     <ClInclude Include="..\TESReloaded\Core\ScriptManager.h" />
     <ClInclude Include="..\TESReloaded\Core\SettingManager.h" />
@@ -181,7 +182,6 @@
     <ClCompile Include="..\TESReloaded\Core\MemoryManagement.cpp" />
     <ClCompile Include="..\TESReloaded\Core\MountedCombat.cpp" />
     <ClCompile Include="..\TESReloaded\Core\PluginVersion.cpp" />
-    <ClCompile Include="..\TESReloaded\Core\RenderHook.cpp" />
     <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ScriptManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp" />

@@ -1,55 +1,5 @@
 #pragma once
-#include <sstream>
-#include <fstream>
-#include <algorithm>
-#include "WindowedMode.h"
 #include "PluginVersion.h"
-
-static const char* WeatherColorTypes[TESWeather::kNumColorTypes] = { "SkyUpper", "Fog", "CloudsLower", "Ambient", "Sunlight", "Sun", "Stars", "SkyLower", "Horizon", "CloudsUpper" };
-static const char* WeatherTimesOfDay[TESWeather::kNumTimeOfDay] = { "Sunrise", "Day", "Sunset", "Night" };
-static const char* WeatherHDRTypes[14] = { "EyeAdaptation", "BlurRadius", "BlurPasses", "EmissiveMult", "TargetLUM", "UpperLUMClamp", "BrightScale", "BrightClamp", "LUMRampNoTex", "LUMRampMin", "LUMRampMax", "SunlightDimmer", "GrassDimmer", "TreeDimmer" };
-
-#if defined(OBLIVION)
-#define SettingsFile "\\Data\\OBSE\\Plugins\\OblivionReloaded.dll.config"
-#define FastMMFile "\\Data\\OBSE\\Plugins\\OblivionReloadedFastMM.dll"
-#define ShadersPath "Data\\Shaders\\OblivionReloaded\\Shaders\\"
-#define EffectsPath "Data\\Shaders\\OblivionReloaded\\Effects\\"
-#define WaterReflectionMapSize 512
-#define kSettingGridsToLoad 0x00B06A2C
-#define kSettingMinGrassSize 0x00B09B20
-#define kSettingGrassStartFadeDistance 0x00B09B10
-#define kSettingGrassEndDistance 0x00B09B18
-#define kSettingGrassWindMagnitudeMin 0x00B09B28
-#define kSettingGrassWindMagnitudeMax 0x00B09B30
-#define kSettingTexturePctThreshold 0x00B08B6C
-#define kSettingMultiSample 0x00B06D0C
-#define kSettingHDR 0x00B06DE4
-static const char* IntroMovie = "ORGameStudios.bik";
-static const char* MainMenuMovie = "ORMainMenu.bik";
-static const char* MainMenuMusic = "Special\\ORMainMenu.mp3";
-#elif defined(SKYRIM)
-#define SettingsFile "\\Data\\SKSE\\Plugins\\SkyrimReloaded.dll.config"
-#define ShadersPath "Data\\Shadersfx\\SkyrimReloaded\\Shaders\\"
-#define EffectsPath "Data\\Shadersfx\\SkyrimReloaded\\Effects\\"
-#define kSettingGridsToLoad 0x01241000
-#define kSettingWorldFoV 0x012C8D78
-#define kSetting1stPersonFoV 0x012C8D84
-#define kSettingNearDistance 0x012C8D54
-static const char* IntroMovie = "";
-static const char* MainMenuMovie = "";
-static const char* MainMenuMusic = "";
-#endif
-#define WeatherColorsSize TESWeather::kNumColorTypes * TESWeather::kNumTimeOfDay * 4
-
-static const UInt32*	SettingGridsToLoad				= (UInt32*)kSettingGridsToLoad;
-static UInt32*			SettingMinGrassSize				= (UInt32*)kSettingMinGrassSize;
-static float*			SettingGrassStartFadeDistance	= (float*)kSettingGrassStartFadeDistance;
-static float*			SettingGrassEndDistance			= (float*)kSettingGrassEndDistance;
-static float*			SettingGrassWindMagnitudeMin	= (float*)kSettingGrassWindMagnitudeMin;
-static float*			SettingGrassWindMagnitudeMax	= (float*)kSettingGrassWindMagnitudeMax;
-static float*			SettingTexturePctThreshold		= (float*)kSettingTexturePctThreshold;
-static const UInt32*	SettingMultiSample				= (UInt32*)kSettingMultiSample;
-static const UInt8*		SettingHDR						= (UInt8*)kSettingHDR;
 
 struct SettingsMainStruct {
 

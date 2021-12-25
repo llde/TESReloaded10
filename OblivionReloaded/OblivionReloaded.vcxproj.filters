@@ -83,9 +83,6 @@
     <ClInclude Include="..\TESReloaded\Core\PluginVersion.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\RenderHook.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -173,6 +170,12 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\ShaderIO.h">
       <Filter>Core\Hooks\Oblivion</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Render.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TESReloaded\Core\Animation.cpp">
@@ -221,9 +224,6 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\PluginVersion.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\RenderHook.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp">

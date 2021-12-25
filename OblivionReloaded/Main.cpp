@@ -1,7 +1,6 @@
-#define WaitForDebugger 1
+#define WaitForDebugger 0
 #define HookDevice 0
 
-#include "RenderHook.h"
 #include "FormHook.h"
 #include "GrassMode.h"
 #include "MountedCombat.h"
@@ -43,7 +42,6 @@ extern "C" {
 			SettingManager::Initialize();
 			if (TheSettingManager->LoadSettings(true)) {
 				AttachHooks();
-				CreateRenderHook();
 				CreateFormLoadHook();
 				CreateGameEventHook();
 				CreateScriptHook();

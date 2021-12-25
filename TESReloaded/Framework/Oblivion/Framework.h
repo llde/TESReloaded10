@@ -5,10 +5,14 @@
 #define assert(a) static_assert(a, "Assertion failed")
 
 #include <windows.h>
+#include <CommCtrl.h>
 #include <string>
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <sstream>
+#include <fstream>
+#include <algorithm>
 #include <d3d9.h>
 #include <d3dx9math.h>
 #include <dinput.h>
@@ -25,6 +29,8 @@
 #include "../Common/Managers.h"
 #include "../Core/Hooks/Settings.h"
 #include "../Core/Hooks/Game.h"
+#include "../Core/Hooks/Render.h"
 #include "../Core/Hooks/Oblivion/Settings.h"
 #include "../Core/Hooks/Oblivion/Game.h"
 #include "../Core/Hooks/Oblivion/ShaderIO.h"
+#include "../Core/Hooks/Oblivion/Render.h"

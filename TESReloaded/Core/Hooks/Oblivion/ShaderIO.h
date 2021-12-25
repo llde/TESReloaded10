@@ -29,3 +29,15 @@ static NiD3DPixelShader* __fastcall CreatePixelShaderHook(BSShader* This, UInt32
 	return (NiD3DPixelShader*)PixelShader;
 
 }
+
+static void (__cdecl* SetShaderPackage)(int, int, UInt8, int, char*, int) = (void (__cdecl*)(int, int, UInt8, int, char*, int))Hooks::SetShaderPackage;
+static void __cdecl SetShaderPackageHook(int Arg1, int Arg2, UInt8 Force1XShaders, int Arg4, char* GraphicsName, int Arg6) {
+	
+	UInt32* ShaderPackage = (UInt32*)0x00B42F48;
+	UInt32* ShaderPackageMax = (UInt32*)0x00B42D74;
+
+	SetShaderPackage(Arg1, Arg2, Force1XShaders, Arg4, GraphicsName, Arg6);
+	*ShaderPackage = 7;
+	*ShaderPackageMax = 7;
+
+}

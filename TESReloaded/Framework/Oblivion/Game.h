@@ -2,6 +2,7 @@
 #include "GameNi.h"
 #include "GameHavok.h"
 
+class DetectorWindow;
 class INISettingCollection;
 class ModInfo;
 class Actor;
