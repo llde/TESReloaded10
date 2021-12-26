@@ -60,3 +60,8 @@ static const UInt32 kSetRegionEditorName = 0x004A32A6;
 static const UInt32 kSetRegionEditorNameReturn = 0x004A33A6;
 static const UInt32 kSetWeatherEditorName = 0x004EE04E;
 static const UInt32 kSetWeatherEditorNameReturn = 0x004EE0EA;
+
+
+#define wtype weaponType
+static const UInt32 kHitEventHook = 0x005FF613;
+static const UInt32 kHitEventReturn = 0x005FF618;

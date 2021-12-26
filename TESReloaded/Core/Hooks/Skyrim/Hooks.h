@@ -47,8 +47,9 @@ void AttachHooks() {
 
 	SafeWriteJump(kRenderInterface,				(UInt32)RenderInterfaceHook);
 	SafeWriteJump(kRenderingGeometry,			(UInt32)RenderingGeometryHook);
-	SafeWriteJump(kSetRegionEditorName, (UInt32)SetRegionEditorNameHook);
-	SafeWriteJump(kSetWeatherEditorName, (UInt32)SetWeatherEditorNameHook);
+	SafeWriteJump(kSetRegionEditorName,			(UInt32)SetRegionEditorNameHook);
+	SafeWriteJump(kSetWeatherEditorName,		(UInt32)SetWeatherEditorNameHook);
+	SafeWriteJump(kHitEventHook,				(UInt32)HitEventHook);
 
 	if (TheSettingManager->SettingsMain.ShadowMode.NearQuality) {
 		SafeWriteJump(kSetShadowDistance,		(UInt32)SetShadowDistanceHook);

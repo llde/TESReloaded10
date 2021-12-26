@@ -29,11 +29,11 @@ void InitializeManagers() {
 	new FrameRateManager();
 	new GameMenuManager();
 	new KeyboardManager();
-	new GameEventManager();
+	GameEventManager::Initialize();
 	new ShadowManager();
 	new OcclusionManager();
 	new EquipmentManager();
-	new ScriptManager();
+	ScriptManager::Initialize();
 	new CameraManager();
 
 }

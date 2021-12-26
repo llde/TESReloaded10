@@ -1,12 +1,3 @@
-#include "ScriptManager.h"
-
-#if defined(OBLIVION)
-#define kRunScripts 0x004402F0
-#elif defined(SKYRIM)
-#define kRunScripts 0x00000000
-#define process processManager->process
-#endif
-
 BaseScript::BaseScript() {
 
 	ElapsedTime = 0.0f;
@@ -232,34 +223,20 @@ EquipmentSetupScript::StepType EquipmentSetupScript::GetCurrentEquipmentType() {
 
 }
 
-class ScriptHook {
-public:
-	void TrackRunScripts();
-};
-
-void (__thiscall ScriptHook::* RunScripts)();
-void (__thiscall ScriptHook::* TrackRunScripts)();
-void ScriptHook::TrackRunScripts() {
-
-	(this->*RunScripts)();
-	TheScriptManager->Run();
-
-}
-
-ScriptManager::ScriptManager() {
+void ScriptManager::Initialize() {
 
 	Logger::Log("Starting the script manager...");
-	TheScriptManager = this;
+	TheScriptManager = new ScriptManager();
 	
 	SettingsMainStruct* MainStruct = &TheSettingManager->SettingsMain;
 
 	if (MainStruct->Effects.LowHF) {
-		if (MainStruct->LowHFSound.HealthEnabled) LowHSound = new LowHSoundScript();
-		if (MainStruct->LowHFSound.FatigueEnabled) LowFSound = new LowFSoundScript();
+		if (MainStruct->LowHFSound.HealthEnabled) TheScriptManager->LowHSound = new LowHSoundScript();
+		if (MainStruct->LowHFSound.FatigueEnabled) TheScriptManager->LowFSound = new LowFSoundScript();
 	}
-	if (MainStruct->Purger.Enabled) Purger = new PurgerScript();
-	if (MainStruct->Gravity.Enabled) Gravity = new GravityScript();
-	if (MainStruct->EquipmentMode.Enabled) EquipmentSetup = new EquipmentSetupScript();
+	if (MainStruct->Purger.Enabled) TheScriptManager->Purger = new PurgerScript();
+	if (MainStruct->Gravity.Enabled) TheScriptManager->Gravity = new GravityScript();
+	if (MainStruct->EquipmentMode.Enabled) TheScriptManager->EquipmentSetup = new EquipmentSetupScript();
 
 }
 
@@ -294,17 +271,5 @@ void ScriptManager::Run() {
 	if (LowHSound) LowHSound->Run();
 	if (LowFSound) LowFSound->Run();
 	if (EquipmentSetup) EquipmentSetup->Run();
-
-}
-
-void CreateScriptHook() {
-
-	*((int *)&RunScripts)	= kRunScripts;
-	TrackRunScripts			= &ScriptHook::TrackRunScripts;
-
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&(PVOID&)RunScripts,	*((PVOID *)&TrackRunScripts));
-	DetourTransactionCommit();
 
 }

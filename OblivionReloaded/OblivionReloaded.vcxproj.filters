@@ -176,11 +176,17 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h">
       <Filter>Framework\Common\Base</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Form.h">
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Form.h">
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Forms.h">
       <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Events.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Script.h">
+      <Filter>Core\Hooks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

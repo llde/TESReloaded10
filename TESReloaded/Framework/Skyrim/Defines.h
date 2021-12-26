@@ -40,3 +40,10 @@ static const UInt32 kSetRegionEditorName = 0x0048BEE4;
 static const UInt32 kSetRegionEditorNameReturn = 0x0048BEEA;
 static const UInt32 kSetWeatherEditorName = 0x004EF358;
 static const UInt32 kSetWeatherEditorNameReturn = 0x004EF35E;
+
+
+#define wtype gameData.type
+static const UInt32 kHitEventHook = 0x006E4837;
+static const UInt32 kHitEventReturn = 0x006E483E;
+
+#define process processManager->process

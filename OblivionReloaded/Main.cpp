@@ -41,8 +41,6 @@ extern "C" {
 			SettingManager::Initialize();
 			if (TheSettingManager->LoadSettings(true)) {
 				AttachHooks();
-				CreateGameEventHook();
-				CreateScriptHook();
 				CreateAnimationHook();
 				CreateShadowsHook();
 				CreateFrameRateHook();

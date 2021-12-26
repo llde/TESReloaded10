@@ -71,8 +71,8 @@ public:
 
 class ScriptManager { // Never disposed
 public:
-	ScriptManager();
-
+	
+	static void				Initialize();
 	void					LoadForms();
 	void					Run();
 
@@ -82,5 +82,3 @@ public:
 	GravityScript*			Gravity;
 	EquipmentSetupScript*	EquipmentSetup;
 };
-
-void CreateScriptHook();

@@ -31,6 +31,7 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)WaterCullingProcess,		&WaterCullingProcessHook);
 	DetourAttach(&(PVOID&)SaveGameScreenshot,		&SaveGameScreenshotHook);
 	DetourAttach(&(PVOID&)LoadForm,					&LoadFormHook);
+	DetourAttach(&(PVOID&)RunScript,				&RunScriptHook);
 	DetourTransactionCommit();
 	
 	SafeWrite8(0x00801BCB,	sizeof(NiD3DVertexShaderEx));
@@ -51,16 +52,17 @@ void AttachHooks() {
 	SafeWriteJump(kDetectorWindowCreateTreeView,	(UInt32)DetectorWindowCreateTreeViewHook);
 	SafeWriteJump(kDetectorWindowDumpAttributes,	(UInt32)DetectorWindowDumpAttributesHook);
 	SafeWriteJump(kDetectorWindowConsoleCommand,	(UInt32)DetectorWindowConsoleCommandHook);
-	SafeWriteJump(kDetectorWindowScale,				kDetectorWindowScaleReturn); // Avoids to add the scale to the node description in the detector window
 	SafeWriteJump(kRenderInterface,					(UInt32)RenderInterfaceHook);
 	SafeWriteJump(kSkipFogPass,						(UInt32)SkipFogPassHook);
+	SafeWriteJump(kSetRegionEditorName,				(UInt32)SetRegionEditorNameHook);
+	SafeWriteJump(kSetWeatherEditorName,			(UInt32)SetWeatherEditorNameHook);
+	SafeWriteJump(kHitEventHook,					(UInt32)HitEventHook);
+	SafeWriteJump(kDetectorWindowScale,				kDetectorWindowScaleReturn); // Avoids to add the scale to the node description in the detector window
 	SafeWriteJump(0x00553EAC,						0x00553EB2); // Patches the use of Lighting30Shader only for the hair
 	SafeWriteJump(0x007D1BC4,						0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
 	SafeWriteJump(0x007D1BCD,						0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
 	SafeWriteJump(0x0049C3A2,						0x0049C41D); // Avoids to manage the cells culling for reflections
 	SafeWriteJump(0x0049C8CB,						0x0049C931); // Avoids to manage the cells culling for reflections
-	SafeWriteJump(kSetRegionEditorName, (UInt32)SetRegionEditorNameHook);
-	SafeWriteJump(kSetWeatherEditorName, (UInt32)SetWeatherEditorNameHook);
 
 	SafeWriteCall(kDetectorWindowSetNodeName, (UInt32)DetectorWindowSetNodeName);
 	

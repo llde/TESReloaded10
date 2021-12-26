@@ -7,9 +7,7 @@ public:
 		OnHit = 1,
 	};
 
-	GameEventManager();
+	static void Initialize();
 
 	void			OnHitByPlayer();
 };
-
-void CreateGameEventHook();
