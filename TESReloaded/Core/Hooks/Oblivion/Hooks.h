@@ -30,11 +30,16 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)RenderReflections,		&RenderReflectionsHook);
 	DetourAttach(&(PVOID&)WaterCullingProcess,		&WaterCullingProcessHook);
 	DetourAttach(&(PVOID&)SaveGameScreenshot,		&SaveGameScreenshotHook);
+	DetourAttach(&(PVOID&)LoadForm,					&LoadFormHook);
 	DetourTransactionCommit();
 	
-	SafeWrite8(0x00801BCB, sizeof(NiD3DVertexShaderEx));
-	SafeWrite8(0x008023A1, sizeof(NiD3DPixelShaderEx));
+	SafeWrite8(0x00801BCB,	sizeof(NiD3DVertexShaderEx));
+	SafeWrite8(0x008023A1,	sizeof(NiD3DPixelShaderEx));
+	SafeWrite8(0x00448843,	sizeof(TESRegionEx));
+	SafeWrite8(0x004A2EFF,	sizeof(TESRegionEx));
 	SafeWrite32(0x0076BD75, sizeof(RenderManager));
+	SafeWrite32(0x004486ED, sizeof(TESWeatherEx));
+	SafeWrite32(0x0044CBE3, sizeof(TESWeatherEx));
 
 	SafeWrite8(0x00A38280, 0x5A); // Fixes the "purple water bug"
 	SafeWrite32(0x0049BFAF, WaterReflectionMapSize); // Constructor
@@ -54,7 +59,9 @@ void AttachHooks() {
 	SafeWriteJump(0x007D1BCD,						0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
 	SafeWriteJump(0x0049C3A2,						0x0049C41D); // Avoids to manage the cells culling for reflections
 	SafeWriteJump(0x0049C8CB,						0x0049C931); // Avoids to manage the cells culling for reflections
-	
+	SafeWriteJump(kSetRegionEditorName, (UInt32)SetRegionEditorNameHook);
+	SafeWriteJump(kSetWeatherEditorName, (UInt32)SetWeatherEditorNameHook);
+
 	SafeWriteCall(kDetectorWindowSetNodeName, (UInt32)DetectorWindowSetNodeName);
 	
 	if (TheSettingManager->SettingsMain.Shaders.Water) {

@@ -28,6 +28,7 @@ public:
 	static const UInt32 RenderReflections			= 0x0049BEF0;
 	static const UInt32 WaterCullingProcess			= 0x0049CBF0;
 	static const UInt32 SaveGameScreenshot			= 0x00411B70;
+	static const UInt32 LoadForm					= 0x00447050;
 };
 
 class CommandManagerBase {

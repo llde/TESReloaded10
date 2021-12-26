@@ -33,6 +33,9 @@
     <Filter Include="Core\Hooks\Oblivion">
       <UniqueIdentifier>{9448ea77-c579-44fe-a667-297e2132562e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\D3D9">
+      <UniqueIdentifier>{22e573de-0c2f-4f02-ae27-75f9b3283a9a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TESReloaded\Core\Animation.h">
@@ -42,9 +45,6 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\CommandManager.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\D3D9Device.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\D3D9Hook.h">
@@ -57,9 +57,6 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\FlyCam.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\FormHook.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\GameEventManager.h">
@@ -78,9 +75,6 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\MountedCombat.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\PluginVersion.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h">
@@ -176,6 +170,18 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\D3D9\D3D9Device.h">
+      <Filter>Core\D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h">
+      <Filter>Framework\Common\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Form.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Form.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TESReloaded\Core\Animation.cpp">
@@ -185,9 +191,6 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\CommandManager.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\D3D9Device.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\D3D9Hook.cpp">
@@ -200,9 +203,6 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\FlyCam.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\FormHook.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\GameEventManager.cpp">
@@ -221,9 +221,6 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\MountedCombat.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\PluginVersion.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp">
@@ -273,6 +270,15 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Framework\Common\Managers.cpp">
       <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\D3D9\D3D9Device.cpp">
+      <Filter>Core\D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Common\Base\PluginVersion.cpp">
+      <Filter>Framework\Common\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\SettingManager.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

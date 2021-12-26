@@ -33,20 +33,26 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)RenderWorldSceneGraph,	&RenderWorldSceneGraphHook);
 	DetourAttach(&(PVOID&)RenderFirstPerson,		&RenderFirstPersonHook);
 	DetourAttach(&(PVOID&)SetupRenderingPass,		&SetupRenderingPassHook);
+	DetourAttach(&(PVOID&)LoadForm,					&LoadFormHook);
 	DetourTransactionCommit();
 
 	SafeWrite8(0x00CCBD66,	sizeof(NiD3DVertexShaderEx));
 	SafeWrite8(0x00CCC676,	sizeof(NiD3DPixelShaderEx));
+	SafeWrite8(0x0048BC15,	sizeof(TESRegionEx));
 	SafeWrite32(0x00CDB659, sizeof(RenderManager));
+	SafeWrite32(0x00442B22, sizeof(TESWeatherEx));
+	SafeWrite32(0x004EF7F5, sizeof(TESWeatherEx));
 
 	SafeWrite8(0x00698BBB, 0); // Stops to clear the depth buffer when rendering the 1st person node
 
 	SafeWriteJump(kRenderInterface,				(UInt32)RenderInterfaceHook);
 	SafeWriteJump(kRenderingGeometry,			(UInt32)RenderingGeometryHook);
+	SafeWriteJump(kSetRegionEditorName, (UInt32)SetRegionEditorNameHook);
+	SafeWriteJump(kSetWeatherEditorName, (UInt32)SetWeatherEditorNameHook);
 
 	if (TheSettingManager->SettingsMain.ShadowMode.NearQuality) {
-		SafeWriteJump(kSetShadowDistance,		(UInt32)SetShadowDistance);
-		SafeWriteJump(kSetShadowDistanceShader, (UInt32)SetShadowDistanceShader);
+		SafeWriteJump(kSetShadowDistance,		(UInt32)SetShadowDistanceHook);
+		SafeWriteJump(kSetShadowDistanceShader, (UInt32)SetShadowDistanceShaderHook);
 	}
 	
 

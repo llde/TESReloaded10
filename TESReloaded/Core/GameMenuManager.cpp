@@ -1,5 +1,3 @@
-#include "PluginVersion.h"
-
 #if defined(OBLIVION)
 static char* TitleMenu = "Oblivion Reloaded - Settings";
 #elif defined(SKYRIM)

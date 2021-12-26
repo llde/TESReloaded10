@@ -1,5 +1,5 @@
 #include "D3D9Hook.h"
-#include "D3D9Device.h"
+#include "D3D9/D3D9Device.h"
 
 #if defined(OBLIVION)
 static const UInt32 kCreateDeviceHook = 0x0076A542;

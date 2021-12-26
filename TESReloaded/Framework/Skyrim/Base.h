@@ -27,9 +27,11 @@ public:
 	static const UInt32 LoadImageSpaceShaders		= 0x00C7CC10;
 	static const UInt32 LoadLightingShaderExtra		= 0x00CA38D0;
 	static const UInt32 Render						= 0x0069BDF0;
+	static const UInt32 SetupRenderingPass			= 0x00CAF9C0;
 	static const UInt32 ProcessImageSpaceShaders	= 0x00C70DA0;
 	static const UInt32 RenderWorldSceneGraph		= 0x00692290;
 	static const UInt32 RenderFirstPerson			= 0x00698B30;
+	static const UInt32 LoadForm					= 0x0043B4A0;
 };
 
 static CommandTable	commandTable;

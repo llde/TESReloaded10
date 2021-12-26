@@ -98,6 +98,9 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Form.h">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">

@@ -33,3 +33,10 @@ static const UInt32 kSetShadowDistanceReturn = 0x00CBB146;
 static const UInt32 kSetShadowDistanceShader = 0x00CB7365;
 static const UInt32 kSetShadowDistanceShaderReturn = 0x00CB736D;
 static NiGeometry* Geometry = NULL;
+
+
+
+static const UInt32 kSetRegionEditorName = 0x0048BEE4;
+static const UInt32 kSetRegionEditorNameReturn = 0x0048BEEA;
+static const UInt32 kSetWeatherEditorName = 0x004EF358;
+static const UInt32 kSetWeatherEditorNameReturn = 0x004EF35E;

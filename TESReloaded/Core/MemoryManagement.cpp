@@ -1,5 +1,4 @@
 #include "MemoryManagement.h"
-#include "PluginVersion.h"
 
 static const UInt32 kMemReallocHook = 0x00401E66;
 static const UInt32 kMemReallocReturn = 0x00401EC7;

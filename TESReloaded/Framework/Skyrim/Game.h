@@ -2148,6 +2148,12 @@ public:
 };
 assert(sizeof(TESRegion) == 0x30);
 
+class TESRegionEx : public TESRegion {
+public:
+	char		EditorName[40];
+};
+assert(sizeof(TESRegionEx) == 0x058);
+
 class BGSStoryManagerTreeForm : public TESForm {
 public:
 	virtual UInt32	Unk_39();

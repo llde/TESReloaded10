@@ -1,18 +1,19 @@
 #pragma once
 
-void (__thiscall RenderHook::* Render)(BSRenderedTexture*, int, int);
-void (__thiscall RenderHook::* TrackRender)(BSRenderedTexture*, int, int);
-void RenderHook::TrackRender(BSRenderedTexture* RenderedTexture, int Arg2, int Arg3) {
+static void (__thiscall* Render)(Main*, BSRenderedTexture*, int, int) = (void (__thiscall*)(Main*, BSRenderedTexture*, int, int))Hooks::Render;
+static void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* RenderedTexture, int Arg2, int Arg3) {
 	
-	TheRenderManager->SetSceneGraph();
+	SettingsMainStruct* SettingsMain = &TheSettingManager->SettingsMain;
+
+	TheCameraManager->SetSceneGraph();
 	TheShaderManager->UpdateConstants();
-	if (TheSettingManager->SettingsMain.Develop.TraceShaders && TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Develop.TraceShaders)) Logger::Log("START FRAME LOG");
-	(this->*Render)(RenderedTexture, Arg2, Arg3);
+	if (SettingsMain->Develop.TraceShaders && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None) && TheKeyboardManager->OnKeyDown(SettingsMain->Develop.TraceShaders)) Logger::Log("START FRAME LOG");
+	(*Render)(This, RenderedTexture, Arg2, Arg3);
 
 }
 
-bool (__cdecl * SetupRenderingPass)(UInt32, BSShader*) = (bool (__cdecl *)(UInt32, BSShader*))0x00CAF9C0;
-bool __cdecl TrackSetupRenderingPass(UInt32 PassIndex, BSShader* Shader) {
+static bool (__cdecl* SetupRenderingPass)(UInt32, BSShader*) = (bool (__cdecl*)(UInt32, BSShader*))Hooks::SetupRenderingPass;
+static bool __cdecl SetupRenderingPassHook(UInt32 PassIndex, BSShader* Shader) {
 	
 	bool r = SetupRenderingPass(PassIndex, Shader);
 
@@ -27,26 +28,24 @@ bool __cdecl TrackSetupRenderingPass(UInt32 PassIndex, BSShader* Shader) {
 
 }
 
-void (__thiscall RenderHook::* RenderWorldSceneGraph)(Sun*, UInt8, UInt8);
-void (__thiscall RenderHook::* TrackRenderWorldSceneGraph)(Sun*, UInt8, UInt8);
-void RenderHook::TrackRenderWorldSceneGraph(Sun* SkySun, UInt8 IsFirstPerson, UInt8 WireFrame) {
+static void (__thiscall* RenderWorldSceneGraph)(Main*, Sun*, UInt8, UInt8) = (void (__thiscall*)(Main*, Sun*, UInt8, UInt8))Hooks::RenderWorldSceneGraph;
+static void __fastcall RenderWorldSceneGraphHook(Main* This, UInt32 edx, Sun* SkySun, UInt8 IsFirstPerson, UInt8 WireFrame) {
 	
 	bool CameraMode = TheSettingManager->SettingsMain.CameraMode.Enabled;
 
-	(this->*RenderWorldSceneGraph)(SkySun, IsFirstPerson, WireFrame);
-	if (CameraMode || Player->IsThirdPersonView(CameraMode, TheRenderManager->FirstPersonView)) TheRenderManager->ResolveDepthBuffer();
+	(*RenderWorldSceneGraph)(This, SkySun, IsFirstPerson, WireFrame);
+	if (CameraMode || Player->IsThirdPersonView(CameraMode, TheCameraManager->FirstPersonView)) TheRenderManager->ResolveDepthBuffer();
 
 }
 
-void (__thiscall RenderHook::* RenderFirstPerson)(NiDX9Renderer*, NiGeometry*, Sun*, BSRenderedTexture*, UInt8);
-void (__thiscall RenderHook::* TrackRenderFirstPerson)(NiDX9Renderer*, NiGeometry*, Sun*, BSRenderedTexture*, UInt8);
-void RenderHook::TrackRenderFirstPerson(NiDX9Renderer* Renderer, NiGeometry* Geo, Sun* SkySun, BSRenderedTexture* RenderedTexture, UInt8 IsMultiSample) {
+static void (__thiscall* RenderFirstPerson)(Main*, NiDX9Renderer*, NiGeometry*, Sun*, BSRenderedTexture*, UInt8) = (void (__thiscall*)(Main*, NiDX9Renderer*, NiGeometry*, Sun*, BSRenderedTexture*, UInt8))Hooks::RenderFirstPerson;
+static void __fastcall RenderFirstPersonHook(Main* This, UInt32 edx, NiDX9Renderer* Renderer, NiGeometry* Geo, Sun* SkySun, BSRenderedTexture* RenderedTexture, UInt8 IsMultiSample) {
 	
-	(this->*RenderFirstPerson)(Renderer, Geo, SkySun, RenderedTexture, IsMultiSample);
+	(RenderFirstPerson)(This, Renderer, Geo, SkySun, RenderedTexture, IsMultiSample);
 	TheRenderManager->ResolveDepthBuffer();
 	TheRenderManager->Clear(NULL, NiRenderer::kClear_ZBUFFER);
 	ThisCall(0x00697E50, Global);
-	(this->*RenderFirstPerson)(Renderer, Geo, SkySun, RenderedTexture, IsMultiSample);
+	(*RenderFirstPerson)(This, Renderer, Geo, SkySun, RenderedTexture, IsMultiSample);
 
 }
 
@@ -61,16 +60,15 @@ static __declspec(naked) void RenderingGeometryHook() {
 
 }
 
-void SetShadowDistanceValue(float* Distance, UInt32 Pass) {
+static void SetShadowDistance(float* Distance, UInt32 Pass) {
 
 	if (Pass == 0) *Distance /= TheSettingManager->SettingsMain.ShadowMode.NearQuality;
 
 }
 
-static __declspec(naked) void SetShadowDistance()
-{
-	__asm
-	{
+static __declspec(naked) void SetShadowDistanceHook() {
+	
+	__asm {
 		faddp   st(1), st
 		fstp	dword ptr [esp + 0x4C]
 		lea		ecx, [esp + 0x4C]
@@ -79,7 +77,7 @@ static __declspec(naked) void SetShadowDistance()
 		pushfd
 		push	edx
 		push	ecx
-		call	SetShadowDistanceValue
+		call	SetShadowDistance
 		add		esp, 8
 		popfd
 		popad
@@ -87,10 +85,9 @@ static __declspec(naked) void SetShadowDistance()
 	}
 }
 
-static __declspec(naked) void SetShadowDistanceShader()
-{
-	__asm
-	{
+static __declspec(naked) void SetShadowDistanceShaderHook() {
+	
+	__asm {
 		lea		ecx, [esp + 0xE0 - 0xC4 + 4]
 		pushad
 		pushfd
@@ -104,4 +101,5 @@ static __declspec(naked) void SetShadowDistanceShader()
 		mov		[esp + esi * 4 + 0xE0 - 0x98], ecx
 		jmp		kSetShadowDistanceShaderReturn
 	}
+
 }
