@@ -1,5 +1,12 @@
 #pragma once
 
+struct Memory {
+	void* (*Malloc)		(size_t Size);
+	void  (*Free)		(void* Block);
+	void* (*Realloc)	(void* Block, size_t Size);
+};
+extern Memory Mem;
+
 class CommandManager;	extern CommandManager*		TheCommandManager;
 class SettingManager;	extern SettingManager*		TheSettingManager;
 class ShaderManager;	extern ShaderManager*		TheShaderManager;

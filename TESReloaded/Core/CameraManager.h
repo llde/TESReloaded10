@@ -2,7 +2,7 @@
 
 class CameraManager { // Never disposed
 public:
-	CameraManager();
+	static void Initialize();
 
 	class CameraManagerCommands { // Never disposed
 	public:

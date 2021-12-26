@@ -264,7 +264,7 @@ typedef std::map<std::string, D3DXVECTOR4> CustomConstants;
 
 __declspec(align(16)) class ShaderManager { // Never disposed
 public:
-	ShaderManager();
+	static void Initialize();
 
 	void* operator new(size_t i) { return _mm_malloc(i, 16); }
 

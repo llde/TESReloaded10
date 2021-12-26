@@ -15,16 +15,16 @@ static const UInt32 kSpineTrackingHook = 0x00603C55;
 static const UInt32 kSpineTrackingReturn = 0x00603C5E;
 static const UInt32 kSpineTrackingReturn1 = 0x00603C95;
 
-CameraManager::CameraManager() {
+void CameraManager::Initialize() {
 
 	Logger::Log("Starting the camera manager...");
-	TheCameraManager = this;
+	TheCameraManager = new CameraManager();
 
-	DialogTarget = NULL;
-	From = { 0.0f, 0.0f, 0.0f };
-	FromOffset = { 0.0f, 0.0f, 0.0f };
-	CameraCommands = new CameraManagerCommands();
-	FirstPersonView = false;
+	TheCameraManager->DialogTarget = NULL;
+	TheCameraManager->From = { 0.0f, 0.0f, 0.0f };
+	TheCameraManager->FromOffset = { 0.0f, 0.0f, 0.0f };
+	TheCameraManager->CameraCommands = new CameraManagerCommands();
+	TheCameraManager->FirstPersonView = false;
 
 }
 

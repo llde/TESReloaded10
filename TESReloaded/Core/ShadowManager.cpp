@@ -1,24 +1,10 @@
 #define DEBUGSH 0
-#include <algorithm>
 
 #if defined(OBLIVION)
-#define RenderStateArgs 0
-#define kRockParams 0x00B46778
-#define kRustleParams 0x00B46788
-#define kWindMatrixes 0x00B467B8
-static const UInt32 kRenderShadowMapHook = 0x0040C919;
-static const UInt32 kRenderShadowMapReturn = 0x0040C920;
-static const UInt32 kAddCastShadowFlagHook = 0x004B1A25;
-static const UInt32 kAddCastShadowFlagReturn = 0x004B1A2A;
-static const UInt32 kEditorCastShadowFlagHook = 0x005498DD;
-static const UInt32 kEditorCastShadowFlagReturn = 0x005498E3;
-#endif
-
-#if defined(OBLIVION)
-ShadowManager::ShadowManager() {
+void ShadowManager::Initialize() {
 	
 	Logger::Log("Starting the shadows manager...");
-	TheShadowManager = this;
+	TheShadowManager = new ShadowManager();
 	
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
@@ -26,27 +12,27 @@ ShadowManager::ShadowManager() {
 	UINT ShadowMapSize = 0;
 	UINT ShadowCubeMapSize = ShadowsInteriors->ShadowCubeMapSize;
 
-	ShadowMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowMap.vso", NULL);
-	ShadowMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowMap.pso", NULL);
-	ShadowCubeMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowCubeMap.vso", NULL);
-	ShadowCubeMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowCubeMap.pso", NULL);
+	TheShadowManager->ShadowMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowMap.vso", NULL);
+	TheShadowManager->ShadowMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowMap.pso", NULL);
+	TheShadowManager->ShadowCubeMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowCubeMap.vso", NULL);
+	TheShadowManager->ShadowCubeMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowCubeMap.pso", NULL);
 	for (int i = 0; i < 3; i++) {
 		UINT ShadowMapSize = ShadowsExteriors->ShadowMapSize[i];
-		Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &ShadowMapTexture[i], NULL);
-		ShadowMapTexture[i]->GetSurfaceLevel(0, &ShadowMapSurface[i]);
-		Device->CreateDepthStencilSurface(ShadowMapSize, ShadowMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &ShadowMapDepthSurface[i], NULL);
-		ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
+		Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &TheShadowManager->ShadowMapTexture[i], NULL);
+		TheShadowManager->ShadowMapTexture[i]->GetSurfaceLevel(0, &TheShadowManager->ShadowMapSurface[i]);
+		Device->CreateDepthStencilSurface(ShadowMapSize, ShadowMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &TheShadowManager->ShadowMapDepthSurface[i], NULL);
+		TheShadowManager->ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
 	}
 	for (int i = 0; i < CubeMapsMax; i++) {
-		Device->CreateCubeTexture(ShadowCubeMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &ShadowCubeMapTexture[i], NULL);
+		Device->CreateCubeTexture(ShadowCubeMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &TheShadowManager->ShadowCubeMapTexture[i], NULL);
 		for (int j = 0; j < 6; j++) {
-			ShadowCubeMapTexture[i]->GetCubeMapSurface((D3DCUBEMAP_FACES)j, 0, &ShadowCubeMapSurface[i][j]);
+			TheShadowManager->ShadowCubeMapTexture[i]->GetCubeMapSurface((D3DCUBEMAP_FACES)j, 0, &TheShadowManager->ShadowCubeMapSurface[i][j]);
 		}
 	}
-	Device->CreateDepthStencilSurface(ShadowCubeMapSize, ShadowCubeMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &ShadowCubeMapDepthSurface, NULL);
-	ShadowCubeMapViewPort = { 0, 0, ShadowCubeMapSize, ShadowCubeMapSize, 0.0f, 1.0f };
+	Device->CreateDepthStencilSurface(ShadowCubeMapSize, ShadowCubeMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &TheShadowManager->ShadowCubeMapDepthSurface, NULL);
+	TheShadowManager->ShadowCubeMapViewPort = { 0, 0, ShadowCubeMapSize, ShadowCubeMapSize, 0.0f, 1.0f };
 	
-	memset(ShadowCubeMapLights, NULL, sizeof(ShadowCubeMapLights));
+	memset(TheShadowManager->ShadowCubeMapLights, NULL, sizeof(ShadowCubeMapLights));
 
 }
 
@@ -622,72 +608,6 @@ void ShadowManager::CalculateBlend(NiPointLight** Lights, int LightIndex) {
 		if (ShadowCubeMapBlend->w < 1.0f) ShadowCubeMapBlend->w += 0.1f;
 	}
 	
-}
-
-static __declspec(naked) void RenderShadowMapHook() {
-
-	__asm {
-		pushad
-		mov		ecx, TheShadowManager
-		call	ShadowManager::RenderShadowMaps
-		popad
-		jmp		kRenderShadowMapReturn
-	}
-
-}
-
-void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* LightPoint) {
-	
-	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
-
-	if (Light->lightFlags & TESObjectLIGH::LightFlags::kLightFlags_CanCarry) {
-		LightPoint->CastShadows = ShadowsInteriors->TorchesCastShadows;
-		LightPoint->CanCarry = 1;
-		if (Ref == Player) {
-			if (Player->isThirdPerson) {
-				if (Player->firstPersonSkinInfo->LightForm == Light) LightPoint->CastShadows = 0;
-			}
-			else {
-				if (Player->ActorSkinInfo->LightForm == NULL && Player->firstPersonSkinInfo->LightForm == Light) LightPoint->CastShadows = 0;
-			}
-			LightPoint->CanCarry = 2;
-		}
-	}		
-	else if (Ref->baseForm->formType == TESForm::FormType::kFormType_Light) {
-		LightPoint->CastShadows = !(Ref->flags & TESForm::FormFlags::kFormFlags_NotCastShadows);
-		LightPoint->CanCarry = 0;
-	}
-
-}
-
-static __declspec(naked) void AddCastShadowFlagHook() {
-
-	__asm {
-		mov     ecx, [esp + 0x158]
-		pushad
-		push	esi
-		push	edi
-		push	ecx
-		call	AddCastShadowFlag
-		pop		ecx
-		pop		edi
-		pop		esi
-		popad
-		pop		ecx
-		pop		edi
-		pop		esi
-		pop		ebp
-		pop		ebx
-		jmp		kAddCastShadowFlagReturn
-	}
-
-}
-
-void CreateShadowsHook() {
-	
-	SafeWriteJump(kRenderShadowMapHook,		(UInt32)RenderShadowMapHook);
-	SafeWriteJump(kAddCastShadowFlagHook,	(UInt32)AddCastShadowFlagHook);
-
 }
 
 void EditorCastShadowFlag(HWND Window, TESForm* Form) {

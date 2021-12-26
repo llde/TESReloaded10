@@ -30,6 +30,16 @@ public:
 	static const UInt32 SaveGameScreenshot			= 0x00411B70;
 	static const UInt32 LoadForm					= 0x00447050;
 	static const UInt32 RunScript					= 0x004402F0;
+	static const UInt32 NewActorAnimData			= 0x00473EB0;
+	static const UInt32 DisposeActorAnimData		= 0x00475B60;
+	static const UInt32 AddAnimation				= 0x00474070;
+	static const UInt32 AddSingle					= 0x00470BA0;
+	static const UInt32 AddMultiple					= 0x00471930;
+	static const UInt32 GetAnimGroupSequenceSingle	= 0x00471710;
+	static const UInt32 GetAnimGroupSequenceMultiple= 0x00470BF0;
+	static const UInt32 NewAnimSequenceMultiple		= 0x00473D90;
+	static const UInt32 ApplyActorAnimData			= 0x00471F20;
+	static const UInt32 LoadAnimGroup				= 0x0051B490;
 };
 
 class CommandManagerBase {

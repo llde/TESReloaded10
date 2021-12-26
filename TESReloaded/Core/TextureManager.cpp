@@ -1,19 +1,3 @@
-#include "TextureManager.h"
-
-#if defined(OBLIVION)
-static const UInt32 kWaterHeightMapHook = 0x0049D9FF;
-static const UInt32 kWaterHeightMapReturn = 0x0049DA08;
-#endif
-#define WordSampler2D "sampler2D"
-#define WordSampler3D "sampler3D"
-#define WordSamplerCUBE "samplerCU"
-#define WordSamplerDelimeter "};"
-#define WordSamplerStateDelimeter ";"
-#define WordRegister "register(s"
-#define WordRegisterDelimeter ")"
-#define WordTextureName "string ResourceName = \x22"
-#define WordTextureNameDelimeter "\x22;"
-
 TextureRecord::TextureRecord() {
 
 	Texture = NULL;
@@ -88,10 +72,10 @@ void TextureRecord::SetSamplerState(D3DSAMPLERSTATETYPE SamplerType, DWORD Value
 
 }
 
-TextureManager::TextureManager() {
+void TextureManager::Initialize() {
 
 	Logger::Log("Starting the textures manager...");
-	TheTextureManager = this;
+	TheTextureManager = new TextureManager();
 
 }
 
@@ -300,33 +284,5 @@ TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, UInt32 Regi
 		if (Type) break;
 	}
 	return NewTextureRecord;
-
-}
-
-void WaterHeightMap(BSRenderedTexture* WaterHeightMap) {
-	
-	TextureList::iterator t = TheTextureManager->Textures.find(WordWaterHeightMapBuffer);
-
-	Tes->waterManager->HeightMap = WaterHeightMap;
-	if (t != TheTextureManager->Textures.end()) t->second->Texture = WaterHeightMap->RenderedTexture->rendererData->dTexture;
-	
-}
-
-static __declspec(naked) void WaterHeightMapHook() {
-
-	__asm {
-		pushad
-		push    eax
-		call	WaterHeightMap
-		pop     eax
-		popad
-		jmp		kWaterHeightMapReturn
-	}
-
-}
-
-void CreateTextureHook() {
-
-	SafeWriteJump(kWaterHeightMapHook, (UInt32)WaterHeightMapHook);
 
 }

@@ -46,11 +46,9 @@ typedef std::map<std::string, TextureRecord*> TextureList;
 
 class TextureManager { // Never disposed
 public:
-	TextureManager();
+	static void			Initialize();
 
-	TextureRecord*			LoadTexture(const char* ShaderSource, UInt32 RegisterIndex);
+	TextureRecord*		LoadTexture(const char* ShaderSource, UInt32 RegisterIndex);
 	
-	TextureList				Textures;
+	TextureList			Textures;
 };
-
-void CreateTextureHook();

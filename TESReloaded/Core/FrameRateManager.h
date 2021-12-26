@@ -2,7 +2,8 @@
 
 class FrameRateManager { // Never disposed
 public:
-	FrameRateManager();
+
+	static void		Initialize();
 
 	void			UpdatePerformance();
 	double			GetPerformance();
@@ -16,5 +17,3 @@ public:
 	double			SmartControlMPF;
 	double			LastPerformance;
 };
-
-void CreateFrameRateHook();

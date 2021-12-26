@@ -2,7 +2,7 @@
 
 class KeyboardManager { // Never disposed
 public:
-	KeyboardManager();
+	static void Initialize();
 
 	bool	OnKeyDown(UInt16 KeyCode);
 	bool	OnKeyPressed(UInt16 KeyCode);

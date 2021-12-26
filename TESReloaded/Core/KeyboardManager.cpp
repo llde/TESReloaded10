@@ -3,10 +3,10 @@
 #define MouseCurrentState Global->GetInputMouse()->CurrentMouseState.rgbButtons
 #define MousePreviousState Global->GetInputMouse()->PreviousMouseState.rgbButtons
 
-KeyboardManager::KeyboardManager() {
+void KeyboardManager::Initialize() {
 
 	Logger::Log("Starting the keyboard manager...");
-	TheKeyboardManager = this;
+	TheKeyboardManager = new KeyboardManager();
 
 }
 

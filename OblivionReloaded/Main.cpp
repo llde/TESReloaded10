@@ -1,13 +1,10 @@
 #define WaitForDebugger 0
 #define HookDevice 0
 
-#include "GrassMode.h"
 #include "MountedCombat.h"
 #include "SleepingMode.h"
-#include "Animation.h"
 #include "Dodge.h"
 #include "FlyCam.h"
-#include "MemoryManagement.h"
 #include "D3D9Hook.h"
 #include "Hooks/Oblivion/Hooks.h"
 
@@ -41,13 +38,6 @@ extern "C" {
 			SettingManager::Initialize();
 			if (TheSettingManager->LoadSettings(true)) {
 				AttachHooks();
-				CreateAnimationHook();
-				CreateShadowsHook();
-				CreateFrameRateHook();
-				CreateTextureHook();
-				CreateOcclusionCullingHook();
-				CreateMemoryManagementHook();
-				CreateGrassHook();
 				CreateCameraModeHook();
 				if (TheSettingManager->SettingsMain.EquipmentMode.Enabled) {
 					CreateEquipmentHook();

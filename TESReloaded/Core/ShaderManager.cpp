@@ -551,49 +551,49 @@ void EffectRecord::Render(IDirect3DDevice9* Device, IDirect3DSurface9* RenderTar
 
 }
 
-ShaderManager::ShaderManager() {
+void ShaderManager::Initialize() {
 
 	Logger::Log("Starting the shaders manager...");
-	TheShaderManager = this;
+	TheShaderManager = new ShaderManager();
 
-	SourceTexture = NULL;
-	SourceSurface = NULL;
-	RenderedTexture = NULL;
-	RenderedSurface = NULL;
-	FrameVertex = NULL;
-	UnderwaterEffect = NULL;
-	WaterLensEffect = NULL;
-	GodRaysEffect = NULL;
-	DepthOfFieldEffect = NULL;
-	AmbientOcclusionEffect = NULL;
-	ColoringEffect = NULL;
-	CinemaEffect = NULL;
-	BloomEffect = NULL;
-	SnowAccumulationEffect = NULL;
-	BloodLensEffect = NULL;
-	MotionBlurEffect = NULL;
-	LowHFEffect = NULL;
-	WetWorldEffect = NULL;
-	SharpeningEffect = NULL;
-	VolumetricFogEffect = NULL;
-	RainEffect = NULL;
-	SnowEffect = NULL;
-	ShadowsExteriorsEffect = NULL;
-	ShadowsInteriorsEffect = NULL;
-	WaterHeightMapVertexShader = NULL;
-	WaterHeightMapPixelShader = NULL;
-	memset(WaterVertexShaders, NULL, sizeof(WaterVertexShaders));
-	memset(WaterPixelShaders, NULL, sizeof(WaterPixelShaders));
-	InitializeConstants();
-	ShaderConst.ReciprocalResolution.x = 1.0f / (float)TheRenderManager->width;
-	ShaderConst.ReciprocalResolution.y = 1.0f / (float)TheRenderManager->height;
-	ShaderConst.ReciprocalResolution.z = (float)TheRenderManager->width / (float)TheRenderManager->height;
-	ShaderConst.ReciprocalResolution.w = 0.0f; // Reserved to store the FoV
-	CreateFrameVertex(TheRenderManager->width, TheRenderManager->height, &FrameVertex);
-	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &SourceTexture, NULL);
-	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &RenderedTexture, NULL);
-	SourceTexture->GetSurfaceLevel(0, &SourceSurface);
-	RenderedTexture->GetSurfaceLevel(0, &RenderedSurface);
+	TheShaderManager->SourceTexture = NULL;
+	TheShaderManager->SourceSurface = NULL;
+	TheShaderManager->RenderedTexture = NULL;
+	TheShaderManager->RenderedSurface = NULL;
+	TheShaderManager->FrameVertex = NULL;
+	TheShaderManager->UnderwaterEffect = NULL;
+	TheShaderManager->WaterLensEffect = NULL;
+	TheShaderManager->GodRaysEffect = NULL;
+	TheShaderManager->DepthOfFieldEffect = NULL;
+	TheShaderManager->AmbientOcclusionEffect = NULL;
+	TheShaderManager->ColoringEffect = NULL;
+	TheShaderManager->CinemaEffect = NULL;
+	TheShaderManager->BloomEffect = NULL;
+	TheShaderManager->SnowAccumulationEffect = NULL;
+	TheShaderManager->BloodLensEffect = NULL;
+	TheShaderManager->MotionBlurEffect = NULL;
+	TheShaderManager->LowHFEffect = NULL;
+	TheShaderManager->WetWorldEffect = NULL;
+	TheShaderManager->SharpeningEffect = NULL;
+	TheShaderManager->VolumetricFogEffect = NULL;
+	TheShaderManager->RainEffect = NULL;
+	TheShaderManager->SnowEffect = NULL;
+	TheShaderManager->ShadowsExteriorsEffect = NULL;
+	TheShaderManager->ShadowsInteriorsEffect = NULL;
+	TheShaderManager->WaterHeightMapVertexShader = NULL;
+	TheShaderManager->WaterHeightMapPixelShader = NULL;
+	memset(TheShaderManager->WaterVertexShaders, NULL, sizeof(WaterVertexShaders));
+	memset(TheShaderManager->WaterPixelShaders, NULL, sizeof(WaterPixelShaders));
+	TheShaderManager->InitializeConstants();
+	TheShaderManager->ShaderConst.ReciprocalResolution.x = 1.0f / (float)TheRenderManager->width;
+	TheShaderManager->ShaderConst.ReciprocalResolution.y = 1.0f / (float)TheRenderManager->height;
+	TheShaderManager->ShaderConst.ReciprocalResolution.z = (float)TheRenderManager->width / (float)TheRenderManager->height;
+	TheShaderManager->ShaderConst.ReciprocalResolution.w = 0.0f; // Reserved to store the FoV
+	TheShaderManager->CreateFrameVertex(TheRenderManager->width, TheRenderManager->height, &TheShaderManager->FrameVertex);
+	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &TheShaderManager->SourceTexture, NULL);
+	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &TheShaderManager->RenderedTexture, NULL);
+	TheShaderManager->SourceTexture->GetSurfaceLevel(0, &TheShaderManager->SourceSurface);
+	TheShaderManager->RenderedTexture->GetSurfaceLevel(0, &TheShaderManager->RenderedSurface);
 
 }
 

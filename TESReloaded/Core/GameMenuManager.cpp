@@ -20,21 +20,21 @@ static char* TitleMenu = "Skyrim Reloaded - Settings";
 #define RowSpace MenuSettings->RowSpace
 #define RowsPerPage MenuSettings->RowsPerPage
 
-GameMenuManager::GameMenuManager() {
+void GameMenuManager::Initialize() {
 
 	Logger::Log("Starting the menu manager...");
-	TheGameMenuManager = this;
+	TheGameMenuManager = new GameMenuManager();
 
 	SettingsMainStruct::MenuStruct* MenuSettings = &TheSettingManager->SettingsMain.Menu;
 
-	SelectedColumn = 0;
-	SelectedRow[0] = SelectedRow[1] = SelectedRow[2] = SelectedRow[3] = 0;
-	SelectedPage[0] = SelectedPage[1] = SelectedPage[2] = SelectedPage[3] = 0;
-	Enabled = false;
-	EditingMode = false;
-	D3DXCreateFontA(TheRenderManager->device, MenuSettings->TextSize, 0, FW_NORMAL, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, MenuSettings->TextFont, &FontNormal);
-	D3DXCreateFontA(TheRenderManager->device, MenuSettings->TextSize, 0, FW_BOLD, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, MenuSettings->TextFont, &FontSelected);
-	D3DXCreateFontA(TheRenderManager->device, MenuSettings->TextSizeStatus, 0, FW_NORMAL, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, MenuSettings->TextFontStatus, &FontStatus);
+	TheGameMenuManager->SelectedColumn = 0;
+	TheGameMenuManager->SelectedRow[4] = { 0 };
+	TheGameMenuManager->SelectedPage[4] = { 0 };
+	TheGameMenuManager->Enabled = false;
+	TheGameMenuManager->EditingMode = false;
+	D3DXCreateFontA(TheRenderManager->device, MenuSettings->TextSize, 0, FW_NORMAL, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, MenuSettings->TextFont, &TheGameMenuManager->FontNormal);
+	D3DXCreateFontA(TheRenderManager->device, MenuSettings->TextSize, 0, FW_BOLD, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, MenuSettings->TextFont, &TheGameMenuManager->FontSelected);
+	D3DXCreateFontA(TheRenderManager->device, MenuSettings->TextSizeStatus, 0, FW_NORMAL, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, MenuSettings->TextFontStatus, &TheGameMenuManager->FontStatus);
 
 }
 

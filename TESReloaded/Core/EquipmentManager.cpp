@@ -1,5 +1,4 @@
 #if defined(OBLIVION)
-#include "Animation.h"
 
 #define ForearmTwistNodeName "Bip01 L ForearmTwist"
 #define QuiverNodeName "Quiver"
@@ -25,13 +24,13 @@ static const UInt32 kSetWeaponRotationPositionHook = 0x006563F3;
 static const UInt32 kSetWeaponRotationPositionReturn = 0x006563FC;
 #endif
 
-EquipmentManager::EquipmentManager() {
+void EquipmentManager::Initialize() {
 
 	Logger::Log("Starting the equipment manager...");
-	TheEquipmentManager = this;
+	TheEquipmentManager = new EquipmentManager();
 
-	OnBackAnim = NULL;
-	LeftTime = -1.0f;
+	TheEquipmentManager->OnBackAnim = NULL;
+	TheEquipmentManager->LeftTime = -1.0f;
 
 }
 

@@ -109,7 +109,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\TESReloaded\Core\Animation.h" />
     <ClInclude Include="..\TESReloaded\Core\CameraManager.h" />
     <ClInclude Include="..\TESReloaded\Core\CommandManager.h" />
     <ClInclude Include="..\TESReloaded\Core\D3D9Hook.h" />
@@ -120,13 +119,20 @@
     <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Animation.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Events.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Forms.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\FrameRate.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Game.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Grass.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Hooks.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Memory.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Occlusion.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\ShaderIO.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Shadows.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Texture.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Script.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h" />
@@ -145,9 +151,7 @@
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\GameNi.h" />
     <ClInclude Include="..\TESReloaded\Core\GameEventManager.h" />
     <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h" />
-    <ClInclude Include="..\TESReloaded\Core\GrassMode.h" />
     <ClInclude Include="..\TESReloaded\Core\KeyboardManager.h" />
-    <ClInclude Include="..\TESReloaded\Core\MemoryManagement.h" />
     <ClInclude Include="..\TESReloaded\Core\MountedCombat.h" />
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />
     <ClInclude Include="..\TESReloaded\Core\ScriptManager.h" />
@@ -161,7 +165,6 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\TESReloaded\Core\Animation.cpp" />
     <ClCompile Include="..\TESReloaded\Core\CameraManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\CommandManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\D3D9Hook.cpp" />
@@ -181,9 +184,7 @@
     <ClCompile Include="..\TESReloaded\Framework\Common\Managers.cpp" />
     <ClCompile Include="..\TESReloaded\Core\GameEventManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\GameMenuManager.cpp" />
-    <ClCompile Include="..\TESReloaded\Core\GrassMode.cpp" />
     <ClCompile Include="..\TESReloaded\Core\KeyboardManager.cpp" />
-    <ClCompile Include="..\TESReloaded\Core\MemoryManagement.cpp" />
     <ClCompile Include="..\TESReloaded\Core\MountedCombat.cpp" />
     <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ScriptManager.cpp" />

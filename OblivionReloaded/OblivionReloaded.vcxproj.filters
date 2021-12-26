@@ -38,9 +38,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\TESReloaded\Core\Animation.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\CameraManager.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -65,13 +62,7 @@
     <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\GrassMode.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\KeyboardManager.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\MemoryManagement.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\MountedCombat.h">
@@ -188,11 +179,29 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Script.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Animation.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Shadows.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\FrameRate.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Texture.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Occlusion.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Memory.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Grass.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\TESReloaded\Core\Animation.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\CameraManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -217,13 +226,7 @@
     <ClCompile Include="..\TESReloaded\Core\GameMenuManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\GrassMode.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\KeyboardManager.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\MemoryManagement.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\MountedCombat.cpp">

@@ -4,7 +4,7 @@
 
 class GameMenuManager { // Never disposed
 public:
-	GameMenuManager();
+	static void Initialize();
 
 	void					Render();
 	void					GetMidSection(char* MidSection);

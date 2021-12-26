@@ -3,7 +3,7 @@
 
 class ShadowManager : public ShadowManagerBase { // Never disposed
 public:
-	ShadowManager();
+	static void Initialize();
 
 	enum PlaneEnum {
 		PlaneNear	= 0,
@@ -48,5 +48,4 @@ public:
 	bool					AlphaEnabled;
 };
 
-void CreateShadowsHook();
 void CreateEditorShadowsHook();

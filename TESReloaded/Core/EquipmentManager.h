@@ -2,7 +2,7 @@
 
 class EquipmentManager { // Never disposed
 public:
-	EquipmentManager();
+	static void Initialize();
 
 	enum PositionRotationType {
 		None,

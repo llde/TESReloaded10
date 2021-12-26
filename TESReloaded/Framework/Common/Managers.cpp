@@ -1,3 +1,5 @@
+Memory Mem;
+
 CommandManager*		TheCommandManager = NULL;
 SettingManager*		TheSettingManager = NULL;
 ShaderManager*		TheShaderManager = NULL;
@@ -24,16 +26,16 @@ ShadowSceneNode*		SceneNode		 = NULL;
 
 void InitializeManagers() {
 
-	new TextureManager();
-	new ShaderManager();
-	new FrameRateManager();
-	new GameMenuManager();
-	new KeyboardManager();
+	TextureManager::Initialize();
+	ShaderManager::Initialize();
+	FrameRateManager::Initialize();
+	GameMenuManager::Initialize();
+	KeyboardManager::Initialize();
 	GameEventManager::Initialize();
-	new ShadowManager();
-	new OcclusionManager();
-	new EquipmentManager();
+	ShadowManager::Initialize();
+	OcclusionManager::Initialize();
+	EquipmentManager::Initialize();
 	ScriptManager::Initialize();
-	new CameraManager();
+	CameraManager::Initialize();
 
 }

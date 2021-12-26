@@ -2,7 +2,7 @@
 
 class OcclusionManager { // Never disposed
 public:
-	OcclusionManager();
+	static void Initialize();
 
 	bool					InFrustum(NiNode* Node);
 	TESObjectREFR*			GetRef(TESObjectREFR* Ref);
@@ -26,5 +26,3 @@ public:
 	IDirect3DTexture9*		WaterTexture;
 	bool					WaterOccluded;
 };
-
-void CreateOcclusionCullingHook();

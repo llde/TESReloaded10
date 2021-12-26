@@ -1,30 +1,9 @@
 #define DEBUGOC 0
-#include "OcclusionManager.h"
 
-#define RenderStateArgs 0
-#define kFormType_MoveableStatic kFormType_Stat
-static const UInt32 kNew1CollisionObjectHook = 0x00564529;
-static const UInt32 kNew1CollisionObjectReturn = 0x0056452E;
-static const UInt32 kNew2CollisionObjectHook = 0x0089E989;
-static const UInt32 kNew2CollisionObjectReturn = 0x0089E98E;
-static const UInt32 kNew3CollisionObjectHook = 0x0089EA1C;
-static const UInt32 kNew3CollisionObjectReturn = 0x0089EA21;
-static const UInt32 kDisposeCollisionObjectHook = 0x00532DD1;
-static const UInt32 kDisposeCollisionObjectReturn = 0x00532DD8;
-static const UInt32 kMaterialPropertyHook = 0x0089F7C6;
-static const UInt32 kMaterialPropertyReturn1 = 0x0089F7CE;
-static const UInt32 kMaterialPropertyReturn2 = 0x0089F8A0;
-static const UInt32 kCoordinateJackHook = 0x008A3101;
-static const UInt32 kCoordinateJackReturn1 = 0x008A3107;
-static const UInt32 kCoordinateJackReturn2 = 0x008A3165;
-static const UInt32 kObjectCullHook = 0x007073D6;
-static const UInt32 kObjectCullReturn1 = 0x007073DC;
-static const UInt32 kObjectCullReturn2 = 0x007073E7;
-
-OcclusionManager::OcclusionManager() {
+void OcclusionManager::Initialize() {
 	
 	Logger::Log("Starting the occlusion manager...");
-	TheOcclusionManager = this;
+	TheOcclusionManager = new OcclusionManager();
 	
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	UINT OcclusionMapSizeX = TheRenderManager->width / TheSettingManager->SettingsMain.OcclusionCulling.OcclusionMapRatio;
@@ -37,17 +16,17 @@ OcclusionManager::OcclusionManager() {
 	char* PixelShaderName = "OcclusionMapDebug.pso";
 #endif
 
-	WaterOccluded = false;
-	WaterTexture = NULL;
+	TheOcclusionManager->WaterOccluded = false;
+	TheOcclusionManager->WaterTexture = NULL;
 
-	OcclusionMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader(VertexShaderName, NULL);
-	OcclusionMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader(PixelShaderName, NULL);
+	TheOcclusionManager->OcclusionMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader(VertexShaderName, NULL);
+	TheOcclusionManager->OcclusionMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader(PixelShaderName, NULL);
 
-	Device->CreateQuery(D3DQUERYTYPE_OCCLUSION, &OcclusionQuery);
-	Device->CreateTexture(OcclusionMapSizeX, OcclusionMapSizeY, 1, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &OcclusionMapTexture, NULL);
-	OcclusionMapTexture->GetSurfaceLevel(0, &OcclusionMapSurface);
-	Device->CreateDepthStencilSurface(OcclusionMapSizeX, OcclusionMapSizeY, D3DFMT_D16, D3DMULTISAMPLE_NONE, 0, true, &OcclusionMapDepthSurface, NULL);
-	OcclusionMapViewPort = { 0, 0, OcclusionMapSizeX, OcclusionMapSizeY, 0.0f, 1.0f };
+	Device->CreateQuery(D3DQUERYTYPE_OCCLUSION, &TheOcclusionManager->OcclusionQuery);
+	Device->CreateTexture(OcclusionMapSizeX, OcclusionMapSizeY, 1, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &TheOcclusionManager->OcclusionMapTexture, NULL);
+	TheOcclusionManager->OcclusionMapTexture->GetSurfaceLevel(0, &TheOcclusionManager->OcclusionMapSurface);
+	Device->CreateDepthStencilSurface(OcclusionMapSizeX, OcclusionMapSizeY, D3DFMT_D16, D3DMULTISAMPLE_NONE, 0, true, &TheOcclusionManager->OcclusionMapDepthSurface, NULL);
+	TheOcclusionManager->OcclusionMapViewPort = { 0, 0, OcclusionMapSizeX, OcclusionMapSizeY, 0.0f, 1.0f };
 
 }
 
@@ -427,127 +406,5 @@ void OcclusionManager::PerformOcclusionCulling() {
 #if DEBUGOC
 	if (TheKeyboardManager->OnKeyDown(26)) D3DXSaveSurfaceToFileA("C:\\Archivio\\Downloads\\occlusionmap.jpg", D3DXIFF_JPG, OcclusionMapSurface, NULL, NULL);
 #endif
-}
-
-static __declspec(naked) void New1CollisionObjectHook() {
-
-	__asm {
-		mov     edi, eax
-		add     esp, 4
-		mov		dword ptr [edi + bhkCollisionObjectEx::GeoNode], 0
-		jmp		kNew1CollisionObjectReturn
-	}
-
-}
-
-static __declspec(naked) void New2CollisionObjectHook() {
-
-	__asm {
-		mov     esi, eax
-		add     esp, 4
-		mov		dword ptr [esi + bhkCollisionObjectEx::GeoNode], 0
-		jmp		kNew2CollisionObjectReturn
-	}
-
-}
-
-static __declspec(naked) void New3CollisionObjectHook() {
-
-	__asm {
-		mov     esi, eax
-		add     esp, 4
-		mov		dword ptr [esi + bhkCollisionObjectEx::GeoNode], 0
-		jmp		kNew3CollisionObjectReturn
-	}
-
-}
-
-void DisposeCollisionObject(bhkCollisionObjectEx* bCollisionObject) {
-	
-	void* VFT = *(void**)bCollisionObject;
-	
-	if (VFT == VFTbhkCollisionObject) {
-		if (NiNode* GeoNode = bCollisionObject->GeoNode) {
-			GeoNode->Destructor(1);
-			bCollisionObject->GeoNode = NULL;
-		}
-	}
-
-}
-
-static __declspec(naked) void DisposeCollisionObjectHook() {
-
-	__asm {
-		pushad
-		push	ecx
-		call	DisposeCollisionObject
-		pop		ecx
-		popad
-		mov     esi, ecx
-		mov		eax, 0x00897B00
-		call	eax
-		jmp		kDisposeCollisionObjectReturn
-	}
-
-}
-
-static __declspec(naked) void MaterialPropertyHook() {
-
-	__asm {
-		test    word ptr [esi + 0x18], 0x400
-		jnz     short loc_return
-		test    edi, edi
-		fldz
-		fst		[esp + 0x18]
-		jmp		kMaterialPropertyReturn1
-	loc_return:
-		jmp		kMaterialPropertyReturn2
-	}
-
-}
-
-static __declspec(naked) void CoordinateJackHook() {
-
-	__asm {
-		test    word ptr [eax + 0x18], 0x400
-		jnz     short loc_return
-		mov     esi, eax
-		jmp		kCoordinateJackReturn1
-	loc_return:
-		jmp		kCoordinateJackReturn2
-	}
-
-}
-
-static __declspec(naked) void ObjectCullHook() {
-
-	__asm {
-		test    word ptr [ecx + 0x18], 0x200
-		jnz     short loc_return
-		mov     eax, [esp + 0x04]
-		mov     edx, [eax]
-		jmp		kObjectCullReturn1
-	loc_return:
-		jmp		kObjectCullReturn2
-	}
-
-}
-
-void CreateOcclusionCullingHook() {
-	
-	if (TheSettingManager->SettingsMain.OcclusionCulling.Enabled) {
-		SafeWrite8(0x00564523, sizeof(bhkCollisionObjectEx));
-		SafeWrite8(0x0089E983, sizeof(bhkCollisionObjectEx));
-		SafeWrite8(0x0089EA16, sizeof(bhkCollisionObjectEx));
-
-		SafeWriteJump(kNew1CollisionObjectHook,		(UInt32)New1CollisionObjectHook);
-		SafeWriteJump(kNew2CollisionObjectHook,		(UInt32)New2CollisionObjectHook);
-		SafeWriteJump(kNew3CollisionObjectHook,		(UInt32)New3CollisionObjectHook);
-		SafeWriteJump(kDisposeCollisionObjectHook,	(UInt32)DisposeCollisionObjectHook);
-		SafeWriteJump(kMaterialPropertyHook,		(UInt32)MaterialPropertyHook);
-		SafeWriteJump(kCoordinateJackHook,			(UInt32)CoordinateJackHook);
-		SafeWriteJump(kObjectCullHook,				(UInt32)ObjectCullHook);
-	}
-
 }
 #endif
