@@ -40,6 +40,28 @@ public:
 	static const UInt32 NewAnimSequenceMultiple		= 0x00473D90;
 	static const UInt32 ApplyActorAnimData			= 0x00471F20;
 	static const UInt32 LoadAnimGroup				= 0x0051B490;
+	static const UInt32 ToggleCamera				= 0x0066C580;
+	static const UInt32 ToggleBody					= 0x00664F70;
+	static const UInt32 SetDialogCamera				= 0x0066C6F0;
+	static const UInt32 SetAimingZoom				= 0x00666670;
+	static const UInt32 UpdateCameraCollisions		= 0x0065F080;
+	static const UInt32 NewHighProcess				= 0x00628EE0;
+	static const UInt32 ManageItem					= 0x005ABBC0;
+	static const UInt32 ProcessAction				= 0x005FCAB0;
+	static const UInt32 ProcessControlAttack		= 0x0065E960;
+	static const UInt32 AttackHandling				= 0x005FEBF0;
+	static const UInt32 GetEquippedWeaponData		= 0x0064B240;
+	static const UInt32 SetEquippedWeaponData		= 0x00658550;
+	static const UInt32 EquipItem					= 0x00489C30;
+	static const UInt32 UnequipItem					= 0x0048A540;
+	static const UInt32 EquipWeapon					= 0x004E1900;
+	static const UInt32 UnequipWeapon				= 0x004DC5B0;
+	static const UInt32 EquipShield					= 0x004E1B40;
+	static const UInt32 EquipLight					= 0x004E1C70;
+	static const UInt32 UnequipLight				= 0x004DCAB0;
+	static const UInt32 GetEquippedLightData		= 0x0064B270;
+	static const UInt32 HideEquipment				= 0x005E7230;
+	static const UInt32 SaveGame					= 0x00485730;
 };
 
 class CommandManagerBase {

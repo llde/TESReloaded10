@@ -32,6 +32,9 @@ public:
 	static const UInt32 RenderWorldSceneGraph		= 0x00692290;
 	static const UInt32 RenderFirstPerson			= 0x00698B30;
 	static const UInt32 LoadForm					= 0x0043B4A0;
+	static const UInt32 SetCameraState				= 0x006533D0;
+	static const UInt32 ManageButtonEvent			= 0x00840BE0;
+	static const UInt32 SetCameraPosition			= 0x0083F690;
 };
 
 static CommandTable	commandTable;

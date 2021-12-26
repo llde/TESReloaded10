@@ -107,6 +107,9 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Events.h">
       <Filter>Core\Hooks\Skyrim</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Camera.h">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">

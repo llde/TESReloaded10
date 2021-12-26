@@ -65,9 +65,6 @@
     <ClInclude Include="..\TESReloaded\Core\KeyboardManager.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\MountedCombat.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -200,6 +197,15 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Grass.h">
       <Filter>Core\Hooks\Oblivion</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Camera.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Equipment.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Mounted.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TESReloaded\Core\CameraManager.cpp">
@@ -227,9 +233,6 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\KeyboardManager.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\MountedCombat.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp">

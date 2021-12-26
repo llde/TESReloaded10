@@ -46,3 +46,6 @@
 #include "../Core/Hooks/Oblivion/Occlusion.h"
 #include "../Core/Hooks/Oblivion/Memory.h"
 #include "../Core/Hooks/Oblivion/Grass.h"
+#include "../Core/Hooks/Oblivion/Camera.h"
+#include "../Core/Hooks/Oblivion/Equipment.h"
+#include "../Core/Hooks/Oblivion/Mounted.h"

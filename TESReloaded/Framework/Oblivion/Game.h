@@ -27,6 +27,7 @@ class Script;
 class EnchantmentItem;
 class ScriptEventList;
 class Menu;
+class InventoryMenu;
 class ExtraDataList;
 class Tile;
 

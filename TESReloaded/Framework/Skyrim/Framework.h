@@ -34,3 +34,5 @@
 #include "../Core/Hooks/Skyrim/ShaderIO.h"
 #include "../Core/Hooks/Skyrim/Render.h"
 #include "../Core/Hooks/Skyrim/Forms.h"
+#include "../Core/Hooks/Skyrim/Events.h"
+#include "../Core/Hooks/Skyrim/Camera.h"

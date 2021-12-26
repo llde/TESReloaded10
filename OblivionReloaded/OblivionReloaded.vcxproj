@@ -120,6 +120,8 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Animation.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Camera.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Equipment.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Events.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Forms.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\FrameRate.h" />
@@ -127,6 +129,7 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Grass.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Hooks.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Memory.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Mounted.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Occlusion.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Settings.h" />
@@ -152,7 +155,6 @@
     <ClInclude Include="..\TESReloaded\Core\GameEventManager.h" />
     <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h" />
     <ClInclude Include="..\TESReloaded\Core\KeyboardManager.h" />
-    <ClInclude Include="..\TESReloaded\Core\MountedCombat.h" />
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />
     <ClInclude Include="..\TESReloaded\Core\ScriptManager.h" />
     <ClInclude Include="..\TESReloaded\Core\SettingManager.h" />
@@ -185,7 +187,6 @@
     <ClCompile Include="..\TESReloaded\Core\GameEventManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\GameMenuManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\KeyboardManager.cpp" />
-    <ClCompile Include="..\TESReloaded\Core\MountedCombat.cpp" />
     <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ScriptManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp" />

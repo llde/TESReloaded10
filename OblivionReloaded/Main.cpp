@@ -1,7 +1,6 @@
 #define WaitForDebugger 0
 #define HookDevice 0
 
-#include "MountedCombat.h"
 #include "SleepingMode.h"
 #include "Dodge.h"
 #include "FlyCam.h"
@@ -38,11 +37,6 @@ extern "C" {
 			SettingManager::Initialize();
 			if (TheSettingManager->LoadSettings(true)) {
 				AttachHooks();
-				CreateCameraModeHook();
-				if (TheSettingManager->SettingsMain.EquipmentMode.Enabled) {
-					CreateEquipmentHook();
-					if (TheSettingManager->SettingsMain.MountedCombat.Enabled) CreateMountedCombatHook();
-				}
 				CreateSleepingModeHook();
 				CreateDodgeHook();
 				CreateFlyCamHook();

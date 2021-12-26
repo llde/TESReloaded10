@@ -24,5 +24,3 @@ public:
 	TESIdleForm*	OnBackAnim;
 	float			LeftTime;
 };
-
-void CreateEquipmentHook();

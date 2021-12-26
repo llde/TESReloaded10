@@ -12,52 +12,52 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Filename) {
 	IDirect3DCubeTexture9* TexC = NULL;
 
 	switch (Type) {
-		case TextureRecordType_PlanarBuffer:
+		case PlanarBuffer:
 			D3DXCreateTextureFromFileA(TheRenderManager->device, Filename, &Tex);
 			if (Tex == NULL) return false;
 			Texture = Tex;
 			break;
-		case TextureRecordType_VolumeBuffer:
+		case VolumeBuffer:
 			D3DXCreateVolumeTextureFromFileA(TheRenderManager->device, Filename, &TexV);
 			if (TexV == NULL) return false;
 			Texture = TexV;
 			break;
-		case TextureRecordType_CubeBuffer:
+		case CubeBuffer:
 			D3DXCreateCubeTextureFromFileA(TheRenderManager->device, Filename, &TexC);
 			if (TexC == NULL) return false;
 			Texture = TexC;
 			break;
-		case TextureRecordType_SourceBuffer:
+		case SourceBuffer:
 			Texture = TheShaderManager->SourceTexture;
 			break;
-		case TextureRecordType_RenderedBuffer:
+		case RenderedBuffer:
 			Texture = TheShaderManager->RenderedTexture;
 			break;
-		case TextureRecordType_DepthBuffer:
+		case DepthBuffer:
 			Texture = TheRenderManager->DepthTexture;
 			break;
-		case TextureRecordType_ShadowMapBufferNear:
+		case ShadowMapBufferNear:
 			Texture = TheShadowManager->ShadowMapTexture[ShadowManager::ShadowMapTypeEnum::MapNear];
 			break;
-		case TextureRecordType_ShadowMapBufferFar:
+		case ShadowMapBufferFar:
 			Texture = TheShadowManager->ShadowMapTexture[ShadowManager::ShadowMapTypeEnum::MapFar];
 			break;
-		case TextureRecordType_OrthoMapBuffer:
+		case OrthoMapBuffer:
 			Texture = TheShadowManager->ShadowMapTexture[ShadowManager::ShadowMapTypeEnum::MapOrtho];
 			break;
-		case TextureRecordType_ShadowCubeMapBuffer0:
+		case ShadowCubeMapBuffer0:
 			Texture = TheShadowManager->ShadowCubeMapTexture[0];
 			break;
-		case TextureRecordType_ShadowCubeMapBuffer1:
+		case ShadowCubeMapBuffer1:
 			Texture = TheShadowManager->ShadowCubeMapTexture[1];
 			break;
-		case TextureRecordType_ShadowCubeMapBuffer2:
+		case ShadowCubeMapBuffer2:
 			Texture = TheShadowManager->ShadowCubeMapTexture[2];
 			break;
-		case TextureRecordType_ShadowCubeMapBuffer3:
+		case ShadowCubeMapBuffer3:
 			Texture = TheShadowManager->ShadowCubeMapTexture[3];
 			break;
-		case TextureRecordType_WaterHeightMapBuffer:
+		case WaterHeightMapBuffer:
 			Texture = NULL;
 			break;
 	}	
@@ -97,7 +97,7 @@ TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, UInt32 Regi
 	std::string WordTextureFilterType[4];
 	std::string WordSRGBType[2];
 	std::string PathS;
-	TextureRecordType Type = TextureRecordType_None;
+	TextureRecord::TextureRecordType Type = TextureRecord::TextureRecordType::None;
 
 	WordSamplerType[0] = "";
 	WordSamplerType[D3DSAMP_ADDRESSU] = "ADDRESSU";
@@ -136,76 +136,76 @@ TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, UInt32 Regi
 			if (atoi(Register) == RegisterIndex) {
 				SamplerParser = strstr(Sampler, WordSourceBuffer);
 				if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-					Type = TextureRecordType_SourceBuffer;
+					Type = TextureRecord::TextureRecordType::SourceBuffer;
 					strcpy(Filename, WordSourceBuffer);
 				}
 				if (!Type) {
 					SamplerParser = strstr(Sampler, WordRenderedBuffer);
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecordType_RenderedBuffer;
+						Type = TextureRecord::TextureRecordType::RenderedBuffer;
 						strcpy(Filename, WordRenderedBuffer);
 					}
 				}
 				if (!Type) {
 					SamplerParser = strstr(Sampler, WordDepthBuffer);
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecordType_DepthBuffer;
+						Type = TextureRecord::TextureRecordType::DepthBuffer;
 						strcpy(Filename, WordDepthBuffer);
 					}
 				}
 				if (!Type) {
 					SamplerParser = strstr(Sampler, WordShadowMapBufferNear);
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecordType_ShadowMapBufferNear;
+						Type = TextureRecord::TextureRecordType::ShadowMapBufferNear;
 						strcpy(Filename, WordShadowMapBufferNear);
 					}
 				}
 				if (!Type) {
 					SamplerParser = strstr(Sampler, WordShadowMapBufferFar);
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecordType_ShadowMapBufferFar;
+						Type = TextureRecord::TextureRecordType::ShadowMapBufferFar;
 						strcpy(Filename, WordShadowMapBufferFar);
 					}
 				}
 				if (!Type) {
 					SamplerParser = strstr(Sampler, WordOrthoMapBuffer);
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecordType_OrthoMapBuffer;
+						Type = TextureRecord::TextureRecordType::OrthoMapBuffer;
 						strcpy(Filename, WordOrthoMapBuffer);
 					}
 				}
 				if (!Type) {
 					SamplerParser = strstr(Sampler, WordShadowCubeMapBuffer0);
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecordType_ShadowCubeMapBuffer0;
+						Type = TextureRecord::TextureRecordType::ShadowCubeMapBuffer0;
 						strcpy(Filename, WordShadowCubeMapBuffer0);
 					}
 				}
 				if (!Type) {
 					SamplerParser = strstr(Sampler, WordShadowCubeMapBuffer1);
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecordType_ShadowCubeMapBuffer1;
+						Type = TextureRecord::TextureRecordType::ShadowCubeMapBuffer1;
 						strcpy(Filename, WordShadowCubeMapBuffer1);
 					}
 				}
 				if (!Type) {
 					SamplerParser = strstr(Sampler, WordShadowCubeMapBuffer2);
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecordType_ShadowCubeMapBuffer2;
+						Type = TextureRecord::TextureRecordType::ShadowCubeMapBuffer2;
 						strcpy(Filename, WordShadowCubeMapBuffer2);
 					}
 				}
 				if (!Type) {
 					SamplerParser = strstr(Sampler, WordShadowCubeMapBuffer3);
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecordType_ShadowCubeMapBuffer3;
+						Type = TextureRecord::TextureRecordType::ShadowCubeMapBuffer3;
 						strcpy(Filename, WordShadowCubeMapBuffer3);
 					}
 				}
 				if (!Type) {
 					SamplerParser = strstr(Sampler, WordWaterHeightMapBuffer);
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecordType_WaterHeightMapBuffer;
+						Type = TextureRecord::TextureRecordType::WaterHeightMapBuffer;
 						strcpy(Filename, WordWaterHeightMapBuffer);
 					}
 				}
@@ -214,16 +214,16 @@ TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, UInt32 Regi
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
 						strncpy(SamplerType, Sampler + strlen(WordSampler) - 2, 1);
 						if (SamplerType[0] == '2')
-							Type = TextureRecordType_PlanarBuffer;
+							Type = TextureRecord::TextureRecordType::PlanarBuffer;
 						else if (SamplerType[0] == '3')
-							Type = TextureRecordType_VolumeBuffer;
+							Type = TextureRecord::TextureRecordType::VolumeBuffer;
 						else if (SamplerType[0] == 'C')
-							Type = TextureRecordType_CubeBuffer;
+							Type = TextureRecord::TextureRecordType::CubeBuffer;
 						memset(Filename, NULL, sizeof(Filename));
 						strncpy(Filename, SamplerParser + strlen(WordTextureName), strstr(SamplerParser, WordTextureNameDelimeter) - (SamplerParser + strlen(WordTextureName)));
 					}
 				}
-				if (Type >= TextureRecordType_SourceBuffer && Type <= TextureRecordType_Max)
+				if (Type >= TextureRecord::TextureRecordType::SourceBuffer && Type <= TextureRecord::TextureRecordType::WaterHeightMapBuffer)
 					strcpy(Path, Filename);
 				else {
 					strcpy(Path, "Data\\Textures\\");

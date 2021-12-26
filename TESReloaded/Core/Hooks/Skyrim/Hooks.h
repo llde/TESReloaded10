@@ -34,6 +34,9 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)RenderFirstPerson,		&RenderFirstPersonHook);
 	DetourAttach(&(PVOID&)SetupRenderingPass,		&SetupRenderingPassHook);
 	DetourAttach(&(PVOID&)LoadForm,					&LoadFormHook);
+	DetourAttach(&(PVOID&)SetCameraState,			&SetCameraStateHook);
+	DetourAttach(&(PVOID&)ManageButtonEvent,		&ManageButtonEventHook);
+	DetourAttach(&(PVOID&)SetCameraPosition,		&SetCameraPositionHook);
 	DetourTransactionCommit();
 
 	SafeWrite8(0x00CCBD66,	sizeof(NiD3DVertexShaderEx));
@@ -44,6 +47,7 @@ void AttachHooks() {
 	SafeWrite32(0x004EF7F5, sizeof(TESWeatherEx));
 
 	SafeWrite8(0x00698BBB, 0); // Stops to clear the depth buffer when rendering the 1st person node
+	SafeWrite8(0x0083F69B, 0); // Stops PlayerCharacter fading
 
 	SafeWriteJump(kRenderInterface,				(UInt32)RenderInterfaceHook);
 	SafeWriteJump(kRenderingGeometry,			(UInt32)RenderingGeometryHook);

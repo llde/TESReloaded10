@@ -34,6 +34,5 @@ public:
 	NiPoint3				FromOffset;
 	CameraManagerCommands*	CameraCommands;
 	bool					FirstPersonView;
+	bool					TogglePOV;
 };
-
-void CreateCameraModeHook();

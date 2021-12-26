@@ -42,6 +42,32 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)NewAnimSequenceMultiple,		&NewAnimSequenceMultipleHook);
 	if (TheSettingManager->SettingsMain.IKFoot.Enabled) DetourAttach(&(PVOID&)ApplyActorAnimData, &ApplyActorAnimDataHook);
 	DetourAttach(&(PVOID&)LoadAnimGroup,				&LoadAnimGroupHook);
+	DetourAttach(&(PVOID&)ToggleCamera,					&ToggleCameraHook);
+	DetourAttach(&(PVOID&)ToggleBody,					&ToggleBodyHook);
+	DetourAttach(&(PVOID&)SetDialogCamera,				&SetDialogCameraHook);
+	DetourAttach(&(PVOID&)SetAimingZoom,				&SetAimingZoomHook);
+	DetourAttach(&(PVOID&)UpdateCameraCollisions,		&UpdateCameraCollisionsHook);
+	if (TheSettingManager->SettingsMain.EquipmentMode.Enabled) {
+		DetourAttach(&(PVOID&)NewHighProcess,				&NewHighProcessHook);
+		DetourAttach(&(PVOID&)ManageItem,					&ManageItemHook);
+		DetourAttach(&(PVOID&)ProcessAction,				&ProcessActionHook);
+		DetourAttach(&(PVOID&)ProcessControlAttack,			&ProcessControlAttackHook);
+		DetourAttach(&(PVOID&)AttackHandling,				&AttackHandlingHook);
+		DetourAttach(&(PVOID&)GetEquippedWeaponData,		&GetEquippedWeaponDataHook);
+		DetourAttach(&(PVOID&)SetEquippedWeaponData,		&SetEquippedWeaponDataHook);
+		DetourAttach(&(PVOID&)EquipItem,					&EquipItemHook);
+		DetourAttach(&(PVOID&)UnequipItem,					&UnequipItemHook);
+		DetourAttach(&(PVOID&)EquipWeapon,					&EquipWeaponHook);
+		DetourAttach(&(PVOID&)UnequipWeapon,				&UnequipWeaponHook);
+		DetourAttach(&(PVOID&)EquipShield,					&EquipShieldHook);
+		if (TheSettingManager->SettingsMain.EquipmentMode.TorchKey != 255) {
+			DetourAttach(&(PVOID&)EquipLight,				&EquipLightHook);
+			DetourAttach(&(PVOID&)UnequipLight,				&UnequipLightHook);
+			DetourAttach(&(PVOID&)GetEquippedLightData,		&GetEquippedLightDataHook);
+		}
+		DetourAttach(&(PVOID&)HideEquipment,				&HideEquipmentHook);
+		DetourAttach(&(PVOID&)SaveGame,						&SaveGameHook);
+	}
 	DetourTransactionCommit();
 	
 	SafeWrite8(0x00801BCB,	sizeof(NiD3DVertexShaderEx));
@@ -166,6 +192,60 @@ void AttachHooks() {
 	if (TheSettingManager->SettingsMain.Main.MemoryTextureManagement) SafeWriteCall(kCreateTextureFromFileInMemory, (UInt32)CreateTextureFromFileInMemory);
 
 	if (TheSettingManager->SettingsMain.GrassMode.Enabled) SafeWriteJump(kGrassHook, (UInt32)GrassHook);
+
+
+	SafeWriteJump(kUpdateCameraHook, (UInt32)UpdateCameraHook);
+	SafeWriteJump(kSwitchCameraHook, (UInt32)SwitchCameraHook);
+	SafeWriteJump(kSwitchCameraPOVHook, (UInt32)SwitchCameraPOVHook);
+	SafeWriteJump(kHeadTrackingHook, (UInt32)HeadTrackingHook);
+	SafeWriteJump(kSpineTrackingHook, (UInt32)SpineTrackingHook);
+	SafeWriteJump(kSetReticleOffsetHook, (UInt32)SetReticleOffsetHook);
+	SafeWriteJump(0x0066B769, 0x0066B795); // Does not lower the player Z axis value (fixes the bug of the camera on feet after resurrection)
+	SafeWriteJump(0x00666704, 0x0066672D); // Enables the zoom with the bow
+
+	SafeWrite32(0x00406775, sizeof(PlayerCharacterEx));
+	SafeWrite32(0x0046451E, sizeof(PlayerCharacterEx));
+
+	UInt32 HighProcessExSize = sizeof(HighProcessEx);
+	SafeWrite32(0x005FA47C, HighProcessExSize);
+	SafeWrite32(0x00607582, HighProcessExSize);
+	SafeWrite32(0x0060791A, HighProcessExSize);
+	SafeWrite32(0x0060CC36, HighProcessExSize);
+	SafeWrite32(0x00659A9C, HighProcessExSize);
+	SafeWrite32(0x00659D3D, HighProcessExSize);
+	SafeWrite32(0x00664B09, HighProcessExSize);
+	SafeWrite32(0x0066A9AA, HighProcessExSize);
+	SafeWrite32(0x0068336E, HighProcessExSize);
+	SafeWrite32(0x0069F2F2, HighProcessExSize);
+	SafeWrite32(0x0069F3D4, HighProcessExSize);
+
+	SafeWriteJump(kPrnHook, (UInt32)PrnHook);
+	SafeWriteJump(kSetWeaponRotationPositionHook, (UInt32)SetWeaponRotationPositionHook);
+	SafeWriteJump(kMenuMouseButtonHook, (UInt32)MenuMouseButtonHook);
+	SafeWriteJump(kEquipItemWornHook, (UInt32)EquipItemWornHook);
+	if (TheSettingManager->SettingsMain.EquipmentMode.TorchKey != 255) {
+		SafeWriteJump(0x004E1DA1, 0x004E1DAF); // Do not play the torch held LP sound on equipping light
+		SafeWriteJump(kUnequipTorchHook, (UInt32)UnequipTorchHook);
+	}
+
+	if (TheSettingManager->SettingsMain.EquipmentMode.Enabled && TheSettingManager->SettingsMain.MountedCombat.Enabled) {
+		SafeWriteCall(kPlayerReadyWeaponHook, (UInt32)ReadyWeaponHook);
+		SafeWriteCall(kActorReadyWeaponHook, (UInt32)ReadyWeaponHook);
+		SafeWriteJump(kActorReadyWeaponSittingHook, (UInt32)ActorReadyWeaponSittingHook);
+		SafeWriteJump(kPlayerAttackHook, (UInt32)PlayerAttackHook);
+		SafeWriteJump(kHittingMountedCreatureHook, (UInt32)HittingMountedCreatureHook);
+		SafeWriteJump(kHideWeaponHook, (UInt32)HideWeaponHook);
+		SafeWriteJump(kBowEquipHook, (UInt32)BowEquipHook);
+		SafeWriteJump(kBowUnequipHook, (UInt32)BowUnequipHook);
+		SafeWriteJump(kAnimControllerHook, (UInt32)AnimControllerHook);
+		SafeWriteJump(kHorsePaletteHook, (UInt32)HorsePaletteHook);
+		SafeWriteJump(0x005FB089, 0x005FB0AD); // Enables the possibility to equip the weapon when sitting/mounting
+		SafeWriteJump(0x005F2F97, 0x005F2FE8); // Enables the possibility to unequip the weapon when sitting/mounting
+
+		SafeWrite16(0x005F4E55, 0xC031); // Enables blockhit animation when mounting
+		SafeWrite16(0x005F4F45, 0xC031); // Enables recoil animation when mounting
+		SafeWrite16(0x005F4FEF, 0xC031); // Enables stagger animation when mounting
+	}
 
 }
 
