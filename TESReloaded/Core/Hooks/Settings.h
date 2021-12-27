@@ -1,5 +1,4 @@
 #pragma once
-#include "WindowedMode.h"
 
 static bool (__thiscall* ReadSetting)(INISettingCollection*, GameSetting*) = (bool (__thiscall*)(INISettingCollection*, GameSetting*))Hooks::ReadSetting;
 static bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, GameSetting* Setting) {
@@ -9,7 +8,7 @@ static bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, G
 	if (!strcmp(Setting->Name, "iLocation X:Display") || !strcmp(Setting->Name, "iLocation Y:Display"))
 		Setting->iValue = 0;
 	else if (!strcmp(Setting->Name, "bFull Screen:Display"))
-		SetWindowedMode(Setting->iValue);
+		TheSettingManager->SetWindowedMode(Setting->iValue);
 	else if (!strcmp(Setting->Name, "SIntroSequence:General") && TheSettingManager->SettingsMain.Main.ReplaceIntro)
 		Setting->pValue = (char*)IntroMovie;
 	else if (!strcmp(Setting->Name, "SMainMenuMovie:General") && TheSettingManager->SettingsMain.Main.ReplaceIntro)

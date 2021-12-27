@@ -218,3 +218,47 @@ static const UInt32 kBowUnequipHook = 0x005F34AB;
 static const UInt32 kBowUnequipReturn = 0x005F34B0;
 static const UInt32 kHideWeaponHook = 0x00654DC8;
 static const UInt32 kHideWeaponReturn = 0x00654E5F;
+
+
+#define kMessageBoxServeSentenceText 0x00B38B30
+#define kMessageBoxButtonYes 0x00B38CF8
+#define kMessageBoxButtonNo 0x00B38D00
+#define SleepingState 9
+
+
+static const UInt32 kJumpPressedHook = 0x00672A79;
+static const UInt32 kJumpPressedReturn1 = 0x00672A80;
+static const UInt32 kJumpPressedReturn2 = 0x00672B94;
+static const UInt32 kDoubleTapHook = 0x006729DA;
+static const UInt32 kDoubleTapReturn = 0x006729EA;
+
+static UInt8 DoubleTapStep = 0;
+static UInt8 Direction[2] = { 0, 0 };
+static UInt32 IsDoubleTapped = 0;
+static float DoubleTapTime = -1.0f;
+
+static const UInt32 kGetControlState = 0x00403520;
+static const UInt32 kGetCharacterController = 0x0065A2C0;
+
+
+#define kFBValue [esp + 0x0C]
+#define kRLValue [esp + 0x08]
+static const UInt32 kUpdateForwardFlyCamHook = 0x0066446C;
+static const UInt32 kUpdateForwardFlyCamReturn = 0x0066447A;
+static const UInt32 kUpdateBackwardFlyCamHook = 0x00664489;
+static const UInt32 kUpdateBackwardFlyCamReturn = 0x00664497;
+static const UInt32 kUpdateRightFlyCamHook = 0x006644A6;
+static const UInt32 kUpdateRightFlyCamReturn = 0x006644B4;
+static const UInt32 kUpdateLeftFlyCamHook = 0x006644C3;
+static const UInt32 kUpdateLeftFlyCamReturn = 0x006644D1;
+
+
+static const UInt32 kCreateDeviceHook = 0x0076A542;
+static const UInt32 kCreateDeviceReturn = 0x0076A547;
+
+
+static char* TitleMenu = "Oblivion Reloaded - Settings";
+
+
+#define kRectStyle 0x0040E7C0
+#define kWindowStyle 0x0040E805

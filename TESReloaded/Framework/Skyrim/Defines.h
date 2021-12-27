@@ -47,3 +47,20 @@ static const UInt32 kHitEventHook = 0x006E4837;
 static const UInt32 kHitEventReturn = 0x006E483E;
 
 #define process processManager->process
+
+
+#define kMessageBoxServeSentenceText 0x01B19068
+#define kMessageBoxButtonYes 0x01B17FA0
+#define kMessageBoxButtonNo 0x01B17FAC
+#define kShowSleepWaitMenu 0x00887B20
+#define SleepingState 7
+
+
+static const UInt32 kCreateDeviceHook = 0x00CD8B6F;
+static const UInt32 kCreateDeviceReturn = 0x00CD8B74;
+
+
+static char* TitleMenu = "Skyrim Reloaded - Settings";
+
+#define kRectStyle 0x0069D832
+#define kWindowStyle 0x0069D877

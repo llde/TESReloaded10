@@ -121,6 +121,8 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\ShaderIO.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Sleeping.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h" />

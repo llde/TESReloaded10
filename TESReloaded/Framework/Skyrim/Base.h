@@ -35,6 +35,9 @@ public:
 	static const UInt32 SetCameraState				= 0x006533D0;
 	static const UInt32 ManageButtonEvent			= 0x00840BE0;
 	static const UInt32 SetCameraPosition			= 0x0083F690;
+	static const UInt32 SetFurnitureCameraState		= 0x0083D6E0;
+	static const UInt32 ProcessSleepWaitMenu		= 0x00887F90;
+	static const UInt32 ServeSentence				= 0x0074B7E0;
 };
 
 static CommandTable	commandTable;
@@ -79,6 +82,17 @@ public:
 	bool IsMatching(char* Versioning) {
 
 		return Versioning[1] == '1';
+
+	}
+	
+	void SetWindowedMode(UInt8 Fullscreen) {
+
+		if (!Fullscreen) {
+			SafeWrite32(0x012CF5F8, 0);
+			SafeWrite32(0x012CF604, 0);
+			SafeWrite32(kRectStyle, WS_POPUP);
+			SafeWrite32(kWindowStyle, WS_POPUP | WS_VISIBLE);
+		}
 
 	}
 

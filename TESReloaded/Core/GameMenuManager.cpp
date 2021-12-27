@@ -1,9 +1,3 @@
-#if defined(OBLIVION)
-static char* TitleMenu = "Oblivion Reloaded - Settings";
-#elif defined(SKYRIM)
-static char* TitleMenu = "Skyrim Reloaded - Settings";
-#endif
-
 #define TextColorNormal D3DCOLOR_XRGB(MenuSettings->TextColorNormal[0], MenuSettings->TextColorNormal[1], MenuSettings->TextColorNormal[2])
 #define TextShadowColorNormal D3DCOLOR_XRGB(MenuSettings->TextShadowColorNormal[0], MenuSettings->TextShadowColorNormal[1], MenuSettings->TextShadowColorNormal[2])
 #define TextColorSelected D3DCOLOR_XRGB(MenuSettings->TextColorSelected[0], MenuSettings->TextColorSelected[1], MenuSettings->TextColorSelected[2])

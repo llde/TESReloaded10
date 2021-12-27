@@ -1,11 +1,8 @@
 #define WaitForDebugger 0
 #define HookDevice 0
 
-#include "SleepingMode.h"
-#include "Dodge.h"
-#include "FlyCam.h"
-#include "D3D9Hook.h"
 #include "Hooks/Oblivion/Hooks.h"
+#include "D3D9/Hook.h"
 
 extern "C" {
 
@@ -37,17 +34,9 @@ extern "C" {
 			SettingManager::Initialize();
 			if (TheSettingManager->LoadSettings(true)) {
 				AttachHooks();
-				CreateSleepingModeHook();
-				CreateDodgeHook();
-				CreateFlyCamHook();
+			}
+			else {
 
-				SafeWriteJump(0x0049849A, 0x004984A0); // Skips antialiasing deactivation if HDR is enabled on the D3DDevice
-				SafeWriteJump(0x004984BD, 0x004984CD); // Skips antialiasing deactivation if AllowScreenshot is enabled
-				SafeWriteJump(0x005DEE60, 0x005DEE68); // Skips antialiasing deactivation if HDR is enabled on loading the video menu
-				SafeWriteJump(0x005DF69E, 0x005DF755); // Skips HDR deactivation changing antialising (video menu)
-				SafeWriteJump(0x00497D5A, 0x00497D63); // Unlocks antialising bar if HDR is enabled (video menu)
-				SafeWriteJump(0x005DF8E9, 0x005DF983); // Skips antialising deactivation changing HDR (video menu)
-				SafeWriteJump(0x006738B1, 0x00673935); // Cancels the fPlayerDeathReloadTime
 			}
 		}
 		else {

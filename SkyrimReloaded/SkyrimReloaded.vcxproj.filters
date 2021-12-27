@@ -110,6 +110,12 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Camera.h">
       <Filter>Core\Hooks\Skyrim</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Sleeping.h">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">

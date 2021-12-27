@@ -62,6 +62,12 @@ public:
 	static const UInt32 GetEquippedLightData		= 0x0064B270;
 	static const UInt32 HideEquipment				= 0x005E7230;
 	static const UInt32 SaveGame					= 0x00485730;
+	static const UInt32 ServeSentence				= 0x00670700;
+	static const UInt32 RemoveWornItems				= 0x0064BAC0;
+	static const UInt32 ProcessSleepWaitMenu		= 0x005D7090;
+	static const UInt32 CloseSleepWaitMenu			= 0x005D6A10;
+	static const UInt32 ShowSleepWaitMenu			= 0x0057B420;
+	static const UInt32 UpdateFlyCam				= 0x006643A0;
 };
 
 class CommandManagerBase {
@@ -95,6 +101,15 @@ public:
 		WeatherEx->textureLayers[0].ddsPath.Set(UpperLayer);
 		WeatherEx->textureLayers[1].ddsPath.Set(LowerLayer);
 		memcpy(WeatherEx->hdrInfo, HDR, 0x38);
+
+	}
+
+	void SetWindowedMode(UInt8 Fullscreen) {
+
+		if (!Fullscreen) {
+			SafeWrite32(kRectStyle, WS_POPUP);
+			SafeWrite32(kWindowStyle, WS_POPUP | WS_VISIBLE);
+		}
 
 	}
 

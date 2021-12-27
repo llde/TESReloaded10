@@ -68,6 +68,16 @@ void AttachHooks() {
 		DetourAttach(&(PVOID&)HideEquipment,				&HideEquipmentHook);
 		DetourAttach(&(PVOID&)SaveGame,						&SaveGameHook);
 	}
+	if (TheSettingManager->SettingsMain.SleepingMode.Enabled) {
+		DetourAttach(&(PVOID&)RemoveWornItems,				&RemoveWornItemsHook);
+		DetourAttach(&(PVOID&)ServeSentence,				&ServeSentenceHook);
+		DetourAttach(&(PVOID&)ProcessSleepWaitMenu,			&ProcessSleepWaitMenuHook);
+		DetourAttach(&(PVOID&)CloseSleepWaitMenu,			&CloseSleepWaitMenuHook);
+		DetourAttach(&(PVOID&)ShowSleepWaitMenu,			&ShowSleepWaitMenuHook);
+	}
+	if (TheSettingManager->SettingsMain.FlyCam.Enabled) {
+		DetourAttach(&(PVOID&)UpdateFlyCam,					&UpdateFlyCamHook);
+	}
 	DetourTransactionCommit();
 	
 	SafeWrite8(0x00801BCB,	sizeof(NiD3DVertexShaderEx));
@@ -246,6 +256,37 @@ void AttachHooks() {
 		SafeWrite16(0x005F4F45, 0xC031); // Enables recoil animation when mounting
 		SafeWrite16(0x005F4FEF, 0xC031); // Enables stagger animation when mounting
 	}
+
+	if (TheSettingManager->SettingsMain.SleepingMode.Enabled) {
+		SafeWriteJump(0x004AEA1C, 0x004AEAEE); // Enables the Player to get into the bed
+		SafeWriteJump(0x004AE961, 0x004AEAEE); // Enables the Player to get into the bed when in prison
+		SafeWriteJump(0x00672BFF, 0x00672C18); // Enables the rest key when in prison
+	}
+
+	if (TheSettingManager->SettingsMain.Dodge.Enabled) {
+		SafeWrite8(0x00672A17, TheSettingManager->SettingsMain.Dodge.AcrobaticsLevel);
+
+		if (TheSettingManager->SettingsMain.Dodge.DoubleTap) {
+			SafeWriteJump(0x00672941, 0x00672954);
+			SafeWriteJump(kJumpPressedHook, (UInt32)JumpPressedHook);
+			SafeWriteJump(kDoubleTapHook, (UInt32)DoubleTapHook);
+		}
+	}
+
+	if (TheSettingManager->SettingsMain.FlyCam.Enabled) {
+		SafeWriteJump(kUpdateForwardFlyCamHook, (UInt32)UpdateForwardFlyCamHook);
+		SafeWriteJump(kUpdateBackwardFlyCamHook, (UInt32)UpdateBackwardFlyCamHook);
+		SafeWriteJump(kUpdateRightFlyCamHook, (UInt32)UpdateRightFlyCamHook);
+		SafeWriteJump(kUpdateLeftFlyCamHook, (UInt32)UpdateLeftFlyCamHook);
+	}
+
+	SafeWriteJump(0x0049849A, 0x004984A0); // Skips antialiasing deactivation if HDR is enabled on the D3DDevice
+	SafeWriteJump(0x004984BD, 0x004984CD); // Skips antialiasing deactivation if AllowScreenshot is enabled
+	SafeWriteJump(0x005DEE60, 0x005DEE68); // Skips antialiasing deactivation if HDR is enabled on loading the video menu
+	SafeWriteJump(0x005DF69E, 0x005DF755); // Skips HDR deactivation changing antialising (video menu)
+	SafeWriteJump(0x00497D5A, 0x00497D63); // Unlocks antialising bar if HDR is enabled (video menu)
+	SafeWriteJump(0x005DF8E9, 0x005DF983); // Skips antialising deactivation changing HDR (video menu)
+	SafeWriteJump(0x006738B1, 0x00673935); // Cancels the fPlayerDeathReloadTime
 
 }
 

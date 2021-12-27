@@ -44,16 +44,7 @@
     <ClInclude Include="..\TESReloaded\Core\CommandManager.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\D3D9Hook.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Dodge.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\EquipmentManager.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\FlyCam.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\GameEventManager.h">
@@ -80,13 +71,7 @@
     <ClInclude Include="..\TESReloaded\Core\ShadowManager.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\SleepingMode.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\TextureManager.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\WindowedMode.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -158,7 +143,7 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\D3D9\D3D9Device.h">
+    <ClInclude Include="..\TESReloaded\Core\D3D9\Device.h">
       <Filter>Core\D3D9</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h">
@@ -206,6 +191,21 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Mounted.h">
       <Filter>Core\Hooks\Oblivion</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Sleeping.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Dodge.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\FlyCam.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\D3D9\Hook.h">
+      <Filter>Core\D3D9</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TESReloaded\Core\CameraManager.cpp">
@@ -214,16 +214,7 @@
     <ClCompile Include="..\TESReloaded\Core\CommandManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\D3D9Hook.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\Dodge.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\EquipmentManager.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\FlyCam.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\GameEventManager.cpp">
@@ -247,13 +238,7 @@
     <ClCompile Include="..\TESReloaded\Core\ShadowManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\SleepingMode.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\TextureManager.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\WindowedMode.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
@@ -283,7 +268,7 @@
     <ClCompile Include="..\TESReloaded\Framework\Common\Managers.cpp">
       <Filter>Framework\Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\D3D9\D3D9Device.cpp">
+    <ClCompile Include="..\TESReloaded\Core\D3D9\Device.cpp">
       <Filter>Core\D3D9</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\PluginVersion.cpp">
@@ -291,6 +276,9 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\SettingManager.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\D3D9\Hook.cpp">
+      <Filter>Core\D3D9</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

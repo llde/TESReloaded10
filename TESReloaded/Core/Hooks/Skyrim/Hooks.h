@@ -37,6 +37,12 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)SetCameraState,			&SetCameraStateHook);
 	DetourAttach(&(PVOID&)ManageButtonEvent,		&ManageButtonEventHook);
 	DetourAttach(&(PVOID&)SetCameraPosition,		&SetCameraPositionHook);
+	if (TheSettingManager->SettingsMain.SleepingMode.Enabled) {
+		DetourAttach(&(PVOID&)SetFurnitureCameraState,	&SetFurnitureCameraStateHook);
+		DetourAttach(&(PVOID&)ProcessSleepWaitMenu,		&ProcessSleepWaitMenuHook);
+		DetourAttach(&(PVOID&)ServeSentence,			&ServeSentenceHook);
+		DetourAttach(&(PVOID&)ShowSleepWaitMenu,		&ShowSleepWaitMenuHook);
+	}
 	DetourTransactionCommit();
 
 	SafeWrite8(0x00CCBD66,	sizeof(NiD3DVertexShaderEx));
@@ -60,5 +66,9 @@ void AttachHooks() {
 		SafeWriteJump(kSetShadowDistanceShader, (UInt32)SetShadowDistanceShaderHook);
 	}
 	
+	if (TheSettingManager->SettingsMain.SleepingMode.Enabled) {
+		SafeWriteJump(0x0049A351, 0x0049A367); // Enables the Player to get into the bed
+		SafeWriteJump(0x0049A30F, 0x0049A367); // Enables the Player to get into the bed when in prison
+	}
 
 }

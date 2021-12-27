@@ -1,4 +1,4 @@
-#include "D3D9Device.h"
+#include "Device.h"
 
 TESRDirect3DDevice9::TESRDirect3DDevice9(IDirect3D9Ex* D3DInterface, IDirect3DDevice9Ex* D3DDevice) : IDirect3DDevice9Ex() {
 	this->D3DInterface = D3DInterface;
