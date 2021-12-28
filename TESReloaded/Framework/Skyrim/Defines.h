@@ -64,3 +64,12 @@ static char* TitleMenu = "Skyrim Reloaded - Settings";
 
 #define kRectStyle 0x0069D832
 #define kWindowStyle 0x0069D877
+
+
+#define kCameraWorldTranslate 0x01B913FC
+
+#define sunGlare general.sunGlare
+#define windSpeed general.windSpeed
+#define weatherType general.weatherType
+#define TerrainShaders ""
+#define BloodShaders ""

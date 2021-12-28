@@ -1,6 +1,5 @@
 #define DEBUGSH 0
 
-#if defined(OBLIVION)
 void ShadowManager::Initialize() {
 	
 	Logger::Log("Starting the shadows manager...");
@@ -639,11 +638,3 @@ void CreateEditorShadowsHook() {
 	SafeWriteJump(kEditorCastShadowFlagHook, (UInt32)EditorCastShadowFlagHook);
 
 }
-#elif defined(SKYRIM)
-ShadowManager::ShadowManager() {
-
-	Logger::Log("Starting the shadows manager...");
-	TheShadowManager = this;
-
-}
-#endif

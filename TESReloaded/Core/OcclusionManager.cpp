@@ -30,7 +30,6 @@ void OcclusionManager::Initialize() {
 
 }
 
-#if defined(OBLIVION)
 bool OcclusionManager::InFrustum(NiNode* Node) {
 	
 	NiCullingProcess* Process = WorldSceneGraph->cullingProcess;
@@ -407,4 +406,3 @@ void OcclusionManager::PerformOcclusionCulling() {
 	if (TheKeyboardManager->OnKeyDown(26)) D3DXSaveSurfaceToFileA("C:\\Archivio\\Downloads\\occlusionmap.jpg", D3DXIFF_JPG, OcclusionMapSurface, NULL, NULL);
 #endif
 }
-#endif

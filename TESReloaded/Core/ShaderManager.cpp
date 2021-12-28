@@ -1,16 +1,4 @@
-#include <fstream>
 #define FrameFVF D3DFVF_XYZ | D3DFVF_TEX1
-
-#if defined(OBLIVION)
-#define TerrainShaders "SLS2001.vso SLS2001.pso SLS2062.vso SLS2066.pso SLS2063.vso SLS2067.pso SLS2064.vso SLS2068.pso"
-#define BloodShaders "GDECALS.vso GDECAL.pso SLS2040.vso SLS2046.pso"
-#elif defined(SKYRIM)
-#define sunGlare general.sunGlare
-#define windSpeed general.windSpeed
-#define weatherType general.weatherType
-#define TerrainShaders ""
-#define BloodShaders ""
-#endif
 
 ShaderProgram::ShaderProgram() {
 

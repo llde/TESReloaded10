@@ -2,6 +2,8 @@
 #define KeyboardPreviousState Global->GetInputKeyboard()->PreviousKeyState
 #define MouseCurrentState Global->GetInputMouse()->CurrentMouseState.rgbButtons
 #define MousePreviousState Global->GetInputMouse()->PreviousMouseState.rgbButtons
+#define KeyboardControls Global->GetInputKeyboard()->KeyboardInputControls
+#define MouseControls Global->GetInputMouse()->MouseInputControls
 
 void KeyboardManager::Initialize() {
 
@@ -55,10 +57,6 @@ bool KeyboardManager::OnMouseUp(UInt8 ButtonIndex) {
 
 }
 
-#if defined(OBLIVION)
-#define KeyboardControls Global->GetInputKeyboard()->KeyboardInputControls
-#define MouseControls Global->GetInputMouse()->MouseInputControls
-
 bool KeyboardManager::OnControlDown(UInt16 ControlID) {
 
 	return OnKeyDown(KeyboardControls[ControlID]) + OnMouseDown(MouseControls[ControlID]);
@@ -92,9 +90,3 @@ void KeyboardManager::SetControlState(UInt8 ControlID, UInt8 CurrentState, UInt8
 	}
 
 }
-#elif defined(SKYRIM)
-bool KeyboardManager::OnControlDown(UInt16 ControlID) { return false; }
-bool KeyboardManager::OnControlPressed(UInt16 ControlID) { return false; }
-bool KeyboardManager::OnControlUp(UInt16 ControlID) { return false; }
-void KeyboardManager::SetControlState(UInt8 ControlID, UInt8 CurrentState, UInt8 PreviousState) {}
-#endif

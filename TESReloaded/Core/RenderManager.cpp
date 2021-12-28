@@ -1,9 +1,3 @@
-#include "RenderManager.h"
-#if defined(OBLIVION)
-#define kCameraWorldTranslate 0x00B3F92C
-#elif defined(SKYRIM)
-#define kCameraWorldTranslate 0x01B913FC
-#endif
 #define RESZ_CODE 0x7FA05000
 
 void RenderManager::CreateD3DMatrix(D3DMATRIX* Matrix, NiTransform* Transform) {
@@ -195,8 +189,8 @@ void RenderManager::Initialize() {
 	D3DDISPLAYMODE currentDisplayMode;
 
 	Logger::Log("Extending the render manager...");
-	CameraForward.x = CameraForward.y = CameraForward.z = CameraForward.w = 0.0f;
-	CameraPosition.x = CameraPosition.y = CameraPosition.z = CameraPosition.w = 0.0f;
+	CameraForward = { 0.0f, 0.0f, 0.0f, 0.0f };
+	CameraPosition = { 0.0f, 0.0f, 0.0f, 0.0f };
 	BackBuffer = NULL;
 	DepthSurface = NULL;
 	DepthTexture = NULL;

@@ -1,11 +1,5 @@
 #pragma once
 
-#if defined(OBLIVION)
-#define kDetectorWindowNode 0x00B42CF4
-#elif defined(SKYRIM)
-#define kDetectorWindowNode 0x00000000
-#endif
-
 class NiD3DVertexShaderEx : public NiD3DVertexShader {
 public:
 	void					SetupShader(IDirect3DVertexShader9* CurrentVertexHandle);

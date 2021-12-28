@@ -262,3 +262,11 @@ static char* TitleMenu = "Oblivion Reloaded - Settings";
 
 #define kRectStyle 0x0040E7C0
 #define kWindowStyle 0x0040E805
+
+
+#define kCameraWorldTranslate 0x00B3F92C
+
+#define kDetectorWindowNode 0x00B42CF4
+
+#define TerrainShaders "SLS2001.vso SLS2001.pso SLS2062.vso SLS2066.pso SLS2063.vso SLS2067.pso SLS2064.vso SLS2068.pso"
+#define BloodShaders "GDECALS.vso GDECAL.pso SLS2040.vso SLS2046.pso"
