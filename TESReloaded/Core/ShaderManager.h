@@ -243,6 +243,30 @@ public:
 	IDirect3DPixelShader9*	ShaderHandle;
 };
 
+class NiD3DVertexShaderEx : public NiD3DVertexShader {
+public:
+	void					SetupShader(IDirect3DVertexShader9* CurrentVertexHandle);
+	void					DisposeShader();
+
+	ShaderRecordVertex*		ShaderProg;
+	ShaderRecordVertex*		ShaderProgE;
+	ShaderRecordVertex*		ShaderProgI;
+	IDirect3DVertexShader9*	ShaderHandleBackup;
+	char					ShaderName[40];
+};
+
+class NiD3DPixelShaderEx : public NiD3DPixelShader {
+public:
+	void					SetupShader(IDirect3DPixelShader9* CurrentPixelHandle);
+	void					DisposeShader();
+
+	ShaderRecordPixel*		ShaderProg;
+	ShaderRecordPixel*		ShaderProgE;
+	ShaderRecordPixel*		ShaderProgI;
+	IDirect3DPixelShader9*	ShaderHandleBackup;
+	char					ShaderName[40];
+};
+
 class EffectRecord : public ShaderProgram {
 public:
 	EffectRecord();
@@ -262,7 +286,7 @@ public:
 typedef std::map<std::string, EffectRecord*> ExtraEffectsList;
 typedef std::map<std::string, D3DXVECTOR4> CustomConstants;
 
-__declspec(align(16)) class ShaderManager { // Never disposed
+__declspec(align(16)) class ShaderManager : public ShaderManagerBase { // Never disposed
 public:
 	static void Initialize();
 
@@ -272,9 +296,9 @@ public:
 	void					CreateEffects();
 	void					InitializeConstants();
 	void					UpdateConstants();
-	void					CreateShader(const char *Name);
-	void					LoadShader(NiD3DVertexShader* Shader);
-	void					LoadShader(NiD3DPixelShader* Shader);
+	void					CreateShader(const char* Name);
+	void					LoadShader(NiD3DVertexShader* VertexShader);
+	void					LoadShader(NiD3DPixelShader* PixelShader);
 	void					DisposeShader(const char* Name);
 	void					CreateEffect(EffectRecordType EffectType);
 	void					DisposeEffect(EffectRecordType EffectType);

@@ -115,13 +115,25 @@ public:
 
 };
 
-class ShadowManagerBase {
+class RenderManagerBase : public NiDX9Renderer {
 public:
 
-	enum ShadowMapTypeEnum {
-		MapNear = 0,
-		MapFar = 1,
-		MapOrtho = 2,
-	};
+	IDirect3DSurface9* CreateHDRRenderTarget() {
+		
+		Ni2DBuffer* Buffer = (Ni2DBuffer*)MemoryAlloc(0x14); *(void**)Buffer = (void*)0x00A8098C; Buffer->m_uiRefCount = 1;
+		NiDX92DBufferData* BufferData = (NiDX92DBufferData*)MemoryAlloc(0x10); *(void**)BufferData = (void*)0x00A89818; BufferData->m_uiRefCount = 1; BufferData->ParentData = Buffer;
+		Buffer->width = width;
+		Buffer->height = height;
+		Buffer->data = BufferData;
+		device->CreateRenderTarget(width, height, D3DFMT_A16B16G16R16F, (D3DMULTISAMPLE_TYPE)(*SettingMultiSample), 0, false, &BufferData->Surface, NULL);
+		defaultRTGroup->RenderTargets[1] = Buffer;
+		return defaultRTGroup->RenderTargets[0]->data->Surface;
+
+	}
+
+};
+
+class ShaderManagerBase {
+public:
 
 };

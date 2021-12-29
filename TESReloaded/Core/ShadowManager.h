@@ -1,9 +1,15 @@
 #pragma once
 #define CubeMapsMax 4
 
-class ShadowManager : public ShadowManagerBase { // Never disposed
+class ShadowManager { // Never disposed
 public:
 	static void Initialize();
+	
+	enum ShadowMapTypeEnum {
+		MapNear = 0,
+		MapFar = 1,
+		MapOrtho = 2,
+	};
 
 	enum PlaneEnum {
 		PlaneNear	= 0,

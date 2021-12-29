@@ -1,30 +1,6 @@
 #pragma once
 
-class NiD3DVertexShaderEx : public NiD3DVertexShader {
-public:
-	void					SetupShader(IDirect3DVertexShader9* CurrentVertexHandle);
-	void					DisposeShader();
-
-	ShaderRecordVertex*		ShaderProg;
-	ShaderRecordVertex*		ShaderProgE;
-	ShaderRecordVertex*		ShaderProgI;
-	IDirect3DVertexShader9*	ShaderHandleBackup;
-	char					ShaderName[40];
-};
-
-class NiD3DPixelShaderEx : public NiD3DPixelShader {
-public:
-	void					SetupShader(IDirect3DPixelShader9* CurrentPixelHandle);
-	void					DisposeShader();
-
-	ShaderRecordPixel*		ShaderProg;
-	ShaderRecordPixel*		ShaderProgE;
-	ShaderRecordPixel*		ShaderProgI;
-	IDirect3DPixelShader9*	ShaderHandleBackup;
-	char					ShaderName[40];
-};
-
-class RenderManager: public NiDX9Renderer {
+class RenderManager: public RenderManagerBase {
 public:
 	void				Initialize();
 	void				ResolveDepthBuffer();

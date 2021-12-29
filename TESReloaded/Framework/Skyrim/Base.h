@@ -98,13 +98,27 @@ public:
 
 };
 
-class ShadowManagerBase {
+class RenderManagerBase {
+public:
+	
+	IDirect3DSurface9* CreateHDRRenderTarget() {
+		
+		return NULL;
+
+	}
+
+};
+
+class ShaderManagerBase {
 public:
 
-	enum ShadowMapTypeEnum {
-		MapNear = 0,
-		MapFar = 1,
-		MapOrtho = 2,
-	};
+	void CreateShader(const char* Name) {
+
+		if (!strcmp(Name, "Water")) {
+			for each (NiD3DVertexShader * VS in WaterVertexShaders) LoadShader(VS);
+			for each (NiD3DPixelShader * PS in WaterPixelShaders) LoadShader(PS);
+		}
+
+	}
 
 };
