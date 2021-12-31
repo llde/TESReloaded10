@@ -24,6 +24,8 @@
 #include "../Common/Base/SafeWrite.h"
 #include "../Common/Base/PluginVersion.h"
 #include "Plugin.h"
+#include "GameNi.h"
+#include "GameHavok.h"
 #include "Game.h"
 #include "Defines.h"
 #include "Base.h"

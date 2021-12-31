@@ -270,3 +270,16 @@ static char* TitleMenu = "Oblivion Reloaded - Settings";
 
 #define TerrainShaders "SLS2001.vso SLS2001.pso SLS2062.vso SLS2066.pso SLS2063.vso SLS2067.pso SLS2064.vso SLS2068.pso"
 #define BloodShaders "GDECALS.vso GDECAL.pso SLS2040.vso SLS2046.pso"
+
+
+static const void*	VFTNiNode				= (void*)0x00A7E38C;
+static const void*	VFTBSFadeNode			= (void*)0x00A3F944;
+static const void*	VFTBSFaceGenNiNode		= (void*)0x00A64F5C;
+static const void*	VFTBSTreeNode			= (void*)0x00A65854;
+static const void*	VFTNiTriShape			= (void*)0x00A7ED5C;
+static const void*	VFTNiTriStrips			= (void*)0x00A7F27C;
+static const void*	VFTbhkCollisionObject	= (void*)0x00A55FCC;
+
+static float*		LocalGrassWindMagnitudeMax	= (float*)0x00B46068;
+static float*		LocalGrassWindMagnitudeMin	= (float*)0x00B46064;
+static UInt8*		LocalWaterHiRes				= (UInt8*)0x00B45FD0;

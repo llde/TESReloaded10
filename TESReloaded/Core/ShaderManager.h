@@ -1,28 +1,6 @@
 #pragma once
 #include <d3dx9mesh.h>
 
-enum EffectRecordType {
-	EffectRecordType_Underwater,
-	EffectRecordType_WaterLens,
-	EffectRecordType_GodRays,
-	EffectRecordType_DepthOfField,
-	EffectRecordType_AmbientOcclusion,
-	EffectRecordType_Coloring,
-	EffectRecordType_Cinema,
-	EffectRecordType_Bloom,
-	EffectRecordType_SnowAccumulation,
-	EffectRecordType_BloodLens,
-	EffectRecordType_MotionBlur,
-	EffectRecordType_LowHF,
-	EffectRecordType_WetWorld,
-	EffectRecordType_Sharpening,
-	EffectRecordType_VolumetricFog,
-	EffectRecordType_Precipitations,
-	EffectRecordType_ShadowsExteriors,
-	EffectRecordType_ShadowsInteriors,
-	EffectRecordType_Extra,
-};
-
 struct ShaderConstants {
 	
 	struct ShadowMapStruct {
@@ -271,6 +249,28 @@ class EffectRecord : public ShaderProgram {
 public:
 	EffectRecord();
 	virtual ~EffectRecord();
+	
+	enum EffectRecordType {
+		Underwater,
+		WaterLens,
+		GodRays,
+		DepthOfField,
+		AmbientOcclusion,
+		Coloring,
+		Cinema,
+		Bloom,
+		SnowAccumulation,
+		BloodLens,
+		MotionBlur,
+		LowHF,
+		WetWorld,
+		Sharpening,
+		VolumetricFog,
+		Precipitations,
+		ShadowsExteriors,
+		ShadowsInteriors,
+		Extra,
+	};
 
 	virtual void			SetCT();
 	virtual void			CreateCT(const char* ShaderSource, ID3DXConstantTable* ConstantTable);
@@ -300,8 +300,8 @@ public:
 	void					LoadShader(NiD3DVertexShader* VertexShader);
 	void					LoadShader(NiD3DPixelShader* PixelShader);
 	void					DisposeShader(const char* Name);
-	void					CreateEffect(EffectRecordType EffectType);
-	void					DisposeEffect(EffectRecordType EffectType);
+	void					CreateEffect(EffectRecord::EffectRecordType EffectType);
+	void					DisposeEffect(EffectRecord::EffectRecordType EffectType);
 	void					RenderEffects(IDirect3DSurface9* RenderTarget);
 	void					SwitchShaderStatus(const char* Name);
 	void					SetCustomConstant(const char* Name, D3DXVECTOR4 Value);

@@ -1,6 +1,4 @@
 #pragma once
-#include "GameNi.h"
-#include "GameHavok.h"
 
 class DetectorWindow;
 class INISettingCollection;
@@ -4029,18 +4027,6 @@ public:
 	char*		Name;
 };
 assert(sizeof(GameSetting) == 0x08);
-
-static const void*	VFTNiNode				= (void*)0x00A7E38C;
-static const void*	VFTBSFadeNode			= (void*)0x00A3F944;
-static const void*	VFTBSFaceGenNiNode		= (void*)0x00A64F5C;
-static const void*	VFTBSTreeNode			= (void*)0x00A65854;
-static const void*	VFTNiTriShape			= (void*)0x00A7ED5C;
-static const void*	VFTNiTriStrips			= (void*)0x00A7F27C;
-static const void*	VFTbhkCollisionObject	= (void*)0x00A55FCC;
-
-static float*		LocalGrassWindMagnitudeMax	= (float*)0x00B46068;
-static float*		LocalGrassWindMagnitudeMin	= (float*)0x00B46064;
-static UInt8*		LocalWaterHiRes				= (UInt8*)0x00B45FD0;
 
 static void* (__cdecl* MemoryAlloc)(size_t) = (void* (__cdecl*)(size_t))0x00401F00;
 static void  (__cdecl* MemoryDealloc)(void*) = (void (__cdecl*)(void*))0x00401F20;

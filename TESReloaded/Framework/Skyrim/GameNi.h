@@ -52,6 +52,7 @@ class NiDX9DeviceDesc;
 class NiDX9Renderer;
 class NiDX9RenderState;
 class NiDX92DBufferData;
+class NiDX9ShaderDeclaration;
 
 class ShadowSceneLight;
 class AnimSequenceBase;
@@ -937,16 +938,16 @@ assert(sizeof(NiD3DPixelShader) == 0x64);
 class BSShader : public NiRefObject {
 public:
 	enum ShaderType {
-		BSGrassShader = 1,
-		BSSkyShader = 2,
-		BSWaterShader = 3,
-		BSBloodSplatterShader = 4,
-		BSUnknownShader = 5,
-		BSLightingShader = 6,
-		BSEffectShader = 7,
-		BSUtilityShader = 8,
-		BSDistantTreeShader = 9,
-		BSParticleShader = 10,
+		GrassShader = 1,
+		SkyShader = 2,
+		WaterShader = 3,
+		BloodSplatterShader = 4,
+		UnknownShader = 5,
+		LightingShader = 6,
+		EffectShader = 7,
+		UtilityShader = 8,
+		DistantTreeShader = 9,
+		ParticleShader = 10,
 	};
 
 	UInt32		unk08;		// 08
@@ -973,14 +974,24 @@ assert(sizeof(BSShader) == 0x54);
 
 class WaterShader : public BSShader {
 public:
-	UInt32				Unk54;			// 54 ShaderDeclaration
-	UInt32				Unk58;			// 58
-	UInt32				Unk5C;			// 5C
-	UInt32				Unk60;			// 60
-	UInt32				Unk64;			// 64
-	UInt32				Unk68;			// 68
+	UInt32				Unk54;		// 54 This should be where shaders are stored (ShaderDefinition array?)
+	UInt32				Unk58;		// 58
+	UInt32				Unk5C;		// 5C
+	UInt32				Unk60;		// 60
+	UInt32				Unk64;		// 64
+	UInt32				Unk68;		// 68
 };
 assert(sizeof(WaterShader) == 0x6C);
+
+class WaterShaderEx : public WaterShader {
+public:
+	void				Set(int Index, NiD3DVertexShader* Shader) { Vertex[Index] = Shader; }
+	void				Set(int Index, NiD3DPixelShader* Shader) { Pixel[Index] = Shader; }
+
+	NiD3DVertexShader*	Vertex[51]; // Where are they? ShaderDefinition?
+	NiD3DPixelShader*	Pixel[51];	// Where are they? ShaderDefinition?
+};
+assert(sizeof(WaterShaderEx) == 0x204);
 
 class Ni2DBuffer : public NiObject {
 public:

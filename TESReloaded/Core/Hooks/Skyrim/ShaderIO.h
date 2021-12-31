@@ -21,7 +21,10 @@ static int __fastcall CreateVertexShaderHook(NiD3DVertexShader* This, UInt32 edx
 	strcat(VertexShader->ShaderName, Counter);
 	strcat(VertexShader->ShaderName, ".vso");
 	TheShaderManager->LoadShader(VertexShader);
-	if (!memcmp(VertexShader->ShaderName, "WATER", 5)) TheShaderManager->WaterVertexShaders[VertexShaderCounter - 1] = VertexShader;
+	if (!memcmp(VertexShader->ShaderName, "WATER", 5)) {
+		WaterShaderEx* WS = *(WaterShaderEx**)0x01BA782C;
+		WS->Set(VertexShaderCounter - 1, VertexShader);
+	}
 	return r;
 
 }
@@ -43,7 +46,10 @@ static int __fastcall CreatePixelShaderHook(NiD3DPixelShader* This, UInt32 edx, 
 	strcat(PixelShader->ShaderName, Counter);
 	strcat(PixelShader->ShaderName, ".pso");
 	TheShaderManager->LoadShader(PixelShader);
-	if (!memcmp(PixelShader->ShaderName, "WATER", 5)) TheShaderManager->WaterPixelShaders[PixelShaderCounter - 1] = PixelShader;
+	if (!memcmp(PixelShader->ShaderName, "WATER", 5)) {
+		WaterShaderEx* WS = *(WaterShaderEx**)0x01BA782C;
+		WS->Set(PixelShaderCounter - 1, PixelShader);
+	}
 	return r;
 
 }

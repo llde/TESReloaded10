@@ -47,6 +47,7 @@ void AttachHooks() {
 
 	SafeWrite8(0x00CCBD66,	sizeof(NiD3DVertexShaderEx));
 	SafeWrite8(0x00CCC676,	sizeof(NiD3DPixelShaderEx));
+	SafeWrite8(0x00C7 4B43, sizeof(WaterShaderEx)); there is not enough byte to expand!
 	SafeWrite8(0x0048BC15,	sizeof(TESRegionEx));
 	SafeWrite32(0x00CDB659, sizeof(RenderManager));
 	SafeWrite32(0x00442B22, sizeof(TESWeatherEx));

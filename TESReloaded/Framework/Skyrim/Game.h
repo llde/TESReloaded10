@@ -4589,9 +4589,6 @@ public:
 
 };
 
-static float* LocalGrassWindMagnitudeMax = (float*)0x00000000;
-static float* LocalGrassWindMagnitudeMin = (float*)0x00000000;
-
 static void* (__cdecl* MemoryAlloc)(size_t) = (void* (__cdecl*)(size_t))0x004017F0;
 static bool  (__cdecl* ExtractArgs)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...) = (bool (__cdecl*)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...))0x00514830;
 static void  (* PrintToConsole)(const char*, ...) = (void (*)(const char*, ...))0x00848820;
