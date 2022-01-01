@@ -891,9 +891,10 @@ void ShaderManager::UpdateConstants() {
 		}
 
 		if (TheSettingManager->SettingsMain.Shaders.Water || TheSettingManager->SettingsMain.Effects.Underwater) {
+			RGBA* rgba = NULL;
 			SettingsWaterStruct* sws = NULL;
 			TESWaterForm* currentWater = Tes->waterManager->WaterForm1;
-			
+
 			if (currentWater) {
 				UInt32 WaterType = currentWater->GetWaterType();
 				if (WaterType == TESWaterForm::WaterType::kWaterType_Blood)
@@ -904,19 +905,18 @@ void ShaderManager::UpdateConstants() {
 			}
 			if (!sws) sws = TheSettingManager->GetSettingsWater("Default");
 
-#if defined(SKIRIM)
 			if (currentWater) {
-				ShaderConst.Water.deepColor.x = currentWater->properties.deepColorR / 255.0f;
-				ShaderConst.Water.deepColor.y = currentWater->properties.deepColorG / 255.0f;
-				ShaderConst.Water.deepColor.z = currentWater->properties.deepColorB / 255.0f;
-				ShaderConst.Water.deepColor.w = currentWater->properties.deepColorA / 255.0f;
-
-				ShaderConst.Water.shallowColor.x = currentWater->properties.shallowColorR / 255.0f;
-				ShaderConst.Water.shallowColor.y = currentWater->properties.shallowColorG / 255.0f;
-				ShaderConst.Water.shallowColor.z = currentWater->properties.shallowColorB / 255.0f;
-				ShaderConst.Water.shallowColor.w = currentWater->properties.shallowColorA / 255.0f;
+				rgba = currentWater->GetDeepColor();
+				ShaderConst.Water.deepColor.x = rgba->r / 255.0f;
+				ShaderConst.Water.deepColor.y = rgba->g / 255.0f;
+				ShaderConst.Water.deepColor.z = rgba->b / 255.0f;
+				ShaderConst.Water.deepColor.w = rgba->a / 255.0f;
+				rgba = currentWater->GetShallowColor();
+				ShaderConst.Water.shallowColor.x = rgba->r / 255.0f;
+				ShaderConst.Water.shallowColor.y = rgba->g / 255.0f;
+				ShaderConst.Water.shallowColor.z = rgba->b / 255.0f;
+				ShaderConst.Water.shallowColor.w = rgba->a / 255.0f;
 			}
-#endif
 
 			ShaderConst.Water.waterCoefficients.x = sws->inExtCoeff_R;
 			ShaderConst.Water.waterCoefficients.y = sws->inExtCoeff_G;
@@ -1319,79 +1319,28 @@ void ShaderManager::UpdateConstants() {
 }
 
 void ShaderManager::CreateShader(const char* Name) {
-
-#if defined(OBLIVION)
-	NiD3DVertexShaderEx** PrecipitationVertexShaders = (NiD3DVertexShaderEx**)0x00B466E0;
-	NiD3DPixelShaderEx** PrecipitationPixelShaders = (NiD3DPixelShaderEx**)0x00B46708;
-	NiD3DVertexShaderEx** ShadowLightVertexShaders = (NiD3DVertexShaderEx**)0x00B45364;
-	NiD3DPixelShaderEx** ShadowLightPixelShaders = (NiD3DPixelShaderEx**)0x00B45144;
-
-	if (!strcmp(Name, "Water")) {
-		WaterShader* WS = (WaterShader*)GetShaderDefinition(17)->Shader;
-		for each (NiD3DVertexShader* VS in WS->Vertex) LoadShader(VS);
-		for each (NiD3DPixelShader* PS in WS->Pixel) LoadShader(PS);
-		WaterShaderHeightMap* WSHM = (WaterShaderHeightMap*)GetShaderDefinition(19)->Shader;
-		LoadShader(WSHM->Vertex);
-		for each (NiD3DPixelShader* PS in WSHM->Pixel) LoadShader(PS);
-		WaterShaderDisplacement* WSD = (WaterShaderDisplacement*)GetShaderDefinition(20)->Shader;
-		for each (NiD3DVertexShader* VS in WSD->Vertex) LoadShader(VS);
-		for each (NiD3DPixelShader* PS in WSD->Pixel) LoadShader(PS);
-	}
-	else if (!strcmp(Name, "Grass")) {
-		TallGrassShader* TGS = (TallGrassShader*)GetShaderDefinition(2)->Shader;
-		for each (NiD3DVertexShader* VS in TGS->Vertex2) LoadShader(VS);
-		for each (NiD3DPixelShader* PS in TGS->Pixel2) LoadShader(PS);
-	}
-	else if (!strcmp(Name, "Precipitations")) {
-		for (int i = 0; i < 4; i++) LoadShader(PrecipitationVertexShaders[i]);
-		for (int i = 0; i < 2; i++) LoadShader(PrecipitationPixelShaders[i]);
-	}
-	else if (!strcmp(Name, "HDR")) {
-		HDRShader* HS = (HDRShader*)GetShaderDefinition(8)->Shader;
-		for each (NiD3DVertexShader* VS in HS->Vertex) LoadShader(VS);
-		for each (NiD3DPixelShader* PS in HS->Pixel) LoadShader(PS);
-	}
-	else if (!strcmp(Name, "POM")) {
-		ParallaxShader* PRS = (ParallaxShader*)GetShaderDefinition(15)->Shader;
-		for each (NiD3DVertexShader* VS in PRS->Vertex) LoadShader(VS);
-		for each (NiD3DPixelShader* PS in PRS->Pixel) LoadShader(PS);
-	}
-	else if (!strcmp(Name, "Skin")) {
-		SkinShader* SS = (SkinShader*)GetShaderDefinition(14)->Shader;
-		for each (NiD3DVertexShader* VS in SS->Vertex) LoadShader(VS);
-		for each (NiD3DPixelShader* PS in SS->Pixel) LoadShader(PS);
-	}
-	else if (!strcmp(Name, "Terrain")) {
-		for (int i = 0; i < 76; i++) {
-			NiD3DVertexShaderEx* VS = ShadowLightVertexShaders[i];
-			if (VS && strstr(TerrainShaders, VS->ShaderName)) LoadShader(VS);
-		}
-		for (int i = 0; i < 82; i++) {
-			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
-			if (PS && strstr(TerrainShaders, PS->ShaderName)) LoadShader(PS);
-		}
+	
+	NiD3DVertexShader** Vertex = NULL;
+	NiD3DPixelShader** Pixel = NULL;
+	
+	if (!strcmp(Name, "Terrain")) {
+		for (int i = 0; i < GetShader(Name, &Vertex, NULL); i++) if (Vertex[i] && strstr(TerrainShaders, ((NiD3DVertexShaderEx*)Vertex[i])->ShaderName)) LoadShader(Vertex[i]);
+		for (int i = 0; i < GetShader(Name, &Pixel, NULL); i++) if (Pixel[i] && strstr(TerrainShaders, ((NiD3DPixelShaderEx*)Pixel[i])->ShaderName)) LoadShader(Pixel[i]);
 	}
 	else if (!strcmp(Name, "ExtraShaders")) {
-		for (int i = 0; i < 76; i++) {
-			NiD3DVertexShaderEx* VS = ShadowLightVertexShaders[i];
-			if (VS && !strstr(TerrainShaders, VS->ShaderName)) LoadShader(VS);
+		for (int i = 0; i < GetShader(Name, &Vertex, NULL); i++) if (Vertex[i] && !strstr(TerrainShaders, ((NiD3DVertexShaderEx*)Vertex[i])->ShaderName)) LoadShader(Vertex[i]);
+		for (int i = 0; i < GetShader(Name, &Pixel, NULL); i++) if (Pixel[i] && !strstr(TerrainShaders, ((NiD3DPixelShaderEx*)Pixel[i])->ShaderName)) LoadShader(Pixel[i]);
+	}
+	else {
+		for (int i = 0; i < GetShader(Name, &Vertex, WaterVertexShaders); i++) LoadShader(Vertex[i]);
+		for (int i = 0; i < GetShader(Name, &Pixel, WaterPixelShaders); i++) LoadShader(Pixel[i]);
+		if (!strcmp(Name, "Water")) {
+			for (int i = 0; i < GetShader("WaterHeightMap", &Vertex, NULL); i++) LoadShader(Vertex[i]);
+			for (int i = 0; i < GetShader("WaterHeightMap", &Pixel, NULL); i++) LoadShader(Pixel[i]);
+			for (int i = 0; i < GetShader("WaterDisplacement", &Vertex, NULL); i++) LoadShader(Vertex[i]);
+			for (int i = 0; i < GetShader("WaterDisplacement", &Pixel, NULL); i++) LoadShader(Pixel[i]);
 		}
-		for (int i = 0; i < 82; i++) {
-			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
-			if (PS && !strstr(TerrainShaders, PS->ShaderName)) LoadShader(PS);
-		}
 	}
-	else if (!strcmp(Name, "Blood")) {
-		GeometryDecalShader* GDS = (GeometryDecalShader*)GetShaderDefinition(16)->Shader;
-		for each (NiD3DVertexShader* VS in GDS->Vertex) LoadShader(VS);
-		for each (NiD3DPixelShader* PS in GDS->Pixel) LoadShader(PS);
-	}
-#elif defined(SKYRIM)
-	if (!strcmp(Name, "Water")) {
-		for each (NiD3DVertexShader* VS in WaterVertexShaders) LoadShader(VS);
-		for each (NiD3DPixelShader* PS in WaterPixelShaders) LoadShader(PS);
-	}
-#endif
 
 }
 
@@ -1417,86 +1366,27 @@ void ShaderManager::LoadShader(NiD3DPixelShader* Shader) {
 
 void ShaderManager::DisposeShader(const char* Name) {
 
-#if defined(OBLIVION)
-	ShaderDefinition* (__cdecl * GetShaderDefinition)(UInt32) = (ShaderDefinition* (__cdecl *)(UInt32))0x007B4290;
-	NiD3DVertexShaderEx** ShadowLightVertexShaders = (NiD3DVertexShaderEx**)0x00B45364;
-	NiD3DPixelShaderEx** ShadowLightPixelShaders = (NiD3DPixelShaderEx**)0x00B45144;
+	NiD3DVertexShader** Vertex = NULL;
+	NiD3DPixelShader** Pixel = NULL;
 
-	if (!strcmp(Name, "Water")) {
-		WaterShader* WS = (WaterShader*)GetShaderDefinition(17)->Shader;
-		for each (NiD3DVertexShaderEx* VS in WS->Vertex) VS->DisposeShader();
-		for each (NiD3DPixelShaderEx* PS in WS->Pixel) PS->DisposeShader();
-
-		WaterShaderHeightMap* WSHM = (WaterShaderHeightMap*)GetShaderDefinition(19)->Shader;
-		NiD3DVertexShaderEx* VS = (NiD3DVertexShaderEx*)WSHM->Vertex;
-		VS->DisposeShader();
-		for each (NiD3DPixelShaderEx* PS in WSHM->Pixel) PS->DisposeShader();
-
-		WaterShaderDisplacement* WSD = (WaterShaderDisplacement*)GetShaderDefinition(20)->Shader;
-		for each (NiD3DVertexShaderEx* VS in WSD->Vertex) VS->DisposeShader();
-		for each (NiD3DPixelShaderEx* PS in WSD->Pixel) PS->DisposeShader();
-	}
-	else if (!strcmp(Name, "Grass")) {
-		TallGrassShader* TGS = (TallGrassShader*)GetShaderDefinition(2)->Shader;
-		for each (NiD3DVertexShaderEx* VS in TGS->Vertex2) VS->DisposeShader();
-		for each (NiD3DPixelShaderEx* PS in TGS->Pixel2) PS->DisposeShader();
-	}
-	else if (!strcmp(Name, "HDR")) {
-		HDRShader* HS = (HDRShader*)GetShaderDefinition(8)->Shader;
-		for each (NiD3DVertexShaderEx* VS in HS->Vertex) VS->DisposeShader();
-		for each (NiD3DPixelShaderEx* PS in HS->Pixel) PS->DisposeShader();
-	}
-	else if (!strcmp(Name, "POM")) {
-		ParallaxShader* PRS = (ParallaxShader*)GetShaderDefinition(15)->Shader;
-		for each (NiD3DVertexShaderEx* VS in PRS->Vertex) VS->DisposeShader();
-		for each (NiD3DPixelShaderEx* PS in PRS->Pixel) PS->DisposeShader();
-	}
-	else if (!strcmp(Name, "Skin")) {
-		SkinShader* SS = (SkinShader*)GetShaderDefinition(14)->Shader;
-		for each (NiD3DVertexShaderEx* VS in SS->Vertex) VS->DisposeShader();
-		for each (NiD3DPixelShaderEx* PS in SS->Pixel) PS->DisposeShader();
-	}
-	else if (!strcmp(Name, "Terrain")) {
-		for (int i = 0; i < 76; i++) {
-			NiD3DVertexShaderEx* VS = ShadowLightVertexShaders[i];
-			if (VS && strstr(TerrainShaders, VS->ShaderName)) VS->DisposeShader();
-		}
-		for (int i = 0; i < 82; i++) {
-			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
-			if (PS && strstr(TerrainShaders, PS->ShaderName)) PS->DisposeShader();
-		}
+	if (!strcmp(Name, "Terrain")) {
+		for (int i = 0; i < GetShader(Name, &Vertex, NULL); i++) if (Vertex[i] && strstr(TerrainShaders, ((NiD3DVertexShaderEx*)Vertex[i])->ShaderName)) ((NiD3DVertexShaderEx*)Vertex[i])->DisposeShader();
+		for (int i = 0; i < GetShader(Name, &Pixel, NULL); i++) if (Pixel[i] && strstr(TerrainShaders, ((NiD3DPixelShaderEx*)Pixel[i])->ShaderName)) ((NiD3DPixelShaderEx*)Pixel[i])->DisposeShader();
 	}
 	else if (!strcmp(Name, "ExtraShaders")) {
-		for (int i = 0; i < 76; i++) {
-			NiD3DVertexShaderEx* VS = ShadowLightVertexShaders[i];
-			if (VS && !strstr(TerrainShaders, VS->ShaderName)) VS->DisposeShader();
-		}
-		for (int i = 0; i < 82; i++) {
-			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
-			if (PS && !strstr(TerrainShaders, PS->ShaderName)) PS->DisposeShader();
+		for (int i = 0; i < GetShader(Name, &Vertex, NULL); i++) if (Vertex[i] && !strstr(TerrainShaders, ((NiD3DVertexShaderEx*)Vertex[i])->ShaderName)) ((NiD3DVertexShaderEx*)Vertex[i])->DisposeShader();
+		for (int i = 0; i < GetShader(Name, &Pixel, NULL); i++) if (Pixel[i] && !strstr(TerrainShaders, ((NiD3DPixelShaderEx*)Pixel[i])->ShaderName)) ((NiD3DPixelShaderEx*)Pixel[i])->DisposeShader();
+	}
+	else {
+		for (int i = 0; i < GetShader(Name, &Vertex, WaterVertexShaders); i++) ((NiD3DVertexShaderEx*)Vertex[i])->DisposeShader();
+		for (int i = 0; i < GetShader(Name, &Pixel, WaterPixelShaders); i++) ((NiD3DPixelShaderEx*)Pixel[i])->DisposeShader();
+		if (!strcmp(Name, "Water")) {
+			for (int i = 0; i < GetShader("WaterHeightMap", &Vertex, NULL); i++) ((NiD3DVertexShaderEx*)Vertex[i])->DisposeShader();
+			for (int i = 0; i < GetShader("WaterHeightMap", &Pixel, NULL); i++) ((NiD3DPixelShaderEx*)Pixel[i])->DisposeShader();
+			for (int i = 0; i < GetShader("WaterDisplacement", &Vertex, NULL); i++) ((NiD3DVertexShaderEx*)Vertex[i])->DisposeShader();
+			for (int i = 0; i < GetShader("WaterDisplacement", &Pixel, NULL); i++) ((NiD3DPixelShaderEx*)Pixel[i])->DisposeShader();
 		}
 	}
-	else if (!strcmp(Name, "Blood")) {
-		GeometryDecalShader* GDS = (GeometryDecalShader*)GetShaderDefinition(16)->Shader;
-		for each (NiD3DVertexShaderEx* VS in GDS->Vertex) VS->DisposeShader();
-		for each (NiD3DPixelShaderEx* PS in GDS->Pixel) PS->DisposeShader();
-	}
-#elif defined(SKYRIM)
-	if (!strcmp(Name, "Water")) {
-		for each (NiD3DVertexShaderEx* VS in WaterVertexShaders) {
-			if (VS->ShaderProg) {
-				VS->ShaderHandle = VS->ShaderHandleBackup;
-				delete VS->ShaderProg; VS->ShaderProg = NULL;
-			}
-		}
-		for each (NiD3DPixelShaderEx* PS in WaterPixelShaders) {
-			if (PS->ShaderProg) {
-				PS->ShaderHandle = PS->ShaderHandleBackup;
-				delete PS->ShaderProg; PS->ShaderProg = NULL;
-			}
-		}
-	}
-#endif
 
 }
 

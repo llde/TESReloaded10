@@ -1038,8 +1038,11 @@ public:
 		kWaterType_Normal,
 	};
 	
-	UInt32				GetWaterType() { return waterType; };
-	void				RemoveUnderwaterFog() { waterSimVals[TESWaterForm::kWaterVal_FogDistNear] = 163830.0f; waterSimVals[TESWaterForm::kWaterVal_FogDistFar] = 163835.0f; };
+	UInt32				GetWaterType() { return waterType; }
+	void				RemoveUnderwaterFog() { waterSimVals[TESWaterForm::kWaterVal_FogDistNear] = 163830.0f; waterSimVals[TESWaterForm::kWaterVal_FogDistFar] = 163835.0f; }
+	RGBA*				GetShallowColor() { return &shallowColor; }
+	RGBA*				GetDeepColor() { return &deepColor; }
+	RGBA*				GetReflectionColor() { return &reflectionColor; }
 
 	TESAttackDamageForm	damageForm;				// 18
 	TESTexture			texture;				// 20
@@ -1051,18 +1054,9 @@ public:
 	UInt16				unk36;
 	TESSound*			loopSound;				// 38
 	float				waterSimVals[11];		// 3C
-	UInt8				shallowColorR;			// 68
-	UInt8				shallowColorG;
-	UInt8				shallowColorB;
-	UInt8				shallowColorA;
-	UInt8				deepColorR;				// 6C
-	UInt8				deepColorG;
-	UInt8				deepColorB;
-	UInt8				deepColorA;
-	UInt8				reflectColorR;			// 70
-	UInt8				reflectColorG;
-	UInt8				reflectColorB;
-	UInt8				reflectColorA;
+	RGBA				shallowColor;			// 68
+	RGBA				deepColor;				// 6C
+	RGBA				reflectionColor;		// 70
 	UInt32				textureBlend;			// 74
 	float				rainSimVals[5];			// 78
 	float				displacementSimVals[5];	// 8C
@@ -4033,7 +4027,6 @@ static void  (__cdecl* MemoryDealloc)(void*) = (void (__cdecl*)(void*))0x00401F2
 static bool  (__cdecl* ExtractArgs)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...) = (bool (__cdecl*)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...))0x004FAE80;
 static void  (__cdecl* CreateGrass)(TESObjectCELL*, NiNode*, float, float, float, float, float, int, float, float, float) = (void (__cdecl*)(TESObjectCELL*, NiNode*, float, float, float, float, float, int, float, float, float))0x004EB3F0;
 static void  (* PrintToConsole)(const char*, ...) = (void (*)(const char*, ...))0x00579B60;
-static ShaderDefinition* (__cdecl* GetShaderDefinition)(UInt32) = (ShaderDefinition* (__cdecl*)(UInt32))0x007B4290;
 static char* (__cdecl* GetPassDescription)(UInt32) = (char* (__cdecl*)(UInt32))0x007B4920;
 static void  (__cdecl* BeginRendering)(UInt32, NiRenderTargetGroup*) = (void (__cdecl*)(UInt32, NiRenderTargetGroup*))0x007D7280;
 static void  (* EndRendering)() = (void (*)())0x007D72D0;

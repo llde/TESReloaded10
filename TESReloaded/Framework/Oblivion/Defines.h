@@ -7,15 +7,6 @@
 #define ShadersPath "Data\\Shaders\\OblivionReloaded\\Shaders\\"
 #define EffectsPath "Data\\Shaders\\OblivionReloaded\\Effects\\"
 #define WaterReflectionMapSize 512
-#define kSettingGridsToLoad 0x00B06A2C
-#define kSettingMinGrassSize 0x00B09B20
-#define kSettingGrassStartFadeDistance 0x00B09B10
-#define kSettingGrassEndDistance 0x00B09B18
-#define kSettingGrassWindMagnitudeMin 0x00B09B28
-#define kSettingGrassWindMagnitudeMax 0x00B09B30
-#define kSettingTexturePctThreshold 0x00B08B6C
-#define kSettingMultiSample 0x00B06D0C
-#define kSettingHDR 0x00B06DE4
 static const char* IntroMovie = "ORGameStudios.bik";
 static const char* MainMenuMovie = "ORMainMenu.bik";
 static const char* MainMenuMusic = "Special\\ORMainMenu.mp3";
@@ -28,15 +19,15 @@ static const char* WeatherColorTypes[TESWeather::kNumColorTypes] = { "SkyUpper",
 static const char* WeatherTimesOfDay[TESWeather::kNumTimeOfDay] = { "Sunrise", "Day", "Sunset", "Night" };
 static const char* WeatherHDRTypes[14] = { "EyeAdaptation", "BlurRadius", "BlurPasses", "EmissiveMult", "TargetLUM", "UpperLUMClamp", "BrightScale", "BrightClamp", "LUMRampNoTex", "LUMRampMin", "LUMRampMax", "SunlightDimmer", "GrassDimmer", "TreeDimmer" };
 
-static const UInt32* SettingGridsToLoad = (UInt32*)kSettingGridsToLoad;
-static UInt32* SettingMinGrassSize = (UInt32*)kSettingMinGrassSize;
-static float* SettingGrassStartFadeDistance = (float*)kSettingGrassStartFadeDistance;
-static float* SettingGrassEndDistance = (float*)kSettingGrassEndDistance;
-static float* SettingGrassWindMagnitudeMin = (float*)kSettingGrassWindMagnitudeMin;
-static float* SettingGrassWindMagnitudeMax = (float*)kSettingGrassWindMagnitudeMax;
-static float* SettingTexturePctThreshold = (float*)kSettingTexturePctThreshold;
-static const UInt32* SettingMultiSample = (UInt32*)kSettingMultiSample;
-static const UInt8* SettingHDR = (UInt8*)kSettingHDR;
+static const UInt32* SettingGridsToLoad = (UInt32*)0x00B06A2C;
+static UInt32* SettingMinGrassSize = (UInt32*)0x00B09B20;
+static float* SettingGrassStartFadeDistance = (float*)0x00B09B10;
+static float* SettingGrassEndDistance = (float*)0x00B09B18;
+static float* SettingGrassWindMagnitudeMin = (float*)0x00B09B28;
+static float* SettingGrassWindMagnitudeMax = (float*)0x00B09B30;
+static float* SettingTexturePctThreshold = (float*)0x00B08B6C;
+static const UInt32* SettingMultiSample = (UInt32*)0x00B06D0C;
+static const UInt8* SettingHDR = (UInt8*)0x00B06DE4;
 
 
 #define kDetectorWindowScale 0x004965A8
@@ -102,17 +93,6 @@ static const UInt32 kWaterHeightMapHook = 0x0049D9FF;
 static const UInt32 kWaterHeightMapReturn = 0x0049DA08;
 
 
-#define WordSampler2D "sampler2D"
-#define WordSampler3D "sampler3D"
-#define WordSamplerCUBE "samplerCU"
-#define WordSamplerDelimeter "};"
-#define WordSamplerStateDelimeter ";"
-#define WordRegister "register(s"
-#define WordRegisterDelimeter ")"
-#define WordTextureName "string ResourceName = \x22"
-#define WordTextureNameDelimeter "\x22;"
-
-
 #define RenderStateArgs 0
 #define kFormType_MoveableStatic kFormType_Stat
 static const UInt32 kNew1CollisionObjectHook = 0x00564529;
@@ -162,17 +142,6 @@ static const UInt32 GameToggleCamera = kToggleCamera;
 
 
 #define SamplerStatesMax 12
-#define WordSourceBuffer "TESR_SourceBuffer"
-#define WordRenderedBuffer "TESR_RenderedBuffer"
-#define WordDepthBuffer "TESR_DepthBuffer"
-#define WordShadowMapBufferNear "TESR_ShadowMapBufferNear"
-#define WordShadowMapBufferFar "TESR_ShadowMapBufferFar"
-#define WordOrthoMapBuffer "TESR_OrthoMapBuffer"
-#define WordShadowCubeMapBuffer0 "TESR_ShadowCubeMapBuffer0"
-#define WordShadowCubeMapBuffer1 "TESR_ShadowCubeMapBuffer1"
-#define WordShadowCubeMapBuffer2 "TESR_ShadowCubeMapBuffer2"
-#define WordShadowCubeMapBuffer3 "TESR_ShadowCubeMapBuffer3"
-#define WordWaterHeightMapBuffer "TESR_WaterHeightMapBuffer"
 
 #define ForearmTwistNodeName "Bip01 L ForearmTwist"
 #define QuiverNodeName "Quiver"
@@ -184,6 +153,18 @@ static const UInt32 GameToggleCamera = kToggleCamera;
 #define FlameNode1Name "FlameNode1"
 #define FlameNode2Name "FlameNode2"
 #define LightNodeName "AttachLight"
+
+#define WordSourceBuffer "TESR_SourceBuffer"
+#define WordRenderedBuffer "TESR_RenderedBuffer"
+#define WordDepthBuffer "TESR_DepthBuffer"
+#define WordShadowMapBufferNear "TESR_ShadowMapBufferNear"
+#define WordShadowMapBufferFar "TESR_ShadowMapBufferFar"
+#define WordOrthoMapBuffer "TESR_OrthoMapBuffer"
+#define WordShadowCubeMapBuffer0 "TESR_ShadowCubeMapBuffer0"
+#define WordShadowCubeMapBuffer1 "TESR_ShadowCubeMapBuffer1"
+#define WordShadowCubeMapBuffer2 "TESR_ShadowCubeMapBuffer2"
+#define WordShadowCubeMapBuffer3 "TESR_ShadowCubeMapBuffer3"
+#define WordWaterHeightMapBuffer "TESR_WaterHeightMapBuffer"
 
 static const UInt32 kPrnHook = 0x0047927B;
 static const UInt32 kPrnReturn = 0x0047928A;

@@ -1952,18 +1952,9 @@ public:
 		float	unk1C;		// 1C - init'd to 0
 		float	fogNearAW;	// Above water fog near place distance
 		float	fogFarAW;	// Above water fog far plane distance
-		UInt8	shallowColorR;
-		UInt8	shallowColorG;
-		UInt8	shallowColorB;
-		UInt8	shallowColorA;
-		UInt8	deepColorR;
-		UInt8	deepColorG;
-		UInt8	deepColorB;
-		UInt8	deepColorA;
-		UInt8	reflectionColorR;
-		UInt8	reflectionColorG;
-		UInt8	reflectionColorB;
-		UInt8	reflectionColorA;
+		RGBA	shallowColor;
+		RGBA	deepColor;
+		RGBA	reflectionColor;
 		UInt8	unk34;		// 34 - init'd to 0
 		UInt8	pad35[3];	// 35
 		float	unk38;		// 38 - init'd to 0.1
@@ -2018,6 +2009,10 @@ public:
 	};
 
 	void				RemoveUnderwaterFog() { properties.fogAmountUW = 0.0f; properties.fogNearUW = 9995.0f; properties.fogFarUW = 10000.0f; }
+	RGBA*				GetShallowColor() { return &properties.shallowColor; }
+	RGBA*				GetDeepColor() { return &properties.deepColor; }
+	RGBA*				GetReflectionColor() { return &properties.reflectionColor; }
+
 	TESFullName			fullName;		// 014
 	TESAttackDamageForm	attackDamage;	// 01C
 	UInt8				unk024;		// 024

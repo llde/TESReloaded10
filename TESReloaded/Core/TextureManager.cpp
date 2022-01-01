@@ -1,3 +1,13 @@
+#define WordSampler2D "sampler2D"
+#define WordSampler3D "sampler3D"
+#define WordSamplerCUBE "samplerCU"
+#define WordSamplerDelimeter "};"
+#define WordSamplerStateDelimeter ";"
+#define WordRegister "register(s"
+#define WordRegisterDelimeter ")"
+#define WordTextureName "string ResourceName = \x22"
+#define WordTextureNameDelimeter "\x22;"
+
 TextureRecord::TextureRecord() {
 
 	Texture = NULL;

@@ -136,4 +136,126 @@ public:
 class ShaderManagerBase {
 public:
 
+	static int GetShader(const char* Name, NiD3DVertexShader*** Shader, NiD3DVertexShader** AdditionalShader) {
+
+		ShaderDefinition** Shaders = (ShaderDefinition**)0x00B42EC0;
+		NiD3DVertexShader** PrecipitationVertexShaders = (NiD3DVertexShader**)0x00B466E0;
+		NiD3DPixelShader** PrecipitationPixelShaders = (NiD3DPixelShader**)0x00B46708;
+		NiD3DVertexShader** ShadowLightVertexShaders = (NiD3DVertexShader**)0x00B45364;
+		NiD3DPixelShader** ShadowLightPixelShaders = (NiD3DPixelShader**)0x00B45144;
+		int Size = 0;
+
+		if (!strcmp(Name, "Water")) {
+			WaterShader* S = (WaterShader*)Shaders[17]->Shader;
+			*Shader = S->Vertex;
+			Size = sizeof(S->Vertex) / 4;
+		}
+		else if (!strcmp(Name, "WaterHeightMap")) {
+			WaterShaderHeightMap* S = (WaterShaderHeightMap*)Shaders[19]->Shader;
+			*Shader = &S->Vertex;
+			Size = sizeof(S->Vertex) / 4;
+		}
+		else if (!strcmp(Name, "WaterDisplacement")) {
+			WaterShaderDisplacement* S = (WaterShaderDisplacement*)Shaders[20]->Shader;
+			*Shader = S->Vertex;
+			Size = sizeof(S->Vertex) / 4;
+		}
+		else if (!strcmp(Name, "Grass")) {
+			TallGrassShader* S = (TallGrassShader*)Shaders[2]->Shader;
+			*Shader = S->Vertex2;
+			Size = sizeof(S->Vertex2) / 4;
+		}
+		else if (!strcmp(Name, "Precipitations")) {
+			*Shader = PrecipitationVertexShaders;
+			Size = 4;
+		}
+		else if (!strcmp(Name, "HDR")) {
+			HDRShader* S = (HDRShader*)Shaders[8]->Shader;
+			*Shader = S->Vertex;
+			Size = sizeof(S->Vertex) / 4;
+		}
+		else if (!strcmp(Name, "POM")) {
+			ParallaxShader* S = (ParallaxShader*)Shaders[15]->Shader;
+			*Shader = S->Vertex;
+			Size = sizeof(S->Vertex) / 4;
+		}
+		else if (!strcmp(Name, "Skin")) {
+			SkinShader* S = (SkinShader*)Shaders[14]->Shader;
+			*Shader = S->Vertex;
+			Size = sizeof(S->Vertex) / 4;
+		}
+		else if (!strcmp(Name, "Terrain") || !strcmp(Name, "ExtraShaders")) {
+			*Shader = ShadowLightVertexShaders;
+			Size = 76;
+		}
+		else if (!strcmp(Name, "Blood")) {
+			GeometryDecalShader* S = (GeometryDecalShader*)Shaders[16]->Shader;
+			*Shader = S->Vertex;
+			Size = sizeof(S->Vertex) / 4;
+		}
+		return Size;
+
+	}
+
+	static int GetShader(const char* Name, NiD3DPixelShader*** Shader, NiD3DPixelShader** AdditionalShader) {
+
+		ShaderDefinition** Shaders = (ShaderDefinition**)0x00B42EC0;
+		NiD3DVertexShader** PrecipitationVertexShaders = (NiD3DVertexShader**)0x00B466E0;
+		NiD3DPixelShader** PrecipitationPixelShaders = (NiD3DPixelShader**)0x00B46708;
+		NiD3DVertexShader** ShadowLightVertexShaders = (NiD3DVertexShader**)0x00B45364;
+		NiD3DPixelShader** ShadowLightPixelShaders = (NiD3DPixelShader**)0x00B45144;
+		int Size = 0;
+
+		if (!strcmp(Name, "Water")) {
+			WaterShader* S = (WaterShader*)Shaders[17]->Shader;
+			*Shader = S->Pixel;
+			Size = sizeof(S->Pixel) / 4;
+		}
+		else if (!strcmp(Name, "WaterHeightMap")) {
+			WaterShaderHeightMap* S = (WaterShaderHeightMap*)Shaders[19]->Shader;
+			*Shader = S->Pixel;
+			Size = sizeof(S->Pixel) / 4;
+		}
+		else if (!strcmp(Name, "WaterDisplacement")) {
+			WaterShaderDisplacement* S = (WaterShaderDisplacement*)Shaders[20]->Shader;
+			*Shader = S->Pixel;
+			Size = sizeof(S->Pixel) / 4;
+		}
+		else if (!strcmp(Name, "Grass")) {
+			TallGrassShader* S = (TallGrassShader*)Shaders[2]->Shader;
+			*Shader = S->Pixel2;
+			Size = sizeof(S->Pixel2) / 4;
+		}
+		else if (!strcmp(Name, "Precipitations")) {
+			*Shader = PrecipitationPixelShaders;
+			Size = 2;
+		}
+		else if (!strcmp(Name, "HDR")) {
+			HDRShader* S = (HDRShader*)Shaders[8]->Shader;
+			*Shader = S->Pixel;
+			Size = sizeof(S->Pixel) / 4;
+		}
+		else if (!strcmp(Name, "POM")) {
+			ParallaxShader* S = (ParallaxShader*)Shaders[15]->Shader;
+			*Shader = S->Pixel;
+			Size = sizeof(S->Pixel) / 4;
+		}
+		else if (!strcmp(Name, "Skin")) {
+			SkinShader* S = (SkinShader*)Shaders[14]->Shader;
+			*Shader = S->Pixel;
+			Size = sizeof(S->Pixel) / 4;
+		}
+		else if (!strcmp(Name, "Terrain")) {
+			*Shader = ShadowLightPixelShaders;
+			Size = 82;
+		}
+		else if (!strcmp(Name, "Blood")) {
+			GeometryDecalShader* S = (GeometryDecalShader*)Shaders[16]->Shader;
+			*Shader = S->Pixel;
+			Size = sizeof(S->Pixel) / 4;
+		}
+		return Size;
+
+	}
+
 };
