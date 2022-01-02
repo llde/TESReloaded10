@@ -109,6 +109,12 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\TESReloaded\Core\CameraManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\CommandManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\D3D9\Device.h" />
+    <ClInclude Include="..\TESReloaded\Core\D3D9\Hook.h" />
+    <ClInclude Include="..\TESReloaded\Core\GameEventManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h" />
@@ -123,27 +129,43 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\ShaderIO.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Sleeping.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h" />
+    <ClInclude Include="..\TESReloaded\Core\KeyboardManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\SettingManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\ShaderManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\TextureManager.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.h" />
-    <ClInclude Include="..\TESReloaded\Framework\Common\Managers.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Base.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Defines.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Framework.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Game.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\GameNi.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Skyrim\Managers.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Papyrus.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Plugin.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\TESReloaded\Core\CameraManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\CommandManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\D3D9\Device.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\D3D9\Hook.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\GameEventManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\GameMenuManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\KeyboardManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\SettingManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\TextureManager.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\Logger.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\SafeWrite.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\disasm.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\modules.cpp" />
-    <ClCompile Include="..\TESReloaded\Framework\Common\Managers.cpp" />
+    <ClCompile Include="..\TESReloaded\Framework\Skyrim\Managers.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>

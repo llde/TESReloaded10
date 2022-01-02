@@ -25,6 +25,7 @@ class Script;
 class EnchantmentItem;
 class ScriptEventList;
 class Menu;
+class SleepWaitMenu;
 class ExtraDataList;
 class MediaSet;
 class MediaLocationController;

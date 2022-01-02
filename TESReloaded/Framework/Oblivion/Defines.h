@@ -141,7 +141,7 @@ static const UInt32 kSetReticleOffsetReturn = 0x0058079C;
 static const UInt32 GameToggleCamera = kToggleCamera;
 
 
-#define SamplerStatesMax 12
+
 
 #define ForearmTwistNodeName "Bip01 L ForearmTwist"
 #define QuiverNodeName "Quiver"
@@ -153,18 +153,6 @@ static const UInt32 GameToggleCamera = kToggleCamera;
 #define FlameNode1Name "FlameNode1"
 #define FlameNode2Name "FlameNode2"
 #define LightNodeName "AttachLight"
-
-#define WordSourceBuffer "TESR_SourceBuffer"
-#define WordRenderedBuffer "TESR_RenderedBuffer"
-#define WordDepthBuffer "TESR_DepthBuffer"
-#define WordShadowMapBufferNear "TESR_ShadowMapBufferNear"
-#define WordShadowMapBufferFar "TESR_ShadowMapBufferFar"
-#define WordOrthoMapBuffer "TESR_OrthoMapBuffer"
-#define WordShadowCubeMapBuffer0 "TESR_ShadowCubeMapBuffer0"
-#define WordShadowCubeMapBuffer1 "TESR_ShadowCubeMapBuffer1"
-#define WordShadowCubeMapBuffer2 "TESR_ShadowCubeMapBuffer2"
-#define WordShadowCubeMapBuffer3 "TESR_ShadowCubeMapBuffer3"
-#define WordWaterHeightMapBuffer "TESR_WaterHeightMapBuffer"
 
 static const UInt32 kPrnHook = 0x0047927B;
 static const UInt32 kPrnReturn = 0x0047928A;

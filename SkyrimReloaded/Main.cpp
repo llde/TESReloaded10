@@ -1,9 +1,8 @@
-#define WaitForDebugger 1
+#define WaitForDebugger 0
 #define HookDevice 0
 
-#include "SleepingMode.h"
-#include "D3D9Hook.h"
 #include "Hooks/Skyrim/Hooks.h"
+#include "D3D9/Hook.h"
 
 extern "C" {
 
@@ -35,7 +34,9 @@ extern "C" {
 			SettingManager::Initialize();
 			if (TheSettingManager->LoadSettings(true)) {
 				AttachHooks();
-				if (TheSettingManager->SettingsMain.SleepingMode.Enabled) CreateSleepingModeHook();
+			}
+			else {
+
 			}
 		}
 		return true;

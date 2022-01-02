@@ -259,3 +259,14 @@ public:
 	}
 
 };
+
+class ShadowManagerBase {
+public:
+
+	enum ShadowMapTypeEnum {
+		MapNear = 0,
+		MapFar = 1,
+		MapOrtho = 2,
+	};
+
+};

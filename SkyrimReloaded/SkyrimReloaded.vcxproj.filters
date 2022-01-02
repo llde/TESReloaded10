@@ -33,6 +33,9 @@
     <Filter Include="Core\Hooks\Skyrim">
       <UniqueIdentifier>{9e4d943f-b63c-4f88-ac81-4554b6015be3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\D3D9">
+      <UniqueIdentifier>{af003247-f2a1-49b1-bf3e-63740a504f7a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -55,9 +58,6 @@
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Defines.h">
       <Filter>Framework\Skyrim</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Framework\Common\Managers.h">
-      <Filter>Framework\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Framework.h">
       <Filter>Framework\Skyrim</Filter>
@@ -116,6 +116,42 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\D3D9\Device.h">
+      <Filter>Core\D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\D3D9\Hook.h">
+      <Filter>Core\D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Skyrim\Managers.h">
+      <Filter>Framework\Skyrim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\CameraManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\CommandManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\GameEventManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\KeyboardManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\RenderManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\SettingManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\ShaderManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\TextureManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -136,8 +172,41 @@
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\modules.cpp">
       <Filter>Framework\Common\Lib\Detours</Filter>
     </ClCompile>
-    <ClCompile Include="..\TESReloaded\Framework\Common\Managers.cpp">
-      <Filter>Framework\Common</Filter>
+    <ClCompile Include="..\TESReloaded\Core\D3D9\Device.cpp">
+      <Filter>Core\D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\D3D9\Hook.cpp">
+      <Filter>Core\D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Skyrim\Managers.cpp">
+      <Filter>Framework\Skyrim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\CameraManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\CommandManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\GameEventManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\GameMenuManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\KeyboardManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\SettingManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\TextureManager.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

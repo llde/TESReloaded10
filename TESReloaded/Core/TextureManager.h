@@ -1,4 +1,16 @@
 #pragma once
+#define SamplerStatesMax 12
+#define WordSourceBuffer "TESR_SourceBuffer"
+#define WordRenderedBuffer "TESR_RenderedBuffer"
+#define WordDepthBuffer "TESR_DepthBuffer"
+#define WordShadowMapBufferNear "TESR_ShadowMapBufferNear"
+#define WordShadowMapBufferFar "TESR_ShadowMapBufferFar"
+#define WordOrthoMapBuffer "TESR_OrthoMapBuffer"
+#define WordShadowCubeMapBuffer0 "TESR_ShadowCubeMapBuffer0"
+#define WordShadowCubeMapBuffer1 "TESR_ShadowCubeMapBuffer1"
+#define WordShadowCubeMapBuffer2 "TESR_ShadowCubeMapBuffer2"
+#define WordShadowCubeMapBuffer3 "TESR_ShadowCubeMapBuffer3"
+#define WordWaterHeightMapBuffer "TESR_WaterHeightMapBuffer"
 
 class TextureRecord {
 public:

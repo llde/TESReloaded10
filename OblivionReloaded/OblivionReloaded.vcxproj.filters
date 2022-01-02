@@ -113,9 +113,6 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h">
       <Filter>Framework\Common\Base</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Framework\Common\Managers.h">
-      <Filter>Framework\Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Settings.h">
       <Filter>Core\Hooks\Oblivion</Filter>
     </ClInclude>
@@ -206,6 +203,9 @@
     <ClInclude Include="..\TESReloaded\Core\D3D9\Hook.h">
       <Filter>Core\D3D9</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Oblivion\Managers.h">
+      <Filter>Framework\Oblivion</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TESReloaded\Core\CameraManager.cpp">
@@ -265,9 +265,6 @@
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\SafeWrite.cpp">
       <Filter>Framework\Common\Base</Filter>
     </ClCompile>
-    <ClCompile Include="..\TESReloaded\Framework\Common\Managers.cpp">
-      <Filter>Framework\Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\D3D9\Device.cpp">
       <Filter>Core\D3D9</Filter>
     </ClCompile>
@@ -279,6 +276,9 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\D3D9\Hook.cpp">
       <Filter>Core\D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Oblivion\Managers.cpp">
+      <Filter>Framework\Oblivion</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

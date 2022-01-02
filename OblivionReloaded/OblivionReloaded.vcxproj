@@ -147,7 +147,6 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.h" />
-    <ClInclude Include="..\TESReloaded\Framework\Common\Managers.h" />
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\Base.h" />
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\Defines.h" />
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\Framework.h" />
@@ -163,6 +162,7 @@
     <ClInclude Include="..\TESReloaded\Core\ShaderManager.h" />
     <ClInclude Include="..\TESReloaded\Core\ShadowManager.h" />
     <ClInclude Include="..\TESReloaded\Core\TextureManager.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Oblivion\Managers.h" />
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\Plugin.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
@@ -181,7 +181,6 @@
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\disasm.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\modules.cpp" />
-    <ClCompile Include="..\TESReloaded\Framework\Common\Managers.cpp" />
     <ClCompile Include="..\TESReloaded\Core\GameEventManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\GameMenuManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\KeyboardManager.cpp" />
@@ -190,6 +189,7 @@
     <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ShadowManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\TextureManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Framework\Oblivion\Managers.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>

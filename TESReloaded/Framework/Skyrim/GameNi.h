@@ -59,6 +59,8 @@ class AnimSequenceBase;
 
 class TESObjectREFR;
 
+class BSFixedString;
+
 class bhkCollisionObject;
 
 struct NiRTTI {

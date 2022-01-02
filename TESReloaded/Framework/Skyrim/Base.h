@@ -37,6 +37,7 @@ public:
 	static const UInt32 SetCameraPosition			= 0x0083F690;
 	static const UInt32 SetFurnitureCameraState		= 0x0083D6E0;
 	static const UInt32 ProcessSleepWaitMenu		= 0x00887F90;
+	static const UInt32 ShowSleepWaitMenu			= 0x00887B20;
 	static const UInt32 ServeSentence				= 0x0074B7E0;
 };
 
@@ -98,7 +99,7 @@ public:
 
 };
 
-class RenderManagerBase {
+class RenderManagerBase : public NiDX9Renderer {
 public:
 	
 	IDirect3DSurface9* CreateHDRRenderTarget() {
@@ -143,5 +144,16 @@ public:
 		return Size;
 
 	}
+
+};
+
+class ShadowManagerBase {
+public:
+
+	enum ShadowMapTypeEnum {
+		MapNear = 0,
+		MapFar = 1,
+		MapOrtho = 2,
+	};
 
 };

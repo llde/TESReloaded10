@@ -52,7 +52,6 @@ static const UInt32 kHitEventReturn = 0x006E483E;
 #define kMessageBoxServeSentenceText 0x01B19068
 #define kMessageBoxButtonYes 0x01B17FA0
 #define kMessageBoxButtonNo 0x01B17FAC
-#define kShowSleepWaitMenu 0x00887B20
 #define SleepingState 7
 
 

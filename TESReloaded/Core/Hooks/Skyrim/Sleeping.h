@@ -1,37 +1,34 @@
 #pragma once
 
-int (__thiscall SleepingMode::* ServeSentence)();
-int (__thiscall SleepingMode::* TrackServeSentence)();
-int SleepingMode::TrackServeSentence() {
+static int (__thiscall* ServeSentence)(PlayerCharacter*) = (int (__thiscall*)(PlayerCharacter*))Hooks::ServeSentence;
+static int __fastcall ServeSentenceHook(PlayerCharacter* This, UInt32 edx) {
 
-	Player->RestoreCamera();
-	return (this->*ServeSentence)();
+	This->RestoreCamera();
+	return (*ServeSentence)(This);
 
 }
 
-void (__thiscall SleepingMode::* SetFurnitureCameraState)(TESFurniture*);
-void (__thiscall SleepingMode::* TrackSetFurnitureCameraState)(TESFurniture*);
-void SleepingMode::TrackSetFurnitureCameraState(TESFurniture* Furniture) {
+static void (__thiscall* SetFurnitureCameraState)(PlayerCamera*, TESFurniture*) = (void (__thiscall*)(PlayerCamera*, TESFurniture*))Hooks::SetFurnitureCameraState;
+static void __fastcall SetFurnitureCameraStateHook(PlayerCamera* This, UInt32 edx, TESFurniture* Furniture) {
 
-	PlayerCamera* Camera = (PlayerCamera*)this;
+	PlayerCamera* Camera = (PlayerCamera*)This;
 	UInt8 SitSleepState = Player->GetSitSleepState();
 
 	if (SitSleepState == 7 && Camera->cameraState->stateId == TESCameraState::CameraState::kCameraState_Furniture) Player->QueueNiNodeUpdate();
-	(this->*SetFurnitureCameraState)(Furniture);
+	(*SetFurnitureCameraState)(This, Furniture);
 
 }
 
-int (__thiscall SleepingMode::* ProcessSleepWaitMenu)(UInt32);
-int (__thiscall SleepingMode::* TrackProcessSleepWaitMenu)(UInt32);
-int SleepingMode::TrackProcessSleepWaitMenu(UInt32 Arg1) {
+static int (__thiscall* ProcessSleepWaitMenu)(SleepWaitMenu*, UInt32) = (int (__thiscall*)(SleepWaitMenu*, UInt32))Hooks::ProcessSleepWaitMenu;
+static int __fastcall ProcessSleepWaitMenuHook(SleepWaitMenu* This, UInt32 edx, UInt32 Arg1) {
 	
 	bool IsPlayerSleeping = Player->flags725 & 4;
 
 	if (Player->JailedState && IsPlayerSleeping) Served = true;
-	bool r = (this->*ProcessSleepWaitMenu)(Arg1);
+	bool r = (*ProcessSleepWaitMenu)(This, Arg1);
 	if (Served && !IsPlayerSleeping) {
 		Served = false;
-		MenuManager->ShowMessageBox(*MessageBoxServeSentenceText, (void*)0x00499D70, *MessageBoxButtonYes, *MessageBoxButtonNo);
+		InterfaceManager->ShowMessageBox(*MessageBoxServeSentenceText, (void*)0x00499D70, *MessageBoxButtonYes, *MessageBoxButtonNo);
 	}
 	return r;
 

@@ -16,3 +16,13 @@ static TES* __fastcall NewTESHook(TES* This, UInt32 edx, char* RootData, NiNode*
 	return Tes;
 
 }
+
+static MainDataHandler* (__thiscall* NewMainDataHandler)(MainDataHandler*) = (MainDataHandler* (__thiscall*)(MainDataHandler*))Hooks::NewMainDataHandler;
+static MainDataHandler* __fastcall NewMainDataHandlerHook(MainDataHandler* This, UInt32 edx) {
+	
+	DataHandler = (*NewMainDataHandler)(This);
+	TheScriptManager->LoadForms();
+	TheEquipmentManager->LoadForms();
+	return DataHandler;
+
+}

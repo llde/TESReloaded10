@@ -1,5 +1,7 @@
 #pragma once
 
+class VMClassRegistry;
+
 class PluginInterface {
 public:
 	enum InterfaceType {

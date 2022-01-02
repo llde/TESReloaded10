@@ -29,16 +29,6 @@ static SceneGraph* __fastcall NewSceneGraphHook(SceneGraph* This, UInt32 edx, ch
 
 }
 
-static MainDataHandler* (__thiscall* NewMainDataHandler)(MainDataHandler*) = (MainDataHandler* (__thiscall*)(MainDataHandler*))Hooks::NewMainDataHandler;
-static MainDataHandler* __fastcall NewMainDataHandlerHook(MainDataHandler* This, UInt32 edx) {
-	
-	DataHandler = (*NewMainDataHandler)(This);
-	TheScriptManager->LoadForms();
-	TheEquipmentManager->LoadForms();
-	return DataHandler;
-
-}
-
 static MenuInterfaceManager* (__thiscall* NewMenuInterfaceManager)(MenuInterfaceManager*) = (MenuInterfaceManager* (__thiscall*)(MenuInterfaceManager*))Hooks::NewMenuInterfaceManager;
 static MenuInterfaceManager* __fastcall NewMenuInterfaceManagerHook(MenuInterfaceManager* This, UInt32 edx) {
 
