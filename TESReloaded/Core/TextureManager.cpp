@@ -47,13 +47,13 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Filename) {
 			Texture = TheRenderManager->DepthTexture;
 			break;
 		case ShadowMapBufferNear:
-			Texture = TheShadowManager->ShadowMapTexture[ShadowManager::ShadowMapTypeEnum::MapNear];
+			Texture = TheShadowManager->ShadowMapTexture[ShadowManagerBase::ShadowMapTypeEnum::MapNear];
 			break;
 		case ShadowMapBufferFar:
-			Texture = TheShadowManager->ShadowMapTexture[ShadowManager::ShadowMapTypeEnum::MapFar];
+			Texture = TheShadowManager->ShadowMapTexture[ShadowManagerBase::ShadowMapTypeEnum::MapFar];
 			break;
 		case OrthoMapBuffer:
-			Texture = TheShadowManager->ShadowMapTexture[ShadowManager::ShadowMapTypeEnum::MapOrtho];
+			Texture = TheShadowManager->ShadowMapTexture[ShadowManagerBase::ShadowMapTypeEnum::MapOrtho];
 			break;
 		case ShadowCubeMapBuffer0:
 			Texture = TheShadowManager->ShadowCubeMapTexture[0];

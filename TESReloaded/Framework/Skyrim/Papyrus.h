@@ -1,7 +1,5 @@
 #pragma once
 
-const char* SRClass = "SRCommands";
-
 bool SetExtraEffectEnabled(BSFixedString Name, bool Value) {
 
 	double result;
@@ -23,8 +21,8 @@ bool SetCustomConstant(BSFixedString Name, float Value1, float Value2, float Val
 
 bool RegisterPapyrusCommands(VMClassRegistry* registry) {
 
-	registry->RegisterFunction(new PapyrusFunction2<BSFixedString, bool>("SetExtraEffectEnabled", SRClass, SetExtraEffectEnabled, registry));
-	registry->RegisterFunction(new PapyrusFunction5<BSFixedString, float, float, float, float>("SetCustomConstant", SRClass, SetCustomConstant, registry));
+	registry->RegisterFunction(new PapyrusFunction2<BSFixedString, bool>("SetExtraEffectEnabled", "SRCommands", SetExtraEffectEnabled, registry));
+	registry->RegisterFunction(new PapyrusFunction5<BSFixedString, float, float, float, float>("SetCustomConstant", "SRCommands", SetCustomConstant, registry));
 	return true;
 
 }

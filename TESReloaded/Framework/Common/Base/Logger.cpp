@@ -1,3 +1,4 @@
+#include "Logger.h"
 char	Logger::MessageBuffer[1024];
 FILE*	Logger::LogFile;
 

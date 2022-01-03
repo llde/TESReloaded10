@@ -1,7 +1,6 @@
 #pragma once
 
 #define CommandPrefix "OR"
-
 #define SettingsFile "\\Data\\OBSE\\Plugins\\OblivionReloaded.dll.config"
 #define FastMMFile "\\Data\\OBSE\\Plugins\\OblivionReloadedFastMM.dll"
 #define ShadersPath "Data\\Shaders\\OblivionReloaded\\Shaders\\"
@@ -10,6 +9,7 @@
 static const char* IntroMovie = "ORGameStudios.bik";
 static const char* MainMenuMovie = "ORMainMenu.bik";
 static const char* MainMenuMusic = "Special\\ORMainMenu.mp3";
+
 #define kMenuRenderedTexture 0x00B333E8
 
 
@@ -32,6 +32,7 @@ static const UInt8* SettingHDR = (UInt8*)0x00B06DE4;
 
 #define kDetectorWindowScale 0x004965A8
 #define kDetectorWindowScaleReturn 0x0049660F
+
 static const UInt32 kRenderInterface = 0x0057F3F3;
 static const UInt32 kRenderInterfaceReturn = 0x0057F3F8;
 static const UInt32 kRenderInterfaceMethod = 0x0070E0A0;
@@ -44,13 +45,6 @@ static const UInt32 kDetectorWindowDumpAttributes = 0x004967C7;
 static const UInt32 kDetectorWindowDumpAttributesReturn = 0x004967CD;
 static const UInt32 kDetectorWindowConsoleCommand = 0x0040CC6C;
 static const UInt32 kDetectorWindowConsoleCommandReturn = 0x0040CC73;
-
-
-
-static const UInt32 kSetRegionEditorName = 0x004A32A6;
-static const UInt32 kSetRegionEditorNameReturn = 0x004A33A6;
-static const UInt32 kSetWeatherEditorName = 0x004EE04E;
-static const UInt32 kSetWeatherEditorNameReturn = 0x004EE0EA;
 
 
 #define wtype weaponType

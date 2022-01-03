@@ -642,7 +642,7 @@ void ShaderManager::InitializeConstants() {
 
 void ShaderManager::UpdateConstants() {
 
-	bool IsThirdPersonView = !TheCameraManager->FirstPersonView;
+	bool IsThirdPersonView = !TheCameraManager->IsFirstPerson();
 	Sky* WorldSky = Tes->sky;
 	NiNode* SunRoot = WorldSky->sun->RootNode;
 	TESClimate* currentClimate = WorldSky->firstClimate;
@@ -1204,7 +1204,7 @@ void ShaderManager::UpdateConstants() {
 		if (TheSettingManager->SettingsMain.Effects.DepthOfField) {
 			SettingsDepthOfFieldStruct* sds = NULL;
 
-			if (TheCameraManager->IsVanityView())
+			if (TheCameraManager->IsVanity())
 				sds = &TheSettingManager->SettingsDepthOfFieldVanityView;
 			else if (IsThirdPersonView)
 				sds = &TheSettingManager->SettingsDepthOfFieldThirdPersonView;

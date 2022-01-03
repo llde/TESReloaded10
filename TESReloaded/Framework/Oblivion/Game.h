@@ -2650,6 +2650,11 @@ public:
 	void			UpdateInventory() { void (*UpdateInventoryMenu)() = (void(*)())0x005AADC0; ThisCall(0x00668CC0, this); ThisCall(0x006575B0, this->process, this, 1, 0, 0); ThisCall(0x0060E260, this); UpdateInventoryMenu(); }
 	bool			IsMoving() { return (process->GetMovementFlags() & 0x800); }
 	bool			IsAlive() { return !GetDead(0); }
+	bool			IsFirstPerson() { return !isThirdPerson; }
+	bool			IsVanity() { return *(bool*)0x00B3BB04; }
+	void			SetFoV(float FoV) { float* SettingWorldFoV = (float*)0x00B0313C; float* Setting1stPersonFoV = (float*)0x00B0313C; worldFoV = *SettingWorldFoV = *Setting1stPersonFoV = FoV; }
+	float			GetFoV(bool IsSpecialView) { return worldFoV; }
+	void			ResetCamera() { ThisCall(0x0066C600, this); }
 
 	UInt8			unk10C;										// 10C
 	UInt8			pad10D[3];									// 10D

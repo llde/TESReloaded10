@@ -11,7 +11,7 @@ void CommandManager::Initialize(const PluginInterface* Interface) {
 
 void CommandManager::PluginCommands::IsThirdPerson(double* result) {
 
-	*result = !TheCameraManager->FirstPersonView;
+	*result = !TheCameraManager->IsFirstPerson();
 
 }
 

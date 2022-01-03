@@ -3,7 +3,7 @@
 static int (__thiscall* ServeSentence)(PlayerCharacter*) = (int (__thiscall*)(PlayerCharacter*))Hooks::ServeSentence;
 static int __fastcall ServeSentenceHook(PlayerCharacter* This, UInt32 edx) {
 
-	This->RestoreCamera();
+	This->ResetCamera();
 	return (*ServeSentence)(This);
 
 }

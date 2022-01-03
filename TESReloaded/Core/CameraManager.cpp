@@ -12,30 +12,43 @@ void CameraManager::Initialize() {
 
 }
 
+bool CameraManager::IsFirstPerson() {
+
+	return TheSettingManager->SettingsMain.CameraMode.Enabled ? FirstPersonView : Player->IsFirstPerson();
+
+}
+
+bool CameraManager::IsVanity() {
+
+	return Player->IsVanity();
+
+}
+
+void CameraManager::SetFirstPerson(bool FirstPerson) {
+
+	FirstPersonView = FirstPerson;
+
+}
+
 void CameraManager::ResetCamera() {
 	
-	ThisCall(0x0066C600, this);
+	Player->ResetCamera();
 
 }
 
 void CameraManager::SetSceneGraph() {
 	
-	float* SettingWorldFoV = (float*)0x00B0313C;
-	float* Setting1stPersonFoV = (float*)0x00B0313C;
-	float* SettingNearDistance = (float*)0x00B03134;
-	float FoV = TheSettingManager->SettingsMain.CameraMode.FoV;
+	SettingsMainStruct::CameraModeStruct* CameraMode = &TheSettingManager->SettingsMain.CameraMode;
+	float FoV = CameraMode->FoV;
 	
-	*SettingNearDistance = 2.5f;
-	if (FoV != WorldSceneGraph->cameraFOV && !Player->IsAiming() && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
-		WorldSceneGraph->UpdateParticleShaderFoVData(FoV);
-		Player->worldFoV = *SettingWorldFoV = *Setting1stPersonFoV = FoV;
+	if (CameraMode->Enabled) {
+		WorldSceneGraph->SetNearDistance(2.5f);
+		if (FoV != WorldSceneGraph->cameraFOV && !Player->IsAiming() && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
+			WorldSceneGraph->SetFoV(FoV);
+			Player->SetFoV(FoV);
+		}
 	}
-	TheShaderManager->ShaderConst.ReciprocalResolution.w = Player->worldFoV;
-}
-
-bool CameraManager::IsVanityView() {
-	
-	return *(bool*)0x00B3BB04;
+	TheShaderManager->ShaderConst.ReciprocalResolution.w = Player->GetFoV(false);
 
 }
 

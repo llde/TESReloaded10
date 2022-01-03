@@ -86,7 +86,7 @@ void SettingManager::Configuration::FillNode(ConfigNode* Node, const char* Secti
 	Node->Type = atoi(GetAttribute(KeyPosition, "Type", AttributeValue));
 	Node->Reboot = atoi(GetAttribute(KeyPosition, "Reboot", AttributeValue));
 	strcpy(Node->Versioning, GetAttribute(KeyPosition, "Versioning", AttributeValue));
-	if (strlen(Node->Versioning) > 2) {
+	if (strlen(Node->Versioning) > 3) {
 		char Error[160];
 		sprintf(Error, "CRITICAL ERROR: VERSIONING! %s %s", Key, Section);
 		Logger::Log(Error);
@@ -317,6 +317,7 @@ bool SettingManager::LoadSettings(bool Init) {
 		SettingsMain.OcclusionCulling.OccludedDistantStaticMax = GetSettingF("Main.OcclusionCulling.Main", "OccludedDistantStaticMax");
 		SettingsMain.OcclusionCulling.OccludedReflectionsMin = GetSettingF("Main.OcclusionCulling.Main", "OccludedReflectionsMin");
 
+		SettingsMain.CameraMode.Enabled = GetSettingI("Main.CameraMode.Main", "Enabled");
 		SettingsMain.CameraMode.Crosshair = GetSettingI("Main.CameraMode.Main", "Crosshair");
 		SettingsMain.CameraMode.ChasingFirst = GetSettingI("Main.CameraMode.Main", "ChasingFirst");
 		SettingsMain.CameraMode.ChasingThird = GetSettingI("Main.CameraMode.Main", "ChasingThird");

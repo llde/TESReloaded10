@@ -70,6 +70,18 @@ public:
 	static const UInt32 UpdateFlyCam				= 0x006643A0;
 };
 
+class Jumpers {
+public:
+	struct SetRegionEditorName {
+		static const UInt32 Hook	= 0x004A32A6;
+		static const UInt32 Return	= 0x004A33A6;
+	};
+	struct SetWeatherEditorName {
+		static const UInt32 Hook	= 0x004EE04E;
+		static const UInt32 Return	= 0x004EE0EA;
+	};
+};
+
 class CommandManagerBase {
 public:
 	

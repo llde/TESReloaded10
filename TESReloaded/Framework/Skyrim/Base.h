@@ -66,6 +66,7 @@ public:
 	void RegisterCommands(const PluginInterface* Interface, void* CommandExecuters[], CommandInfo* CommandInfos[], int CommandInfoSize) {
 
 		PapyrusInterface* PInterface = (PapyrusInterface*)Interface->QueryInterface(PluginInterface::InterfaceType::kInterface_Papyrus);
+
 		PInterface->Register(RegisterPapyrusCommands);
 		
 		//DetourTransactionBegin();

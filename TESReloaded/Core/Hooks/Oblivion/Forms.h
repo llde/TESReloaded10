@@ -1,13 +1,13 @@
 #pragma once
 
 static __declspec(naked) void SetRegionEditorNameHook() {
-
+	
 	__asm {
 		push	ecx
 		call	SetRegionEditorName
 		add		esp, 8
 		xor		esi, esi
-		jmp		kSetRegionEditorNameReturn
+		jmp		Jumpers::SetRegionEditorName::Return
 	}
 
 }
@@ -20,7 +20,7 @@ static __declspec(naked) void SetWeatherEditorNameHook() {
 		push	ecx
 		call	SetWeatherEditorName
 		add		esp, 8
-		jmp		kSetWeatherEditorNameReturn
+		jmp		Jumpers::SetWeatherEditorName::Return
 	}
 
 }

@@ -7,18 +7,18 @@ static int __fastcall SetCameraStateHook(PlayerCamera* This, UInt32 edx, TESCame
 
 	if (This->cameraNode->m_pcName && CameraState->camera->thirdPersonState2 != NULL) {
 		if (CameraState->stateId == TESCameraState::CameraState::kCameraState_FirstPerson) {
-			if (TheCameraManager->FirstPersonView && TheCameraManager->TogglePOV) {
+			if (TheCameraManager->IsFirstPerson() && TheCameraManager->TogglePOV) {
 				CameraState = This->thirdPersonState2;
-				TheCameraManager->FirstPersonView = false;
+				TheCameraManager->SetFirstPerson(false);
 			}
 			else {
 				CameraState = This->thirdPersonState2;
-				TheCameraManager->FirstPersonView = true;
+				TheCameraManager->SetFirstPerson(true);
 			}
 		}
-		else if (CameraState->stateId == TESCameraState::CameraState::kCameraState_ThirdPerson2) TheCameraManager->FirstPersonView = false;
-		if (TheCameraManager->FirstPersonView && CameraState->stateId != TESCameraState::CameraState::kCameraState_ThirdPerson2) TheCameraManager->FirstPersonView = false;
-		if (!TheCameraManager->FirstPersonView && CameraState->stateId == TESCameraState::CameraState::kCameraState_ThirdPerson2) {
+		else if (CameraState->stateId == TESCameraState::CameraState::kCameraState_ThirdPerson2) TheCameraManager->SetFirstPerson(false);
+		if (TheCameraManager->IsFirstPerson() && CameraState->stateId != TESCameraState::CameraState::kCameraState_ThirdPerson2) TheCameraManager->SetFirstPerson(false);
+		if (!TheCameraManager->IsFirstPerson() && CameraState->stateId == TESCameraState::CameraState::kCameraState_ThirdPerson2) {
 			IsWeaponOut = Player->actorState.IsWeaponOut();
 			This->AllowVanityMode = !IsWeaponOut;
 			This->UpdateOverShoulder(IsWeaponOut);
@@ -38,7 +38,7 @@ static void __fastcall ManageButtonEventHook(PlayerInputHandler* This, UInt32 ed
 	if (State->stateId == TESCameraState::CameraState::kCameraState_ThirdPerson2) {
 		if (PlayerControls::Get()->IsCamSwitchControlEnabled()) {
 			if (State->TogglePOV) TheCameraManager->TogglePOV = true;
-			if (TheCameraManager->FirstPersonView && *Event->GetControlID() == InputStringHolder::Get()->zoomOut) State->camera->SetCameraState(State->camera->thirdPersonState2);
+			if (TheCameraManager->IsFirstPerson() && *Event->GetControlID() == InputStringHolder::Get()->zoomOut) State->camera->SetCameraState(State->camera->thirdPersonState2);
 		}
 	}
 
@@ -49,7 +49,7 @@ static void __fastcall SetCameraPositionHook(ThirdPersonState* This, UInt32 edx)
 
 	BSFixedString Head;
 
-	if (TheCameraManager->FirstPersonView) {
+	if (TheCameraManager->IsFirstPerson()) {
 		Head.Create("NPC Head [Head]");
 		NiNode* ActorNode = Player->GetNiRootNode(0);
 		NiPoint3* HeadPosition = &ActorNode->GetObjectByName(&Head)->m_worldTransform.pos;

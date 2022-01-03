@@ -3,7 +3,7 @@
 static void (__thiscall* ToggleCamera)(PlayerCharacter*, UInt8) = (void (__thiscall*)(PlayerCharacter*, UInt8))Hooks::ToggleCamera;
 static void __fastcall ToggleCameraHook(PlayerCharacter* This, UInt32 edx, UInt8 FirstPersonView) {
 	
-	TheCameraManager->FirstPersonView = FirstPersonView;
+	TheCameraManager->SetFirstPerson(FirstPersonView);
 	if (Player->IsAiming()) { (*ToggleCamera)(This, 1); return; }
 	(*ToggleCamera)(This, 0);
 
@@ -33,7 +33,7 @@ static void __fastcall UpdateCameraCollisionsHook(PlayerCharacter* This, UInt32 
 	UInt8 SitSleepState = Player->GetSitSleepState();
 
 	if (SitSleepState >= HighProcess::kSitSleep_SleepingIn && SitSleepState <= HighProcess::kSitSleep_SleepingOut) Player->DisableFading = 1;
-	if (!TheCameraManager->FirstPersonView) {
+	if (!TheCameraManager->IsFirstPerson()) {
 		CameraChasing = !CameraMode->ChasingThird;
 	}
 	else {
@@ -43,7 +43,7 @@ static void __fastcall UpdateCameraCollisionsHook(PlayerCharacter* This, UInt32 
 	(*UpdateCameraCollisions)(This, CameraPosition, PlayerPosition, CameraChasing);
 	Player->DisableFading = DisableFading;
 	if (Crosshair == 0) {
-		if (!TheCameraManager->FirstPersonView) InterfaceManager->SetCrosshair(0); else InterfaceManager->SetCrosshair(1);
+		if (!TheCameraManager->IsFirstPerson()) InterfaceManager->SetCrosshair(0); else InterfaceManager->SetCrosshair(1);
 	}
 	else {
 		if (Crosshair == 1) {
@@ -62,7 +62,7 @@ static void __fastcall UpdateCameraCollisionsHook(PlayerCharacter* This, UInt32 
 static void (__thiscall* SetAimingZoom)(PlayerCharacter*, float) = (void (__thiscall*)(PlayerCharacter*, float))Hooks::SetAimingZoom;
 static void __fastcall SetAimingZoomHook(PlayerCharacter* This, UInt32 edx, float Arg1) {
 	
-	if (TheCameraManager->FirstPersonView) {
+	if (TheCameraManager->IsFirstPerson()) {
 		if (Player->IsAiming()) ThisCall(kToggleCamera, Player, 1);
 		(*SetAimingZoom)(This, Arg1);
 	}
@@ -85,7 +85,7 @@ static void UpdateCamera(NiAVObject* CameraNode, NiPoint3* LocalPosition) {
 	NiPoint3 Offset;
 	
 	if (SitSleepState < HighProcess::kSitSleep_SleepingIn || SitSleepState > HighProcess::kSitSleep_SleepingOut) From->x = 0.0f;
-	if (!TheCameraManager->FirstPersonView && SitSleepState >= HighProcess::kSitSleep_SleepingIn && SitSleepState <= HighProcess::kSitSleep_SleepingOut) {
+	if (!TheCameraManager->IsFirstPerson() && SitSleepState >= HighProcess::kSitSleep_SleepingIn && SitSleepState <= HighProcess::kSitSleep_SleepingOut) {
 		if (From->x == 0.0f) {
 			From->x = CameraPosition->x;
 			From->y = CameraPosition->y;
@@ -135,7 +135,7 @@ static void UpdateCamera(NiAVObject* CameraNode, NiPoint3* LocalPosition) {
 		CameraNode->m_worldTransform.rot = mw;
 		CameraNode->m_localTransform.rot = ml;
 	}
-	else if (TheCameraManager->FirstPersonView && !TheCameraManager->IsVanityView()) {
+	else if (TheCameraManager->IsFirstPerson() && !TheCameraManager->IsVanity()) {
 		if (SitSleepState != HighProcess::kSitSleep_SittingIn && SitSleepState != HighProcess::kSitSleep_SittingOut) {
 			Offset = { CameraMode->Offset.z * Player->scale, CameraMode->Offset.y * Player->scale, CameraMode->Offset.x * Player->scale };
 			if (Player->IsAiming() && Player->ActorSkinInfo->WeaponForm->weaponType == TESObjectWEAP::WeaponType::kWeapType_Bow) {

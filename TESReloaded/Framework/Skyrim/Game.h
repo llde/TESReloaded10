@@ -3397,17 +3397,16 @@ assert(sizeof(PlayerSkills) == 0x04);
 
 class PlayerCharacter : public Character {
 public:
-	void				RestoreCamera() { ThisCall(0x00730EE0, this, 0); }
-	void				SetFoV(SceneGraph* WorldSceneGraph, float* SettingWorldFoV, float* Setting1stPersonFoV, float FoV) { PlayerCamera* Camera = PlayerCamera::Get(); WorldSceneGraph->SetCameraFOV(FoV); Camera->worldFoV = Camera->firstPersonFoV = *SettingWorldFoV = *Setting1stPersonFoV = FoV; }
-	float				GetFoV(bool IsSpecialView) { PlayerCamera* Camera = PlayerCamera::Get(); return (IsSpecialView ? Camera->firstPersonFoV : Camera->worldFoV); }
-	bool				IsThirdPersonView(bool CameraMode, bool FirstPersonView) { return (!CameraMode ? PlayerCamera::Get()->cameraState->stateId == TESCameraState::CameraState::kCameraState_ThirdPerson2 : !FirstPersonView); }
-	bool				IsVanityView() { return false; }
 	bool				IsAiming() { return false; }
 	TESWorldSpace*		GetWorldSpace() { return (parentCell != NULL ? parentCell->worldSpace : NULL); }
 	TESRegion*			GetRegion() { return NULL; }
-	void				UpdateInventory() {}
 	bool				IsMoving() { return false; }
 	bool				IsAlive() { return !GetDead(1); }
+	bool				IsFirstPerson() { return PlayerCamera::Get()->cameraState->stateId == TESCameraState::CameraState::kCameraState_FirstPerson; }
+	bool				IsVanity() { return false; }
+	void				SetFoV(float FoV) { float* SettingWorldFoV = (float*)0x012C8D78; float* Setting1stPersonFoV = (float*)0x012C8D84; PlayerCamera* Camera = PlayerCamera::Get(); Camera->worldFoV = Camera->firstPersonFoV = *SettingWorldFoV = *Setting1stPersonFoV = FoV; }
+	float				GetFoV(bool IsSpecialView) { PlayerCamera* Camera = PlayerCamera::Get(); return (IsSpecialView ? Camera->firstPersonFoV : Camera->worldFoV); }
+	void				ResetCamera() { ThisCall(0x00730EE0, this, 0); }
 
 	UInt32				menuOpenCloseEvent;				// 19C .?AV?$BSTEventSink@VMenuOpenCloseEvent@@@@
 	UInt32				menuModeChangeEvent;			// 1A0 .?AV?$BSTEventSink@VMenuModeChangeEvent@@@@

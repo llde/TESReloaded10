@@ -36,6 +36,7 @@ struct SettingsMainStruct {
 	};
 
 	struct CameraModeStruct {
+		bool		Enabled;
 		bool		ChasingFirst;
 		bool		ChasingThird;
 		UInt8		Crosshair;

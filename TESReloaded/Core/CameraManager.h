@@ -24,15 +24,19 @@ public:
 
 	};
 	
-	void					ResetCamera();
+	bool					IsFirstPerson();
+	bool					IsVanity();
+	void					SetFirstPerson(bool FirstPerson);
 	void					SetSceneGraph();
-	bool					IsVanityView();
+	void					ResetCamera();
 	void					ExecuteCommands(NiAVObject* CameraNode);
 
 	Actor*					DialogTarget;
 	NiPoint3				From;
 	NiPoint3				FromOffset;
 	CameraManagerCommands*	CameraCommands;
-	bool					FirstPersonView;
 	bool					TogglePOV;
+
+private:
+	bool					FirstPersonView;
 };

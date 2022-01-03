@@ -106,8 +106,8 @@ void AttachHooks() {
 	SafeWriteJump(kDetectorWindowConsoleCommand,	(UInt32)DetectorWindowConsoleCommandHook);
 	SafeWriteJump(kRenderInterface,					(UInt32)RenderInterfaceHook);
 	SafeWriteJump(kSkipFogPass,						(UInt32)SkipFogPassHook);
-	SafeWriteJump(kSetRegionEditorName,				(UInt32)SetRegionEditorNameHook);
-	SafeWriteJump(kSetWeatherEditorName,			(UInt32)SetWeatherEditorNameHook);
+	SafeWriteJump(Jumpers::SetRegionEditorName::Hook,	(UInt32)SetRegionEditorNameHook);
+	SafeWriteJump(Jumpers::SetWeatherEditorName::Hook,	(UInt32)SetWeatherEditorNameHook);
 	SafeWriteJump(kHitEventHook,					(UInt32)HitEventHook);
 	SafeWriteJump(kNewAnimSequenceSingleHook,		(UInt32)NewAnimSequenceSingleHook);
 	SafeWriteJump(kRemoveSequenceHook,				(UInt32)RemoveSequenceHook);

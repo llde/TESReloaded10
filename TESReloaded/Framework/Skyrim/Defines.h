@@ -5,10 +5,6 @@
 #define SettingsFile "\\Data\\SKSE\\Plugins\\SkyrimReloaded.dll.config"
 #define ShadersPath "Data\\Shadersfx\\SkyrimReloaded\\Shaders\\"
 #define EffectsPath "Data\\Shadersfx\\SkyrimReloaded\\Effects\\"
-#define kSettingGridsToLoad 0x01241000
-#define kSettingWorldFoV 0x012C8D78
-#define kSetting1stPersonFoV 0x012C8D84
-#define kSettingNearDistance 0x012C8D54
 static const char* IntroMovie = "";
 static const char* MainMenuMovie = "";
 static const char* MainMenuMusic = "";

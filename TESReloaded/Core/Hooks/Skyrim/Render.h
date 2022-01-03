@@ -41,7 +41,7 @@ static void __fastcall RenderWorldSceneGraphHook(Main* This, UInt32 edx, Sun* Sk
 static void (__thiscall* RenderFirstPerson)(Main*, NiDX9Renderer*, NiGeometry*, Sun*, BSRenderedTexture*, UInt8) = (void (__thiscall*)(Main*, NiDX9Renderer*, NiGeometry*, Sun*, BSRenderedTexture*, UInt8))Hooks::RenderFirstPerson;
 static void __fastcall RenderFirstPersonHook(Main* This, UInt32 edx, NiDX9Renderer* Renderer, NiGeometry* Geo, Sun* SkySun, BSRenderedTexture* RenderedTexture, UInt8 IsMultiSample) {
 	
-	(RenderFirstPerson)(This, Renderer, Geo, SkySun, RenderedTexture, IsMultiSample);
+	(*RenderFirstPerson)(This, Renderer, Geo, SkySun, RenderedTexture, IsMultiSample);
 	TheRenderManager->ResolveDepthBuffer();
 	TheRenderManager->Clear(NULL, NiRenderer::kClear_ZBUFFER);
 	ThisCall(0x00697E50, Global);

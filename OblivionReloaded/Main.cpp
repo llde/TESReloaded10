@@ -36,7 +36,11 @@ extern "C" {
 				AttachHooks();
 			}
 			else {
-
+				char Error[160];
+				sprintf(Error, "CRITICAL ERROR: Cannot find the config file.");
+				Logger::Log(Error);
+				MessageBoxA(NULL, Error, PluginVersion::VersionString, MB_ICONERROR | MB_OK);
+				TerminateProcess(GetCurrentProcess(), 0);
 			}
 		}
 		else {
