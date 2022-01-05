@@ -225,7 +225,7 @@ static __declspec(naked) void NewAnimSequenceSingleHook() {
 		mov		[eax+0x4], esi
 		push	eax
 		mov     dword ptr [eax], 0x00A3C72C
-		jmp		kNewAnimSequenceSingleReturn
+		jmp		Jumpers::NewAnimSequenceSingle::Return
 	}
 
 }
@@ -241,10 +241,10 @@ static __declspec(naked) void RemoveSequenceHook() {
 		lea		ecx, [esp+0x1C]
 		push	ecx
 		mov		ecx, edi
-		jmp		kRemoveSequenceReturn1
+		jmp		Jumpers::RemoveSequence::Return1
 
 	skip_removal:
-		jmp		kRemoveSequenceReturn2
+		jmp		Jumpers::RemoveSequence::Return2
 	}
 
 }

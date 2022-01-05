@@ -10,7 +10,7 @@ static void RaiseEvent(Actor* Act, Actor* TargetAct, GameEventManager::EventEnum
 					InventoryChanges::EntryData* WeaponData = Proc->equippedWeaponData;
 					if (WeaponData) {
 						TESForm* EquippedObject = WeaponData->type;
-						if (EquippedObject && EquippedObject->formType == TESForm::FormType::kFormType_Weapon && ((TESObjectWEAP*)EquippedObject)->wtype <= TESObjectWEAP::kWeapType_BluntTwoHand) TheGameEventManager->OnHitByPlayer();
+						if (EquippedObject && EquippedObject->formType == TESForm::FormType::kFormType_Weapon && ((TESObjectWEAP*)EquippedObject)->weaponType <= TESObjectWEAP::kWeapType_BluntTwoHand) TheGameEventManager->OnHitByPlayer();
 					}
 				}
 				break;
@@ -32,7 +32,7 @@ static __declspec(naked) void HitEventHook() {
 		add		esp, 12
 		popad
 		push	256
-		jmp		kHitEventReturn
+		jmp		Jumpers::HitEvent::Return
 	}
 
 }

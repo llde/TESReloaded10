@@ -28,6 +28,7 @@ public:
 	static const UInt32 RenderReflections			= 0x0049BEF0;
 	static const UInt32 WaterCullingProcess			= 0x0049CBF0;
 	static const UInt32 SaveGameScreenshot			= 0x00411B70;
+	static const UInt32 RenderObject				= 0x0070C0B0;
 	static const UInt32 LoadForm					= 0x00447050;
 	static const UInt32 RunScript					= 0x004402F0;
 	static const UInt32 NewActorAnimData			= 0x00473EB0;
@@ -79,6 +80,37 @@ public:
 	struct SetWeatherEditorName {
 		static const UInt32 Hook	= 0x004EE04E;
 		static const UInt32 Return	= 0x004EE0EA;
+	};
+	struct SkipFogPass {
+		static const UInt32 Hook	= 0x007AE6F5;
+		static const UInt32 Return	= 0x007AE6FB;
+	};
+	struct DetectorWindow {
+		static const UInt32 CreateTreeViewHook		= 0x00495E1F;
+		static const UInt32 CreateTreeViewReturn	= 0x00495E27;
+		static const UInt32 DumpAttributesHook		= 0x004967C7;
+		static const UInt32 DumpAttributesReturn	= 0x004967CD;
+		static const UInt32 ConsoleCommandHook		= 0x0040CC6C;
+		static const UInt32 ConsoleCommandReturn	= 0x0040CC73;
+		static const UInt32 SetNodeName				= 0x0049658E;
+	};
+	struct RenderInterface {
+		static const UInt32 Hook	= 0x0057F3F3;
+		static const UInt32 Return	= 0x0057F3F8;
+		static const UInt32 Method	= 0x0070E0A0;
+	};
+	struct HitEvent {
+		static const UInt32 Hook	= 0x005FF613;
+		static const UInt32 Return	= 0x005FF618;
+	};
+	struct NewAnimSequenceSingle {
+		static const UInt32 Hook	= 0x0047414D;
+		static const UInt32 Return	= 0x00474157;
+	};
+	struct RemoveSequence {
+		static const UInt32 Hook	= 0x004742B7;
+		static const UInt32 Return1 = 0x004742BF;
+		static const UInt32 Return2 = 0x004742CD;
 	};
 };
 

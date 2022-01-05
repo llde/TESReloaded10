@@ -5,7 +5,6 @@
 #define FastMMFile "\\Data\\OBSE\\Plugins\\OblivionReloadedFastMM.dll"
 #define ShadersPath "Data\\Shaders\\OblivionReloaded\\Shaders\\"
 #define EffectsPath "Data\\Shaders\\OblivionReloaded\\Effects\\"
-#define WaterReflectionMapSize 512
 static const char* IntroMovie = "ORGameStudios.bik";
 static const char* MainMenuMovie = "ORMainMenu.bik";
 static const char* MainMenuMusic = "Special\\ORMainMenu.mp3";
@@ -29,37 +28,9 @@ static float* SettingTexturePctThreshold = (float*)0x00B08B6C;
 static const UInt32* SettingMultiSample = (UInt32*)0x00B06D0C;
 static const UInt8* SettingHDR = (UInt8*)0x00B06DE4;
 
-
-#define kDetectorWindowScale 0x004965A8
-#define kDetectorWindowScaleReturn 0x0049660F
-
-static const UInt32 kRenderInterface = 0x0057F3F3;
-static const UInt32 kRenderInterfaceReturn = 0x0057F3F8;
-static const UInt32 kRenderInterfaceMethod = 0x0070E0A0;
-static const UInt32 kSkipFogPass = 0x007AE6F5;
-static const UInt32 kSkipFogPassReturn = 0x007AE6FB;
-static const UInt32 kDetectorWindowSetNodeName = 0x0049658E;
-static const UInt32 kDetectorWindowCreateTreeView = 0x00495E1F;
-static const UInt32 kDetectorWindowCreateTreeViewReturn = 0x00495E27;
-static const UInt32 kDetectorWindowDumpAttributes = 0x004967C7;
-static const UInt32 kDetectorWindowDumpAttributesReturn = 0x004967CD;
-static const UInt32 kDetectorWindowConsoleCommand = 0x0040CC6C;
-static const UInt32 kDetectorWindowConsoleCommandReturn = 0x0040CC73;
-
-
-#define wtype weaponType
-static const UInt32 kHitEventHook = 0x005FF613;
-static const UInt32 kHitEventReturn = 0x005FF618;
-
-
-
 #define ORAnimString "_OR_"
 
-static const UInt32 kNewAnimSequenceSingleHook = 0x0047414D;
-static const UInt32 kNewAnimSequenceSingleReturn = 0x00474157;
-static const UInt32 kRemoveSequenceHook = 0x004742B7;
-static const UInt32 kRemoveSequenceReturn1 = 0x004742BF;
-static const UInt32 kRemoveSequenceReturn2 = 0x004742CD;
+
 
 static ActorAnimDataEx* AnimDataAnimation = NULL;
 

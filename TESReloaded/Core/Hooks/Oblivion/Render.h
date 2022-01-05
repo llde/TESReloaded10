@@ -157,6 +157,23 @@ static NiPixelData* __cdecl SaveGameScreenshotHook(int* pWidth, int* pHeight) {
 
 }
 
+static void (__cdecl* RenderObject)(NiCamera*, NiNode*, NiCullingProcess*, NiVisibleArray*) = (void (__cdecl*)(NiCamera*, NiNode*, NiCullingProcess*, NiVisibleArray*))Hooks::RenderObject;
+static void __cdecl RenderObjectHook(NiCamera* Camera, NiNode* Object, NiCullingProcess* CullingProcess, NiVisibleArray* VisibleArray) {
+	
+	bool CameraMode = TheSettingManager->SettingsMain.CameraMode.Enabled;
+
+	RenderObject(Camera, Object, CullingProcess, VisibleArray);
+	if (Object == WorldSceneGraph && (CameraMode || !TheCameraManager->IsFirstPerson())) {
+		TheRenderManager->ResolveDepthBuffer();
+	}
+	else if (Object == Player->firstPersonNiNode) {
+		TheRenderManager->ResolveDepthBuffer();
+		TheRenderManager->Clear(NULL, NiRenderer::kClear_ZBUFFER);
+		RenderObject(Camera, Object, CullingProcess, VisibleArray);
+	}
+
+}
+
 static __declspec(naked) void SkipFogPassHook() {
 
 	__asm {
@@ -165,7 +182,7 @@ static __declspec(naked) void SkipFogPassHook() {
 		add		edi, 1
 	loc_continue:
 		cmp     edi, 0x198
-		jmp		kSkipFogPassReturn
+		jmp		Jumpers::SkipFogPass::Return
 	}
 
 }
@@ -215,7 +232,7 @@ static __declspec(naked) void DetectorWindowCreateTreeViewHook() {
 		mov		[esi + 0x0C], eax
 		pop     esi
 		add     esp, 0x40
-		jmp		kDetectorWindowCreateTreeViewReturn
+		jmp		Jumpers::DetectorWindow::CreateTreeViewReturn
 	}
 
 }
@@ -243,7 +260,7 @@ static __declspec(naked) void DetectorWindowDumpAttributesHook() {
 		call	DetectorWindowDumpAttributes
 		add		esp, 16
 		movzx   ecx, word ptr [esi + 0x0A]
-		jmp		kDetectorWindowDumpAttributesReturn
+		jmp		Jumpers::DetectorWindow::DumpAttributesReturn
 	}
 
 }
@@ -252,7 +269,7 @@ static __declspec(naked) void DetectorWindowConsoleCommandHook() {
 
 	__asm {
 		call	DWNode::Create
-		jmp		kDetectorWindowConsoleCommandReturn
+		jmp		Jumpers::DetectorWindow::ConsoleCommandReturn
 	}
 
 }

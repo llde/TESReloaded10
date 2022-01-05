@@ -5,7 +5,6 @@ static void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRend
 	
 	BSRenderedTexture* MenuRenderedTexture = *(BSRenderedTexture**)kMenuRenderedTexture;
 	
-	TheRenderManager->ResolveDepthBuffer();
 	TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->BackBuffer;
 	ProcessImageSpaceShaders(Renderer, RenderedTexture1, RenderedTexture2);
 	if (!RenderedTexture2 && TheRenderManager->currentRTGroup) TheShaderManager->RenderEffects(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
@@ -21,12 +20,12 @@ static void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRend
 static __declspec(naked) void RenderInterfaceHook() {
 	
 	__asm {
-		call	kRenderInterfaceMethod
+		call	Jumpers::RenderInterface::Method
 		pushad
 		mov		ecx, TheGameMenuManager
 		call	GameMenuManager::Render
 		popad
-		jmp		kRenderInterfaceReturn
+		jmp		Jumpers::RenderInterface::Return
 	}
 
 }
