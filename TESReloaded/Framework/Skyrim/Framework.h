@@ -26,7 +26,6 @@
 #include "Plugin.h"
 #include "Game.h"
 #include "Defines.h"
-#include "Papyrus.h"
 #include "Base.h"
 #include "Managers.h"
 #include "../Core/Hooks/Settings.h"

@@ -42,6 +42,7 @@ public:
 };
 
 static CommandTable	commandTable;
+static void* PapyrusFunctions[2];
 
 //void (__cdecl* ToggleConsole)() = (void (__cdecl*)())0x00847210;
 //void __cdecl TrackToggleConsole() {
@@ -60,13 +61,23 @@ static CommandTable	commandTable;
 //
 //}
 
+static bool RegisterPapyrusCommands(VMClassRegistry* registry) {
+
+	registry->RegisterFunction(new PapyrusFunction2<BSFixedString, bool>(CommandPrefix"SetExtraEffectEnabled", CommandPrefix"Commands", PapyrusFunctions[0], registry));
+	registry->RegisterFunction(new PapyrusFunction5<BSFixedString, float, float, float, float>(CommandPrefix"SetCustomConstant", CommandPrefix"Commands", PapyrusFunctions[1], registry));
+	return true;
+
+}
+
 class CommandManagerBase {
 public:
 
-	void RegisterCommands(const PluginInterface* Interface, void* CommandExecuters[], CommandInfo* CommandInfos[], int CommandInfoSize) {
+	void RegisterCommands(const PluginInterface* Interface, void** CommandExecuters, CommandInfo** CommandInfos, int CommandInfoSize, void** PapyrusCommands) {
 
 		PapyrusInterface* PInterface = (PapyrusInterface*)Interface->QueryInterface(PluginInterface::InterfaceType::kInterface_Papyrus);
 
+		PapyrusFunctions[0] = PapyrusCommands[0];
+		PapyrusFunctions[1] = PapyrusCommands[1];
 		PInterface->Register(RegisterPapyrusCommands);
 		
 		//DetourTransactionBegin();

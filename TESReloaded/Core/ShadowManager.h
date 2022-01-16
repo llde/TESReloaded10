@@ -47,5 +47,3 @@ public:
 	ShaderRecordPixel*		CurrentPixel;
 	bool					AlphaEnabled;
 };
-
-void CreateEditorShadowsHook();

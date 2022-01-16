@@ -44,7 +44,7 @@ extern "C" {
 			}
 		}
 		else {
-			CreateEditorShadowsHook();
+			AttachEditorHooks();
 		}
 		return true;
 

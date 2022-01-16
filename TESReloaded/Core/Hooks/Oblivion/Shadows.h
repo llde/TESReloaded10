@@ -7,7 +7,7 @@ static __declspec(naked) void RenderShadowMapHook() {
 		mov		ecx, TheShadowManager
 		call	ShadowManager::RenderShadowMaps
 		popad
-		jmp		kRenderShadowMapReturn
+		jmp		Jumpers::Shadows::RenderShadowMapReturn
 	}
 
 }
@@ -54,7 +54,31 @@ static __declspec(naked) void AddCastShadowFlagHook() {
 		pop		esi
 		pop		ebp
 		pop		ebx
-		jmp		kAddCastShadowFlagReturn
+		jmp		Jumpers::Shadows::AddCastShadowFlagReturn
+	}
+
+}
+
+static void EditorCastShadowFlag(HWND Window, TESForm* Form) {
+
+	if (Window && Form) {
+		SetDlgItemTextA(Window, 0x697, "Does Not Cast Shadows");
+		SetWindowPos(GetDlgItem(Window, 0x697), HWND_BOTTOM, 0, 0, 140, 15, SWP_NOMOVE | SWP_NOZORDER);
+	}
+
+}
+
+static __declspec(naked) void EditorCastShadowFlagHook() {
+
+	__asm {
+		pushad
+		push	eax
+		push	edi
+		call	EditorCastShadowFlag
+		pop		edi
+		pop		eax
+		popad
+		jmp		Jumpers::Shadows::EditorCastShadowFlagReturn
 	}
 
 }

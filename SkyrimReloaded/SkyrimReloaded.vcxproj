@@ -144,7 +144,6 @@
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Game.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\GameNi.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Managers.h" />
-    <ClInclude Include="..\TESReloaded\Framework\Skyrim\Papyrus.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Plugin.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

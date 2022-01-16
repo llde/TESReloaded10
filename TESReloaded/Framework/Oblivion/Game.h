@@ -160,6 +160,15 @@ public:
 };
 assert(sizeof(BSString) == 0x008);
 
+class BSFixedString {
+public:
+	const char* m_data;		// 00
+
+	bool operator == (const BSFixedString& lhs) const { return m_data == lhs.m_data; }
+	bool operator < (const BSFixedString& lhs) const { return m_data < lhs.m_data; }
+};
+assert(sizeof(BSFixedString) == 0x04);
+
 class BSExtraData {
 public:
 	enum ExtraDataType {

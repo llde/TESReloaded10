@@ -133,9 +133,9 @@ void AttachHooks() {
 	SafeWriteJump(Jumpers::HitEvent::Hook,						(UInt32)HitEventHook);
 	SafeWriteJump(Jumpers::NewAnimSequenceSingle::Hook,			(UInt32)NewAnimSequenceSingleHook);
 	SafeWriteJump(Jumpers::RemoveSequence::Hook,				(UInt32)RemoveSequenceHook);
-	SafeWriteJump(kRenderShadowMapHook,				(UInt32)RenderShadowMapHook);
-	SafeWriteJump(kAddCastShadowFlagHook,			(UInt32)AddCastShadowFlagHook);
-	SafeWriteJump(kWaterHeightMapHook,				(UInt32)WaterHeightMapHook);
+	SafeWriteJump(Jumpers::Shadows::RenderShadowMapHook,		(UInt32)RenderShadowMapHook);
+	SafeWriteJump(Jumpers::Shadows::AddCastShadowFlagHook,		(UInt32)AddCastShadowFlagHook);
+	SafeWriteJump(Jumpers::WaterHeightMap::Hook,				(UInt32)WaterHeightMapHook);
 	SafeWriteJump(0x0040F488, (UInt32)EndProcessHook);
 	SafeWriteJump(0x00553EAC, 0x00553EB2); // Patches the use of Lighting30Shader only for the hair
 	SafeWriteJump(0x007D1BC4, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
@@ -272,6 +272,11 @@ void AttachHooks() {
 
 }
 
+void AttachEditorHooks() {
+	
+	SafeWriteJump(Jumpers::Shadows::EditorCastShadowFlagHook, (UInt32)EditorCastShadowFlagHook);
+
+}
 //#include <fstream>
 //LPD3DXBUFFER Disasm;
 //char FileNameS[MAX_PATH];

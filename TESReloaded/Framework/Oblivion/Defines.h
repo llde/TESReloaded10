@@ -40,12 +40,7 @@ static ActorAnimDataEx* AnimDataAnimation = NULL;
 #define kRockParams 0x00B46778
 #define kRustleParams 0x00B46788
 #define kWindMatrixes 0x00B467B8
-static const UInt32 kRenderShadowMapHook = 0x0040C919;
-static const UInt32 kRenderShadowMapReturn = 0x0040C920;
-static const UInt32 kAddCastShadowFlagHook = 0x004B1A25;
-static const UInt32 kAddCastShadowFlagReturn = 0x004B1A2A;
-static const UInt32 kEditorCastShadowFlagHook = 0x005498DD;
-static const UInt32 kEditorCastShadowFlagReturn = 0x005498E3;
+
 
 
 static const UInt32 TimeInfoUpdate = 0x0047D170;
@@ -54,8 +49,7 @@ static const UInt32 kUpdateTimeInfoReturn = 0x0040D8B0;
 static float* MPF = (float*)0x00B33E94;
 
 
-static const UInt32 kWaterHeightMapHook = 0x0049D9FF;
-static const UInt32 kWaterHeightMapReturn = 0x0049DA08;
+
 
 
 #define RenderStateArgs 0

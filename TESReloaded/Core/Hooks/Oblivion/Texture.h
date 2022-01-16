@@ -17,7 +17,7 @@ static __declspec(naked) void WaterHeightMapHook() {
 		call	WaterHeightMap
 		pop     eax
 		popad
-		jmp		kWaterHeightMapReturn
+		jmp		Jumpers::WaterHeightMap::Return
 	}
 
 }

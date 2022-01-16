@@ -1,6 +1,6 @@
 #pragma once
 
-bool SetExtraEffectEnabled(BSFixedString Name, bool Value) {
+static bool SetExtraEffectEnabled(BSFixedString Name, bool Value) {
 
 	double result;
 
@@ -9,7 +9,7 @@ bool SetExtraEffectEnabled(BSFixedString Name, bool Value) {
 
 }
 
-bool SetCustomConstant(BSFixedString Name, float Value1, float Value2, float Value3, float Value4) {
+static bool SetCustomConstant(BSFixedString Name, float Value1, float Value2, float Value3, float Value4) {
 
 	double result;
 	D3DXVECTOR4 Value = { Value1, Value2, Value3, Value4 };
@@ -19,7 +19,7 @@ bool SetCustomConstant(BSFixedString Name, float Value1, float Value2, float Val
 
 }
 
-bool RegisterPapyrusCommands(VMClassRegistry* registry) {
+static bool RegisterPapyrusCommands(VMClassRegistry* registry) {
 
 	registry->RegisterFunction(new PapyrusFunction2<BSFixedString, bool>("SetExtraEffectEnabled", "SRCommands", SetExtraEffectEnabled, registry));
 	registry->RegisterFunction(new PapyrusFunction5<BSFixedString, float, float, float, float>("SetCustomConstant", "SRCommands", SetCustomConstant, registry));
