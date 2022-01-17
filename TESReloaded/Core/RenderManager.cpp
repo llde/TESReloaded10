@@ -338,13 +338,13 @@ void DWNode::Create() {
 	DWNode* Node = (DWNode*)Pointers::Functions::MemoryAlloc(sizeof(DWNode)); Node->New(2048);
 
 	Node->SetName("Passes...");
-	Pointers::Generic::DetectorWindowNode = Node;
+	*Pointers::Generic::DetectorWindowNode = Node;
 
 }
 
 DWNode* DWNode::Get() {
 	
-	return (DWNode*)Pointers::Generic::DetectorWindowNode;
+	return *(DWNode**)Pointers::Generic::DetectorWindowNode;
 
 }
 
@@ -355,6 +355,6 @@ void DWNode::AddNode(char* Name, NiAVObject* Child0, NiAVObject* Child1) {
 	Node->SetName(Name);
 	Node->m_children.Add(&Child0); // We do not use the AddObject to avoid to alter the original object
 	Node->m_children.Add(&Child1); // Same as above
-	Pointers::Generic::DetectorWindowNode->AddObject(Node, 1);
+	(*Pointers::Generic::DetectorWindowNode)->AddObject(Node, 1);
 
 }

@@ -4047,7 +4047,7 @@ namespace Pointers {
 		static const char*		  MessageBoxButtonYes		  = *(const char**)0x00B38CF8;
 		static const char*		  MessageBoxButtonNo		  = *(const char**)0x00B38D00;
 		static void*			  ServeSentenceCallback		  = (void*)0x00671600;
-		static NiNode*			  DetectorWindowNode		  = *(NiNode**)0x00B42CF4;
+		static NiNode**			  DetectorWindowNode		  = (NiNode**)0x00B42CF4;
 	}
 	namespace Functions {
 		static void* (__cdecl* MemoryAlloc)(size_t) = (void* (__cdecl*)(size_t))0x00401F00;
