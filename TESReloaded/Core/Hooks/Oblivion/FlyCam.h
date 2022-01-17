@@ -23,10 +23,10 @@ static void __fastcall UpdateFlyCamHook(PlayerCharacter* This, UInt32 edx) {
 static __declspec(naked) void UpdateForwardFlyCamHook() {
 
 	__asm {
-		fld		kFBValue
+		fld		FlyCamFBValue
 		fadd	Scroll
-		fstp	kFBValue
-		jmp		kUpdateForwardFlyCamReturn
+		fstp	FlyCamFBValue
+		jmp		Jumpers::FlyCam::UpdateForwardFlyCamReturn
 	}
 
 }
@@ -34,10 +34,10 @@ static __declspec(naked) void UpdateForwardFlyCamHook() {
 static __declspec(naked) void UpdateBackwardFlyCamHook() {
 
 	__asm {
-		fld		kFBValue
+		fld		FlyCamFBValue
 		fsub	Scroll
-		fstp	kFBValue
-		jmp		kUpdateBackwardFlyCamReturn
+		fstp	FlyCamFBValue
+		jmp		Jumpers::FlyCam::UpdateBackwardFlyCamReturn
 	}
 
 }
@@ -45,10 +45,10 @@ static __declspec(naked) void UpdateBackwardFlyCamHook() {
 static __declspec(naked) void UpdateRightFlyCamHook() {
 
 	__asm {
-		fld		kRLValue
+		fld		FlyCamRLValue
 		fadd	Scroll
-		fstp	kRLValue
-		jmp		kUpdateRightFlyCamReturn
+		fstp	FlyCamRLValue
+		jmp		Jumpers::FlyCam::UpdateRightFlyCamReturn
 	}
 
 }
@@ -56,10 +56,10 @@ static __declspec(naked) void UpdateRightFlyCamHook() {
 static __declspec(naked) void UpdateLeftFlyCamHook() {
 
 	__asm {
-		fld		kRLValue
+		fld		FlyCamRLValue
 		fsub	Scroll
-		fstp	kRLValue
-		jmp		kUpdateLeftFlyCamReturn
+		fstp	FlyCamRLValue
+		jmp		Jumpers::FlyCam::UpdateLeftFlyCamReturn
 	}
 
 }

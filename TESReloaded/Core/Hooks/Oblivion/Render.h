@@ -45,10 +45,10 @@ static void __fastcall WaterHeightMapRenderHook(WaterShaderHeightMap* This, UInt
 		ShaderHeightMap->Unk09C = 0.5f / 256.0f;
 		ShaderHeightMap->CurrentPixelIndex = 5;
 		TargetGroup = (NiRenderTargetGroup*)ThisCall(0x007D6FE0, *RenderedTexture2);
-		BeginRendering(0, TargetGroup);
+		Pointers::Functions::BeginRendering(0, TargetGroup);
 		if ((TheRenderManager->SceneState1 == 1 || TheRenderManager->SceneState2 == 1) && TheRenderManager->IsReady == 1) TheRenderManager->SetupScreenSpaceCamera(&Viewport);
 		ThisCall(0x00709C60, ScreenElements, TheRenderManager);
-		EndRendering();
+		Pointers::Functions::EndRendering();
 	}
 	else {
 		(*WaterHeightMapRender)(This, ScreenElements, RenderedTexture1, RenderedTexture2, Arg4);
@@ -81,7 +81,7 @@ static UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiG
 		Toggles->y = 1.0f;
 		if (DWNode::Get()) {
 			char Name[256];
-			sprintf(Name, "Pass %i %s, %s (%s %s)", PassIndex, GetPassDescription(PassIndex), Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
+			sprintf(Name, "Pass %i %s, %s (%s %s)", PassIndex, Pointers::Functions::GetPassDescription(PassIndex), Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
 			if (VertexShader->ShaderHandle == VertexShader->ShaderHandleBackup) strcat(Name, " - Vertex: vanilla");
 			if (PixelShader->ShaderHandle == PixelShader->ShaderHandleBackup) strcat(Name, " - Pixel: vanilla");
 			DWNode::AddNode(Name, Geometry->m_parent, Geometry);
@@ -135,7 +135,7 @@ static void __fastcall WaterCullingProcessHook(TESWaterCullingProcess* This, UIn
 	float BoundBox = 0.0f;
 	void* VFT = *(void**)Object;
 	
-	if (VFT == VFTBSFadeNode && TheSettingManager->SettingsMain.OcclusionCulling.Enabled) {
+	if (VFT == Pointers::VirtualTables::BSFadeNode && TheSettingManager->SettingsMain.OcclusionCulling.Enabled) {
 		NiBound* Bound = Object->GetWorldBound();
 		TheRenderManager->GetScreenSpaceBoundSize(&BoundSize, Bound);
 		BoundBox = (BoundSize.x * 100.f) * (BoundSize.y * 100.0f);

@@ -73,6 +73,10 @@ public:
 
 class Jumpers {
 public:
+	struct CreateDevice {
+		static const UInt32 Hook	= 0x0076A542;
+		static const UInt32 Return	= 0x0076A547;
+	};
 	struct SetRegionEditorName {
 		static const UInt32 Hook	= 0x004A32A6;
 		static const UInt32 Return	= 0x004A33A6;
@@ -124,6 +128,109 @@ public:
 		static const UInt32 Hook	= 0x0049D9FF;
 		static const UInt32 Return	= 0x0049DA08;
 	};
+	struct EndProcess {
+		static const UInt32 Hook	= 0x0040F488;
+	};
+	struct Occlusion {
+		static const UInt32 New1CollisionObjectHook			= 0x00564529;
+		static const UInt32 New1CollisionObjectReturn		= 0x0056452E;
+		static const UInt32 New2CollisionObjectHook			= 0x0089E989;
+		static const UInt32 New2CollisionObjectReturn		= 0x0089E98E;
+		static const UInt32 New3CollisionObjectHook			= 0x0089EA1C;
+		static const UInt32 New3CollisionObjectReturn		= 0x0089EA21;
+		static const UInt32 DisposeCollisionObjectHook		= 0x00532DD1;
+		static const UInt32 DisposeCollisionObjectReturn	= 0x00532DD8;
+		static const UInt32 MaterialPropertyHook			= 0x0089F7C6;
+		static const UInt32 MaterialPropertyReturn1			= 0x0089F7CE;
+		static const UInt32 MaterialPropertyReturn2			= 0x0089F8A0;
+		static const UInt32 CoordinateJackHook				= 0x008A3101;
+		static const UInt32 CoordinateJackReturn1			= 0x008A3107;
+		static const UInt32 CoordinateJackReturn2			= 0x008A3165;
+		static const UInt32 ObjectCullHook					= 0x007073D6;
+		static const UInt32 ObjectCullReturn1				= 0x007073DC;
+		static const UInt32 ObjectCullReturn2				= 0x007073E7;
+	};
+	struct Camera {
+		static const UInt32 UpdateCameraHook		= 0x0066BE6E;
+		static const UInt32 UpdateCameraReturn		= 0x0066BE7C;
+		static const UInt32 SwitchCameraHook		= 0x00671AC9;
+		static const UInt32 SwitchCameraReturn		= 0x00671AD0;
+		static const UInt32 SwitchCameraPOVHook		= 0x00672FDA;
+		static const UInt32 SwitchCameraPOVReturn	= 0x00672FE2;
+		static const UInt32 HeadTrackingHook		= 0x0055D6A8;
+		static const UInt32 HeadTrackingReturn		= 0x0055D6B5;
+		static const UInt32 HeadTrackingReturn1		= 0x0055D7E6;
+		static const UInt32 SpineTrackingHook		= 0x00603C55;
+		static const UInt32 SpineTrackingReturn		= 0x00603C5E;
+		static const UInt32 SpineTrackingReturn1	= 0x00603C95;
+		static const UInt32 SetReticleOffsetHook	= 0x00580796;
+		static const UInt32 SetReticleOffsetReturn	= 0x0058079C;
+	};
+	struct UpdateGrass {
+		static const UInt32 Hook	= 0x004EBF87;
+		static const UInt32 Return	= 0x004EC4E8;
+	};
+	struct Memory {
+		static const UInt32 MemReallocHook					= 0x00401E66;
+		static const UInt32 MemReallocReturn				= 0x00401EC7;
+		static const UInt32 CreateTextureFromFileInMemory	= 0x007610D3;
+	};
+	struct Equipment {
+		static const UInt32 PrnHook							= 0x0047927B;
+		static const UInt32 PrnReturn						= 0x0047928A;
+		static const UInt32 MenuMouseButtonHook				= 0x0058251B;
+		static const UInt32 MenuMouseButtonReturn1			= 0x00582525;
+		static const UInt32 MenuMouseButtonReturn2			= 0x0058264F;
+		static const UInt32 UnequipTorchHook				= 0x0048A7AD;
+		static const UInt32 UnequipTorchReturn				= 0x0048A7B5;
+		static const UInt32 EquipItemWornHook				= 0x00489E0A;
+		static const UInt32 EquipItemWornReturn				= 0x00489E13;
+		static const UInt32 SetWeaponRotationPositionHook	= 0x006563F3;
+		static const UInt32 SetWeaponRotationPositionReturn = 0x006563FC;
+	};
+	struct Mounted {
+		static const UInt32 PlayerReadyWeaponHook			= 0x00671E37;
+		static const UInt32 ActorReadyWeaponHook			= 0x005FDA4F;
+		static const UInt32 ActorReadyWeaponSittingHook		= 0x005FD904;
+		static const UInt32 ActorReadyWeaponSittingReturn	= 0x005FD910;
+		static const UInt32 PlayerAttackHook				= 0x00672612;
+		static const UInt32 PlayerAttackReturn				= 0x0067261F;
+		static const UInt32 HittingMountedCreatureHook		= 0x005FF017;
+		static const UInt32 HittingMountedCreatureReturn	= 0x005FF01C;
+		static const UInt32 BowEquipHook					= 0x004E1AC4;
+		static const UInt32 BowEquipReturn					= 0x004E1AC9;
+		static const UInt32 AnimControllerHook				= 0x004732F4;
+		static const UInt32 AnimControllerReturn1			= 0x004732FA;
+		static const UInt32 AnimControllerReturn2			= 0x00473314;
+		static const UInt32 HorsePaletteHook				= 0x007165B9;
+		static const UInt32 HorsePaletteReturn1				= 0x007165C2;
+		static const UInt32 HorsePaletteReturn2				= 0x0071661B;
+		static const UInt32 BowUnequipHook					= 0x005F34AB;
+		static const UInt32 BowUnequipReturn				= 0x005F34B0;
+		static const UInt32 HideWeaponHook					= 0x00654DC8;
+		static const UInt32 HideWeaponReturn				= 0x00654E5F;
+	};
+	struct Dodge {
+		static const UInt32 JumpPressedHook		= 0x00672A79;
+		static const UInt32 JumpPressedReturn1	= 0x00672A80;
+		static const UInt32 JumpPressedReturn2	= 0x00672B94;
+		static const UInt32 DoubleTapHook		= 0x006729DA;
+		static const UInt32 DoubleTapReturn		= 0x006729EA;
+	};
+	struct FlyCam {
+		static const UInt32 UpdateForwardFlyCamHook		= 0x0066446C;
+		static const UInt32 UpdateForwardFlyCamReturn	= 0x0066447A;
+		static const UInt32 UpdateBackwardFlyCamHook	= 0x00664489;
+		static const UInt32 UpdateBackwardFlyCamReturn	= 0x00664497;
+		static const UInt32 UpdateRightFlyCamHook		= 0x006644A6;
+		static const UInt32 UpdateRightFlyCamReturn		= 0x006644B4;
+		static const UInt32 UpdateLeftFlyCamHook		= 0x006644C3;
+		static const UInt32 UpdateLeftFlyCamReturn		= 0x006644D1;
+	};
+	struct UpdateTimeInfo {
+		static const UInt32 Hook	= 0x0040D8AB;
+		static const UInt32 Return	= 0x0040D8B0;
+	};
 };
 
 class CommandManagerBase {
@@ -163,8 +270,8 @@ public:
 	void SetWindowedMode(UInt8 Fullscreen) {
 
 		if (!Fullscreen) {
-			SafeWrite32(kRectStyle, WS_POPUP);
-			SafeWrite32(kWindowStyle, WS_POPUP | WS_VISIBLE);
+			SafeWrite32(0x0040E7C0, WS_POPUP);
+			SafeWrite32(0x0040E805, WS_POPUP | WS_VISIBLE);
 		}
 
 	}
@@ -176,12 +283,12 @@ public:
 
 	IDirect3DSurface9* CreateHDRRenderTarget() {
 		
-		Ni2DBuffer* Buffer = (Ni2DBuffer*)MemoryAlloc(0x14); *(void**)Buffer = (void*)0x00A8098C; Buffer->m_uiRefCount = 1;
-		NiDX92DBufferData* BufferData = (NiDX92DBufferData*)MemoryAlloc(0x10); *(void**)BufferData = (void*)0x00A89818; BufferData->m_uiRefCount = 1; BufferData->ParentData = Buffer;
+		Ni2DBuffer* Buffer = (Ni2DBuffer*)Pointers::Functions::MemoryAlloc(0x14); *(void**)Buffer = (void*)0x00A8098C; Buffer->m_uiRefCount = 1;
+		NiDX92DBufferData* BufferData = (NiDX92DBufferData*)Pointers::Functions::MemoryAlloc(0x10); *(void**)BufferData = (void*)0x00A89818; BufferData->m_uiRefCount = 1; BufferData->ParentData = Buffer;
 		Buffer->width = width;
 		Buffer->height = height;
 		Buffer->data = BufferData;
-		device->CreateRenderTarget(width, height, D3DFMT_A16B16G16R16F, (D3DMULTISAMPLE_TYPE)(*SettingMultiSample), 0, false, &BufferData->Surface, NULL);
+		device->CreateRenderTarget(width, height, D3DFMT_A16B16G16R16F, (D3DMULTISAMPLE_TYPE)(*Pointers::Settings::MultiSample), 0, false, &BufferData->Surface, NULL);
 		defaultRTGroup->RenderTargets[1] = Buffer;
 		return defaultRTGroup->RenderTargets[0]->data->Surface;
 

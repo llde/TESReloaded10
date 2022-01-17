@@ -2664,6 +2664,7 @@ public:
 	void			SetFoV(float FoV) { float* SettingWorldFoV = (float*)0x00B0313C; float* Setting1stPersonFoV = (float*)0x00B0313C; worldFoV = *SettingWorldFoV = *Setting1stPersonFoV = FoV; }
 	float			GetFoV(bool IsSpecialView) { return worldFoV; }
 	void			ResetCamera() { ThisCall(0x0066C600, this); }
+	void			ToggleCamera() { ThisCall(0x0066C580, this, 1); }
 
 	UInt8			unk10C;										// 10C
 	UInt8			pad10D[3];									// 10D
@@ -4036,11 +4037,54 @@ public:
 };
 assert(sizeof(GameSetting) == 0x08);
 
-static void* (__cdecl* MemoryAlloc)(size_t) = (void* (__cdecl*)(size_t))0x00401F00;
-static void  (__cdecl* MemoryDealloc)(void*) = (void (__cdecl*)(void*))0x00401F20;
-static bool  (__cdecl* ExtractArgs)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...) = (bool (__cdecl*)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...))0x004FAE80;
-static void  (__cdecl* CreateGrass)(TESObjectCELL*, NiNode*, float, float, float, float, float, int, float, float, float) = (void (__cdecl*)(TESObjectCELL*, NiNode*, float, float, float, float, float, int, float, float, float))0x004EB3F0;
-static void  (* PrintToConsole)(const char*, ...) = (void (*)(const char*, ...))0x00579B60;
-static char* (__cdecl* GetPassDescription)(UInt32) = (char* (__cdecl*)(UInt32))0x007B4920;
-static void  (__cdecl* BeginRendering)(UInt32, NiRenderTargetGroup*) = (void (__cdecl*)(UInt32, NiRenderTargetGroup*))0x007D7280;
-static void  (* EndRendering)() = (void (*)())0x007D72D0;
+namespace Pointers {
+	namespace Generic {
+		static float*			  MPF						  = (float*)0x00B33E94;
+		static BSRenderedTexture* MenuRenderedTexture		  = *(BSRenderedTexture**)0x00B333E8;
+		static NiPoint3*		  CameraWorldTranslate		  = (NiPoint3*)0x00B3F92C;
+		static NiPoint3*		  CameraLocation			  = (NiPoint3*)0x00B3F9A8;
+		static const char*		  MessageBoxServeSentenceText = *(const char**)0x00B38B30;
+		static const char*		  MessageBoxButtonYes		  = *(const char**)0x00B38CF8;
+		static const char*		  MessageBoxButtonNo		  = *(const char**)0x00B38D00;
+		static void*			  ServeSentenceCallback		  = (void*)0x00671600;
+		static NiNode*			  DetectorWindowNode		  = *(NiNode**)0x00B42CF4;
+	}
+	namespace Functions {
+		static void* (__cdecl* MemoryAlloc)(size_t) = (void* (__cdecl*)(size_t))0x00401F00;
+		static void  (__cdecl* MemoryDealloc)(void*) = (void (__cdecl*)(void*))0x00401F20;
+		static bool  (__cdecl* ExtractArgs)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...) = (bool (__cdecl*)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...))0x004FAE80;
+		static void  (__cdecl* CreateGrass)(TESObjectCELL*, NiNode*, float, float, float, float, float, int, float, float, float) = (void (__cdecl*)(TESObjectCELL*, NiNode*, float, float, float, float, float, int, float, float, float))0x004EB3F0;
+		static void  (* PrintToConsole)(const char*, ...) = (void (*)(const char*, ...))0x00579B60;
+		static char* (__cdecl* GetPassDescription)(UInt32) = (char* (__cdecl*)(UInt32))0x007B4920;
+		static void  (__cdecl* BeginRendering)(UInt32, NiRenderTargetGroup*) = (void (__cdecl*)(UInt32, NiRenderTargetGroup*))0x007D7280;
+		static void  (* EndRendering)() = (void (*)())0x007D72D0;
+	}
+	namespace VirtualTables {
+		static const void* NiNode				= (void*)0x00A7E38C;
+		static const void* BSFadeNode			= (void*)0x00A3F944;
+		static const void* BSFaceGenNiNode		= (void*)0x00A64F5C;
+		static const void* BSTreeNode			= (void*)0x00A65854;
+		static const void* NiTriShape			= (void*)0x00A7ED5C;
+		static const void* NiTriStrips			= (void*)0x00A7F27C;
+		static const void* bhkCollisionObject	= (void*)0x00A55FCC;
+	}
+	namespace Settings {
+		static UInt32* GridsToLoad				= (UInt32*)0x00B06A2C;
+		static UInt32* MinGrassSize				= (UInt32*)0x00B09B20;
+		static float*  GrassStartFadeDistance	= (float*)0x00B09B10;
+		static float*  GrassEndDistance			= (float*)0x00B09B18;
+		static float*  GrassWindMagnitudeMin	= (float*)0x00B09B28;
+		static float*  GrassWindMagnitudeMax	= (float*)0x00B09B30;
+		static float*  TexturePctThreshold		= (float*)0x00B08B6C;
+		static UInt32* MultiSample				= (UInt32*)0x00B06D0C;
+		static UInt8*  HDR						= (UInt8*)0x00B06DE4;
+	}
+	namespace ShaderParams {
+		static float* GrassWindMagnitudeMax	= (float*)0x00B46068;
+		static float* GrassWindMagnitudeMin	= (float*)0x00B46064;
+		static UInt8* WaterHighResolution	= (UInt8*)0x00B45FD0;
+		static float* RockParams			= (float*)0x00B46778;
+		static float* RustleParams			= (float*)0x00B46788;
+		static float* WindMatrixes			= (float*)0x00B467B8;
+	}
+}

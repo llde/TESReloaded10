@@ -1,3 +1,9 @@
+#define FlameCapName "FlameCap"
+#define FlameNode0Name "FlameNode0"
+#define FlameNode1Name "FlameNode1"
+#define FlameNode2Name "FlameNode2"
+#define LightNodeName "AttachLight"
+
 void EquipmentManager::Initialize() {
 
 	Logger::Log("Starting the equipment manager...");

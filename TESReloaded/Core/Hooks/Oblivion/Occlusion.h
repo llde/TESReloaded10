@@ -6,7 +6,7 @@ static __declspec(naked) void New1CollisionObjectHook() {
 		mov     edi, eax
 		add     esp, 4
 		mov		dword ptr [edi + bhkCollisionObjectEx::GeoNode], 0
-		jmp		kNew1CollisionObjectReturn
+		jmp		Jumpers::Occlusion::New1CollisionObjectReturn
 	}
 
 }
@@ -17,7 +17,7 @@ static __declspec(naked) void New2CollisionObjectHook() {
 		mov     esi, eax
 		add     esp, 4
 		mov		dword ptr [esi + bhkCollisionObjectEx::GeoNode], 0
-		jmp		kNew2CollisionObjectReturn
+		jmp		Jumpers::Occlusion::New2CollisionObjectReturn
 	}
 
 }
@@ -28,7 +28,7 @@ static __declspec(naked) void New3CollisionObjectHook() {
 		mov     esi, eax
 		add     esp, 4
 		mov		dword ptr [esi + bhkCollisionObjectEx::GeoNode], 0
-		jmp		kNew3CollisionObjectReturn
+		jmp		Jumpers::Occlusion::New3CollisionObjectReturn
 	}
 
 }
@@ -37,7 +37,7 @@ static void DisposeCollisionObject(bhkCollisionObjectEx* bCollisionObject) {
 	
 	void* VFT = *(void**)bCollisionObject;
 	
-	if (VFT == VFTbhkCollisionObject) {
+	if (VFT == Pointers::VirtualTables::bhkCollisionObject) {
 		if (NiNode* GeoNode = bCollisionObject->GeoNode) {
 			GeoNode->Destructor(1);
 			bCollisionObject->GeoNode = NULL;
@@ -57,7 +57,7 @@ static __declspec(naked) void DisposeCollisionObjectHook() {
 		mov     esi, ecx
 		mov		eax, 0x00897B00
 		call	eax
-		jmp		kDisposeCollisionObjectReturn
+		jmp		Jumpers::Occlusion::DisposeCollisionObjectReturn
 	}
 
 }
@@ -70,9 +70,9 @@ static __declspec(naked) void MaterialPropertyHook() {
 		test    edi, edi
 		fldz
 		fst		[esp + 0x18]
-		jmp		kMaterialPropertyReturn1
+		jmp		Jumpers::Occlusion::MaterialPropertyReturn1
 	loc_return:
-		jmp		kMaterialPropertyReturn2
+		jmp		Jumpers::Occlusion::MaterialPropertyReturn2
 	}
 
 }
@@ -83,9 +83,9 @@ static __declspec(naked) void CoordinateJackHook() {
 		test    word ptr [eax + 0x18], 0x400
 		jnz     short loc_return
 		mov     esi, eax
-		jmp		kCoordinateJackReturn1
+		jmp		Jumpers::Occlusion::CoordinateJackReturn1
 	loc_return:
-		jmp		kCoordinateJackReturn2
+		jmp		Jumpers::Occlusion::CoordinateJackReturn2
 	}
 
 }
@@ -97,9 +97,9 @@ static __declspec(naked) void ObjectCullHook() {
 		jnz     short loc_return
 		mov     eax, [esp + 0x04]
 		mov     edx, [eax]
-		jmp		kObjectCullReturn1
+		jmp		Jumpers::Occlusion::ObjectCullReturn1
 	loc_return:
-		jmp		kObjectCullReturn2
+		jmp		Jumpers::Occlusion::ObjectCullReturn2
 	}
 
 }

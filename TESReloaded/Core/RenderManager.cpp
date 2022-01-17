@@ -72,11 +72,10 @@ void RenderManager::SetupSceneCamera() {
 	NiCamera* Camera = WorldSceneGraph->camera;
 
 	if (Camera) {
-		NiPoint3 Loc = *(NiPoint3*)0x00B3F9A8;
+		NiPoint3 Loc = *Pointers::Generic::CameraLocation;
 		NiPoint3 Forward = { 0.0f, 0.0f, 0.0f };
 		NiPoint3 Up = { 0.0f, 0.0f, 0.0f };
 		NiPoint3 Right = { 0.0f, 0.0f, 0.0f };
-		NiPoint3* CameraWorldTranslate = (NiPoint3*)kCameraWorldTranslate;
 		D3DXMATRIX InvProj;
 		NiMatrix33* WorldRotate = &Camera->m_worldTransform.rot;
 		NiPoint3* WorldTranslate = &Camera->m_worldTransform.pos;
@@ -87,7 +86,7 @@ void RenderManager::SetupSceneCamera() {
 		float TpB = Frustum->Top + Frustum->Bottom;
 		float InvFmN = 1.0f / (Frustum->Far - Frustum->Near);
 
-		memcpy(CameraWorldTranslate, WorldTranslate, 0x0C);
+		memcpy(Pointers::Generic::CameraWorldTranslate, WorldTranslate, 0x0C);
 
 		Forward.x = WorldRotate->data[0][0];
 		Forward.y = WorldRotate->data[1][0];
@@ -336,26 +335,26 @@ void NiD3DPixelShaderEx::DisposeShader() {
 
 void DWNode::Create() { 
 	
-	DWNode* Node = (DWNode*)MemoryAlloc(sizeof(DWNode)); Node->New(2048);
+	DWNode* Node = (DWNode*)Pointers::Functions::MemoryAlloc(sizeof(DWNode)); Node->New(2048);
 
 	Node->SetName("Passes...");
-	*(DWNode**)kDetectorWindowNode = Node;
+	Pointers::Generic::DetectorWindowNode = Node;
 
 }
 
 DWNode* DWNode::Get() {
 	
-	return *(DWNode**)kDetectorWindowNode;
+	return (DWNode*)Pointers::Generic::DetectorWindowNode;
 
 }
 
 void DWNode::AddNode(char* Name, NiAVObject* Child0, NiAVObject* Child1) {
 
-	NiNode* Node = (NiNode*)MemoryAlloc(sizeof(NiNode)); Node->New(2);
+	NiNode* Node = (NiNode*)Pointers::Functions::MemoryAlloc(sizeof(NiNode)); Node->New(2);
 
 	Node->SetName(Name);
 	Node->m_children.Add(&Child0); // We do not use the AddObject to avoid to alter the original object
 	Node->m_children.Add(&Child1); // Same as above
-	(*(DWNode**)kDetectorWindowNode)->AddObject(Node, 1);
+	Pointers::Generic::DetectorWindowNode->AddObject(Node, 1);
 
 }

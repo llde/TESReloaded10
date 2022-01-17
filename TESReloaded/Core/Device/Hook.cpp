@@ -17,13 +17,13 @@ static __declspec(naked) void CreateDeviceHook()
 	{
 		mov		eax, [ecx + 0x40]
 		call	CreateDevice
-		jmp		kCreateDeviceReturn
+		jmp		Jumpers::CreateDevice::Return
 	}
 
 }
 
-void CreateD3D9Hook() {
+void AttachDeviceHooks() {
 
-	SafeWriteJump(kCreateDeviceHook, (UInt32)CreateDeviceHook);
+	SafeWriteJump(Jumpers::CreateDevice::Hook, (UInt32)CreateDeviceHook);
 
 }

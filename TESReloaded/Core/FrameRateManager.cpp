@@ -42,10 +42,10 @@ void FrameRateManager::PerformSync() {
 	double FrameTime = CurrentPerformance - LastPerformance;
 	float NMPF = 0.0f;
 
-	*MPF = NMPF;
+	*Pointers::Generic::MPF = NMPF;
 	if (FrameTime < SmartControlMPF) Sleep(SmartControlMPF - FrameTime);
 	LastPerformance = GetPerformance();
 	NMPF = (float)(FrameTime + TheSettingManager->SettingsMain.FrameRate.FlowControl + (LastPerformance - CurrentPerformance));
-	if (NMPF >= 10.0f && NMPF <= 120.0f) *MPF = NMPF;
+	if (NMPF >= 10.0f && NMPF <= 120.0f) *Pointers::Generic::MPF = NMPF;
 	
 }

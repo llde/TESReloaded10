@@ -1012,45 +1012,45 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Grass.Scale.z = TheSettingManager->SettingsGrass.ScaleZ;
 			switch (TheSettingManager->SettingsGrass.GrassDensity) {
 				case 1:
-					*SettingMinGrassSize = 240;
-					*SettingTexturePctThreshold = 0.3f;
+					*Pointers::Settings::MinGrassSize = 240;
+					*Pointers::Settings::TexturePctThreshold = 0.3f;
 					break;
 				case 2:
-					*SettingMinGrassSize = 240;
-					*SettingTexturePctThreshold = 0.2f;
+					*Pointers::Settings::MinGrassSize = 240;
+					*Pointers::Settings::TexturePctThreshold = 0.2f;
 					break;
 				case 3:
-					*SettingMinGrassSize = 120;
-					*SettingTexturePctThreshold = 0.3f;
+					*Pointers::Settings::MinGrassSize = 120;
+					*Pointers::Settings::TexturePctThreshold = 0.3f;
 					break;
 				case 4:
-					*SettingMinGrassSize = 120;
-					*SettingTexturePctThreshold = 0.2f;
+					*Pointers::Settings::MinGrassSize = 120;
+					*Pointers::Settings::TexturePctThreshold = 0.2f;
 					break;
 				case 5:
-					*SettingMinGrassSize = 80;
-					*SettingTexturePctThreshold = 0.3f;
+					*Pointers::Settings::MinGrassSize = 80;
+					*Pointers::Settings::TexturePctThreshold = 0.3f;
 					break;
 				case 6:
-					*SettingMinGrassSize = 80;
-					*SettingTexturePctThreshold = 0.2f;
+					*Pointers::Settings::MinGrassSize = 80;
+					*Pointers::Settings::TexturePctThreshold = 0.2f;
 					break;
 				case 7:
-					*SettingMinGrassSize = 20;
-					*SettingTexturePctThreshold = 0.3f;
+					*Pointers::Settings::MinGrassSize = 20;
+					*Pointers::Settings::TexturePctThreshold = 0.3f;
 					break;
 				case 8:
-					*SettingMinGrassSize = 20;
-					*SettingTexturePctThreshold = 0.2f;
+					*Pointers::Settings::MinGrassSize = 20;
+					*Pointers::Settings::TexturePctThreshold = 0.2f;
 					break;
 				default:
 					break;
 			}
-			*SettingGrassStartFadeDistance = TheSettingManager->SettingsGrass.MinDistance;
-			*SettingGrassEndDistance = TheSettingManager->SettingsGrass.MaxDistance;
+			*Pointers::Settings::GrassStartFadeDistance = TheSettingManager->SettingsGrass.MinDistance;
+			*Pointers::Settings::GrassEndDistance = TheSettingManager->SettingsGrass.MaxDistance;
 			if (TheSettingManager->SettingsGrass.WindEnabled) {
-				*SettingGrassWindMagnitudeMax = *LocalGrassWindMagnitudeMax = TheSettingManager->SettingsGrass.WindCoefficient * ShaderConst.currentwindSpeed;
-				*SettingGrassWindMagnitudeMin = *LocalGrassWindMagnitudeMin = *SettingGrassWindMagnitudeMax * 0.5f;
+				*Pointers::Settings::GrassWindMagnitudeMax = *Pointers::ShaderParams::GrassWindMagnitudeMax = TheSettingManager->SettingsGrass.WindCoefficient * ShaderConst.currentwindSpeed;
+				*Pointers::Settings::GrassWindMagnitudeMin = *Pointers::ShaderParams::GrassWindMagnitudeMin = *Pointers::Settings::GrassWindMagnitudeMax * 0.5f;
 			}
 		}
 

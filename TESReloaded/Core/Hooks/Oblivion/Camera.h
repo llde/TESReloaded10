@@ -1,4 +1,5 @@
 #pragma once
+static const UInt32 ASMGameToggleCamera = 0x0066C580;
 
 static void (__thiscall* ToggleCamera)(PlayerCharacter*, UInt8) = (void (__thiscall*)(PlayerCharacter*, UInt8))Hooks::ToggleCamera;
 static void __fastcall ToggleCameraHook(PlayerCharacter* This, UInt32 edx, UInt8 FirstPersonView) {
@@ -63,7 +64,7 @@ static void (__thiscall* SetAimingZoom)(PlayerCharacter*, float) = (void (__this
 static void __fastcall SetAimingZoomHook(PlayerCharacter* This, UInt32 edx, float Arg1) {
 	
 	if (TheCameraManager->IsFirstPerson()) {
-		if (Player->IsAiming()) ThisCall(kToggleCamera, Player, 1);
+		if (Player->IsAiming()) Player->ToggleCamera();
 		(*SetAimingZoom)(This, Arg1);
 	}
 
@@ -180,7 +181,7 @@ static __declspec(naked) void UpdateCameraHook() {
 		pop		eax
 		pop		ecx
 		popad
-		jmp		kUpdateCameraReturn
+		jmp		Jumpers::Camera::UpdateCameraReturn
 	}
 
 }
@@ -191,7 +192,7 @@ static __declspec(naked) void SwitchCameraHook() {
 		mov		eax, TheCameraManager
 		movzx	edx, byte ptr[eax + CameraManager::FirstPersonView]
 		cmp		edx, 1
-		jmp		kSwitchCameraReturn
+		jmp		Jumpers::Camera::SwitchCameraReturn
 	}
 
 }
@@ -204,8 +205,8 @@ static __declspec(naked) void SwitchCameraPOVHook() {
 		xor		ecx, 1
 		push	ecx
 		mov		ecx, ebx
-		call	GameToggleCamera
-		jmp		kSwitchCameraPOVReturn
+		call	ASMGameToggleCamera
+		jmp		Jumpers::Camera::SwitchCameraPOVReturn
 	}
 
 }
@@ -216,10 +217,10 @@ static __declspec(naked) void HeadTrackingHook() {
 		mov     eax, [ebp + 0x114]
 		cmp		eax, Player
 		jz		short loc_SkipTracking
-		jmp		kHeadTrackingReturn
+		jmp		Jumpers::Camera::HeadTrackingReturn
 
 	loc_SkipTracking:
-		jmp		kHeadTrackingReturn1
+		jmp		Jumpers::Camera::HeadTrackingReturn1
 	}
 
 }
@@ -229,10 +230,10 @@ static __declspec(naked) void SpineTrackingHook() {
 	__asm {
 		cmp		esi, Player
 		jz		short loc_SkipTracking
-		jmp		kSpineTrackingReturn
+		jmp		Jumpers::Camera::SpineTrackingReturn
 
 	loc_SkipTracking:
-		jmp		kSpineTrackingReturn1
+		jmp		Jumpers::Camera::SpineTrackingReturn1
 	}
 
 }
@@ -255,7 +256,7 @@ static __declspec(naked) void SetReticleOffsetHook() {
 		call	SetReticleOffset
 		pop		eax
 		mov     ecx, Player
-		jmp		kSetReticleOffsetReturn
+		jmp		Jumpers::Camera::SetReticleOffsetReturn
 	}
 
 }

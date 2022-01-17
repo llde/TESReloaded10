@@ -1,4 +1,9 @@
 #pragma once
+#define ForearmTwistNodeName "Bip01 L ForearmTwist"
+#define QuiverNodeName "Quiver"
+#define TorchNodeName "Torch"
+#define BeltNodeName "Bip01 Pelvis"
+#define ScabbardNodeName "Scb"
 
 static void AttachShieldToQuiver(Character* Act, HighProcessEx* Process, NiNode* ForearmTwistNode, NiNode* QuiverNode) {
 
@@ -497,7 +502,7 @@ static __declspec(naked) void UnequipTorchHook() {
 		popad
 		mov     edx, [ecx]
 		mov     eax, [edx + 0xF0]
-		jmp		kUnequipTorchReturn
+		jmp		Jumpers::Equipment::UnequipTorchReturn
 	}
 
 }
@@ -525,7 +530,7 @@ static __declspec(naked) void EquipItemWornHook() {
 		add		esp, 8
 		popad
 		mov		al, IsWorn
-		jmp		kEquipItemWornReturn
+		jmp		Jumpers::Equipment::EquipItemWornReturn
 	}
 
 }
@@ -621,7 +626,7 @@ static __declspec(naked) void PrnHook() {
 		call	Prn
 		add		esp, 0x14
 		popad
-		jmp		kPrnReturn
+		jmp		Jumpers::Equipment::PrnReturn
 	}
 
 }
@@ -654,7 +659,7 @@ static __declspec(naked) void SetWeaponRotationPositionHook() {
 		call	SetWeaponRotationPosition
 		add		esp, 8
 		popad
-		jmp		kSetWeaponRotationPositionReturn
+		jmp		Jumpers::Equipment::SetWeaponRotationPositionReturn
 	}
 
 }
@@ -678,11 +683,11 @@ static __declspec(naked) void MenuMouseButtonHook() {
 		cmp		eax, 0
 		jz		short loc_notpressed
 		popad
-		jmp		kMenuMouseButtonReturn1
+		jmp		Jumpers::Equipment::MenuMouseButtonReturn1
 
 	loc_notpressed:
 		popad
-		jmp		kMenuMouseButtonReturn2
+		jmp		Jumpers::Equipment::MenuMouseButtonReturn2
 	}
 
 }

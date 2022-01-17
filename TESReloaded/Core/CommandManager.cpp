@@ -73,7 +73,7 @@ static bool CommandExecuter_SetExtraEffectEnabled(CommandArgs Args) {
 	char Name[80];
 	int Value;
 
-	if (ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Name, &Value)) TheCommandManager->Commands.SetExtraEffectEnabled(Args.result, Name, Value);
+	if (Pointers::Functions::ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Name, &Value)) TheCommandManager->Commands.SetExtraEffectEnabled(Args.result, Name, Value);
 	return true;
 
 }
@@ -83,7 +83,7 @@ static bool CommandExecuter_SetCustomConstant(CommandArgs Args) {
 	char Name[80];
 	D3DXVECTOR4 Value;
 	
-	if (ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Name, &Value.x, &Value.y, &Value.z, &Value.w)) TheCommandManager->Commands.SetCustomConstant(Args.result, Name, &Value);
+	if (Pointers::Functions::ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Name, &Value.x, &Value.y, &Value.z, &Value.w)) TheCommandManager->Commands.SetCustomConstant(Args.result, Name, &Value);
 	return true;
 
 }
@@ -100,7 +100,7 @@ static bool CommandExecuter_GetSetting(CommandArgs Args) {
 	char Section[40];
 	char Key[40];
 
-	if (ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Section, &Key)) TheCommandManager->Commands.GetSetting(Args.result, Section, Key);
+	if (Pointers::Functions::ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Section, &Key)) TheCommandManager->Commands.GetSetting(Args.result, Section, Key);
 	return true;
 
 }
@@ -111,7 +111,7 @@ static bool CommandExecuter_SetSetting(CommandArgs Args) {
 	char Key[40];
 	float Value;
 
-	if (ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Section, &Key, &Value)) TheCommandManager->Commands.SetSetting(Args.result, Section, Key, Value);
+	if (Pointers::Functions::ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Section, &Key, &Value)) TheCommandManager->Commands.SetSetting(Args.result, Section, Key, Value);
 	return true;
 
 }
@@ -121,7 +121,7 @@ static bool CommandExecuter_CameraTranslate(CommandArgs Args) {
 	TESObjectREFR* Ref;
 	NiPoint3 Value;
 
-	if (ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Ref, &Value.x, &Value.y, &Value.z)) TheCommandManager->Commands.CameraTranslate(Args.result, Ref, &Value);
+	if (Pointers::Functions::ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Ref, &Value.x, &Value.y, &Value.z)) TheCommandManager->Commands.CameraTranslate(Args.result, Ref, &Value);
 	return true;
 
 }
@@ -131,7 +131,7 @@ static bool CommandExecuter_CameraRotate(CommandArgs Args) {
 	TESObjectREFR* Ref;
 	NiPoint3 Value;
 
-	if (ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Ref, &Value.z, &Value.x, &Value.y)) TheCommandManager->Commands.CameraRotate(Args.result, Ref, &Value);
+	if (Pointers::Functions::ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Ref, &Value.z, &Value.x, &Value.y)) TheCommandManager->Commands.CameraRotate(Args.result, Ref, &Value);
 	return true;
 
 }
@@ -140,7 +140,7 @@ static bool CommandExecuter_CameraTranslateToPosition(CommandArgs Args) {
 
 	NiPoint3 Value;
 
-	if (ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Value.x, &Value.y, &Value.z)) TheCommandManager->Commands.CameraTranslateToPosition(Args.result, &Value);
+	if (Pointers::Functions::ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Value.x, &Value.y, &Value.z)) TheCommandManager->Commands.CameraTranslateToPosition(Args.result, &Value);
 	return true;
 
 }
@@ -149,7 +149,7 @@ static bool CommandExecuter_CameraRotateToPosition(CommandArgs Args) {
 
 	NiPoint3 Value;
 
-	if (ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Value.z, &Value.x, &Value.y)) TheCommandManager->Commands.CameraRotateToPosition(Args.result, &Value);
+	if (Pointers::Functions::ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Value.z, &Value.x, &Value.y)) TheCommandManager->Commands.CameraRotateToPosition(Args.result, &Value);
 	return true;
 
 }
@@ -159,7 +159,7 @@ static bool CommandExecuter_CameraLookAt(CommandArgs Args) {
 	TESObjectREFR* Ref;
 	NiPoint3 Value;
 
-	if (ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Ref, &Value.x, &Value.y, &Value.z)) TheCommandManager->Commands.CameraLookAt(Args.result, Ref, &Value);
+	if (Pointers::Functions::ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Ref, &Value.x, &Value.y, &Value.z)) TheCommandManager->Commands.CameraLookAt(Args.result, Ref, &Value);
 	return true;
 
 }
@@ -168,7 +168,7 @@ static bool CommandExecuter_CameraLookAtPosition(CommandArgs Args) {
 
 	NiPoint3 Value;
 
-	if (ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Value.x, &Value.y, &Value.z)) TheCommandManager->Commands.CameraLookAtPosition(Args.result, &Value);
+	if (Pointers::Functions::ExtractArgs(Args.paramInfo, Args.arg1, Args.opcodeOffset, Args.thisObj, Args.Obj, Args.scriptObj, Args.eventList, &Value.x, &Value.y, &Value.z)) TheCommandManager->Commands.CameraLookAtPosition(Args.result, &Value);
 	return true;
 
 }
@@ -234,7 +234,7 @@ void CommandManager::PluginCommands::IsThirdPerson(double* result) {
 
 void CommandManager::PluginCommands::GetVersion(double* result) {
 
-	if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_Console)) PrintToConsole(PluginVersion::VersionString);
+	if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_Console)) Pointers::Functions::PrintToConsole(PluginVersion::VersionString);
 	*result = 1;
 
 }
@@ -260,7 +260,7 @@ void CommandManager::PluginCommands::GetLocationName(double* result) {
 			s += "(no region)";
 		s += ", Cell: ";
 		s += cellName;
-		PrintToConsole(s.c_str());
+		Pointers::Functions::PrintToConsole(s.c_str());
 	}
 	*result = 1;
 
@@ -291,7 +291,7 @@ void CommandManager::PluginCommands::GetWeatherName(double* result) {
 			s += weatherName;
 		else
 			s += "(no weather)";
-		PrintToConsole(s.c_str());
+		Pointers::Functions::PrintToConsole(s.c_str());
 	}
 	*result = 1;
 

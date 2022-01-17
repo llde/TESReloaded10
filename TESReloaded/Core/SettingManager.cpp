@@ -1358,8 +1358,8 @@ void SettingManager::SetSettingsWeather(TESWeather* Weather) {
 		WeatherEx->SetFogDayFar(SettingsWeather->FogFarDay);
 		WeatherEx->SetFogNightNear(SettingsWeather->FogNearNight);
 		WeatherEx->SetFogNightFar(SettingsWeather->FogFarNight);
-		memcpy(WeatherEx->colors, SettingsWeather->Colors, WeatherColorsSize);
-		memcpy(WeatherEx->colorsb, SettingsWeather->Colors, WeatherColorsSize);
+		memcpy(WeatherEx->colors, SettingsWeather->Colors, TESWeather::kNumColorTypes * TESWeather::kNumTimeOfDay * 4);
+		memcpy(WeatherEx->colorsb, SettingsWeather->Colors, TESWeather::kNumColorTypes * TESWeather::kNumTimeOfDay * 4);
 	}
 	for (int c = 0; c < TESWeatherEx::eColor_Lighting; c++) {
 		WeatherEx->colors[c].colors[TESWeatherEx::eTime_Night].r = WeatherEx->colorsb[c].colors[TESWeatherEx::eTime_Night].r * SettingsMain.WeatherMode.CoeffNight.x;

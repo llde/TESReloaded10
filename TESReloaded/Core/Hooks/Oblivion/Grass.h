@@ -5,17 +5,17 @@ static void UpdateGrass(TESObjectCELL* Cell, NiNode* GrassNode, float CameraPosX
 
 	for (UInt32 i = 0; i < CellArraySize; i++) {
 		if (TESObjectCELL* Cell = CellArray->gridEntry[i].cell) {
-			if (TheOcclusionManager->InFrustum(Cell->niNode)) CreateGrass(Cell, GrassNode, CameraPosX, CameraPosY, CameraPosZ, CameraForwardX, CameraForwardY, Arg8, StartFadingDistance, EndDistance, Arg11);
+			if (TheOcclusionManager->InFrustum(Cell->niNode)) Pointers::Functions::CreateGrass(Cell, GrassNode, CameraPosX, CameraPosY, CameraPosZ, CameraForwardX, CameraForwardY, Arg8, StartFadingDistance, EndDistance, Arg11);
 		}
 	}
 
 }
 
-static __declspec(naked) void GrassHook() {
+static __declspec(naked) void UpdateGrassHook() {
 
 	__asm {
 		call	UpdateGrass
-		jmp		kGrassReturn
+		jmp		Jumpers::UpdateGrass::Return
 	}
 
 }

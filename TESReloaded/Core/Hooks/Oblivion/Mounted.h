@@ -65,7 +65,7 @@ static __declspec(naked) void ActorReadyWeaponSittingHook() {
 		xor		eax, eax
 
 	loc_jumphack:
-		jmp		kActorReadyWeaponSittingReturn
+		jmp		Jumpers::Mounted::ActorReadyWeaponSittingReturn
 	}
 	
 }
@@ -86,7 +86,7 @@ static __declspec(naked) void PlayerAttackHook() {
 		xor		eax, eax
 
 	loc_jumphack:
-		jmp		kPlayerAttackReturn
+		jmp		Jumpers::Mounted::PlayerAttackReturn
 	}
 
 }
@@ -119,11 +119,11 @@ static __declspec(naked) void HittingMountedCreatureHook() {
 
 		popad
 		xor		esi, esi
-		jmp		kHittingMountedCreatureReturn
+		jmp		Jumpers::Mounted::HittingMountedCreatureReturn
 
 loc_jumphack:
 		popad
-		jmp		kHittingMountedCreatureReturn
+		jmp		Jumpers::Mounted::HittingMountedCreatureReturn
 	}
 
 }
@@ -184,7 +184,7 @@ static __declspec(naked) void HideWeaponHook() {
 		call	HideWeapon
 		add		esp, 8
 		popad
-		jmp		kHideWeaponReturn
+		jmp		Jumpers::Mounted::HideWeaponReturn
 	}
 
 }
@@ -196,7 +196,7 @@ static __declspec(naked) void BowEquipHook() {
 		mov		eax, 0x005E13D0
 		call	eax
 		mov		EquippingBow, 0
-		jmp		kBowEquipReturn
+		jmp		Jumpers::Mounted::BowEquipReturn
 	}
 
 }
@@ -214,7 +214,7 @@ static __declspec(naked) void BowUnequipHook() {
 		mov		eax, 0x005E13D0
 		call	eax
 	skip_blend:
-		jmp		kBowUnequipReturn
+		jmp		Jumpers::Mounted::BowUnequipReturn
 	}
 
 }
@@ -227,10 +227,10 @@ static __declspec(naked) void AnimControllerHook() {
 		jz		short skip_controller
 		cmp		EquippingBow, 1
 		jz		short skip_controller
-		jmp		kAnimControllerReturn1
+		jmp		Jumpers::Mounted::AnimControllerReturn1
 
 	skip_controller:
-		jmp		kAnimControllerReturn2
+		jmp		Jumpers::Mounted::AnimControllerReturn2
 	}
 
 }
@@ -261,10 +261,10 @@ static __declspec(naked) void HorsePaletteHook() {
 		test	al, al
 		popad
 		jne		short skip_node
-		jmp		kHorsePaletteReturn1
+		jmp		Jumpers::Mounted::HorsePaletteReturn1
 
 	skip_node:
-		jmp		kHorsePaletteReturn2
+		jmp		Jumpers::Mounted::HorsePaletteReturn2
 	}
 
 }

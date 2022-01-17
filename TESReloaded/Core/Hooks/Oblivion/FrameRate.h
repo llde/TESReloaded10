@@ -1,4 +1,5 @@
 #pragma once
+static const UInt32 ASMTimeInfoUpdate = 0x0047D170;
 
 static __declspec(naked) void UpdateTimeInfoHook() {
 
@@ -7,8 +8,8 @@ static __declspec(naked) void UpdateTimeInfoHook() {
 		mov		ecx, TheFrameRateManager
 		call	FrameRateManager::PerformSync
 		popad
-		call	TimeInfoUpdate
-		jmp		kUpdateTimeInfoReturn
+		call	ASMTimeInfoUpdate
+		jmp		Jumpers::UpdateTimeInfo::Return
 	}
 
 }

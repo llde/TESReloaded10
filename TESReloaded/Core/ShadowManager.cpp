@@ -132,14 +132,14 @@ void ShadowManager::RenderExterior(NiAVObject* Object, float MinRadius) {
 		float Radius = Object->GetWorldBoundRadius();
 		if (!(Object->m_flags & NiAVObject::kFlag_AppCulled) && Radius >= MinRadius && Object->m_worldTransform.pos.z + Radius > TheShaderManager->ShaderConst.Water.waterSettings.x) {
 			void* VFT = *(void**)Object;
-			if (VFT == VFTNiNode || VFT == VFTBSFadeNode || VFT == VFTBSFaceGenNiNode || VFT == VFTBSTreeNode) {
-				if (VFT == VFTBSFadeNode && ((BSFadeNode*)Object)->FadeAlpha < 0.75f) return;
+			if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode || VFT == Pointers::VirtualTables::BSTreeNode) {
+				if (VFT == Pointers::VirtualTables::BSFadeNode && ((BSFadeNode*)Object)->FadeAlpha < 0.75f) return;
 				NiNode* Node = (NiNode*)Object;
 				for (int i = 0; i < Node->m_children.end; i++) {
 					RenderExterior(Node->m_children.data[i], MinRadius);
 				}
 			}
-			else if (VFT == VFTNiTriShape || VFT == VFTNiTriStrips) {
+			else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
 				RenderGeometry((NiGeometry*)Object);
 			}
 		}
@@ -153,13 +153,13 @@ void ShadowManager::RenderInterior(NiAVObject* Object, float MinRadius) {
 		float Radius = Object->GetWorldBoundRadius();
 		if (!(Object->m_flags & NiAVObject::kFlag_AppCulled) && Radius >= MinRadius) {
 			void* VFT = *(void**)Object;
-			if (VFT == VFTNiNode || VFT == VFTBSFadeNode || VFT == VFTBSFaceGenNiNode) {
+			if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode) {
 				NiNode* Node = (NiNode*)Object;
 				for (int i = 0; i < Node->m_children.end; i++) {
 					RenderInterior(Node->m_children.data[i], MinRadius);
 				}
 			}
-			else if (VFT == VFTNiTriShape || VFT == VFTNiTriStrips) {
+			else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
 				RenderGeometry((NiGeometry*)Object);
 			}
 		}
@@ -171,7 +171,7 @@ void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMa
 
 	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
 		void* VFT = *(void**)Object;
-		if (VFT == VFTNiNode) {
+		if (VFT == Pointers::VirtualTables::NiNode) {
 			NiNode* Node = (NiNode*)Object;
 			if (InFrustum(ShadowMapType, Node)) {
 				for (int i = 0; i < Node->m_children.end; i++) {
@@ -179,7 +179,7 @@ void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMa
 				}
 			}
 		}
-		else if (VFT == VFTNiTriShape || VFT == VFTNiTriStrips) {
+		else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
 			RenderGeometry((NiGeometry*)Object);
 		}
 	}
@@ -222,9 +222,6 @@ void ShadowManager::Render(NiGeometry* Geo) {
 	if (GeoData) {
 		TheRenderManager->CreateD3DMatrix(&TheShaderManager->ShaderConst.ShadowMap.ShadowWorld, &Geo->m_worldTransform);
 		if (Geo->m_parent->m_pcName && !memcmp(Geo->m_parent->m_pcName, "Leaves", 6)) {
-			NiVector4* RockParams = (NiVector4*)kRockParams;
-			NiVector4* RustleParams = (NiVector4*)kRustleParams;
-			NiVector4* WindMatrixes = (NiVector4*)kWindMatrixes;
 			SpeedTreeLeafShaderProperty* STProp = (SpeedTreeLeafShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
 			BSTreeNode* Node = (BSTreeNode*)Geo->m_parent->m_parent;
 			NiDX9SourceTextureData* Texture = (NiDX9SourceTextureData*)Node->TreeModel->LeavesTexture->rendererData;
@@ -232,9 +229,9 @@ void ShadowManager::Render(NiGeometry* Geo) {
 			TheShaderManager->ShaderConst.Shadow.Data.x = 2.0f;
 			Device->SetVertexShaderConstantF(63, (float*)&BillboardRight, 1);
 			Device->SetVertexShaderConstantF(64, (float*)&BillboardUp, 1);
-			Device->SetVertexShaderConstantF(65, (float*)RockParams, 1);
-			Device->SetVertexShaderConstantF(66, (float*)RustleParams, 1);
-			Device->SetVertexShaderConstantF(67, (float*)WindMatrixes, 16);
+			Device->SetVertexShaderConstantF(65, Pointers::ShaderParams::RockParams, 1);
+			Device->SetVertexShaderConstantF(66, Pointers::ShaderParams::RustleParams, 1);
+			Device->SetVertexShaderConstantF(67, Pointers::ShaderParams::WindMatrixes, 16);
 			Device->SetVertexShaderConstantF(83, STProp->leafData->leafBase, 48);
 			RenderState->SetTexture(0, Texture->dTexture);
 			RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);

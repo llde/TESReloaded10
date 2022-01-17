@@ -80,9 +80,7 @@ void AttachHooks() {
 		DetourAttach(&(PVOID&)CloseSleepWaitMenu,			&CloseSleepWaitMenuHook);
 		DetourAttach(&(PVOID&)ShowSleepWaitMenu,			&ShowSleepWaitMenuHook);
 	}
-	if (SettingsMain->FlyCam.Enabled) {
-		DetourAttach(&(PVOID&)UpdateFlyCam,					&UpdateFlyCamHook);
-	}
+	if (SettingsMain->FlyCam.Enabled) DetourAttach(&(PVOID&)UpdateFlyCam, &UpdateFlyCamHook);
 	DetourTransactionCommit();
 	
 	SafeWrite8(0x00801BCB,	sizeof(NiD3DVertexShaderEx));
@@ -136,7 +134,7 @@ void AttachHooks() {
 	SafeWriteJump(Jumpers::Shadows::RenderShadowMapHook,		(UInt32)RenderShadowMapHook);
 	SafeWriteJump(Jumpers::Shadows::AddCastShadowFlagHook,		(UInt32)AddCastShadowFlagHook);
 	SafeWriteJump(Jumpers::WaterHeightMap::Hook,				(UInt32)WaterHeightMapHook);
-	SafeWriteJump(0x0040F488, (UInt32)EndProcessHook);
+	SafeWriteJump(Jumpers::EndProcess::Hook,					(UInt32)EndProcessHook);
 	SafeWriteJump(0x00553EAC, 0x00553EB2); // Patches the use of Lighting30Shader only for the hair
 	SafeWriteJump(0x007D1BC4, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
 	SafeWriteJump(0x007D1BCD, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
@@ -151,7 +149,7 @@ void AttachHooks() {
 	SafeWriteJump(0x005DF8E9, 0x005DF983); // Skips antialising deactivation changing HDR (video menu)
 	SafeWriteJump(0x006738B1, 0x00673935); // Cancels the fPlayerDeathReloadTime
 	if (SettingsMain->Shaders.Water) {
-		*LocalWaterHiRes = 1;
+		*Pointers::ShaderParams::WaterHighResolution = 1;
 		SafeWrite8(0x0049EBAC, 0); // Avoids to change the shader for the skydome when underwater
 		SafeWriteJump(0x0053B16F, 0x0053B20C); // Avoids to change atmosphere colors when underwater
 		SafeWriteJump(0x00542F63, 0x00542FC1); // Avoids to remove the sun over the scene when underwater
@@ -161,7 +159,7 @@ void AttachHooks() {
 		SafeWrite8(0x007BE32B, SettingsMain->Main.AnisotropicFilter);
 	}
 	if (SettingsMain->Main.RemovePrecipitations) SafeWriteJump(0x00543167, 0x00543176);
-	if (SettingsMain->FrameRate.SmartControl) SafeWriteJump(kUpdateTimeInfoHook, (UInt32)UpdateTimeInfoHook);
+	if (SettingsMain->FrameRate.SmartControl) SafeWriteJump(Jumpers::UpdateTimeInfo::Hook, (UInt32)UpdateTimeInfoHook);
 	if (SettingsMain->FrameRate.SmartBackgroundProcess) {
 		SafeWrite8(0x007635F9, 0x8B); // Patches the NiRenderer::CreateSourceCubeMapRendererData
 		SafeWrite8(0x007635FA, 0xF8); // Patches the NiRenderer::CreateSourceCubeMapRendererData
@@ -178,13 +176,13 @@ void AttachHooks() {
 		SafeWriteJump(0x0077AEAF, 0x0077AEC3); // Skips leaving	 SourceDataCriticalSection (NiDX9TextureManager::PrecacheTexture)
 	}
 	if (SettingsMain->OcclusionCulling.Enabled) {
-		SafeWriteJump(kNew1CollisionObjectHook,		(UInt32)New1CollisionObjectHook);
-		SafeWriteJump(kNew2CollisionObjectHook,		(UInt32)New2CollisionObjectHook);
-		SafeWriteJump(kNew3CollisionObjectHook,		(UInt32)New3CollisionObjectHook);
-		SafeWriteJump(kDisposeCollisionObjectHook,	(UInt32)DisposeCollisionObjectHook);
-		SafeWriteJump(kMaterialPropertyHook,		(UInt32)MaterialPropertyHook);
-		SafeWriteJump(kCoordinateJackHook,			(UInt32)CoordinateJackHook);
-		SafeWriteJump(kObjectCullHook,				(UInt32)ObjectCullHook);
+		SafeWriteJump(Jumpers::Occlusion::New1CollisionObjectHook,		(UInt32)New1CollisionObjectHook);
+		SafeWriteJump(Jumpers::Occlusion::New2CollisionObjectHook,		(UInt32)New2CollisionObjectHook);
+		SafeWriteJump(Jumpers::Occlusion::New3CollisionObjectHook,		(UInt32)New3CollisionObjectHook);
+		SafeWriteJump(Jumpers::Occlusion::DisposeCollisionObjectHook,	(UInt32)DisposeCollisionObjectHook);
+		SafeWriteJump(Jumpers::Occlusion::MaterialPropertyHook,			(UInt32)MaterialPropertyHook);
+		SafeWriteJump(Jumpers::Occlusion::CoordinateJackHook,			(UInt32)CoordinateJackHook);
+		SafeWriteJump(Jumpers::Occlusion::ObjectCullHook,				(UInt32)ObjectCullHook);
 	}
 	if (SettingsMain->Main.MemoryHeapManagement) {
 		GetCurrentDirectoryA(MAX_PATH, Filename);
@@ -208,40 +206,40 @@ void AttachHooks() {
 		SafeWriteJump(0x0040B3A0, 0x0040C008); //Skips MemoryHeap stats
 		SafeWriteCall(0x00401AAE, (UInt32)Mem.Malloc);
 		SafeWriteCall(0x00401495, (UInt32)Mem.Free);
-		SafeWriteJump(kMemReallocHook, (UInt32)MemReallocHook);
+		SafeWriteJump(Jumpers::Memory::MemReallocHook, (UInt32)MemReallocHook);
 	}
-	if (SettingsMain->Main.MemoryTextureManagement) SafeWriteCall(kCreateTextureFromFileInMemory, (UInt32)CreateTextureFromFileInMemory);
-	if (SettingsMain->GrassMode.Enabled) SafeWriteJump(kGrassHook, (UInt32)GrassHook);
+	if (SettingsMain->Main.MemoryTextureManagement) SafeWriteCall(Jumpers::Memory::CreateTextureFromFileInMemory, (UInt32)CreateTextureFromFileInMemory);
+	if (SettingsMain->GrassMode.Enabled) SafeWriteJump(Jumpers::UpdateGrass::Hook, (UInt32)UpdateGrassHook);
 	if (SettingsMain->CameraMode.Enabled) {
-		SafeWriteJump(kUpdateCameraHook, (UInt32)UpdateCameraHook);
-		SafeWriteJump(kSwitchCameraHook, (UInt32)SwitchCameraHook);
-		SafeWriteJump(kSwitchCameraPOVHook, (UInt32)SwitchCameraPOVHook);
-		SafeWriteJump(kHeadTrackingHook, (UInt32)HeadTrackingHook);
-		SafeWriteJump(kSpineTrackingHook, (UInt32)SpineTrackingHook);
-		SafeWriteJump(kSetReticleOffsetHook, (UInt32)SetReticleOffsetHook);
+		SafeWriteJump(Jumpers::Camera::UpdateCameraHook,		(UInt32)UpdateCameraHook);
+		SafeWriteJump(Jumpers::Camera::SwitchCameraHook,		(UInt32)SwitchCameraHook);
+		SafeWriteJump(Jumpers::Camera::SwitchCameraPOVHook,		(UInt32)SwitchCameraPOVHook);
+		SafeWriteJump(Jumpers::Camera::HeadTrackingHook,		(UInt32)HeadTrackingHook);
+		SafeWriteJump(Jumpers::Camera::SpineTrackingHook,		(UInt32)SpineTrackingHook);
+		SafeWriteJump(Jumpers::Camera::SetReticleOffsetHook,	(UInt32)SetReticleOffsetHook);
 		SafeWriteJump(0x0066B769, 0x0066B795); // Does not lower the player Z axis value (fixes the bug of the camera on feet after resurrection)
 		SafeWriteJump(0x00666704, 0x0066672D); // Enables the zoom with the bow
 	}
 	if (SettingsMain->EquipmentMode.Enabled) {
-		SafeWriteJump(kPrnHook, (UInt32)PrnHook);
-		SafeWriteJump(kSetWeaponRotationPositionHook, (UInt32)SetWeaponRotationPositionHook);
-		SafeWriteJump(kMenuMouseButtonHook, (UInt32)MenuMouseButtonHook);
-		SafeWriteJump(kEquipItemWornHook, (UInt32)EquipItemWornHook);
+		SafeWriteJump(Jumpers::Equipment::PrnHook,							(UInt32)PrnHook);
+		SafeWriteJump(Jumpers::Equipment::SetWeaponRotationPositionHook,	(UInt32)SetWeaponRotationPositionHook);
+		SafeWriteJump(Jumpers::Equipment::MenuMouseButtonHook,				(UInt32)MenuMouseButtonHook);
+		SafeWriteJump(Jumpers::Equipment::EquipItemWornHook,				(UInt32)EquipItemWornHook);
 		if (SettingsMain->EquipmentMode.TorchKey != 255) {
 			SafeWriteJump(0x004E1DA1, 0x004E1DAF); // Do not play the torch held LP sound on equipping light
-			SafeWriteJump(kUnequipTorchHook, (UInt32)UnequipTorchHook);
+			SafeWriteJump(Jumpers::Equipment::UnequipTorchHook,				(UInt32)UnequipTorchHook);
 		}
 		if (SettingsMain->MountedCombat.Enabled) {
-			SafeWriteCall(kPlayerReadyWeaponHook, (UInt32)ReadyWeaponHook);
-			SafeWriteCall(kActorReadyWeaponHook, (UInt32)ReadyWeaponHook);
-			SafeWriteJump(kActorReadyWeaponSittingHook, (UInt32)ActorReadyWeaponSittingHook);
-			SafeWriteJump(kPlayerAttackHook, (UInt32)PlayerAttackHook);
-			SafeWriteJump(kHittingMountedCreatureHook, (UInt32)HittingMountedCreatureHook);
-			SafeWriteJump(kHideWeaponHook, (UInt32)HideWeaponHook);
-			SafeWriteJump(kBowEquipHook, (UInt32)BowEquipHook);
-			SafeWriteJump(kBowUnequipHook, (UInt32)BowUnequipHook);
-			SafeWriteJump(kAnimControllerHook, (UInt32)AnimControllerHook);
-			SafeWriteJump(kHorsePaletteHook, (UInt32)HorsePaletteHook);
+			SafeWriteCall(Jumpers::Mounted::PlayerReadyWeaponHook,			(UInt32)ReadyWeaponHook);
+			SafeWriteCall(Jumpers::Mounted::ActorReadyWeaponHook,			(UInt32)ReadyWeaponHook);
+			SafeWriteJump(Jumpers::Mounted::ActorReadyWeaponSittingHook,	(UInt32)ActorReadyWeaponSittingHook);
+			SafeWriteJump(Jumpers::Mounted::PlayerAttackHook,				(UInt32)PlayerAttackHook);
+			SafeWriteJump(Jumpers::Mounted::HittingMountedCreatureHook,		(UInt32)HittingMountedCreatureHook);
+			SafeWriteJump(Jumpers::Mounted::HideWeaponHook,					(UInt32)HideWeaponHook);
+			SafeWriteJump(Jumpers::Mounted::BowEquipHook,					(UInt32)BowEquipHook);
+			SafeWriteJump(Jumpers::Mounted::BowUnequipHook,					(UInt32)BowUnequipHook);
+			SafeWriteJump(Jumpers::Mounted::AnimControllerHook,				(UInt32)AnimControllerHook);
+			SafeWriteJump(Jumpers::Mounted::HorsePaletteHook,				(UInt32)HorsePaletteHook);
 			SafeWriteJump(0x005FB089, 0x005FB0AD); // Enables the possibility to equip the weapon when sitting/mounting
 			SafeWriteJump(0x005F2F97, 0x005F2FE8); // Enables the possibility to unequip the weapon when sitting/mounting
 
@@ -259,15 +257,15 @@ void AttachHooks() {
 		SafeWrite8(0x00672A17, SettingsMain->Dodge.AcrobaticsLevel);
 		if (SettingsMain->Dodge.DoubleTap) {
 			SafeWriteJump(0x00672941, 0x00672954);
-			SafeWriteJump(kJumpPressedHook, (UInt32)JumpPressedHook);
-			SafeWriteJump(kDoubleTapHook, (UInt32)DoubleTapHook);
+			SafeWriteJump(Jumpers::Dodge::JumpPressedHook,	(UInt32)JumpPressedHook);
+			SafeWriteJump(Jumpers::Dodge::DoubleTapHook,	(UInt32)DoubleTapHook);
 		}
 	}
 	if (SettingsMain->FlyCam.Enabled) {
-		SafeWriteJump(kUpdateForwardFlyCamHook, (UInt32)UpdateForwardFlyCamHook);
-		SafeWriteJump(kUpdateBackwardFlyCamHook, (UInt32)UpdateBackwardFlyCamHook);
-		SafeWriteJump(kUpdateRightFlyCamHook, (UInt32)UpdateRightFlyCamHook);
-		SafeWriteJump(kUpdateLeftFlyCamHook, (UInt32)UpdateLeftFlyCamHook);
+		SafeWriteJump(Jumpers::FlyCam::UpdateForwardFlyCamHook,		(UInt32)UpdateForwardFlyCamHook);
+		SafeWriteJump(Jumpers::FlyCam::UpdateBackwardFlyCamHook,	(UInt32)UpdateBackwardFlyCamHook);
+		SafeWriteJump(Jumpers::FlyCam::UpdateRightFlyCamHook,		(UInt32)UpdateRightFlyCamHook);
+		SafeWriteJump(Jumpers::FlyCam::UpdateLeftFlyCamHook,		(UInt32)UpdateLeftFlyCamHook);
 	}
 
 }

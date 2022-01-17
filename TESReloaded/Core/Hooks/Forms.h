@@ -8,7 +8,7 @@ static bool __cdecl LoadFormHook(TESForm* Form, UInt32 ModEntry) {
 		case TESForm::FormType::kFormType_Weather: {
 				if (TheSettingManager->SettingsMain.WeatherMode.Enabled) {
 					TESWeatherEx* Weather = (TESWeatherEx*)Form;
-					memcpy(Weather->colorsb, Weather->colors, WeatherColorsSize);
+					memcpy(Weather->colorsb, Weather->colors, TESWeather::kNumColorTypes * TESWeather::kNumTimeOfDay * 4);
 					TheSettingManager->SetSettingsWeather(Weather);
 				}
 			}

@@ -1,11 +1,13 @@
 #pragma once
 
+static ActorAnimDataEx* AnimDataAnimation = NULL;
+
 static ActorAnimData* (__thiscall* NewActorAnimData)(ActorAnimData*) = (ActorAnimData* (__thiscall*)(ActorAnimData*))Hooks::NewActorAnimData;
 static ActorAnimData* __fastcall NewActorAnimDataHook(ActorAnimData* This, UInt32 edx) {
 
 	ActorAnimDataEx* AnimData = (ActorAnimDataEx*)(*NewActorAnimData)(This);
 	
-	NiTList<BSAnimGroupSequence>* ORAnims = (NiTList<BSAnimGroupSequence>*)MemoryAlloc(0x10);
+	NiTList<BSAnimGroupSequence>* ORAnims = (NiTList<BSAnimGroupSequence>*)Pointers::Functions::MemoryAlloc(0x10);
 	*(void**)ORAnims = (void*)0x00A3C748;
 	ORAnims->start = NULL;
 	ORAnims->end = NULL;
@@ -213,7 +215,7 @@ static TESAnimGroup* __cdecl LoadAnimGroupHook(NiControllerSequence* ControllerS
 
 	TESAnimGroup* AnimGroup = LoadAnimGroup(ControllerSequence, FilePath);
 
-	AnimGroup->animOR = (bool)strstr(FilePath, ORAnimString);
+	AnimGroup->animOR = (bool)strstr(FilePath, AnimString);
 	return AnimGroup;
 
 }

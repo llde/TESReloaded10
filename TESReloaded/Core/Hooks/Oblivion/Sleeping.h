@@ -32,7 +32,7 @@ static void __cdecl CloseSleepWaitMenuHook() {
 	CloseSleepWaitMenu();
 	if (Served) {
 		Served = false;
-		InterfaceManager->ShowMessageBox(*MessageBoxServeSentenceText, (void*)0x00671600, *MessageBoxButtonYes, *MessageBoxButtonNo);
+		InterfaceManager->ShowMessageBox(Pointers::Generic::MessageBoxServeSentenceText, Pointers::Generic::ServeSentenceCallback, Pointers::Generic::MessageBoxButtonYes, Pointers::Generic::MessageBoxButtonNo);
 	}
 
 }

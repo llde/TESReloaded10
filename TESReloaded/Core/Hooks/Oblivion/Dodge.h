@@ -1,4 +1,10 @@
 #pragma once
+static const UInt32 ASMGetControlState = 0x00403520;
+static const UInt32 ASMGetCharacterController = 0x0065A2C0;
+static UInt8 DoubleTapStep = 0;
+static UInt8 Direction[2] = { 0, 0 };
+static UInt32 IsDoubleTapped = 0;
+static float DoubleTapTime = -1.0f;
 
 static __declspec(naked) void JumpPressedHook() {
 
@@ -6,15 +12,15 @@ static __declspec(naked) void JumpPressedHook() {
 		push    1
 		push	13
 		mov		ecx, edi
-		call	kGetControlState
+		call	ASMGetControlState
 		test	eax, eax
 		jz		short loc_notpressed
 		mov		ecx, ebx
-		call	kGetCharacterController
-		jmp		kJumpPressedReturn1
+		call	ASMGetCharacterController
+		jmp		Jumpers::Dodge::JumpPressedReturn1
 
 	loc_notpressed:
-		jmp		kJumpPressedReturn2
+		jmp		Jumpers::Dodge::JumpPressedReturn2
 	}
 
 }
@@ -70,7 +76,7 @@ static __declspec(naked) void DoubleTapHook() {
 		add		esp, 4
 		popad
 		mov		eax, IsDoubleTapped
-		jmp		kDoubleTapReturn
+		jmp		Jumpers::Dodge::DoubleTapReturn
 	}
 
 }

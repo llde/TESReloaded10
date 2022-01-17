@@ -111,8 +111,8 @@
   <ItemGroup>
     <ClInclude Include="..\TESReloaded\Core\CameraManager.h" />
     <ClInclude Include="..\TESReloaded\Core\CommandManager.h" />
-    <ClInclude Include="..\TESReloaded\Core\D3D9\Device.h" />
-    <ClInclude Include="..\TESReloaded\Core\D3D9\Hook.h" />
+    <ClInclude Include="..\TESReloaded\Core\Device\Device.h" />
+    <ClInclude Include="..\TESReloaded\Core\Device\Hook.h" />
     <ClInclude Include="..\TESReloaded\Core\EquipmentManager.h" />
     <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
@@ -169,8 +169,8 @@
   <ItemGroup>
     <ClCompile Include="..\TESReloaded\Core\CameraManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\CommandManager.cpp" />
-    <ClCompile Include="..\TESReloaded\Core\D3D9\Device.cpp" />
-    <ClCompile Include="..\TESReloaded\Core\D3D9\Hook.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Device\Device.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Device\Hook.cpp" />
     <ClCompile Include="..\TESReloaded\Core\EquipmentManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\FrameRateManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\OcclusionManager.cpp" />

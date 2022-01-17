@@ -6,7 +6,7 @@ static __declspec(naked) void MemReallocHook() {
 		push	ebx
 		call	Mem.Realloc
 		add		esp, 8
-		jmp		kMemReallocReturn
+		jmp		Jumpers::Memory::MemReallocReturn
 	}
 
 }

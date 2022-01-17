@@ -78,15 +78,15 @@ void OcclusionManager::RenderStatic(NiAVObject* Object, float MinBoundSize, floa
 			BoundBox = (BoundSize.x * 100.f) * (BoundSize.y * 100.0f);
 			if (BoundBox >= MinBoundSize && BoundBox <= MaxBoundSize) {
 				void* VFT = *(void**)Object;
-				if (VFT == VFTNiNode || VFT == VFTBSFadeNode) {
-					if (VFT == VFTBSFadeNode && ((BSFadeNode*)Object)->FadeAlpha < 0.9f) return;
+				if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode) {
+					if (VFT == Pointers::VirtualTables::BSFadeNode && ((BSFadeNode*)Object)->FadeAlpha < 0.9f) return;
 					NiNode* Node = (NiNode*)Object;
 					if (bhkCollisionObjectEx* CollisionObject = (bhkCollisionObjectEx*)Node->m_spCollision) {
 						VFT = *(void**)CollisionObject;
-						if (VFT == VFTbhkCollisionObject) {
+						if (VFT == Pointers::VirtualTables::bhkCollisionObject) {
 							if (!CollisionObject->GeoNode) {
 								if (bhkRigidBody* RigidBody = CollisionObject->bRigidBody) {
-									NiNode* GeoNode = (NiNode*)MemoryAlloc(sizeof(NiNode)); GeoNode->New(1); GeoNode->SetName("bhkColDisp"); GeoNode->m_flags |= NiAVObject::kFlag_IsOCNode;
+									NiNode* GeoNode = (NiNode*)Pointers::Functions::MemoryAlloc(sizeof(NiNode)); GeoNode->New(1); GeoNode->SetName("bhkColDisp"); GeoNode->m_flags |= NiAVObject::kFlag_IsOCNode;
 									GeoNode->m_localTransform.scale = fabs(1.0f / Node->m_worldTransform.scale);
 									Node->AddObject(GeoNode, 1);
 									GeoNode->UpdateDownwardPass(0.0f, false);
@@ -117,13 +117,13 @@ void OcclusionManager::RenderImmediate(NiAVObject* Object, bool PerformOcclusion
 	
 	if (Object) {
 		void* VFT = *(void**)Object;
-		if (VFT == VFTNiNode) {
+		if (VFT == Pointers::VirtualTables::NiNode) {
 			NiNode* Node = (NiNode*)Object;
 			for (int i = 0; i < Node->m_children.end; i++) {
 				RenderImmediate(Node->m_children.data[i], PerformOcclusion);
 			}
 		}
-		else if (VFT == VFTNiTriShape || VFT == VFTNiTriStrips) {
+		else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
 			NiGeometry* Geo = (NiGeometry*)Object;
 			if (!Geo->geomData->BuffData) TheRenderManager->unsharedGeometryGroup->AddObject(Geo->geomData, NULL, NULL);
 			if (PerformOcclusion) OcclusionQuery->Issue(D3DISSUE_BEGIN);
@@ -145,7 +145,7 @@ void OcclusionManager::RenderTerrain(NiAVObject* Object) {
 
 	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
 		void* VFT = *(void**)Object;
-		if (VFT == VFTNiNode) {
+		if (VFT == Pointers::VirtualTables::NiNode) {
 			NiNode* Node = (NiNode*)Object;
 			if (InFrustum(Node)) {
 				for (int i = 0; i < Node->m_children.end; i++) {
@@ -153,7 +153,7 @@ void OcclusionManager::RenderTerrain(NiAVObject* Object) {
 				}
 			}
 		}
-		else if (VFT == VFTNiTriShape || VFT == VFTNiTriStrips) {
+		else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
 			NiGeometry* Geo = (NiGeometry*)Object;
 			if (Geo->geomData->BuffData) Render(Geo);
 		}
@@ -167,7 +167,7 @@ void OcclusionManager::RenderWater(NiAVObject* Object) {
 
 	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
 		void* VFT = *(void**)Object;
-		if (VFT == VFTNiNode) {
+		if (VFT == Pointers::VirtualTables::NiNode) {
 			NiNode* Node = (NiNode*)Object;
 			if (InFrustum(Node)) {
 				for (int i = 0; i < Node->m_children.end; i++) {
@@ -175,7 +175,7 @@ void OcclusionManager::RenderWater(NiAVObject* Object) {
 				}
 			}
 		}
-		else if (VFT == VFTNiTriShape || VFT == VFTNiTriStrips) {
+		else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
 			NiGeometry* Geo = (NiGeometry*)Object;
 			if (Geo->geomData->BuffData) {
 				OcclusionQuery->Issue(D3DISSUE_BEGIN);
@@ -262,7 +262,7 @@ void OcclusionManager::ManageDistantStatic(NiAVObject* Object, float MaxBoundSiz
 
 	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
 		void* VFT = *(void**)Object;
-		if (VFT == VFTNiNode) {
+		if (VFT == Pointers::VirtualTables::NiNode) {
 			NiNode* Node = (NiNode*)Object;
 			if (InFrustum(Node)) {
 				for (int i = 0; i < Node->m_children.end; i++) {
@@ -270,7 +270,7 @@ void OcclusionManager::ManageDistantStatic(NiAVObject* Object, float MaxBoundSiz
 				}
 			}
 		}
-		else if (VFT == VFTBSFadeNode) {
+		else if (VFT == Pointers::VirtualTables::BSFadeNode) {
 			if (!TheSettingManager->SettingsMain.OcclusionCulling.OccludedDistantStaticIC && !memcmp(Object->m_pcName + 18, "ImperialCity", 12)) return;
 			NiBound* Bound = Object->GetWorldBound();
 			TheRenderManager->GetScreenSpaceBoundSize(&BoundSize, Bound);
@@ -288,7 +288,7 @@ void OcclusionManager::RenderDistantStatic(NiAVObject* Object) {
 
 	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled) && !(Object->m_flags & NiAVObject::kFlag_IsOccluded)) {
 		void* VFT = *(void**)Object;
-		if (VFT == VFTNiNode || VFT == VFTBSFadeNode) {
+		if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode) {
 			NiNode* Node = (NiNode*)Object;
 			if (InFrustum(Node)) {
 				for (int i = 0; i < Node->m_children.end; i++) {
@@ -296,7 +296,7 @@ void OcclusionManager::RenderDistantStatic(NiAVObject* Object) {
 				}
 			}
 		}
-		else if (VFT == VFTNiTriShape || VFT == VFTNiTriStrips) {
+		else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
 			NiGeometry* Geo = (NiGeometry*)Object;
 			if (Geo->geomData->BuffData) Render(Geo);
 		}
