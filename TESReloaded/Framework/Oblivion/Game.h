@@ -4043,10 +4043,6 @@ namespace Pointers {
 		static BSRenderedTexture* MenuRenderedTexture		  = *(BSRenderedTexture**)0x00B333E8;
 		static NiPoint3*		  CameraWorldTranslate		  = (NiPoint3*)0x00B3F92C;
 		static NiPoint3*		  CameraLocation			  = (NiPoint3*)0x00B3F9A8;
-		static const char*		  MessageBoxServeSentenceText = *(const char**)0x00B38B30;
-		static const char*		  MessageBoxButtonYes		  = *(const char**)0x00B38CF8;
-		static const char*		  MessageBoxButtonNo		  = *(const char**)0x00B38D00;
-		static void*			  ServeSentenceCallback		  = (void*)0x00671600;
 		static NiNode**			  DetectorWindowNode		  = (NiNode**)0x00B42CF4;
 	}
 	namespace Functions {

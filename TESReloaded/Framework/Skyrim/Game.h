@@ -2776,6 +2776,16 @@ assert(sizeof(ActorState) == 0x0C);
 
 class HighProcess {
 public:
+	enum SitSleep {
+		kSitSleep_None = 0,
+		kSitSleep_SittingIn = 3,
+		kSitSleep_Sitting = 4,
+		kSitSleep_SittingOut = 5,
+		kSitSleep_SleepingIn = 6,
+		kSitSleep_Sleeping = 7,
+		kSitSleep_SleepingOut = 8,
+	};
+
 	struct Data30 {
 		UInt32	unk00;	// 00
 		UInt32	unk04;	// 04
@@ -3881,7 +3891,7 @@ public:
 };
 assert(sizeof(ModList) == 0x408);
 
-class MasterDataHandler {
+class MainDataHandler {
 public:
 
 	TESForm*							CreateForm(UInt8 FormType) { return IFormFactory::GetFactory(FormType)->Create(); }
@@ -4037,7 +4047,7 @@ public:
 	ModList								modList;			// 694
 	UInt32								moreunks[100];		// A9C
 };
-assert(sizeof(MasterDataHandler) == 0xC2C);
+assert(sizeof(MainDataHandler) == 0xC2C);
 
 class SoundControl {
 public:
@@ -4583,7 +4593,15 @@ public:
 	}
 
 };
-
-static void* (__cdecl* MemoryAlloc)(size_t) = (void* (__cdecl*)(size_t))0x004017F0;
-static bool  (__cdecl* ExtractArgs)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...) = (bool (__cdecl*)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...))0x00514830;
-static void  (* PrintToConsole)(const char*, ...) = (void (*)(const char*, ...))0x00848820;
+namespace Pointers {
+	namespace Generic {
+		static BSRenderedTexture* MenuRenderedTexture	= *(BSRenderedTexture**)0x01B2E8D8;
+		static NiPoint3*		  CameraWorldTranslate	= (NiPoint3*)0x01B913FC;
+		static NiNode**			  DetectorWindowNode	= (NiNode**)0x00000000;
+	}
+	namespace Functions {
+		static void* (__cdecl* MemoryAlloc)(size_t) = (void* (__cdecl*)(size_t))0x004017F0;
+		static bool  (__cdecl* ExtractArgs)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...) = (bool (__cdecl*)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...))0x00514830;
+		static void  (* PrintToConsole)(const char*, ...) = (void (*)(const char*, ...))0x00848820;
+	}
+}

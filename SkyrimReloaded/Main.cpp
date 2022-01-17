@@ -2,7 +2,7 @@
 #define HookDevice 0
 
 #include "Hooks/Skyrim/Hooks.h"
-#include "D3D9/Hook.h"
+#include "Device/Hook.h"
 
 extern "C" {
 
@@ -22,7 +22,7 @@ extern "C" {
 		while (!IsDebuggerPresent()) Sleep(10);
 	#endif
 	#if HookDevice
-		CreateD3D9Hook();
+		AttachDeviceHooks();
 	#endif
 #endif
 

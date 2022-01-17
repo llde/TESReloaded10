@@ -33,7 +33,7 @@
     <Filter Include="Core\Hooks\Skyrim">
       <UniqueIdentifier>{9e4d943f-b63c-4f88-ac81-4554b6015be3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Core\D3D9">
+    <Filter Include="Core\Device">
       <UniqueIdentifier>{af003247-f2a1-49b1-bf3e-63740a504f7a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -113,12 +113,6 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\D3D9\Device.h">
-      <Filter>Core\D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\D3D9\Hook.h">
-      <Filter>Core\D3D9</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Managers.h">
       <Filter>Framework\Skyrim</Filter>
     </ClInclude>
@@ -149,6 +143,12 @@
     <ClInclude Include="..\TESReloaded\Core\TextureManager.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Device\Device.h">
+      <Filter>Core\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Device\Hook.h">
+      <Filter>Core\Device</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -168,12 +168,6 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\modules.cpp">
       <Filter>Framework\Common\Lib\Detours</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\D3D9\Device.cpp">
-      <Filter>Core\D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\D3D9\Hook.cpp">
-      <Filter>Core\D3D9</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Framework\Skyrim\Managers.cpp">
       <Filter>Framework\Skyrim</Filter>
@@ -204,6 +198,12 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\TextureManager.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Device\Device.cpp">
+      <Filter>Core\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Device\Hook.cpp">
+      <Filter>Core\Device</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

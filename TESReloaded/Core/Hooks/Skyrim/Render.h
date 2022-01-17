@@ -1,4 +1,5 @@
 #pragma once
+static NiGeometry* Geometry = NULL;
 
 static void (__thiscall* Render)(Main*, BSRenderedTexture*, int, int) = (void (__thiscall*)(Main*, BSRenderedTexture*, int, int))Hooks::Render;
 static void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* RenderedTexture, int Arg2, int Arg3) {
@@ -34,7 +35,7 @@ static void __fastcall RenderWorldSceneGraphHook(Main* This, UInt32 edx, Sun* Sk
 	bool CameraMode = TheSettingManager->SettingsMain.CameraMode.Enabled;
 
 	(*RenderWorldSceneGraph)(This, SkySun, IsFirstPerson, WireFrame);
-	if (CameraMode || Player->IsThirdPersonView(CameraMode, TheCameraManager->FirstPersonView)) TheRenderManager->ResolveDepthBuffer();
+	if (CameraMode || !TheCameraManager->IsFirstPerson()) TheRenderManager->ResolveDepthBuffer();
 
 }
 
@@ -55,7 +56,7 @@ static __declspec(naked) void RenderingGeometryHook() {
 		mov     ebx, [esi]
 		mov     ebp, [esi + 8]
 		mov     Geometry, ebp
-		jmp		kRenderingGeometryReturn
+		jmp		Jumpers::RenderingGeometry::Return
 	}
 
 }
@@ -81,7 +82,7 @@ static __declspec(naked) void SetShadowDistanceHook() {
 		add		esp, 8
 		popfd
 		popad
-		jmp		kSetShadowDistanceReturn
+		jmp		Jumpers::Shadows::SetShadowDistanceReturn
 	}
 }
 
@@ -99,7 +100,7 @@ static __declspec(naked) void SetShadowDistanceShaderHook() {
 		popad
 		mov		ecx, [esp + 0xE0 - 0xC4 + 4]
 		mov		[esp + esi * 4 + 0xE0 - 0x98], ecx
-		jmp		kSetShadowDistanceShaderReturn
+		jmp		Jumpers::Shadows::SetShadowDistanceShaderReturn
 	}
 
 }

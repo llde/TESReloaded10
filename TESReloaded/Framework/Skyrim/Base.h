@@ -41,6 +41,40 @@ public:
 	static const UInt32 ServeSentence				= 0x0074B7E0;
 };
 
+class Jumpers {
+public:
+	struct CreateDevice {
+		static const UInt32 Hook	= 0x00CD8B6F;
+		static const UInt32 Return	= 0x00CD8B74;
+	};
+	struct SetRegionEditorName {
+		static const UInt32 Hook	= 0x0048BEE4;
+		static const UInt32 Return	= 0x0048BEEA;
+	};
+	struct SetWeatherEditorName {
+		static const UInt32 Hook	= 0x004EF358;
+		static const UInt32 Return	= 0x004EF35E;
+	};
+	struct RenderInterface {
+		static const UInt32 Hook	= 0x00A5CB57;
+		static const UInt32 Return	= 0x00A5CB5C;
+		static const UInt32 Method	= 0x00A623F0;
+	};
+	struct RenderingGeometry {
+		static const UInt32 Hook	= 0x00CAFFC0;
+		static const UInt32 Return	= 0x00CAFFC5;
+	};
+	struct Shadows {
+		static const UInt32 SetShadowDistanceHook			= 0x00CBB140;
+		static const UInt32 SetShadowDistanceReturn			= 0x00CBB146;
+		static const UInt32 SetShadowDistanceShaderHook		= 0x00CB7365;
+		static const UInt32 SetShadowDistanceShaderReturn	= 0x00CB736D;
+	};
+	struct HitEvent {
+		static const UInt32 Hook	= 0x006E4837;
+		static const UInt32 Return	= 0x006E483E;
+	};
+};
 static CommandTable	commandTable;
 static void* PapyrusFunctions[2];
 
@@ -103,8 +137,8 @@ public:
 		if (!Fullscreen) {
 			SafeWrite32(0x012CF5F8, 0);
 			SafeWrite32(0x012CF604, 0);
-			SafeWrite32(kRectStyle, WS_POPUP);
-			SafeWrite32(kWindowStyle, WS_POPUP | WS_VISIBLE);
+			SafeWrite32(0x0069D832, WS_POPUP);
+			SafeWrite32(0x0069D877, WS_POPUP | WS_VISIBLE);
 		}
 
 	}

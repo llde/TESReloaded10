@@ -7,7 +7,7 @@ void RaiseEvent(Actor* Act, Actor* TargetAct, GameEventManager::EventEnum GameEv
 			case GameEventManager::OnHit:
 				if (Act == Player) {
 					TESForm* EquippedObject = Act->GetEquippedObject(ActorProcessManager::EquippedHand::kEquippedHand_Right);
-					if (EquippedObject && EquippedObject->formType == TESForm::FormType::kFormType_Weapon && ((TESObjectWEAP*)EquippedObject)->wtype <= TESObjectWEAP::WeaponType::kType_TwoHandAxe) TheGameEventManager->OnHitByPlayer();
+					if (EquippedObject && EquippedObject->formType == TESForm::FormType::kFormType_Weapon && ((TESObjectWEAP*)EquippedObject)->gameData.type <= TESObjectWEAP::WeaponType::kType_TwoHandAxe) TheGameEventManager->OnHitByPlayer();
 				}
 				break;
 			default:

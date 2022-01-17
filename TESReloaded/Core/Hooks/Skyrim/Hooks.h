@@ -55,15 +55,15 @@ void AttachHooks() {
 	SafeWrite8(0x00698BBB, 0); // Stops to clear the depth buffer when rendering the 1st person node
 	SafeWrite8(0x0083F69B, 0); // Stops PlayerCharacter fading
 
-	SafeWriteJump(kRenderInterface,				(UInt32)RenderInterfaceHook);
-	SafeWriteJump(kRenderingGeometry,			(UInt32)RenderingGeometryHook);
-	SafeWriteJump(kSetRegionEditorName,			(UInt32)SetRegionEditorNameHook);
-	SafeWriteJump(kSetWeatherEditorName,		(UInt32)SetWeatherEditorNameHook);
-	SafeWriteJump(kHitEventHook,				(UInt32)HitEventHook);
+	SafeWriteJump(Jumpers::RenderInterface::Hook,		(UInt32)RenderInterfaceHook);
+	SafeWriteJump(Jumpers::RenderingGeometry::Hook,		(UInt32)RenderingGeometryHook);
+	SafeWriteJump(Jumpers::SetRegionEditorName::Hook,	(UInt32)SetRegionEditorNameHook);
+	SafeWriteJump(Jumpers::SetWeatherEditorName::Hook,	(UInt32)SetWeatherEditorNameHook);
+	SafeWriteJump(Jumpers::HitEvent::Hook,				(UInt32)HitEventHook);
 
 	if (TheSettingManager->SettingsMain.ShadowMode.NearQuality) {
-		SafeWriteJump(kSetShadowDistance,		(UInt32)SetShadowDistanceHook);
-		SafeWriteJump(kSetShadowDistanceShader, (UInt32)SetShadowDistanceShaderHook);
+		SafeWriteJump(Jumpers::Shadows::SetShadowDistanceHook,		 (UInt32)SetShadowDistanceHook);
+		SafeWriteJump(Jumpers::Shadows::SetShadowDistanceShaderHook, (UInt32)SetShadowDistanceShaderHook);
 	}
 	
 	if (TheSettingManager->SettingsMain.SleepingMode.Enabled) {

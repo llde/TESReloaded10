@@ -28,7 +28,7 @@ static int __fastcall ProcessSleepWaitMenuHook(SleepWaitMenu* This, UInt32 edx, 
 	bool r = (*ProcessSleepWaitMenu)(This, Arg1);
 	if (Served && !IsPlayerSleeping) {
 		Served = false;
-		InterfaceManager->ShowMessageBox(*MessageBoxServeSentenceText, (void*)0x00499D70, *MessageBoxButtonYes, *MessageBoxButtonNo);
+		InterfaceManager->ShowMessageBox(*(const char**)0x01B19068, (void*)0x00499D70, *(const char**)0x01B17FA0, *(const char**)0x01B17FAC);
 	}
 	return r;
 
