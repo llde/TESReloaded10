@@ -10,7 +10,7 @@ static void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* Ren
 	TheShaderManager->UpdateConstants();
 	if (SettingsMain->OcclusionCulling.Enabled) TheOcclusionManager->PerformOcclusionCulling();
 	TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->defaultRTGroup->RenderTargets[1]->data->Surface;
-	if (SettingsMain->Develop.TraceShaders && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None) && TheKeyboardManager->OnKeyDown(SettingsMain->Develop.TraceShaders) && DWNode::Get() == NULL) DWNode::Create();
+	if (SettingsMain->Develop.TraceShaders && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None) && Global->OnKeyDown(SettingsMain->Develop.TraceShaders) && DWNode::Get() == NULL) DWNode::Create();
 	(*Render)(This, RenderedTexture);
 
 }

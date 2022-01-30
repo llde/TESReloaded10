@@ -94,17 +94,17 @@ static void UpdateCamera(NiAVObject* CameraNode, NiPoint3* LocalPosition) {
 		}
 		else {
 			TheCameraManager->FromOffset = { 0.0f, 0.0f, 0.0f };
-			if (TheKeyboardManager->OnControlPressed(2))
+			if (Global->OnControlPressed(2))
 				FromOffset->x -= 5.0f;
-			else if (TheKeyboardManager->OnControlPressed(3))
+			else if (Global->OnControlPressed(3))
 				FromOffset->x += 5.0f;
-			if (TheKeyboardManager->OnControlPressed(0))
+			if (Global->OnControlPressed(0))
 				FromOffset->y += 5.0f;
-			else if (TheKeyboardManager->OnControlPressed(1))
+			else if (Global->OnControlPressed(1))
 				FromOffset->y -= 5.0f;
-			if (TheKeyboardManager->OnControlPressed(4))
+			if (Global->OnControlPressed(4))
 				FromOffset->z += 5.0f;
-			else if (TheKeyboardManager->OnControlPressed(6))
+			else if (Global->OnControlPressed(6))
 				FromOffset->z -= 5.0f;
 			if (FromOffset->x != 0.0f || FromOffset->y != 0.0f || FromOffset->z != 0.0f) {
 				Offset = CameraNode->m_worldTransform.rot * TheCameraManager->FromOffset;

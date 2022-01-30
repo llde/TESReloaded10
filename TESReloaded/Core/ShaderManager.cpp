@@ -845,10 +845,10 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.oldfogEnd = ShaderConst.pWeather->GetFogDayFar();
 				}
 
-				ShaderConst.oldsunGlare = ShaderConst.pWeather->sunGlare;
-				ShaderConst.oldwindSpeed = ShaderConst.pWeather->windSpeed;
-				ShaderConst.currentsunGlare = (ShaderConst.oldsunGlare - ((ShaderConst.oldsunGlare - currentWeather->sunGlare) * weatherPercent)) / 255.0f;
-				ShaderConst.currentwindSpeed = (ShaderConst.oldwindSpeed - ((ShaderConst.oldwindSpeed - currentWeather->windSpeed) * weatherPercent)) / 255.0f;
+				ShaderConst.oldsunGlare = ShaderConst.pWeather->GetSunGlare();
+				ShaderConst.oldwindSpeed = ShaderConst.pWeather->GetWindSpeed();
+				ShaderConst.currentsunGlare = (ShaderConst.oldsunGlare - ((ShaderConst.oldsunGlare - currentWeather->GetSunGlare()) * weatherPercent)) / 255.0f;
+				ShaderConst.currentwindSpeed = (ShaderConst.oldwindSpeed - ((ShaderConst.oldwindSpeed - currentWeather->GetWindSpeed()) * weatherPercent)) / 255.0f;
 
 				ShaderConst.fogColor.x = ShaderConst.oldfogColor.x - ((ShaderConst.oldfogColor.x - ShaderConst.fogColor.x) * weatherPercent);
 				ShaderConst.fogColor.y = ShaderConst.oldfogColor.y - ((ShaderConst.oldfogColor.y - ShaderConst.fogColor.y) * weatherPercent);
@@ -957,10 +957,10 @@ void ShaderManager::UpdateConstants() {
 		}		
 
 		if (TheSettingManager->SettingsMain.Effects.SnowAccumulation && currentWeather) {
-			if (currentWeather->weatherType == TESWeather::WeatherType::kType_Snow) {
+			if (currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow) {
 				if (ShaderConst.SnowAccumulation.Params.w < TheSettingManager->SettingsPrecipitations.SnowAccumulation.Amount) ShaderConst.SnowAccumulation.Params.w = ShaderConst.SnowAccumulation.Params.w + TheSettingManager->SettingsPrecipitations.SnowAccumulation.Increase;
 			}
-			else if (!previousWeather || (previousWeather && previousWeather->weatherType == TESWeather::WeatherType::kType_Snow)) {
+			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow)) {
 				if (ShaderConst.SnowAccumulation.Params.w > 0.0f)
 					ShaderConst.SnowAccumulation.Params.w = ShaderConst.SnowAccumulation.Params.w - TheSettingManager->SettingsPrecipitations.SnowAccumulation.Decrease;
 				else if (ShaderConst.SnowAccumulation.Params.w < 0.0f)
@@ -972,11 +972,11 @@ void ShaderManager::UpdateConstants() {
 		}
 			
 		if ((TheSettingManager->SettingsMain.Effects.WetWorld || TheSettingManager->SettingsMain.Shaders.Water) && currentWeather) {
-			if (currentWeather->weatherType == TESWeather::WeatherType::kType_Rainy) {
+			if (currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy) {
 				ShaderConst.WetWorld.Data.y = 1.0f;
 				if (ShaderConst.WetWorld.Data.x < TheSettingManager->SettingsPrecipitations.WetWorld.Amount) ShaderConst.WetWorld.Data.x = ShaderConst.WetWorld.Data.x + TheSettingManager->SettingsPrecipitations.WetWorld.Increase;
 			}
-			else if (!previousWeather || (previousWeather && previousWeather->weatherType == TESWeather::WeatherType::kType_Rainy)) {
+			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy)) {
 				ShaderConst.WetWorld.Data.y = 0.3f - weatherPercent;
 				if (ShaderConst.WetWorld.Data.y <= 0.0f) ShaderConst.WetWorld.Data.y = 0.05f;
 				if (ShaderConst.WetWorld.Data.x > 0.0f)
@@ -991,15 +991,15 @@ void ShaderManager::UpdateConstants() {
 		}
 		
 		if (TheSettingManager->SettingsMain.Effects.Precipitations && currentWeather) {
-			if (currentWeather->weatherType == TESWeather::WeatherType::kType_Rainy)
+			if (currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy)
 				ShaderConst.Precipitations.RainData.x = weatherPercent;
-			else if (!previousWeather || (previousWeather && previousWeather->weatherType == TESWeather::WeatherType::kType_Rainy))
+			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy))
 				ShaderConst.Precipitations.RainData.x = 1.0f - weatherPercent;
 			ShaderConst.Precipitations.RainData.y = TheSettingManager->SettingsPrecipitations.Rain.DepthStep;
 			ShaderConst.Precipitations.RainData.z = TheSettingManager->SettingsPrecipitations.Rain.Speed;
-			if (currentWeather->weatherType == TESWeather::WeatherType::kType_Snow)
+			if (currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow)
 				ShaderConst.Precipitations.SnowData.x = weatherPercent;
-			else if (!previousWeather || (previousWeather && previousWeather->weatherType == TESWeather::WeatherType::kType_Snow))
+			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow))
 				ShaderConst.Precipitations.SnowData.x = 1.0f - weatherPercent;
 			ShaderConst.Precipitations.SnowData.y = TheSettingManager->SettingsPrecipitations.Snow.DepthStep;
 			ShaderConst.Precipitations.SnowData.z = TheSettingManager->SettingsPrecipitations.Snow.Speed;
@@ -1710,7 +1710,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		CinemaEffect->SetCT();
 		CinemaEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Main.ScreenshotKey)) {
+	if (Global->OnKeyDown(TheSettingManager->SettingsMain.Main.ScreenshotKey)) {
 		char Filename[MAX_PATH];
 		char Name[80];
 		time_t CurrentTime = time(NULL);

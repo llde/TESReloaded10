@@ -963,10 +963,24 @@ public:
 	float			GetFogDayFar() { return fogDay.farFog; }
 	float			GetFogNightNear() { return fogNight.nearFog; }
 	float			GetFogNightFar() { return fogNight.farFog; }
+	UInt8			GetSunGlare() { return sunGlare; }
+	UInt8			GetTransDelta() { return transDelta; }
+	UInt8			GetWindSpeed() { return windSpeed; }
+	UInt8			GetWeatherType() { return weatherType; }
+	UInt8			GetSunDamage() { return sunDamage; }
+	UInt8			GetCloudSpeedLower() { return cloudSpeedLower; }
+	UInt8			GetCloudSpeedUpper() { return cloudSpeedUpper; }
 	void			SetFogDayNear(float Value) { fogDay.nearFog = Value; }
 	void			SetFogDayFar(float Value) { fogDay.farFog = Value; }
 	void			SetFogNightNear(float Value) { fogNight.nearFog = Value; }
 	void			SetFogNightFar(float Value) { fogNight.farFog = Value; }
+	void			SetSunGlare(UInt8 Value) { sunGlare = Value; }
+	void			SetTransDelta(UInt8 Value) { transDelta = Value; }
+	void			SetWindSpeed(UInt8 Value) { windSpeed = Value; }
+	void			SetWeatherType(UInt8 Value) { weatherType = Value; }
+	void			SetSunDamage(UInt8 Value) { sunDamage = Value; }
+	void			SetCloudSpeedLower(UInt8 Value) { cloudSpeedLower = Value; }
+	void			SetCloudSpeedUpper(UInt8 Value) { cloudSpeedUpper = Value; }
 
 	TESTexture			textureLayers[2];			// 018
 	TESModel			model;						// 030
@@ -3930,8 +3944,27 @@ assert(sizeof(SoundControl) == 0x328);
 
 class Main {
 public:
-	InputControl*	GetInputKeyboard() { return input; }
-	InputControl*	GetInputMouse() { return input; }
+	bool			OnKeyDown(UInt16 KeyCode) { if (KeyCode >= 256) return OnMouseDown(KeyCode - 256); if (KeyCode != 255 && input->CurrentKeyState[KeyCode] && !input->PreviousKeyState[KeyCode]) return true; return false; }
+	bool			OnKeyPressed(UInt16 KeyCode) { if (KeyCode >= 256) return OnMousePressed(KeyCode - 256); if (KeyCode != 255 && input->CurrentKeyState[KeyCode] && input->PreviousKeyState[KeyCode]) return true; return false; }
+	bool			OnKeyUp(UInt16 KeyCode) { if (KeyCode >= 256) return OnMouseUp(KeyCode - 256); if (KeyCode != 255 && !input->CurrentKeyState[KeyCode] && input->PreviousKeyState[KeyCode]) return true; return false; }
+	bool			OnMouseDown(UInt8 ButtonIndex) { if (ButtonIndex != 255 && input->CurrentMouseState.rgbButtons[ButtonIndex] && !input->PreviousMouseState.rgbButtons[ButtonIndex]) return true; return false; }
+	bool			OnMousePressed(UInt8 ButtonIndex) { if (ButtonIndex != 255 && input->CurrentMouseState.rgbButtons[ButtonIndex] && input->PreviousMouseState.rgbButtons[ButtonIndex]) return true; return false; }
+	bool			OnMouseUp(UInt8 ButtonIndex) { if (ButtonIndex != 255 && !input->CurrentMouseState.rgbButtons[ButtonIndex] && input->PreviousMouseState.rgbButtons[ButtonIndex]) return true; return false; }
+	bool			OnControlDown(UInt16 ControlID) { return OnKeyDown(input->KeyboardInputControls[ControlID]) + OnMouseDown(input->MouseInputControls[ControlID]); }
+	bool			OnControlPressed(UInt16 ControlID) { return OnKeyPressed(input->KeyboardInputControls[ControlID]) + OnMousePressed(input->MouseInputControls[ControlID]); }
+	bool			OnControlUp(UInt16 ControlID) { return OnKeyUp(input->KeyboardInputControls[ControlID]) + OnMouseUp(input->MouseInputControls[ControlID]); }
+	void			SetControlState(UInt8 ControlID, UInt8 CurrentState, UInt8 PreviousState) {
+						UInt16 Source = input->KeyboardInputControls[ControlID];
+						if (Source != 255) {
+							input->CurrentKeyState[Source] = CurrentState;
+							input->PreviousKeyState[Source] = PreviousState;
+						}
+						Source = input->MouseInputControls[ControlID];
+						if (Source != 255) {
+							input->CurrentMouseState.rgbButtons[Source] = CurrentState;
+							input->PreviousMouseState.rgbButtons[Source] = PreviousState;
+						}
+					}
 	SoundControl*	GetSound() { return sound; }
 	void			PurgeModels() { ThisCall(0x00404C60, this, 1); }
 
@@ -4039,11 +4072,11 @@ assert(sizeof(GameSetting) == 0x08);
 
 namespace Pointers {
 	namespace Generic {
-		static float*			  MPF						  = (float*)0x00B33E94;
-		static BSRenderedTexture* MenuRenderedTexture		  = *(BSRenderedTexture**)0x00B333E8;
-		static NiPoint3*		  CameraWorldTranslate		  = (NiPoint3*)0x00B3F92C;
-		static NiPoint3*		  CameraLocation			  = (NiPoint3*)0x00B3F9A8;
-		static NiNode**			  DetectorWindowNode		  = (NiNode**)0x00B42CF4;
+		static float*			  MPF					= (float*)0x00B33E94;
+		static BSRenderedTexture* MenuRenderedTexture	= *(BSRenderedTexture**)0x00B333E8;
+		static NiPoint3*		  CameraWorldTranslate	= (NiPoint3*)0x00B3F92C;
+		static NiPoint3*		  CameraLocation		= (NiPoint3*)0x00B3F9A8;
+		static NiNode**			  DetectorWindowNode	= (NiNode**)0x00B42CF4;
 	}
 	namespace Functions {
 		static void* (__cdecl* MemoryAlloc)(size_t) = (void* (__cdecl*)(size_t))0x00401F00;

@@ -8,7 +8,7 @@ static void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* Ren
 
 	TheCameraManager->SetSceneGraph();
 	TheShaderManager->UpdateConstants();
-	if (SettingsMain->Develop.TraceShaders && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None) && TheKeyboardManager->OnKeyDown(SettingsMain->Develop.TraceShaders)) Logger::Log("START FRAME LOG");
+	if (SettingsMain->Develop.TraceShaders && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None) && Global->OnKeyDown(SettingsMain->Develop.TraceShaders)) Logger::Log("START FRAME LOG");
 	(*Render)(This, RenderedTexture, Arg2, Arg3);
 
 }
@@ -94,7 +94,7 @@ static __declspec(naked) void SetShadowDistanceShaderHook() {
 		pushfd
 		push	0
 		push	ecx
-		call	SetShadowDistanceValue
+		call	SetShadowDistance
 		add		esp, 8
 		popfd
 		popad

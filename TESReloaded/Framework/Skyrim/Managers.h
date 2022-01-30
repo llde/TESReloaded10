@@ -5,8 +5,8 @@ class SettingManager;	extern SettingManager*		TheSettingManager;
 class ShaderManager;	extern ShaderManager*		TheShaderManager;
 class TextureManager;	extern TextureManager*		TheTextureManager;
 class RenderManager;	extern RenderManager*		TheRenderManager;
+class FrameRateManager; extern FrameRateManager*	TheFrameRateManager;
 class GameMenuManager;	extern GameMenuManager*		TheGameMenuManager;
-class KeyboardManager;	extern KeyboardManager*		TheKeyboardManager;
 class GameEventManager; extern GameEventManager*	TheGameEventManager;
 class CameraManager;	extern CameraManager*		TheCameraManager;
 
@@ -24,9 +24,9 @@ class ShadowSceneNode;		extern ShadowSceneNode*			SceneNode;
 #include "TextureManager.h"
 #include "ShaderManager.h"
 #include "RenderManager.h"
+#include "FrameRateManager.h"
 #include "GameEventManager.h"
 #include "GameMenuManager.h"
-#include "KeyboardManager.h"
 #include "CameraManager.h"
 
 void InitializeManagers();

@@ -128,9 +128,6 @@
     <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\KeyboardManager.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -148,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Device\Hook.h">
       <Filter>Core\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -184,9 +184,6 @@
     <ClCompile Include="..\TESReloaded\Core\GameMenuManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\TESReloaded\Core\KeyboardManager.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -204,6 +201,9 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\Device\Hook.cpp">
       <Filter>Core\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\FrameRateManager.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

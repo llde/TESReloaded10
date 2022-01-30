@@ -113,6 +113,7 @@
     <ClInclude Include="..\TESReloaded\Core\CommandManager.h" />
     <ClInclude Include="..\TESReloaded\Core\Device\Device.h" />
     <ClInclude Include="..\TESReloaded\Core\Device\Hook.h" />
+    <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h" />
     <ClInclude Include="..\TESReloaded\Core\GameEventManager.h" />
     <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
@@ -129,7 +130,6 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\ShaderIO.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Sleeping.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h" />
-    <ClInclude Include="..\TESReloaded\Core\KeyboardManager.h" />
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />
     <ClInclude Include="..\TESReloaded\Core\SettingManager.h" />
     <ClInclude Include="..\TESReloaded\Core\ShaderManager.h" />
@@ -152,9 +152,9 @@
     <ClCompile Include="..\TESReloaded\Core\CommandManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\Device\Device.cpp" />
     <ClCompile Include="..\TESReloaded\Core\Device\Hook.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\FrameRateManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\GameEventManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\GameMenuManager.cpp" />
-    <ClCompile Include="..\TESReloaded\Core\KeyboardManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\SettingManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp" />

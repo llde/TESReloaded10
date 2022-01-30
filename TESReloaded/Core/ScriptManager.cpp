@@ -78,7 +78,7 @@ void PurgerScript::Run() {
 
 	if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
 		int PurgerTime = TheSettingManager->SettingsMain.Purger.Time;
-		bool PurgerKeyPressed = TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Purger.Key);
+		bool PurgerKeyPressed = Global->OnKeyDown(TheSettingManager->SettingsMain.Purger.Key);
 
 		if (PurgerTime || PurgerKeyPressed) {
 			ElapsedTime += TheFrameRateManager->ElapsedTime;
@@ -202,7 +202,7 @@ EquipmentSetupScript::StepType EquipmentSetupScript::GetCurrentEquipmentType() {
 	StepType CurrentStep = Normal;
 	
 	if (CombatState) CurrentStep = Combat;
-	if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.EquipmentMode.CombatEquipmentKey)) {
+	if (Global->OnKeyDown(TheSettingManager->SettingsMain.EquipmentMode.CombatEquipmentKey)) {
 		if (CombatState) CurrentStep = Normal; else CurrentStep = Combat;
 		CombatState = !CombatState;
 	}

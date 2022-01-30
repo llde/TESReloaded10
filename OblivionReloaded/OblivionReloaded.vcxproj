@@ -155,7 +155,6 @@
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\GameNi.h" />
     <ClInclude Include="..\TESReloaded\Core\GameEventManager.h" />
     <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h" />
-    <ClInclude Include="..\TESReloaded\Core\KeyboardManager.h" />
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />
     <ClInclude Include="..\TESReloaded\Core\ScriptManager.h" />
     <ClInclude Include="..\TESReloaded\Core\SettingManager.h" />
@@ -183,7 +182,6 @@
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\modules.cpp" />
     <ClCompile Include="..\TESReloaded\Core\GameEventManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\GameMenuManager.cpp" />
-    <ClCompile Include="..\TESReloaded\Core\KeyboardManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ScriptManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp" />

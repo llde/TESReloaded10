@@ -8,7 +8,6 @@ RenderManager*		TheRenderManager = NULL;
 FrameRateManager*	TheFrameRateManager = NULL;
 GameEventManager*	TheGameEventManager = NULL;
 GameMenuManager*	TheGameMenuManager = NULL;
-KeyboardManager*	TheKeyboardManager = NULL;
 ShadowManager*		TheShadowManager = NULL;
 OcclusionManager*	TheOcclusionManager = NULL;
 EquipmentManager*	TheEquipmentManager = NULL;
@@ -30,7 +29,6 @@ void InitializeManagers() {
 	ShaderManager::Initialize();
 	FrameRateManager::Initialize();
 	GameMenuManager::Initialize();
-	KeyboardManager::Initialize();
 	GameEventManager::Initialize();
 	ShadowManager::Initialize();
 	OcclusionManager::Initialize();

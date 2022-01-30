@@ -3,9 +3,9 @@ SettingManager*		TheSettingManager = NULL;
 ShaderManager*		TheShaderManager = NULL;
 TextureManager*		TheTextureManager = NULL;
 RenderManager*		TheRenderManager = NULL;
+FrameRateManager*	TheFrameRateManager = NULL;
 GameEventManager*	TheGameEventManager = NULL;
 GameMenuManager*	TheGameMenuManager = NULL;
-KeyboardManager*	TheKeyboardManager = NULL;
 CameraManager*		TheCameraManager = NULL;
 
 Main*					Global			 = NULL;
@@ -21,8 +21,8 @@ void InitializeManagers() {
 
 	TextureManager::Initialize();
 	ShaderManager::Initialize();
+	FrameRateManager::Initialize();
 	GameMenuManager::Initialize();
-	KeyboardManager::Initialize();
 	GameEventManager::Initialize();
 	CameraManager::Initialize();
 

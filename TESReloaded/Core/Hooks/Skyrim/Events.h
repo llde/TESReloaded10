@@ -29,7 +29,7 @@ static __declspec(naked) void HitEventHook() {
 		call	RaiseEvent
 		add		esp, 12
 		popad
-		jmp		kHitEventReturn
+		jmp		Jumpers::HitEvent::Return
 	}
 
 }

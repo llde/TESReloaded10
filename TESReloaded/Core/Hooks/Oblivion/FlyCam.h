@@ -7,8 +7,8 @@ static void __fastcall UpdateFlyCamHook(PlayerCharacter* This, UInt32 edx) {
 	SettingsMainStruct::FlyCamStruct* FlyCam = &TheSettingManager->SettingsMain.FlyCam;
 	float ScrollMultiplier = FlyCam->ScrollMultiplier;
 
-	if (TheKeyboardManager->OnKeyDown(FlyCam->KeyAdd)) FlyCam->ScrollMultiplier += FlyCam->StepValue;
-	if (TheKeyboardManager->OnKeyDown(FlyCam->KeySubtract)) FlyCam->ScrollMultiplier -= FlyCam->StepValue;
+	if (Global->OnKeyDown(FlyCam->KeyAdd)) FlyCam->ScrollMultiplier += FlyCam->StepValue;
+	if (Global->OnKeyDown(FlyCam->KeySubtract)) FlyCam->ScrollMultiplier -= FlyCam->StepValue;
 	if (FlyCam->ScrollMultiplier <= 0.0f) FlyCam->ScrollMultiplier = 1.0f;
 	Scroll = FlyCam->ScrollMultiplier * 10.0f;
 	if (ScrollMultiplier != FlyCam->ScrollMultiplier) {

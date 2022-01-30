@@ -794,20 +794,6 @@ public:
 };
 assert(sizeof(BSString) == 0x008);
 
-class BSFixedString {
-public:
-	void	Create(const char* src) { ThisCall(0x00A511C0, this, src); }
-	void	Dispose() { ThisCall(0x00A511B0, this); }
-	void	Set(const char* src) { ThisCall(0x00A51210, this, src); }
-
-	const char* m_data;		// 00
-
-	bool operator == (const BSFixedString& lhs) const { return m_data == lhs.m_data; }
-	bool operator < (const BSFixedString& lhs) const { return m_data < lhs.m_data; }
-
-};
-assert(sizeof(BSFixedString) == 0x04);
-
 class InputEvent {
 public:
 	enum EventType {
@@ -1849,6 +1835,25 @@ public:
 	float			GetFogDayFar() { return fogDistance.farDay; }
 	float			GetFogNightNear() { return fogDistance.nearNight; }
 	float			GetFogNightFar() { return fogDistance.farNight; }
+	UInt8			GetSunGlare() { return general.sunGlare; }
+	UInt8			GetTransDelta() { return general.transDelta; }
+	UInt8			GetWindSpeed() { return general.windSpeed; }
+	UInt8			GetWeatherType() { return general.weatherType; }
+	UInt8			GetSunDamage() { return general.sunDamage; }
+	UInt8			GetCloudSpeedLower() { return general.cloudSpeedLower; }
+	UInt8			GetCloudSpeedUpper() { return general.cloudSpeedUpper; }
+	void			SetFogDayNear(float Value) { fogDistance.nearDay = Value; }
+	void			SetFogDayFar(float Value) { fogDistance.farDay = Value; }
+	void			SetFogNightNear(float Value) { fogDistance.nearNight = Value; }
+	void			SetFogNightFar(float Value) { fogDistance.farNight = Value; }
+	void			SetSunGlare(UInt8 Value) { general.sunGlare = Value; }
+	void			SetTransDelta(UInt8 Value) { general.transDelta = Value; }
+	void			SetWindSpeed(UInt8 Value) { general.windSpeed = Value; }
+	void			SetWeatherType(UInt8 Value) { general.weatherType = Value; }
+	void			SetSunDamage(UInt8 Value) { general.sunDamage = Value; }
+	void			SetCloudSpeedLower(UInt8 Value) { general.cloudSpeedLower = Value; }
+	void			SetCloudSpeedUpper(UInt8 Value) { general.cloudSpeedUpper = Value; }
+
 
 	TESTexture		texture[0x20];					// 014 TESTexture1024
 	UInt8			unk114[0x20];					// 114 - cleared to 0x7F
@@ -2727,6 +2732,8 @@ public:
 	virtual bool	GetDead(UInt8 Arg1); // Arg1 = 1 for Actors
 	virtual void	Unk_9A();
 	virtual void	Unk_9B();
+
+	bool				IsActor() { return this->formType == TESForm::kFormType_Character; }
 
 	NiRefObject			handleRefObject;	// 14
 	BSTEventSink<void*>	animGraphEventSink;	// 1C BSTEventSink<BSAnimationGraphEvent>
@@ -3894,17 +3901,31 @@ assert(sizeof(ModList) == 0x408);
 class MainDataHandler {
 public:
 
-	TESForm*							CreateForm(UInt8 FormType) { return IFormFactory::GetFactory(FormType)->Create(); }
-	bool								AddData(TESForm* Form) { return true; }
-	void								FillNames(std::vector<std::string>* List, UInt32 FormType) {
-											List->clear();
-											if (FormType == TESForm::FormType::kFormType_Weather) {
-												for (UInt32 i = 0; i < weathers.count; i++) {
-													TESWeatherEx* Weather = (TESWeatherEx*)weathers.data[i];
-													List->push_back(Weather->EditorName);
-												}
-											}
+	TESForm*				CreateForm(UInt8 FormType) { return IFormFactory::GetFactory(FormType)->Create(); }
+	bool					AddData(TESForm* Form) { return true; }
+	void					FillNames(std::vector<std::string>* List, UInt32 FormType) {
+								List->clear();
+								if (FormType == TESForm::FormType::kFormType_Weather) {
+									for (UInt32 i = 0; i < weathers.count; i++) {
+										TESWeatherEx* Weather = (TESWeatherEx*)weathers.data[i];
+										List->push_back(Weather->EditorName);
+									}
+								}
+							}
+	TESForm*				GetFormByName(const char* EditorName, UInt32 FormType) {
+								TESForm* Form = NULL;
+
+								if (FormType == TESForm::FormType::kFormType_Weather) {
+									for (UInt32 i = 0; i < weathers.count; i++) {
+										TESWeatherEx* Weather = (TESWeatherEx*)weathers.data[i];
+										if (!strcmp(EditorName, Weather->EditorName)) {
+											Form = Weather;
+											break;
 										}
+									}
+								}
+								return Form;
+							}
 
 	UInt32								unk000;
 	UInt32								unk004;
@@ -4059,6 +4080,16 @@ class Main {
 public:
 	BSWin32KeyboardDevice*	GetInputKeyboard() { return (*(InputEventDispatcher**)0x01B2E724)->keyboard; }
 	BSWin32MouseDevice*		GetInputMouse() { return (*(InputEventDispatcher**)0x01B2E724)->mouse; }
+	bool					OnKeyDown(UInt16 KeyCode) { BSWin32KeyboardDevice* input = GetInputKeyboard(); if (KeyCode >= 256) return OnMouseDown(KeyCode - 256); if (KeyCode != 255 && input->CurrentKeyState[KeyCode] && !input->PreviousKeyState[KeyCode]) return true; return false; }
+	bool					OnKeyPressed(UInt16 KeyCode) { BSWin32KeyboardDevice* input = GetInputKeyboard(); if (KeyCode >= 256) return OnMousePressed(KeyCode - 256); if (KeyCode != 255 && input->CurrentKeyState[KeyCode] && input->PreviousKeyState[KeyCode]) return true; return false; }
+	bool					OnKeyUp(UInt16 KeyCode) { BSWin32KeyboardDevice* input = GetInputKeyboard(); if (KeyCode >= 256) return OnMouseUp(KeyCode - 256); if (KeyCode != 255 && !input->CurrentKeyState[KeyCode] && input->PreviousKeyState[KeyCode]) return true; return false; }
+	bool					OnMouseDown(UInt8 ButtonIndex) { BSWin32MouseDevice* input = GetInputMouse(); if (ButtonIndex != 255 && input->CurrentMouseState.rgbButtons[ButtonIndex] && !input->PreviousMouseState.rgbButtons[ButtonIndex]) return true; return false; }
+	bool					OnMousePressed(UInt8 ButtonIndex) { BSWin32MouseDevice* input = GetInputMouse(); if (ButtonIndex != 255 && input->CurrentMouseState.rgbButtons[ButtonIndex] && input->PreviousMouseState.rgbButtons[ButtonIndex]) return true; return false; }
+	bool					OnMouseUp(UInt8 ButtonIndex) { BSWin32MouseDevice* input = GetInputMouse(); if (ButtonIndex != 255 && !input->CurrentMouseState.rgbButtons[ButtonIndex] && input->PreviousMouseState.rgbButtons[ButtonIndex]) return true; return false; }
+	bool					OnControlDown(UInt16 ControlID) { return false; }
+	bool					OnControlPressed(UInt16 ControlID) { return false; }
+	bool					OnControlUp(UInt16 ControlID) { return false; }
+	void					SetControlState(UInt8 ControlID, UInt8 CurrentState, UInt8 PreviousState) { }
 	SoundControl*			GetSound() { return NULL; }
 	void					PurgeModels() {}
 
@@ -4593,15 +4624,37 @@ public:
 	}
 
 };
+
 namespace Pointers {
 	namespace Generic {
+		static float*			  MPF					= (float*)0x00000000;
 		static BSRenderedTexture* MenuRenderedTexture	= *(BSRenderedTexture**)0x01B2E8D8;
 		static NiPoint3*		  CameraWorldTranslate	= (NiPoint3*)0x01B913FC;
+		static NiPoint3*		  CameraLocation		= (NiPoint3*)0x01B910A4;
 		static NiNode**			  DetectorWindowNode	= (NiNode**)0x00000000;
 	}
 	namespace Functions {
 		static void* (__cdecl* MemoryAlloc)(size_t) = (void* (__cdecl*)(size_t))0x004017F0;
 		static bool  (__cdecl* ExtractArgs)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...) = (bool (__cdecl*)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...))0x00514830;
 		static void  (* PrintToConsole)(const char*, ...) = (void (*)(const char*, ...))0x00848820;
+	}
+	namespace Settings {
+		static UInt32* GridsToLoad				= (UInt32*)0x01241000;
+		static UInt32* MinGrassSize				= (UInt32*)0x00000000;
+		static float*  GrassStartFadeDistance	= (float*)0x00000000;
+		static float*  GrassEndDistance			= (float*)0x00000000;
+		static float*  GrassWindMagnitudeMin	= (float*)0x00000000;
+		static float*  GrassWindMagnitudeMax	= (float*)0x00000000;
+		static float*  TexturePctThreshold		= (float*)0x00000000;
+		static UInt32* MultiSample				= (UInt32*)0x00000000;
+		static UInt8*  HDR						= (UInt8*)0x00000000;
+	}
+	namespace ShaderParams {
+		static float* GrassWindMagnitudeMax	= (float*)0x00000000;
+		static float* GrassWindMagnitudeMin	= (float*)0x00000000;
+		static UInt8* WaterHighResolution	= (UInt8*)0x00000000;
+		static float* RockParams			= (float*)0x00000000;
+		static float* RustleParams			= (float*)0x00000000;
+		static float* WindMatrixes			= (float*)0x00000000;
 	}
 }

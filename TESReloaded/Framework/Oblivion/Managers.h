@@ -14,7 +14,6 @@ class TextureManager;	extern TextureManager*		TheTextureManager;
 class RenderManager;	extern RenderManager*		TheRenderManager;
 class FrameRateManager; extern FrameRateManager*	TheFrameRateManager;
 class GameMenuManager;	extern GameMenuManager*		TheGameMenuManager;
-class KeyboardManager;	extern KeyboardManager*		TheKeyboardManager;
 class GameEventManager; extern GameEventManager*	TheGameEventManager;
 class ShadowManager;	extern ShadowManager*		TheShadowManager;
 class OcclusionManager; extern OcclusionManager*	TheOcclusionManager;
@@ -41,7 +40,6 @@ class ShadowSceneNode;		extern ShadowSceneNode*			SceneNode;
 #include "FrameRateManager.h"
 #include "GameEventManager.h"
 #include "GameMenuManager.h"
-#include "KeyboardManager.h"
 #include "ShadowManager.h"
 #include "OcclusionManager.h"
 #include "CameraManager.h"

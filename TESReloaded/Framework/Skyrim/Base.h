@@ -132,6 +132,10 @@ public:
 
 	}
 	
+	void SetTextureAndHDR(TESWeatherEx* WeatherEx, char* UpperLayer, char* LowerLayer, float* HDR) {
+
+	}
+
 	void SetWindowedMode(UInt8 Fullscreen) {
 
 		if (!Fullscreen) {

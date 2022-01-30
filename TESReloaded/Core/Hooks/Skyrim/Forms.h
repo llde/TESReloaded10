@@ -7,7 +7,7 @@ static __declspec(naked) void SetRegionEditorNameHook() {
 		call	SetRegionEditorName
 		add		esp, 8
 		lea     ecx, [esp+0x20]
-		jmp		kSetRegionEditorNameReturn
+		jmp		Jumpers::SetRegionEditorName::Return
 	}
 
 }
@@ -21,7 +21,7 @@ static __declspec(naked) void SetWeatherEditorNameHook() {
 		call	SetWeatherEditorName
 		add		esp, 8
 		lea     ecx, [esp + 0x20]
-		jmp		kSetWeatherEditorNameReturn
+		jmp		Jumpers::SetWeatherEditorName::Return
 	}
 
 }

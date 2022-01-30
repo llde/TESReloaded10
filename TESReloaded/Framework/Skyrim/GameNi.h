@@ -59,8 +59,6 @@ class AnimSequenceBase;
 
 class TESObjectREFR;
 
-class BSFixedString;
-
 class bhkCollisionObject;
 
 struct NiRTTI {
@@ -68,6 +66,20 @@ struct NiRTTI {
 	NiRTTI*		parent;
 };
 assert(sizeof(NiRTTI) == 0x008);
+
+class BSFixedString {
+public:
+	void	Create(const char* src) { ThisCall(0x00A511C0, this, src); }
+	void	Dispose() { ThisCall(0x00A511B0, this); }
+	void	Set(const char* src) { ThisCall(0x00A51210, this, src); }
+
+	const char* m_data;		// 00
+
+	bool operator == (const BSFixedString& lhs) const { return m_data == lhs.m_data; }
+	bool operator < (const BSFixedString& lhs) const { return m_data < lhs.m_data; }
+
+};
+assert(sizeof(BSFixedString) == 0x04);
 
 class NiPoint2 {
 public:
@@ -532,7 +544,7 @@ public:
 	virtual void		SetPropertyState(NiProperty* prop);
 	virtual void		Unk_25(UInt32 arg0);
 	virtual void		Unk_26(UInt32 arg0);
-	virtual NiAVObject*	GetObjectByName(BSFixedString* name);
+	virtual NiAVObject*	GetObjectByString(BSFixedString* name);
 	virtual void		SetSelectiveUpdateFlags(bool* selectiveUpdate, bool selectiveUpdateTransforms, bool* rigid);
 	virtual void		UpdateDownwardPass(ControllerUpdateContext* ctx, UInt32 unk1);
 	virtual void		UpdateSelectedDownwardPass(ControllerUpdateContext* ctx, UInt32 unk1);
@@ -545,15 +557,23 @@ public:
 	virtual void		Unk_31(UInt32 arg0);
 	virtual void		Unk_32(UInt32 arg0);
 
-	float GetDistance(NiPoint3* Point) {
+	NiAVObject* GetObjectByName(const char* Name) {
+		BSFixedString Head;
+		NiAVObject* r = NULL;
 
+		Head.Create(Name);
+		r = GetObjectByString(&Head);
+		Head.Dispose();
+		return r;
+	}
+
+	float GetDistance(NiPoint3* Point) {
 		NiPoint3 v;
 
 		v.x = this->m_worldTransform.pos.x - Point->x;
 		v.y = this->m_worldTransform.pos.y - Point->y;
 		v.z = this->m_worldTransform.pos.z - Point->z;
 		return sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
-
 	}
 
 	NiNode*			m_parent;			// 18

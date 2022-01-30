@@ -47,19 +47,15 @@ static void __fastcall ManageButtonEventHook(PlayerInputHandler* This, UInt32 ed
 static void (__thiscall* SetCameraPosition)(ThirdPersonState*) = (void (__thiscall*)(ThirdPersonState*))Hooks::SetCameraPosition;
 static void __fastcall SetCameraPositionHook(ThirdPersonState* This, UInt32 edx) {
 
-	BSFixedString Head;
-
 	if (TheCameraManager->IsFirstPerson()) {
-		Head.Create("NPC Head [Head]");
 		NiNode* ActorNode = Player->GetNiRootNode(0);
-		NiPoint3* HeadPosition = &ActorNode->GetObjectByName(&Head)->m_worldTransform.pos;
+		NiPoint3* HeadPosition = &ActorNode->GetObjectByName("NPC Head [Head]")->m_worldTransform.pos;
 		NiPoint3 v = ActorNode->m_worldTransform.rot * TheSettingManager->SettingsMain.CameraMode.Offset;
 		This->CameraPosition.x = HeadPosition->x + v.x;
 		This->CameraPosition.y = HeadPosition->y + v.y;
 		This->CameraPosition.z = HeadPosition->z + v.z;
 		This->OverShoulderPosX = This->OverShoulderPosY = This->OverShoulderPosZ = 0.0f;
 		This->camera->AllowVanityMode = 0;
-		Head.Dispose();
 	}
 	(*SetCameraPosition)(This);
 	

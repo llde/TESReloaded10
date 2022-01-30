@@ -246,16 +246,16 @@ void SettingManager::Configuration::CreateWeatherSection(const char* WeatherName
 	sprintf(SectionNode, "<HDR Value=\"%s\" Type=\"3\" Reboot=\"0\" Versioning=\"10\" Info=\"\" />", Value); strcat(Section, SectionNode);
 	strcat(Section, "</HDR>");
 	strcat(Section, "<Main>");
-	sprintf(SectionNode, "<CloudSpeedLower Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->cloudSpeedLower); strcat(Section, SectionNode);
-	sprintf(SectionNode, "<CloudSpeedUpper Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->cloudSpeedUpper); strcat(Section, SectionNode);
+	sprintf(SectionNode, "<CloudSpeedLower Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetCloudSpeedLower()); strcat(Section, SectionNode);
+	sprintf(SectionNode, "<CloudSpeedUpper Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetCloudSpeedUpper()); strcat(Section, SectionNode);
 	sprintf(SectionNode, "<FogFarDay Value=\"%.1f\" Type=\"2\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetFogDayFar()); strcat(Section, SectionNode);
 	sprintf(SectionNode, "<FogFarNight Value=\"%.1f\" Type=\"2\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetFogNightFar()); strcat(Section, SectionNode);
 	sprintf(SectionNode, "<FogNearDay Value=\"%.1f\" Type=\"2\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetFogDayNear()); strcat(Section, SectionNode);
 	sprintf(SectionNode, "<FogNearNight Value=\"%.1f\" Type=\"2\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetFogNightNear()); strcat(Section, SectionNode);
-	sprintf(SectionNode, "<SunDamage Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->sunDamage); strcat(Section, SectionNode);
-	sprintf(SectionNode, "<SunGlare Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->sunGlare); strcat(Section, SectionNode);
-	sprintf(SectionNode, "<TransDelta Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->transDelta); strcat(Section, SectionNode);
-	sprintf(SectionNode, "<WindSpeed Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->windSpeed); strcat(Section, SectionNode);
+	sprintf(SectionNode, "<SunDamage Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetSunDamage()); strcat(Section, SectionNode);
+	sprintf(SectionNode, "<SunGlare Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetSunGlare()); strcat(Section, SectionNode);
+	sprintf(SectionNode, "<TransDelta Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetTransDelta()); strcat(Section, SectionNode);
+	sprintf(SectionNode, "<WindSpeed Value=\"%i\" Type=\"1\" Reboot=\"0\" Versioning=\"11\" Info=\"\" />", Weather->GetWindSpeed()); strcat(Section, SectionNode);
 	sprintf(SectionNode, "<UpperLayer Value=\"%s\" Type=\"3\" Reboot=\"0\" Versioning=\"00\" Info=\"\" />", Weather->textureLayers[0].ddsPath.m_data); strcat(Section, SectionNode);
 	sprintf(SectionNode, "<LowerLayer Value=\"%s\" Type=\"3\" Reboot=\"0\" Versioning=\"00\" Info=\"\" />", Weather->textureLayers[1].ddsPath.m_data); strcat(Section, SectionNode);
 	strcat(Section, "</Main>");
@@ -1155,9 +1155,9 @@ void SettingManager::FillMenuSettings(Configuration::SettingList* Settings, cons
 		else {
 			TESWeather* Weather = (TESWeather*)DataHandler->GetFormByName(Values[1].c_str(), TESForm::FormType::kFormType_Weather);
 			if (Values[2] == "Main") {
-				CreateNodeF(&Node, Section, "CloudSpeedLower", Weather->cloudSpeedLower, "111", 0, Configuration::NodeType::Integer);
+				CreateNodeF(&Node, Section, "CloudSpeedLower", Weather->GetCloudSpeedLower(), "111", 0, Configuration::NodeType::Integer);
 				Settings->push_back(Node);
-				CreateNodeF(&Node, Section, "CloudSpeedUpper", Weather->cloudSpeedUpper, "111", 0, Configuration::NodeType::Integer);
+				CreateNodeF(&Node, Section, "CloudSpeedUpper", Weather->GetCloudSpeedUpper(), "111", 0, Configuration::NodeType::Integer);
 				Settings->push_back(Node);
 				CreateNodeF(&Node, Section, "FogFarDay", Weather->GetFogDayFar(), "111", 0, Configuration::NodeType::Float);
 				Settings->push_back(Node);
@@ -1167,13 +1167,13 @@ void SettingManager::FillMenuSettings(Configuration::SettingList* Settings, cons
 				Settings->push_back(Node);
 				CreateNodeF(&Node, Section, "FogNearNight", Weather->GetFogNightNear(), "111", 0, Configuration::NodeType::Float);
 				Settings->push_back(Node);
-				CreateNodeF(&Node, Section, "SunDamage", Weather->sunDamage, "111", 0, Configuration::NodeType::Integer);
+				CreateNodeF(&Node, Section, "SunDamage", Weather->GetSunDamage(), "111", 0, Configuration::NodeType::Integer);
 				Settings->push_back(Node);
-				CreateNodeF(&Node, Section, "SunGlare", Weather->sunGlare, "111", 0, Configuration::NodeType::Integer);
+				CreateNodeF(&Node, Section, "SunGlare", Weather->GetSunGlare(), "111", 0, Configuration::NodeType::Integer);
 				Settings->push_back(Node);
-				CreateNodeF(&Node, Section, "TransDelta", Weather->transDelta, "111", 0, Configuration::NodeType::Integer);
+				CreateNodeF(&Node, Section, "TransDelta", Weather->GetTransDelta(), "111", 0, Configuration::NodeType::Integer);
 				Settings->push_back(Node);
-				CreateNodeF(&Node, Section, "WindSpeed", Weather->windSpeed, "111", 0, Configuration::NodeType::Integer);
+				CreateNodeF(&Node, Section, "WindSpeed", Weather->GetWindSpeed(), "111", 0, Configuration::NodeType::Integer);
 				Settings->push_back(Node);
 			}
 			else if (Values[2] == "HDR") {
@@ -1348,12 +1348,12 @@ void SettingManager::SetSettingsWeather(TESWeather* Weather) {
 
 	if (SettingsWeather) {
 		SetTextureAndHDR(WeatherEx, SettingsWeather->UpperLayer, SettingsWeather->LowerLayer, SettingsWeather->HDR);
-		WeatherEx->windSpeed = SettingsWeather->WindSpeed;
-		WeatherEx->cloudSpeedLower = SettingsWeather->CloudSpeedLower;
-		WeatherEx->cloudSpeedUpper = SettingsWeather->CloudSpeedUpper;
-		WeatherEx->transDelta = SettingsWeather->TransDelta;
-		WeatherEx->sunGlare = SettingsWeather->SunGlare;
-		WeatherEx->sunDamage = SettingsWeather->SunDamage;
+		WeatherEx->SetWindSpeed(SettingsWeather->WindSpeed);
+		WeatherEx->SetCloudSpeedLower(SettingsWeather->CloudSpeedLower);
+		WeatherEx->SetCloudSpeedUpper(SettingsWeather->CloudSpeedUpper);
+		WeatherEx->SetTransDelta(SettingsWeather->TransDelta);
+		WeatherEx->SetSunGlare(SettingsWeather->SunGlare);
+		WeatherEx->SetSunDamage(SettingsWeather->SunDamage);
 		WeatherEx->SetFogDayNear(SettingsWeather->FogNearDay);
 		WeatherEx->SetFogDayFar(SettingsWeather->FogFarDay);
 		WeatherEx->SetFogNightNear(SettingsWeather->FogNearNight);

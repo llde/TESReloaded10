@@ -52,7 +52,7 @@ void GameMenuManager::Render() {
 		FontNormal->DrawTextA(NULL, PluginVersion::VersionString, -1, &Rect, DT_CENTER, TextColorNormal);
 	}
 	else {
-		if (TheKeyboardManager->OnKeyDown(MenuSettings->KeyEnable)) {
+		if (Global->OnKeyDown(MenuSettings->KeyEnable)) {
 			Enabled = !Enabled;
 			EditingMode = false;
 		}
@@ -61,7 +61,7 @@ void GameMenuManager::Render() {
 			EditingMode = false;
 		}
 		if (Enabled) {
-			if (TheKeyboardManager->OnKeyDown(MenuSettings->KeyEditing) && SelectedColumn == 3) {
+			if (Global->OnKeyDown(MenuSettings->KeyEditing) && SelectedColumn == 3) {
 				if (!EditingMode)
 					strcpy(EditingValue, SelectedNode.Value);
 				else
@@ -70,30 +70,30 @@ void GameMenuManager::Render() {
 			}
 			if (!EditingMode) {
 				if (SelectedColumn == 0) {
-					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeyDown)) SelectedColumn = 1;
-					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeyLeft) && SelectedRow[SelectedColumn] > 0) SelectedRow[SelectedColumn] -= 1;
-					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeyRight) && SelectedRow[SelectedColumn] < Rows[SelectedColumn] - 1) SelectedRow[SelectedColumn] += 1;
+					if (Global->OnKeyDown(MenuSettings->KeyDown)) SelectedColumn = 1;
+					if (Global->OnKeyDown(MenuSettings->KeyLeft) && SelectedRow[SelectedColumn] > 0) SelectedRow[SelectedColumn] -= 1;
+					if (Global->OnKeyDown(MenuSettings->KeyRight) && SelectedRow[SelectedColumn] < Rows[SelectedColumn] - 1) SelectedRow[SelectedColumn] += 1;
 					SelectedPage[1] = SelectedPage[2] = SelectedPage[3] = 0;
 				}
 				else {
-					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeyUp)) {
+					if (Global->OnKeyDown(MenuSettings->KeyUp)) {
 						if (SelectedRow[SelectedColumn] > 0) SelectedRow[SelectedColumn] -= 1; else SelectedColumn = 0;
 					}
-					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeyDown) && SelectedRow[SelectedColumn] < Rows[SelectedColumn] - 1) SelectedRow[SelectedColumn] += 1;
-					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeyLeft)) {
+					if (Global->OnKeyDown(MenuSettings->KeyDown) && SelectedRow[SelectedColumn] < Rows[SelectedColumn] - 1) SelectedRow[SelectedColumn] += 1;
+					if (Global->OnKeyDown(MenuSettings->KeyLeft)) {
 						if (SelectedColumn > 0) SelectedColumn -= 1;
 						SelectedRow[SelectedColumn + 1] = 0;
 					}
-					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeyRight) && SelectedColumn < 3) SelectedColumn += 1;
-					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeyPageUp) && SelectedPage[SelectedColumn] > 0) {
+					if (Global->OnKeyDown(MenuSettings->KeyRight) && SelectedColumn < 3) SelectedColumn += 1;
+					if (Global->OnKeyDown(MenuSettings->KeyPageUp) && SelectedPage[SelectedColumn] > 0) {
 						SelectedPage[SelectedColumn] -= 1;
 						SelectedRow[SelectedColumn] = 0;
 					}
-					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeyPageDown) && SelectedPage[SelectedColumn] < Pages[SelectedColumn]) {
+					if (Global->OnKeyDown(MenuSettings->KeyPageDown) && SelectedPage[SelectedColumn] < Pages[SelectedColumn]) {
 						SelectedPage[SelectedColumn] += 1;
 						SelectedRow[SelectedColumn] = 0;
 					}
-					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeyAdd)) {
+					if (Global->OnKeyDown(MenuSettings->KeyAdd)) {
 						if ((SelectedColumn == 1 && !memcmp(SelectedNode.Section, "Shaders", 7)) || ((SelectedColumn == 3 && !memcmp(SelectedNode.Section, "Shaders", 7) && !memcmp(SelectedNode.Section + strlen(SelectedNode.Section) - 6, "Status", 6)))) {
 							GetMidSection(MidSection);
 							bool ShaderEnabled = TheSettingManager->GetMenuShaderEnabled(MidSection);
@@ -128,7 +128,7 @@ void GameMenuManager::Render() {
 							}
 						}
 					}
-					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeySubtract)) {
+					if (Global->OnKeyDown(MenuSettings->KeySubtract)) {
 						if ((SelectedColumn == 1 && !memcmp(SelectedNode.Section, "Shaders", 7)) || ((SelectedColumn == 3 && !memcmp(SelectedNode.Section, "Shaders", 7) && !memcmp(SelectedNode.Section + strlen(SelectedNode.Section) - 6, "Status", 6)))) {
 							GetMidSection(MidSection);
 							bool ShaderEnabled = TheSettingManager->GetMenuShaderEnabled(MidSection);
@@ -159,38 +159,38 @@ void GameMenuManager::Render() {
 							}
 						}
 					}
-					if (TheKeyboardManager->OnKeyDown(MenuSettings->KeySave)) {
+					if (Global->OnKeyDown(MenuSettings->KeySave)) {
 						TheSettingManager->SaveSettings();
 						InterfaceManager->ShowMessage("Settings saved.");
 					}
 				}
 			}
 			else {
-				if (TheKeyboardManager->OnKeyDown(82))
+				if (Global->OnKeyDown(82))
 					strcat(EditingValue, "0");
-				else if (TheKeyboardManager->OnKeyDown(79))
+				else if (Global->OnKeyDown(79))
 					strcat(EditingValue, "1");
-				else if (TheKeyboardManager->OnKeyDown(80))
+				else if (Global->OnKeyDown(80))
 					strcat(EditingValue, "2");
-				else if (TheKeyboardManager->OnKeyDown(81))
+				else if (Global->OnKeyDown(81))
 					strcat(EditingValue, "3");
-				else if (TheKeyboardManager->OnKeyDown(75))
+				else if (Global->OnKeyDown(75))
 					strcat(EditingValue, "4");
-				else if (TheKeyboardManager->OnKeyDown(76))
+				else if (Global->OnKeyDown(76))
 					strcat(EditingValue, "5");
-				else if (TheKeyboardManager->OnKeyDown(77))
+				else if (Global->OnKeyDown(77))
 					strcat(EditingValue, "6");
-				else if (TheKeyboardManager->OnKeyDown(71))
+				else if (Global->OnKeyDown(71))
 					strcat(EditingValue, "7");
-				else if (TheKeyboardManager->OnKeyDown(72))
+				else if (Global->OnKeyDown(72))
 					strcat(EditingValue, "8");
-				else if (TheKeyboardManager->OnKeyDown(73))
+				else if (Global->OnKeyDown(73))
 					strcat(EditingValue, "9");
-				else if (TheKeyboardManager->OnKeyDown(83))
+				else if (Global->OnKeyDown(83))
 					strcat(EditingValue, ".");
-				else if (TheKeyboardManager->OnKeyDown(74))
+				else if (Global->OnKeyDown(74))
 					strcat(EditingValue, "-");
-				if (strlen(EditingValue) > 0 && TheKeyboardManager->OnKeyDown(14)) EditingValue[strlen(EditingValue) - 1] = NULL;
+				if (strlen(EditingValue) > 0 && Global->OnKeyDown(14)) EditingValue[strlen(EditingValue) - 1] = NULL;
 			}
 
 			Text = TitleMenu;

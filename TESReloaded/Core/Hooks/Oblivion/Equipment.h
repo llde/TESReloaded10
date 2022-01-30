@@ -108,7 +108,7 @@ static void __fastcall ManageItemHook(InventoryMenu* This, UInt32 edx, int Selec
 
 	if (SelectedRect) {
 		if (!memcmp(SelectedRect->name.m_data, "inv_OREquipment_button", 22) && TheScriptManager->EquipmentSetup->ConfigStep == EquipmentSetupScript::StepType::None) TheScriptManager->EquipmentSetup->ConfigStep = EquipmentSetupScript::StepType::Request;
-		if (TheKeyboardManager->OnMouseUp(1)) {
+		if (Global->OnMouseUp(1)) {
 			float fIndex = 0.0f;
 			if (SelectedRect->GetFloatValue(Tile::TileValue::kTileValue_user11, &fIndex)) {
 				InventoryChanges::EntryData* InventoryData = Player->GetInventoryItem(fIndex);
@@ -186,7 +186,7 @@ static int __fastcall ProcessActionHook(Character* This, UInt32 edx, float Arg1,
 				}
 			}
 		}
-		if (This == Player && LightData && Process->OnBackState == HighProcessEx::State::In && TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.EquipmentMode.TorchKey)) {
+		if (This == Player && LightData && Process->OnBackState == HighProcessEx::State::In && Global->OnKeyDown(TheSettingManager->SettingsMain.EquipmentMode.TorchKey)) {
 			NiNode* BeltNode = (NiNode*)This->niNode->GetObjectByName(BeltNodeName);
 			NiNode* TorchNode = This->ActorSkinInfo->TorchNode;
 			NiAVObject* Object = NULL;
@@ -241,19 +241,19 @@ static UInt8 __fastcall ProcessControlAttackHook(PlayerCharacter* This, UInt32 e
 	InventoryChanges::EntryData* LeftWeaponData = Process->EquippedLeftWeaponData;
 	
 	if (LeftWeaponData) {
-		if (TheKeyboardManager->OnControlDown(6)) {
+		if (Global->OnControlDown(6)) {
 			if (TheEquipmentManager->LeftTime == -1.0f)
 				TheEquipmentManager->LeftTime = 0.0f;
 			else
 				TheEquipmentManager->LeftTime += TheFrameRateManager->ElapsedTime;
-			if (TheEquipmentManager->LeftTime < TheSettingManager->SettingsMain.EquipmentMode.DualBlockDelay) TheKeyboardManager->SetControlState(6, 0, 0);
+			if (TheEquipmentManager->LeftTime < TheSettingManager->SettingsMain.EquipmentMode.DualBlockDelay) Global->SetControlState(6, 0, 0);
 		}
 		else if (TheEquipmentManager->LeftTime >= 0.0f) {
 			if (TheEquipmentManager->LeftTime < TheSettingManager->SettingsMain.EquipmentMode.DualBlockDelay) {
 				TheEquipmentManager->SetAnimGroup(Process, 20, 2, "Characters\\_Male\\OnehandAttackLeft_OR_dual_left.kf");
 				TheEquipmentManager->SetAnimGroup(Process, 21, 2, "Characters\\_Male\\OnehandAttackRight_OR_dual_left.kf");
 				Process->LeftAnimState = HighProcessEx::State::In;
-				TheKeyboardManager->SetControlState(4, 0x80, 0);
+				Global->SetControlState(4, 0x80, 0);
 			}
 			TheEquipmentManager->LeftTime = -1.0f;
 		}
@@ -666,7 +666,7 @@ static __declspec(naked) void SetWeaponRotationPositionHook() {
 
 static int MouseMenuButton(MenuInterfaceManager* Im, UInt8 Button1State) {
 	
-	if (Button1State || (Im->activeMenu && Im->activeMenu->id == Menu::MenuType::kMenuType_Inventory && TheKeyboardManager->OnMouseUp(1))) return 1;
+	if (Button1State || (Im->activeMenu && Im->activeMenu->id == Menu::MenuType::kMenuType_Inventory && Global->OnMouseUp(1))) return 1;
 	return 0;
 
 }
