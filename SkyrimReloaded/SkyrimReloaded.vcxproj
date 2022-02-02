@@ -135,6 +135,7 @@
     <ClInclude Include="..\TESReloaded\Core\ShaderManager.h" />
     <ClInclude Include="..\TESReloaded\Core\TextureManager.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.h" />
@@ -160,6 +161,7 @@
     <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\TextureManager.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\Logger.cpp" />
+    <ClCompile Include="..\TESReloaded\Framework\Common\Base\PluginVersion.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\SafeWrite.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\disasm.cpp" />

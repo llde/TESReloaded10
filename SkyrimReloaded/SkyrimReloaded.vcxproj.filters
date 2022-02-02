@@ -149,6 +149,9 @@
     <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h">
+      <Filter>Framework\Common\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -204,6 +207,9 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\FrameRateManager.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Common\Base\PluginVersion.cpp">
+      <Filter>Framework\Common\Base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1137,10 +1137,10 @@ public:
 	UInt32								unk688;							// 688
 	UInt32								unk68C;							// 68C
 	D3DXMATRIXA16						worldMatrix;					// 690
-	D3DMATRIX							viewMatrix;						// 6D0
-	D3DMATRIX							projMatrix;						// 710
-	D3DMATRIX							unkMatrix;						// 750
-	D3DMATRIX							invViewMatrix;					// 790
+	D3DXMATRIX							viewMatrix;						// 6D0
+	D3DXMATRIX							projMatrix;						// 710
+	D3DXMATRIX							unkMatrix;						// 750
+	D3DXMATRIX							invViewMatrix;					// 790
 	NiPoint2*							ScreenTextureVerts;				// 7D0
 	NiColorAlpha*						ScreenTextureColors;			// 7D4
 	NiPoint2*							ScreenTextureTexCoords;			// 7D8

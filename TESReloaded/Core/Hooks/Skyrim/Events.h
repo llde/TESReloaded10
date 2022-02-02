@@ -1,6 +1,6 @@
 #pragma once
 
-void RaiseEvent(Actor* Act, Actor* TargetAct, GameEventManager::EventEnum GameEvent) {
+static void RaiseEvent(Actor* Act, Actor* TargetAct, GameEventManager::EventEnum GameEvent) {
 	
 	if (Act) {
 		switch (GameEvent) {
