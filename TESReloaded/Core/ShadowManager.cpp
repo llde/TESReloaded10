@@ -5,7 +5,6 @@ void ShadowManager::Initialize() {
 	Logger::Log("Starting the shadows manager...");
 	TheShadowManager = new ShadowManager();
 	
-	IDirect3DDevice9* Device = TheRenderManager->device;
 	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
 	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
 	UINT ShadowMapSize = 0;
@@ -16,21 +15,10 @@ void ShadowManager::Initialize() {
 	TheShadowManager->ShadowCubeMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowCubeMap.vso", NULL);
 	TheShadowManager->ShadowCubeMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowCubeMap.pso", NULL);
 	for (int i = 0; i < 3; i++) {
-		UINT ShadowMapSize = ShadowsExteriors->ShadowMapSize[i];
-		Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &TheShadowManager->ShadowMapTexture[i], NULL);
-		TheShadowManager->ShadowMapTexture[i]->GetSurfaceLevel(0, &TheShadowManager->ShadowMapSurface[i]);
-		Device->CreateDepthStencilSurface(ShadowMapSize, ShadowMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &TheShadowManager->ShadowMapDepthSurface[i], NULL);
+		ShadowMapSize = ShadowsExteriors->ShadowMapSize[i];
 		TheShadowManager->ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
 	}
-	for (int i = 0; i < CubeMapsMax; i++) {
-		Device->CreateCubeTexture(ShadowCubeMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &TheShadowManager->ShadowCubeMapTexture[i], NULL);
-		for (int j = 0; j < 6; j++) {
-			TheShadowManager->ShadowCubeMapTexture[i]->GetCubeMapSurface((D3DCUBEMAP_FACES)j, 0, &TheShadowManager->ShadowCubeMapSurface[i][j]);
-		}
-	}
-	Device->CreateDepthStencilSurface(ShadowCubeMapSize, ShadowCubeMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &TheShadowManager->ShadowCubeMapDepthSurface, NULL);
 	TheShadowManager->ShadowCubeMapViewPort = { 0, 0, ShadowCubeMapSize, ShadowCubeMapSize, 0.0f, 1.0f };
-	
 	memset(TheShadowManager->ShadowCubeMapLights, NULL, sizeof(ShadowCubeMapLights));
 
 }
@@ -344,8 +332,8 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 	BillboardRight = { View._11, View._21, View._31, 0.0f };
 	BillboardUp = { View._12, View._22, View._32, 0.0f };
 	SetFrustum(ShadowMapType, &ShadowMap->ShadowViewProj);
-	Device->SetRenderTarget(0, ShadowMapSurface[ShadowMapType]);
-	Device->SetDepthStencilSurface(ShadowMapDepthSurface[ShadowMapType]);
+	Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurface[ShadowMapType]);
+	Device->SetDepthStencilSurface(TheTextureManager->ShadowMapDepthSurface[ShadowMapType]);
 	Device->SetViewport(&ShadowMapViewPort[ShadowMapType]);
 	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
 	if (SunDir->z > 0.0f) {
@@ -391,8 +379,8 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, S
 	D3DXMATRIX View, Proj;
 	D3DXVECTOR3 Eye, At, Up;
 
-	Device->SetDepthStencilSurface(ShadowCubeMapDepthSurface);
-	for (int L = 0; L < CubeMapsMax; L++) {
+	Device->SetDepthStencilSurface(TheTextureManager->ShadowCubeMapDepthSurface);
+	for (int L = 0; L < ShadowCubeMapsMax; L++) {
 		TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[L].w = 0.0f;
 		if (L <= LightIndex) {
 			LightPos = &Lights[L]->m_worldTransform.pos;
@@ -439,7 +427,7 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, S
 				}
 				D3DXMatrixLookAtRH(&View, &Eye, &At, &Up);
 				ShadowMap->ShadowViewProj = View * Proj;
-				Device->SetRenderTarget(0, ShadowCubeMapSurface[L][Face]);
+				Device->SetRenderTarget(0, TheTextureManager->ShadowCubeMapSurface[L][Face]);
 				Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
 				Device->BeginScene();
 				RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE, RenderStateArgs);
@@ -510,7 +498,7 @@ void ShadowManager::RenderShadowMaps() {
 	}
 	else {
 		std::map<int, NiPointLight*> SceneLights;
-		NiPointLight* Lights[CubeMapsMax] = { NULL };
+		NiPointLight* Lights[ShadowCubeMapsMax] = { NULL };
 		int LightIndex = -1;
 		bool TorchOnBeltEnabled = EquipmentModeSettings->Enabled && EquipmentModeSettings->TorchKey != 255;
 

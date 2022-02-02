@@ -1,4 +1,5 @@
 #pragma once
+
 static const UInt32 ASMTimeInfoUpdate = 0x0047D170;
 
 static __declspec(naked) void UpdateTimeInfoHook() {

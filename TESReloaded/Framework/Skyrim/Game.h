@@ -1822,7 +1822,7 @@ public:
 	struct CloudAlpha {
 		float	time[kNumTimeOfDay];
 	};
-	
+
 	struct LightingColor {
 		UInt32	x[2];				// 00 - init'd to 00FFFFFF
 		UInt32	y[2];
@@ -1842,6 +1842,7 @@ public:
 	UInt8			GetSunDamage() { return general.sunDamage; }
 	UInt8			GetCloudSpeedLower() { return general.cloudSpeedLower; }
 	UInt8			GetCloudSpeedUpper() { return general.cloudSpeedUpper; }
+	float			GetHDR(int Index) { return 0.0f; }
 	void			SetFogDayNear(float Value) { fogDistance.nearDay = Value; }
 	void			SetFogDayFar(float Value) { fogDistance.farDay = Value; }
 	void			SetFogNightNear(float Value) { fogDistance.nearNight = Value; }
@@ -1855,7 +1856,7 @@ public:
 	void			SetCloudSpeedUpper(UInt8 Value) { general.cloudSpeedUpper = Value; }
 
 
-	TESTexture		texture[0x20];					// 014 TESTexture1024
+	TESTexture		textureLayers[0x20];			// 014 TESTexture1024
 	UInt8			unk114[0x20];					// 114 - cleared to 0x7F
 	UInt8			unk134[0x20];					// 134 - cleared to 0x7F
 	UInt8			unk154[0x200];					// 154
@@ -1940,6 +1941,12 @@ assert(sizeof(TESClimate) == 0x48);
 
 class TESWaterForm : public TESForm {
 public:
+	enum WaterType {
+		kWaterType_Blood,
+		kWaterType_Lava,
+		kWaterType_Normal,
+	};
+
 	struct Data2C {
 		UInt32	unk0;	// 0
 		UInt32	unk4;	// 4
@@ -2014,6 +2021,7 @@ public:
 		UInt32	unk8;	// 8
 	};
 
+	UInt32				GetWaterType() { return kWaterType_Normal; }
 	void				RemoveUnderwaterFog() { properties.fogAmountUW = 0.0f; properties.fogNearUW = 9995.0f; properties.fogFarUW = 10000.0f; }
 	RGBA*				GetShallowColor() { return &properties.shallowColor; }
 	RGBA*				GetDeepColor() { return &properties.deepColor; }
@@ -3793,6 +3801,7 @@ public:
 
 	void				PurgeCells() {}
 	float				GetWaterHeight(TESObjectREFR* Ref) { return ThisCallF(0x004D62D0, Ref); }
+	TESWaterForm*		GetWaterForm() { return currentCell->GetWaterForm(); }
 
 	UInt32				unk04;
 	UInt32				unk08;

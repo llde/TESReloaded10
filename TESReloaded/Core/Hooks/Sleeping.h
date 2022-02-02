@@ -1,4 +1,5 @@
 #pragma once
+
 static bool Served = false;
 
 static void (__cdecl * ShowSleepWaitMenu)(bool) = (void (__cdecl *)(bool))Hooks::ShowSleepWaitMenu;

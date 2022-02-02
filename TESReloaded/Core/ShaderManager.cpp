@@ -335,7 +335,7 @@ void ShaderRecord::SetCT() {
 	ShaderValue* Value;
 
 	if (HasCT) {
-		if (HasRB) TheRenderManager->device->StretchRect(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface, NULL, TheShaderManager->RenderedSurface, NULL, D3DTEXF_NONE);
+		if (HasRB) TheRenderManager->device->StretchRect(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface, NULL, TheTextureManager->RenderedSurface, NULL, D3DTEXF_NONE);
 		if (HasDB) TheRenderManager->ResolveDepthBuffer();
 		for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
 			Value = &TextureShaderValues[c];
@@ -544,10 +544,6 @@ void ShaderManager::Initialize() {
 	Logger::Log("Starting the shaders manager...");
 	TheShaderManager = new ShaderManager();
 
-	TheShaderManager->SourceTexture = NULL;
-	TheShaderManager->SourceSurface = NULL;
-	TheShaderManager->RenderedTexture = NULL;
-	TheShaderManager->RenderedSurface = NULL;
 	TheShaderManager->FrameVertex = NULL;
 	TheShaderManager->UnderwaterEffect = NULL;
 	TheShaderManager->WaterLensEffect = NULL;
@@ -578,10 +574,6 @@ void ShaderManager::Initialize() {
 	TheShaderManager->ShaderConst.ReciprocalResolution.z = (float)TheRenderManager->width / (float)TheRenderManager->height;
 	TheShaderManager->ShaderConst.ReciprocalResolution.w = 0.0f; // Reserved to store the FoV
 	TheShaderManager->CreateFrameVertex(TheRenderManager->width, TheRenderManager->height, &TheShaderManager->FrameVertex);
-	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &TheShaderManager->SourceTexture, NULL);
-	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &TheShaderManager->RenderedTexture, NULL);
-	TheShaderManager->SourceTexture->GetSurfaceLevel(0, &TheShaderManager->SourceSurface);
-	TheShaderManager->RenderedTexture->GetSurfaceLevel(0, &TheShaderManager->RenderedSurface);
 
 }
 
@@ -893,7 +885,7 @@ void ShaderManager::UpdateConstants() {
 		if (TheSettingManager->SettingsMain.Shaders.Water || TheSettingManager->SettingsMain.Effects.Underwater) {
 			RGBA* rgba = NULL;
 			SettingsWaterStruct* sws = NULL;
-			TESWaterForm* currentWater = Tes->waterManager->WaterForm1;
+			TESWaterForm* currentWater = Tes->GetWaterForm();
 
 			if (currentWater) {
 				UInt32 WaterType = currentWater->GetWaterType();
@@ -1602,8 +1594,10 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
 	IDirect3DDevice9* Device = TheRenderManager->device;
+	IDirect3DSurface9* SourceSurface = TheTextureManager->SourceSurface;
+	IDirect3DSurface9* RenderedSurface = TheTextureManager->RenderedSurface;
 	TESWorldSpace* currentWorldSpace = Player->GetWorldSpace();
-	
+
 	TheRenderManager->SetupSceneCamera();
 	Device->SetStreamSource(0, FrameVertex, 0, sizeof(FrameVS));
 	Device->SetFVF(FrameFVF);

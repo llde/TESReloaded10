@@ -1,3 +1,5 @@
+#pragma once
+
 static bool EquippingBow = 0;
 
 // This function is the bool 0x005E3350.

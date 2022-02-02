@@ -1,7 +1,5 @@
 #pragma once
 
-#include <d3dx9core.h>
-
 class GameMenuManager { // Never disposed
 public:
 	static void Initialize();

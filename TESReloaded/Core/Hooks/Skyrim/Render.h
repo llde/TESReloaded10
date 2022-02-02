@@ -1,4 +1,5 @@
 #pragma once
+
 static NiGeometry* Geometry = NULL;
 
 static void (__thiscall* Render)(Main*, BSRenderedTexture*, int, int) = (void (__thiscall*)(Main*, BSRenderedTexture*, int, int))Hooks::Render;

@@ -970,6 +970,7 @@ public:
 	UInt8			GetSunDamage() { return sunDamage; }
 	UInt8			GetCloudSpeedLower() { return cloudSpeedLower; }
 	UInt8			GetCloudSpeedUpper() { return cloudSpeedUpper; }
+	float			GetHDR(int Index) { return hdrInfo[Index]; }
 	void			SetFogDayNear(float Value) { fogDay.nearFog = Value; }
 	void			SetFogDayFar(float Value) { fogDay.farFog = Value; }
 	void			SetFogNightNear(float Value) { fogNight.nearFog = Value; }
@@ -3324,6 +3325,7 @@ public:
 	
 	void				PurgeCells() { ThisCall(0x00442630, this, 1, 0); ThisCall(0x0043FC20, this, 0); }
 	float				GetWaterHeight(TESObjectREFR* Ref) { return Ref->parentCell->GetWaterHeight(); }
+	TESWaterForm*		GetWaterForm() { return waterManager->WaterForm1; }
 	float				GetTerrainHeight(NiPoint3* Pos) { float Height; ThisCall(0x00440590, this, Pos, &Height); return Height; }
 	NiNode*				CastRay(bhkWorldRayCastData* WorldRayCastData) { return (NiNode*)ThisCall(0x00446A10, this, WorldRayCastData); }
 

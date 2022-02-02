@@ -1,5 +1,4 @@
 #pragma once
-#define CubeMapsMax 4
 
 class ShadowManager : public ShadowManagerBase { // Never disposed
 public:
@@ -29,16 +28,10 @@ public:
 
 	ShaderRecordVertex*		ShadowMapVertex;
 	ShaderRecordPixel*		ShadowMapPixel;
-	IDirect3DTexture9*		ShadowMapTexture[3];
-	IDirect3DSurface9*		ShadowMapSurface[3];
-	IDirect3DSurface9*		ShadowMapDepthSurface[3];
 	D3DVIEWPORT9			ShadowMapViewPort[3];
 	D3DXPLANE				ShadowMapFrustum[3][6];
 	NiVector4				BillboardRight;
 	NiVector4				BillboardUp;
-	IDirect3DCubeTexture9*	ShadowCubeMapTexture[CubeMapsMax];
-	IDirect3DSurface9*		ShadowCubeMapSurface[CubeMapsMax][6];
-	IDirect3DSurface9*		ShadowCubeMapDepthSurface;
 	ShaderRecordVertex*		ShadowCubeMapVertex;
 	ShaderRecordPixel*		ShadowCubeMapPixel;
 	D3DVIEWPORT9			ShadowCubeMapViewPort;

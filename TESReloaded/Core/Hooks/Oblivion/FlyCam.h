@@ -1,4 +1,5 @@
 #pragma once
+
 static float Scroll = 0.0f;
 
 static void (__thiscall* UpdateFlyCam)(PlayerCharacter*) = (void (__thiscall*)(PlayerCharacter*))Hooks::UpdateFlyCam;

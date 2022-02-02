@@ -1,3 +1,5 @@
+#pragma once
+
 static __declspec(naked) void MemReallocHook() {
 
 	__asm {

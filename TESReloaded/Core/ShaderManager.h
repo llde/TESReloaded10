@@ -1,5 +1,4 @@
 #pragma once
-#include <d3dx9mesh.h>
 
 struct ShaderConstants {
 	
@@ -311,10 +310,6 @@ public:
 
 	ShaderConstants			ShaderConst;
 	CustomConstants			CustomConst;
-	IDirect3DTexture9*		SourceTexture;
-	IDirect3DSurface9*		SourceSurface;
-	IDirect3DTexture9* 		RenderedTexture;
-	IDirect3DSurface9*		RenderedSurface;
 	IDirect3DVertexBuffer9*	FrameVertex;
 	EffectRecord*			UnderwaterEffect;
 	EffectRecord*			WaterLensEffect;

@@ -1,4 +1,5 @@
 #pragma once
+
 static const UInt32 ASMGetControlState = 0x00403520;
 static const UInt32 ASMGetCharacterController = 0x0065A2C0;
 static UInt8 DoubleTapStep = 0;

@@ -191,12 +191,8 @@ void RenderManager::Initialize() {
 	CameraForward = { 0.0f, 0.0f, 0.0f, 0.0f };
 	CameraPosition = { 0.0f, 0.0f, 0.0f, 0.0f };
 	BackBuffer = NULL;
-	DepthSurface = NULL;
-	DepthTexture = NULL;
-	DepthTextureINTZ = NULL;
 	SaveGameScreenShotRECT = { 0, 0, 256, 144 };
 	IsSaveGameScreenShot = false;
-	device->CreateTexture(width, height, 1, D3DUSAGE_DEPTHSTENCIL, (D3DFORMAT)MAKEFOURCC('I','N','T','Z'), D3DPOOL_DEFAULT, &DepthTexture, NULL);
 	device->GetDirect3D(&D3D);
 	D3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &currentDisplayMode);
 	RESZ = D3D->CheckDeviceFormat(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, currentDisplayMode.Format, D3DUSAGE_RENDERTARGET, D3DRTYPE_SURFACE, (D3DFORMAT)MAKEFOURCC('R','E','S','Z')) == D3D_OK;
@@ -235,7 +231,7 @@ void RenderManager::ResolveDepthBuffer() {
 		device->SetVertexShader(NULL);
 		device->SetPixelShader(NULL);
 		device->SetFVF(D3DFVF_XYZ);
-		device->SetTexture(0, DepthTexture);
+		device->SetTexture(0, TheTextureManager->DepthTexture);
 		device->SetRenderState(D3DRS_ZENABLE, FALSE);
 		device->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 		device->SetRenderState(D3DRS_COLORWRITEENABLE, NULL);
@@ -255,24 +251,12 @@ void RenderManager::ResolveDepthBuffer() {
 		if (pCurrVX) pCurrVX->Release();
 	}
 	else {
-		if (!DepthSurface) {
-			D3DSURFACE_DESC desc;
-			device->GetDepthStencilSurface(&DepthSurface);
-			DepthSurface->GetDesc(&desc);
-			if (desc.Format == (D3DFORMAT)MAKEFOURCC('I','N','T','Z')) {
-				void *Container = NULL;
-				DepthSurface->GetContainer(IID_IDirect3DTexture9, &Container);
-				DepthTextureINTZ = (IDirect3DTexture9*)Container;
-				NvAPI_D3D9_RegisterResource(DepthTextureINTZ);
-			}
-			else
-				NvAPI_D3D9_RegisterResource(DepthSurface);
-			NvAPI_D3D9_RegisterResource(DepthTexture);
+		if (!TheTextureManager->DepthSurface) {
+			device->GetDepthStencilSurface(&TheTextureManager->DepthSurface);
+			NvAPI_D3D9_RegisterResource(TheTextureManager->DepthSurface);
+			NvAPI_D3D9_RegisterResource(TheTextureManager->DepthTexture);
 		}
-		if (!DepthTextureINTZ)
-			NvAPI_D3D9_StretchRectEx(device, DepthSurface, NULL, DepthTexture, NULL, D3DTEXF_NONE);
-		else
-			NvAPI_D3D9_StretchRectEx(device, DepthTextureINTZ, NULL, DepthTexture, NULL, D3DTEXF_NONE);
+		NvAPI_D3D9_StretchRectEx(device, TheTextureManager->DepthSurface, NULL, TheTextureManager->DepthTexture, NULL, D3DTEXF_NONE);
 	}
 
 }

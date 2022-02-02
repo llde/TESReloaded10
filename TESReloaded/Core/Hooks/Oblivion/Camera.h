@@ -1,4 +1,5 @@
 #pragma once
+
 static const UInt32 ASMGameToggleCamera = 0x0066C580;
 
 static void (__thiscall* ToggleCamera)(PlayerCharacter*, UInt8) = (void (__thiscall*)(PlayerCharacter*, UInt8))Hooks::ToggleCamera;

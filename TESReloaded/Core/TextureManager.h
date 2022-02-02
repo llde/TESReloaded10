@@ -1,5 +1,6 @@
 #pragma once
 #define SamplerStatesMax 12
+#define ShadowCubeMapsMax 4
 #define WordSourceBuffer "TESR_SourceBuffer"
 #define WordRenderedBuffer "TESR_RenderedBuffer"
 #define WordDepthBuffer "TESR_DepthBuffer"
@@ -45,9 +46,21 @@ typedef std::map<std::string, TextureRecord*> TextureList;
 
 class TextureManager { // Never disposed
 public:
-	static void			Initialize();
+	static void				Initialize();
 
-	TextureRecord*		LoadTexture(const char* ShaderSource, UInt32 RegisterIndex);
-	
-	TextureList			Textures;
+	TextureRecord*			LoadTexture(const char* ShaderSource, UInt32 RegisterIndex);
+
+	IDirect3DTexture9*		SourceTexture;
+	IDirect3DSurface9*		SourceSurface;
+	IDirect3DTexture9* 		RenderedTexture;
+	IDirect3DSurface9*		RenderedSurface;
+	IDirect3DTexture9*		DepthTexture;
+	IDirect3DSurface9*		DepthSurface;
+	IDirect3DTexture9*		ShadowMapTexture[3];
+	IDirect3DSurface9*		ShadowMapSurface[3];
+	IDirect3DSurface9*		ShadowMapDepthSurface[3];
+	IDirect3DCubeTexture9*	ShadowCubeMapTexture[ShadowCubeMapsMax];
+	IDirect3DSurface9*		ShadowCubeMapSurface[ShadowCubeMapsMax][6];
+	IDirect3DSurface9*		ShadowCubeMapDepthSurface;
+	TextureList				Textures;
 };

@@ -1,3 +1,5 @@
+#pragma once
+
 static void UpdateGrass(TESObjectCELL* Cell, NiNode* GrassNode, float CameraPosX, float CameraPosY, float CameraPosZ, float CameraForwardX, float CameraForwardY, int Arg8, float StartFadingDistance, float EndDistance, float Arg11) {
 	
 	GridCellArray* CellArray = Tes->gridCellArray;

@@ -240,7 +240,7 @@ void SettingManager::Configuration::CreateWeatherSection(const char* WeatherName
 	strcat(Section, "<HDR>");
 	Value[0] = NULL;
 	for (UInt32 i = 0; i < 14; i++) {
-		strcat(Value, ToString(Weather->hdrInfo[i]).c_str());
+		strcat(Value, ToString(Weather->GetHDR(i)).c_str());
 		if (i < 13) strcat(Value, " ");
 	}
 	sprintf(SectionNode, "<HDR Value=\"%s\" Type=\"3\" Reboot=\"0\" Versioning=\"10\" Info=\"\" />", Value); strcat(Section, SectionNode);
@@ -1178,7 +1178,7 @@ void SettingManager::FillMenuSettings(Configuration::SettingList* Settings, cons
 			}
 			else if (Values[2] == "HDR") {
 				for (UInt32 i = 0; i < 14; i++) {
-					CreateNodeF(&Node, Section, WeatherHDRTypes[i], Weather->hdrInfo[i], "100", 0, Configuration::NodeType::Float);
+					CreateNodeF(&Node, Section, WeatherHDRTypes[i], Weather->GetHDR(i), "100", 0, Configuration::NodeType::Float);
 					Settings->push_back(Node);
 				}
 			}

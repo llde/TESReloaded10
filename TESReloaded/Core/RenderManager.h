@@ -15,9 +15,6 @@ public:
 	D3DXVECTOR4			CameraForward;
 	D3DXVECTOR4			CameraPosition;
 	IDirect3DSurface9*	BackBuffer;
-	IDirect3DSurface9*	DepthSurface;
-	IDirect3DTexture9*	DepthTexture;
-	IDirect3DTexture9*	DepthTextureINTZ;
 	RECT				SaveGameScreenShotRECT;
 	bool				IsSaveGameScreenShot;
 	bool				RESZ;

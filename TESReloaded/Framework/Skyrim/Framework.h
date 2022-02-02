@@ -5,7 +5,6 @@
 #define assert(a) static_assert(a, "Assertion failed")
 
 #include <windows.h>
-#include <CommCtrl.h>
 #include <string>
 #include <vector>
 #include <map>

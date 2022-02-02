@@ -38,34 +38,34 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Filename) {
 			Texture = TexC;
 			break;
 		case SourceBuffer:
-			Texture = TheShaderManager->SourceTexture;
+			Texture = TheTextureManager->SourceTexture;
 			break;
 		case RenderedBuffer:
-			Texture = TheShaderManager->RenderedTexture;
+			Texture = TheTextureManager->RenderedTexture;
 			break;
 		case DepthBuffer:
-			Texture = TheRenderManager->DepthTexture;
+			Texture = TheTextureManager->DepthTexture;
 			break;
 		case ShadowMapBufferNear:
-			Texture = TheShadowManager->ShadowMapTexture[ShadowManagerBase::ShadowMapTypeEnum::MapNear];
+			Texture = TheTextureManager->ShadowMapTexture[ShadowManagerBase::ShadowMapTypeEnum::MapNear];
 			break;
 		case ShadowMapBufferFar:
-			Texture = TheShadowManager->ShadowMapTexture[ShadowManagerBase::ShadowMapTypeEnum::MapFar];
+			Texture = TheTextureManager->ShadowMapTexture[ShadowManagerBase::ShadowMapTypeEnum::MapFar];
 			break;
 		case OrthoMapBuffer:
-			Texture = TheShadowManager->ShadowMapTexture[ShadowManagerBase::ShadowMapTypeEnum::MapOrtho];
+			Texture = TheTextureManager->ShadowMapTexture[ShadowManagerBase::ShadowMapTypeEnum::MapOrtho];
 			break;
 		case ShadowCubeMapBuffer0:
-			Texture = TheShadowManager->ShadowCubeMapTexture[0];
+			Texture = TheTextureManager->ShadowCubeMapTexture[0];
 			break;
 		case ShadowCubeMapBuffer1:
-			Texture = TheShadowManager->ShadowCubeMapTexture[1];
+			Texture = TheTextureManager->ShadowCubeMapTexture[1];
 			break;
 		case ShadowCubeMapBuffer2:
-			Texture = TheShadowManager->ShadowCubeMapTexture[2];
+			Texture = TheTextureManager->ShadowCubeMapTexture[2];
 			break;
 		case ShadowCubeMapBuffer3:
-			Texture = TheShadowManager->ShadowCubeMapTexture[3];
+			Texture = TheTextureManager->ShadowCubeMapTexture[3];
 			break;
 		case WaterHeightMapBuffer:
 			Texture = NULL;
@@ -86,7 +86,40 @@ void TextureManager::Initialize() {
 
 	Logger::Log("Starting the textures manager...");
 	TheTextureManager = new TextureManager();
+	
+	IDirect3DDevice9* Device = TheRenderManager->device;
+	UInt32 Width = TheRenderManager->width;
+	UInt32 Height = TheRenderManager->height;
+	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
+	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
+	UINT ShadowMapSize = 0;
+	UINT ShadowCubeMapSize = ShadowsInteriors->ShadowCubeMapSize;
 
+	TheTextureManager->SourceTexture = NULL;
+	TheTextureManager->SourceSurface = NULL;
+	TheTextureManager->RenderedTexture = NULL;
+	TheTextureManager->RenderedSurface = NULL;
+	TheTextureManager->DepthTexture = NULL;
+	TheTextureManager->DepthSurface = NULL;
+	Device->CreateTexture(Width, Height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &TheTextureManager->SourceTexture, NULL);
+	Device->CreateTexture(Width, Height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &TheTextureManager->RenderedTexture, NULL);
+	TheTextureManager->SourceTexture->GetSurfaceLevel(0, &TheTextureManager->SourceSurface);
+	TheTextureManager->RenderedTexture->GetSurfaceLevel(0, &TheTextureManager->RenderedSurface);
+	Device->CreateTexture(Width, Height, 1, D3DUSAGE_DEPTHSTENCIL, (D3DFORMAT)MAKEFOURCC('I', 'N', 'T', 'Z'), D3DPOOL_DEFAULT, &TheTextureManager->DepthTexture, NULL);
+	for (int i = 0; i < 3; i++) {
+		ShadowMapSize = ShadowsExteriors->ShadowMapSize[i];
+		Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &TheTextureManager->ShadowMapTexture[i], NULL);
+		TheTextureManager->ShadowMapTexture[i]->GetSurfaceLevel(0, &TheTextureManager->ShadowMapSurface[i]);
+		Device->CreateDepthStencilSurface(ShadowMapSize, ShadowMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &TheTextureManager->ShadowMapDepthSurface[i], NULL);
+	}
+	for (int i = 0; i < ShadowCubeMapsMax; i++) {
+		Device->CreateCubeTexture(ShadowCubeMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &TheTextureManager->ShadowCubeMapTexture[i], NULL);
+		for (int j = 0; j < 6; j++) {
+			TheTextureManager->ShadowCubeMapTexture[i]->GetCubeMapSurface((D3DCUBEMAP_FACES)j, 0, &TheTextureManager->ShadowCubeMapSurface[i][j]);
+		}
+	}
+	Device->CreateDepthStencilSurface(ShadowCubeMapSize, ShadowCubeMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &TheTextureManager->ShadowCubeMapDepthSurface, NULL);
+	
 }
 
 TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, UInt32 RegisterIndex) {
