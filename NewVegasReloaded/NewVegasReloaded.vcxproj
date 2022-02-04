@@ -63,18 +63,18 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;NEWVEGAS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)TESReloaded\Framework;$(SolutionDir)TESReloaded\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>$(SolutionDir)TESReloaded\Framework\Framework.h</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>$(SolutionDir)TESReloaded\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>$(SolutionDir)TESReloaded\Framework\NewVegas\Framework.h</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
-      <AdditionalDependencies>d3dx9.lib;dxguid.lib;version.lib;$(SolutionDir)\TESReloaded\Framework\NVAPI\x86\nvapi.lib;$(SolutionDir)\TESReloaded\Framework\Bink\binkw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dx9.lib;dxguid.lib;version.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Nvidia\x86\nvapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetPath)" "C:\Bethesda Softworks\Fallout New Vegas\Data\NVSE\Plugins\$(TargetName).dll"</Command>
@@ -109,20 +109,53 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\TESReloaded\Core\CameraManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\CommandManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\Device\Device.h" />
+    <ClInclude Include="..\TESReloaded\Core\Device\Hook.h" />
+    <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\GameEventManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\SettingManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\ShaderManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\ShadowManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\TextureManager.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.h" />
     <ClInclude Include="..\TESReloaded\Framework\NewVegas\Base.h" />
     <ClInclude Include="..\TESReloaded\Framework\NewVegas\Defines.h" />
+    <ClInclude Include="..\TESReloaded\Framework\NewVegas\Framework.h" />
+    <ClInclude Include="..\TESReloaded\Framework\NewVegas\Game.h" />
+    <ClInclude Include="..\TESReloaded\Framework\NewVegas\GameHavok.h" />
+    <ClInclude Include="..\TESReloaded\Framework\NewVegas\GameNi.h" />
+    <ClInclude Include="..\TESReloaded\Framework\NewVegas\Managers.h" />
+    <ClInclude Include="..\TESReloaded\Framework\NewVegas\Plugin.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\TESReloaded\Core\CameraManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\CommandManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Device\Device.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Device\Hook.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\FrameRateManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\GameEventManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\GameMenuManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\SettingManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\ShadowManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\TextureManager.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\Logger.cpp" />
+    <ClCompile Include="..\TESReloaded\Framework\Common\Base\PluginVersion.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\SafeWrite.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\disasm.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\modules.cpp" />
+    <ClCompile Include="..\TESReloaded\Framework\NewVegas\Managers.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>

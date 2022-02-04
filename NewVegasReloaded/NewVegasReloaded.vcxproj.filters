@@ -27,6 +27,15 @@
     <Filter Include="Framework\Common\Lib\Detours">
       <UniqueIdentifier>{e6f95313-1631-432b-a52f-9c1173c9ddc7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Device">
+      <UniqueIdentifier>{1075d60f-cbc0-4adc-8a42-769f6929cc77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Hooks">
+      <UniqueIdentifier>{e2b555f5-e8d6-4c6e-9e2c-98ef530c5c66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Hooks\NewVegas">
+      <UniqueIdentifier>{f0b99bc3-6555-4572-9d48-37b20ad75ba8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -50,6 +59,63 @@
     <ClInclude Include="..\TESReloaded\Framework\NewVegas\Defines.h">
       <Filter>Framework\NewVegas</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\NewVegas\Framework.h">
+      <Filter>Framework\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h">
+      <Filter>Framework\Common\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\NewVegas\Game.h">
+      <Filter>Framework\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\NewVegas\GameHavok.h">
+      <Filter>Framework\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\NewVegas\GameNi.h">
+      <Filter>Framework\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\NewVegas\Managers.h">
+      <Filter>Framework\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\NewVegas\Plugin.h">
+      <Filter>Framework\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Device\Device.h">
+      <Filter>Core\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Device\Hook.h">
+      <Filter>Core\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\CameraManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\CommandManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\GameEventManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\RenderManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\SettingManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\ShaderManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\ShadowManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\TextureManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -69,6 +135,48 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\modules.cpp">
       <Filter>Framework\Common\Lib\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Common\Base\PluginVersion.cpp">
+      <Filter>Framework\Common\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\NewVegas\Managers.cpp">
+      <Filter>Framework\NewVegas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Device\Device.cpp">
+      <Filter>Core\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Device\Hook.cpp">
+      <Filter>Core\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\CameraManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\CommandManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\FrameRateManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\GameEventManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\GameMenuManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\SettingManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\ShadowManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\TextureManager.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
