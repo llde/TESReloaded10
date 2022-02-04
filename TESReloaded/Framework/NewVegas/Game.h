@@ -267,6 +267,15 @@ public:
 };
 assert(sizeof(BSString) == 0x008);
 
+class BSFixedString {
+public:
+	const char* m_data;		// 00
+
+	bool operator == (const BSFixedString& lhs) const { return m_data == lhs.m_data; }
+	bool operator < (const BSFixedString& lhs) const { return m_data < lhs.m_data; }
+};
+assert(sizeof(BSFixedString) == 0x04);
+
 class BSExtraData {
 public:
 	enum ExtraDataType {
@@ -1263,10 +1272,29 @@ public:
 		UInt32 type;	// 0 - Default; 1 - Precip; 2 - Wind; 3 - Thunder
 	};
 
-	float					GetFogDayNear() { return fogDay.nearFog; }
-	float					GetFogDayFar() { return fogDay.farFog; }
-	float					GetFogNightNear() { return fogNight.nearFog; }
-	float					GetFogNightFar() { return fogNight.farFog; }
+	float			GetFogDayNear() { return fogDay.nearFog; }
+	float			GetFogDayFar() { return fogDay.farFog; }
+	float			GetFogNightNear() { return fogNight.nearFog; }
+	float			GetFogNightFar() { return fogNight.farFog; }
+	UInt8			GetSunGlare() { return sunGlare; }
+	UInt8			GetTransDelta() { return transDelta; }
+	UInt8			GetWindSpeed() { return windSpeed; }
+	UInt8			GetWeatherType() { return weatherType; }
+	UInt8			GetSunDamage() { return sunDamage; }
+	UInt8			GetCloudSpeedLower() { return cloudSpeedLower; }
+	UInt8			GetCloudSpeedUpper() { return cloudSpeedUpper; }
+	float			GetHDR(int Index) { return hdrInfo[Index]; }
+	void			SetFogDayNear(float Value) { fogDay.nearFog = Value; }
+	void			SetFogDayFar(float Value) { fogDay.farFog = Value; }
+	void			SetFogNightNear(float Value) { fogNight.nearFog = Value; }
+	void			SetFogNightFar(float Value) { fogNight.farFog = Value; }
+	void			SetSunGlare(UInt8 Value) { sunGlare = Value; }
+	void			SetTransDelta(UInt8 Value) { transDelta = Value; }
+	void			SetWindSpeed(UInt8 Value) { windSpeed = Value; }
+	void			SetWeatherType(UInt8 Value) { weatherType = Value; }
+	void			SetSunDamage(UInt8 Value) { sunDamage = Value; }
+	void			SetCloudSpeedLower(UInt8 Value) { cloudSpeedLower = Value; }
+	void			SetCloudSpeedUpper(UInt8 Value) { cloudSpeedUpper = Value; }
 
 	UInt32					unk018;						// 018
 	void*					imageSpaceMods[6];			// 01C TESImageSpaceModifier*
@@ -5086,11 +5114,28 @@ namespace Pointers {
 	namespace Generic {
 	}
 	namespace Functions {
+		static bool  (__cdecl* ExtractArgs)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...) = (bool (__cdecl*)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...))0x005ACCB0;
+		static void  (* PrintToConsole)(const char*, ...) = (void (*)(const char*, ...))0x00703C00;
+		static char* (__cdecl* GetPassDescription)(UInt32) = (char* (__cdecl*)(UInt32))0x00B4F9D0;
 	}
 	namespace VirtualTables {
+		static const void* NiNode			= (void*)0x0109B5AC;
+		static const void* BSFadeNode		= (void*)0x010A8F90;
+		static const void* BSFaceGenNiNode	= (void*)0x010660DC;
+		static const void* BSTreeNode		= (void*)0x010668E4;
+		static const void* NiTriShape		= (void*)0x0109D454;
+		static const void* NiTriStrips		= (void*)0x0109CD44;
 	}
 	namespace Settings {
+		static UInt32* MinGrassSize				= (UInt32*)0x00000000;
+		static float*  GrassStartFadeDistance	= (float*)0x00000000;
+		static float*  GrassEndDistance			= (float*)0x00000000;
+		static float*  GrassWindMagnitudeMin	= (float*)0x00000000;
+		static float*  GrassWindMagnitudeMax	= (float*)0x00000000;
+		static float*  TexturePctThreshold		= (float*)0x00000000;
 	}
 	namespace ShaderParams {
+		static float* GrassWindMagnitudeMax	= (float*)0x00000000;
+		static float* GrassWindMagnitudeMin	= (float*)0x00000000;
 	}
 }

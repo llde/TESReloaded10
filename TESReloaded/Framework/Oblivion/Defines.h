@@ -10,7 +10,6 @@
 #define kFormType_MoveableStatic kFormType_Stat
 #define TerrainShaders "SLS2001.vso SLS2001.pso SLS2062.vso SLS2066.pso SLS2063.vso SLS2067.pso SLS2064.vso SLS2068.pso"
 #define BloodShaders "GDECALS.vso GDECAL.pso SLS2040.vso SLS2046.pso"
-#define RenderStateArgs 0
 #define FlyCamFBValue [esp + 0x0C]
 #define FlyCamRLValue [esp + 0x08]
 static const char* IntroMovie = "ORGameStudios.bik";

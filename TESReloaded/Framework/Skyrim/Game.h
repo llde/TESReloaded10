@@ -4648,22 +4648,15 @@ namespace Pointers {
 		static void  (* PrintToConsole)(const char*, ...) = (void (*)(const char*, ...))0x00848820;
 	}
 	namespace Settings {
-		static UInt32* GridsToLoad				= (UInt32*)0x01241000;
 		static UInt32* MinGrassSize				= (UInt32*)0x00000000;
 		static float*  GrassStartFadeDistance	= (float*)0x00000000;
 		static float*  GrassEndDistance			= (float*)0x00000000;
 		static float*  GrassWindMagnitudeMin	= (float*)0x00000000;
 		static float*  GrassWindMagnitudeMax	= (float*)0x00000000;
 		static float*  TexturePctThreshold		= (float*)0x00000000;
-		static UInt32* MultiSample				= (UInt32*)0x00000000;
-		static UInt8*  HDR						= (UInt8*)0x00000000;
 	}
 	namespace ShaderParams {
 		static float* GrassWindMagnitudeMax	= (float*)0x00000000;
 		static float* GrassWindMagnitudeMin	= (float*)0x00000000;
-		static UInt8* WaterHighResolution	= (UInt8*)0x00000000;
-		static float* RockParams			= (float*)0x00000000;
-		static float* RustleParams			= (float*)0x00000000;
-		static float* WindMatrixes			= (float*)0x00000000;
 	}
 }

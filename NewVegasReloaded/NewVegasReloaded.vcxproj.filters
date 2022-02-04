@@ -116,6 +116,18 @@
     <ClInclude Include="..\TESReloaded\Core\TextureManager.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
