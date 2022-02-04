@@ -7,7 +7,10 @@ public:
 
 class Jumpers {
 public:
-
+	struct CreateDevice {
+		static const UInt32 Hook	= 0x00E731FF;
+		static const UInt32 Return	= 0x00E73204;
+	};
 };
 
 class CommandManagerBase {

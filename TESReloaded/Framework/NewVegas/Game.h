@@ -4959,8 +4959,29 @@ assert(sizeof(SoundControl) == 0x0A4);
 
 class Main {
 public:
-	InputControl*	GetInputKeyboard() { return *(InputControl**)0x011F35CC; }
-	InputControl*	GetInputMouse() { return *(InputControl**)0x011F35CC; }
+	InputControl*	GetInputControl() { return *(InputControl**)0x011F35CC; }
+	bool			OnKeyDown(UInt16 KeyCode) { InputControl* input = GetInputControl(); if (KeyCode >= 256) return OnMouseDown(KeyCode - 256); if (KeyCode != 255 && input->CurrentKeyState[KeyCode] && !input->PreviousKeyState[KeyCode]) return true; return false; }
+	bool			OnKeyPressed(UInt16 KeyCode) { InputControl* input = GetInputControl(); if (KeyCode >= 256) return OnMousePressed(KeyCode - 256); if (KeyCode != 255 && input->CurrentKeyState[KeyCode] && input->PreviousKeyState[KeyCode]) return true; return false; }
+	bool			OnKeyUp(UInt16 KeyCode) { InputControl* input = GetInputControl(); if (KeyCode >= 256) return OnMouseUp(KeyCode - 256); if (KeyCode != 255 && !input->CurrentKeyState[KeyCode] && input->PreviousKeyState[KeyCode]) return true; return false; }
+	bool			OnMouseDown(UInt8 ButtonIndex) { InputControl* input = GetInputControl(); if (ButtonIndex != 255 && input->CurrentMouseState.rgbButtons[ButtonIndex] && !input->PreviousMouseState.rgbButtons[ButtonIndex]) return true; return false; }
+	bool			OnMousePressed(UInt8 ButtonIndex) { InputControl* input = GetInputControl(); if (ButtonIndex != 255 && input->CurrentMouseState.rgbButtons[ButtonIndex] && input->PreviousMouseState.rgbButtons[ButtonIndex]) return true; return false; }
+	bool			OnMouseUp(UInt8 ButtonIndex) { InputControl* input = GetInputControl(); if (ButtonIndex != 255 && !input->CurrentMouseState.rgbButtons[ButtonIndex] && input->PreviousMouseState.rgbButtons[ButtonIndex]) return true; return false; }
+	bool			OnControlDown(UInt16 ControlID) { InputControl* input = GetInputControl(); return OnKeyDown(input->KeyboardInputControls[ControlID]) + OnMouseDown(input->MouseInputControls[ControlID]); }
+	bool			OnControlPressed(UInt16 ControlID) { InputControl* input = GetInputControl(); return OnKeyPressed(input->KeyboardInputControls[ControlID]) + OnMousePressed(input->MouseInputControls[ControlID]); }
+	bool			OnControlUp(UInt16 ControlID) { InputControl* input = GetInputControl(); return OnKeyUp(input->KeyboardInputControls[ControlID]) + OnMouseUp(input->MouseInputControls[ControlID]); }
+	void			SetControlState(UInt8 ControlID, UInt8 CurrentState, UInt8 PreviousState) {
+						InputControl* input = GetInputControl();
+						UInt16 Source = input->KeyboardInputControls[ControlID];
+						if (Source != 255) {
+							input->CurrentKeyState[Source] = CurrentState;
+							input->PreviousKeyState[Source] = PreviousState;
+						}
+						Source = input->MouseInputControls[ControlID];
+						if (Source != 255) {
+							input->CurrentMouseState.rgbButtons[Source] = CurrentState;
+							input->PreviousMouseState.rgbButtons[Source] = PreviousState;
+						}
+					}
 	SoundControl*	GetSound() { return *(SoundControl**)0x011F6D98; }
 	void			PurgeModels() {}
 
