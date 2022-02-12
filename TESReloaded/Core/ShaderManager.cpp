@@ -564,8 +564,6 @@ void ShaderManager::Initialize() {
 	TheShaderManager->SnowEffect = NULL;
 	TheShaderManager->ShadowsExteriorsEffect = NULL;
 	TheShaderManager->ShadowsInteriorsEffect = NULL;
-	TheShaderManager->WaterHeightMapVertexShader = NULL;
-	TheShaderManager->WaterHeightMapPixelShader = NULL;
 	memset(TheShaderManager->WaterVertexShaders, NULL, sizeof(WaterVertexShaders));
 	memset(TheShaderManager->WaterPixelShaders, NULL, sizeof(WaterPixelShaders));
 	TheShaderManager->InitializeConstants();

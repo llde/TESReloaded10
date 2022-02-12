@@ -1464,7 +1464,7 @@ public:
 		float		directionalFade;
 		float		fogClipDistance;
 	};
-
+	NiNode*			GetNode() { return niNode; }
 	float			GetWaterHeight() { return ThisCallF(0x004CACE0, this); }
 	hkWorld*		GetHavokWorld() {
 						ExtraHavok* extraHavok = (ExtraHavok*)extraDataList.GetExtraData(BSExtraData::ExtraDataType::kExtraData_Havok);
@@ -2314,6 +2314,7 @@ public:
 	virtual void			Unk_68();
 	virtual void			Unk_69();
 	
+	NiNode*							GetNode() { return niNode; }
 	InventoryChanges::EntryData*	GetInventoryItem(UInt32 Index) { return (InventoryChanges::EntryData*)ThisCall(0x004D88F0, this, Index, 0); }
 
 	TESChildCell		childCell;		// 018

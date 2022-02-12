@@ -35,6 +35,13 @@ public:
 		return Versioning[2] == '1';
 
 	}
+	
+	void SetTextureAndHDR(TESWeatherEx* WeatherEx, char* UpperLayer, char* LowerLayer, float* HDR) {
+
+		WeatherEx->textureLayers[0].ddsPath.Set(UpperLayer);
+		WeatherEx->textureLayers[1].ddsPath.Set(LowerLayer);
+
+	}
 
 };
 
@@ -51,6 +58,44 @@ public:
 
 class ShaderManagerBase {
 public:
+
+	static int GetShader(const char* Name, NiD3DVertexShader*** Shader, NiD3DVertexShader** AdditionalShader) {
+
+		BSShader** Shaders = (BSShader**)0x011F9548;
+		int Size = 0;
+
+		if (!strcmp(Name, "Water")) {
+			WaterShader* S = (WaterShader*)Shaders[17];
+			*Shader = S->Vertex;
+			Size = sizeof(S->Vertex) / 4;
+		}
+		else if (!strcmp(Name, "WaterHeightMap")) {
+			WaterShaderHeightMap* S = (WaterShaderHeightMap*)Shaders[19]->Shader;
+			*Shader = &S->Vertex;
+			Size = sizeof(S->Vertex) / 4;
+		}
+		return Size;
+
+	}
+
+	static int GetShader(const char* Name, NiD3DPixelShader*** Shader, NiD3DPixelShader** AdditionalShader) {
+
+		BSShader** Shaders = (BSShader**)0x011F9548;
+		int Size = 0;
+
+		if (!strcmp(Name, "Water")) {
+			WaterShader* S = (WaterShader*)Shaders[17];
+			*Shader = S->Pixel;
+			Size = sizeof(S->Pixel) / 4;
+		}
+		else if (!strcmp(Name, "WaterHeightMap")) {
+			WaterShaderHeightMap* S = (WaterShaderHeightMap*)Shaders[19]->Shader;
+			*Shader = S->Pixel;
+			Size = sizeof(S->Pixel) / 4;
+		}
+		return Size;
+
+	}
 
 };
 

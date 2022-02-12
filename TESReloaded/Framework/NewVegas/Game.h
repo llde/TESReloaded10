@@ -1381,18 +1381,9 @@ public:
 		float	unk1C;		// 1C - init'd to 0
 		float	fogNearAW;	// Above water fog near place distance
 		float	fogFarAW;	// Above water fog far plane distance
-		UInt8	shallowColorR;
-		UInt8	shallowColorG;
-		UInt8	shallowColorB;
-		UInt8	shallowColorA;
-		UInt8	deepColorR;
-		UInt8	deepColorG;
-		UInt8	deepColorB;
-		UInt8	deepColorA;
-		UInt8	reflectionColorR;
-		UInt8	reflectionColorG;
-		UInt8	reflectionColorB;
-		UInt8	reflectionColorA;
+		RGBA	shallowColor;
+		RGBA	deepColor;
+		RGBA	reflectionColor;
 		UInt8	unk34;		// 34 - init'd to 0
 		UInt8	pad35[3];	// 35
 		float	unk38;		// 38 - init'd to 0.1
@@ -1442,6 +1433,8 @@ public:
 
 	UInt32					GetWaterType() { return kWaterType_Normal; };
 	void					RemoveUnderwaterFog() { properties.fogAmountUW = 0.0f; properties.fogNearUW = 9995.0f; properties.fogFarUW = 10000.0f; }
+	RGBA*					GetShallowColor() { return &properties.shallowColor; }
+	RGBA*					GetDeepColor() { return &properties.deepColor; }
 
 	TESFullName				fullName;		// 018
 	TESAttackDamageForm		attackDamage;	// 024
@@ -3662,17 +3655,17 @@ public:
 	virtual void		Unk_139();
 	virtual void		Unk_13A();
 	
-	void				SetFoV(SceneGraph* WorldSceneGraph, float* SettingWorldFoV, float* Setting1stPersonFoV, float FoV) { WorldSceneGraph->SetCameraFOV(FoV); worldFoV = firstPersonFoV = *SettingWorldFoV = *Setting1stPersonFoV = FoV; }
-	float				GetFoV(bool IsSpecialView) { return (IsSpecialView ? firstPersonFoV : worldFoV); }
-	bool				IsThirdPersonView(bool CameraMode, bool FirstPersonView) { return (!CameraMode ? isThirdPerson : !FirstPersonView); }
-	bool				IsVanityView() { return *(bool*)0x011E07B8; }
 	bool				IsAiming() { return (process->IsWeaponOut() && process->IsAiming()); }
-	bool				IsReloading() { return (ThisCall(0x008A8870, this)); }
 	TESWorldSpace*		GetWorldSpace() { return (parentCell != NULL ? parentCell->worldSpace : NULL); }
 	TESRegion*			GetRegion() { return currentRegion; }
 	void				UpdateInventory() {}
 	bool				IsMoving() { return (actorMover->GetMovementFlags() & 0x800); }
 	bool				IsAlive() { return !GetDead(1); }
+	bool				IsFirstPerson() { return !isThirdPerson; }
+	bool				IsVanity() { return *(bool*)0x011E07B8; }
+	void				SetFoV(float FoV) { float* SettingWorldFoV = (float*)0x01203160; float* Setting1stPersonFoV = (float*)0x0120316C; worldFoV = *SettingWorldFoV = *Setting1stPersonFoV = FoV; }
+	float				GetFoV(bool IsSpecialView) { return (IsSpecialView ? firstPersonFoV : worldFoV); }
+	bool				IsReloading() { return (ThisCall(0x008A8870, this)); }
 
 	UInt32				unk1C8[(0x244-0x1C8) >> 2];		// 1C8	0224 is a package of type 1C, 208 could be a DialogPackage, 206 questObjectiveTargets is valid
 	float				unk244[0x4D];					// 244	have to be a set of ActorValue
@@ -4702,7 +4695,7 @@ public:
 };
 assert(sizeof(ModList) == 0x408);
 
-class MasterDataHandler {
+class MainDataHandler {
 public:
 	
 	TESForm*				CreateForm(UInt8 FormType) { TESForm* (__cdecl* CreateForm)(UInt8) = (TESForm* (__cdecl*)(UInt8))0x00465110; return CreateForm(FormType); }
@@ -4814,7 +4807,7 @@ public:
 	UInt32							unk634;					// 634
 	UInt32							unk638;					// 638
 };
-assert(sizeof(MasterDataHandler) == 0x63C);
+assert(sizeof(MainDataHandler) == 0x63C);
 
 class InputControl {
 public:
@@ -5158,5 +5151,8 @@ namespace Pointers {
 	namespace ShaderParams {
 		static float* GrassWindMagnitudeMax	= (float*)0x00000000;
 		static float* GrassWindMagnitudeMin	= (float*)0x00000000;
+		static float* RockParams			= (float*)0x01200658;
+		static float* RustleParams			= (float*)0x01200668;
+		static float* WindMatrixes			= (float*)0x01200688;
 	}
 }

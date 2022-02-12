@@ -92,7 +92,7 @@ TESObjectREFR* ShadowManager::GetRef(TESObjectREFR* Ref, SettingsShadowStruct::F
 	
 	TESObjectREFR* R = NULL;
 
-	if (Ref && Ref->niNode) {
+	if (Ref && Ref->GetNode()) {
 		TESForm* Form = Ref->baseForm;
 		if (!(Ref->flags & TESForm::FormFlags::kFormFlags_NotCastShadows)) {
 			UInt8 TypeID = Form->formType;
@@ -347,7 +347,7 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 		for (UInt32 i = 0; i < CellArraySize; i++) {
 			if (TESObjectCELL* Cell = CellArray->GetCell(i)) {
 				if (ShadowsExteriors->Forms[ShadowMapType].Terrain) {
-					NiNode* CellNode = Cell->niNode;
+					NiNode* CellNode = Cell->GetNode();
 					for (int i = 2; i < 6; i++) {
 						NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[i];
 						if (TerrainNode->m_children.end) RenderTerrain(TerrainNode->m_children.data[0], ShadowMapType);
@@ -356,7 +356,7 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 				TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
 				while (Entry) {
 					if (TESObjectREFR* Ref = GetRef(Entry->item, &ShadowsExteriors->Forms[ShadowMapType], &ShadowsExteriors->ExcludedForms)) {
-						NiNode* RefNode = Ref->niNode;
+						NiNode* RefNode = Ref->GetNode();
 						if (InFrustum(ShadowMapType, RefNode)) RenderExterior(RefNode, MinRadius);
 					}
 					Entry = Entry->next;
@@ -440,7 +440,7 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, S
 				TList<TESObjectREFR>::Entry* Entry = &Player->parentCell->objectList.First;
 				while (Entry) {
 					if (TESObjectREFR* Ref = GetRef(Entry->item, &ShadowsInteriors->Forms, &ShadowsInteriors->ExcludedForms)) {
-						NiNode* RefNode = Ref->niNode;
+						NiNode* RefNode = Ref->GetNode();
 						if (RefNode->GetDistance(LightPos) <= Radius * 1.2f) RenderInterior(RefNode, MinRadius);
 					}
 					Entry = Entry->next;
@@ -470,7 +470,7 @@ void ShadowManager::RenderShadowMaps() {
 	if (Player->GetWorldSpace()) {
 		D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
 		D3DXVECTOR4 OrthoDir = D3DXVECTOR3(0.05f, 0.05f, 1.0f);
-		NiNode* PlayerNode = Player->niNode;
+		NiNode* PlayerNode = Player->GetNode();
 		D3DXVECTOR3 At;
 
 		At.x = PlayerNode->m_worldTransform.pos.x - TheRenderManager->CameraPosition.x;

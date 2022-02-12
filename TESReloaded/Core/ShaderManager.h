@@ -331,8 +331,6 @@ public:
 	EffectRecord*			ShadowsExteriorsEffect;
 	EffectRecord*			ShadowsInteriorsEffect;
 	ExtraEffectsList		ExtraEffects;
-	NiD3DVertexShader*		WaterHeightMapVertexShader;
-	NiD3DPixelShader*		WaterHeightMapPixelShader;
 	NiD3DVertexShader*		WaterVertexShaders[51];
 	NiD3DPixelShader*		WaterPixelShaders[51];
 };
