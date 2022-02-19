@@ -44,7 +44,7 @@ void CameraManager::SetSceneGraph() {
 	if (CameraMode->Enabled) {
 		WorldSceneGraph->SetNearDistance(2.5f);
 		if (FoV != WorldSceneGraph->cameraFOV && !Player->IsAiming() && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
-			WorldSceneGraph->SetFoV(FoV);
+			WorldSceneGraph->UpdateParticleShaderFoV(FoV);
 			Player->SetFoV(FoV);
 		}
 	}

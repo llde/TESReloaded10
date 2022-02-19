@@ -128,6 +128,21 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Hooks.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Settings.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Game.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\ShaderIO.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Render.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">

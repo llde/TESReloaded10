@@ -615,7 +615,7 @@ assert(sizeof(NiCullingProcess) == 0x90);
 
 class SceneGraph : public NiNode {
 public:
-	void				SetFoV(float FoV) { void (__cdecl* UpdateParticleShaderFoV)(float) = (void (__cdecl*)(float))0x007B70E0; ThisCall(0x00411160, this, FoV, 0); UpdateParticleShaderFoV(FoV); }
+	void				UpdateParticleShaderFoV(float FoV) { void (__cdecl* UpdateParticleShaderFoVData)(float) = (void (__cdecl*)(float))0x007B70E0; ThisCall(0x00411160, this, FoV, 0); UpdateParticleShaderFoVData(FoV); }
 	void				SetNearDistance(float Distance) { float* SettingNearDistance = (float*)0x00B03134; *SettingNearDistance = Distance; }
 
 	NiCamera*			camera;					// 0DC

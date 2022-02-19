@@ -1325,10 +1325,10 @@ void ShaderManager::CreateShader(const char* Name) {
 		for (int i = 0; i < GetShader(Name, &Vertex, WaterVertexShaders); i++) LoadShader(Vertex[i]);
 		for (int i = 0; i < GetShader(Name, &Pixel, WaterPixelShaders); i++) LoadShader(Pixel[i]);
 		if (!strcmp(Name, "Water")) {
-			for (int i = 0; i < GetShader("WaterHeightMap", &Vertex, NULL); i++) LoadShader(Vertex[i]);
-			for (int i = 0; i < GetShader("WaterHeightMap", &Pixel, NULL); i++) LoadShader(Pixel[i]);
-			for (int i = 0; i < GetShader("WaterDisplacement", &Vertex, NULL); i++) LoadShader(Vertex[i]);
-			for (int i = 0; i < GetShader("WaterDisplacement", &Pixel, NULL); i++) LoadShader(Pixel[i]);
+			for (int i = 0; i < GetShader("WaterHeightMap", &Vertex, WaterVertexShaders); i++) LoadShader(Vertex[i]);
+			for (int i = 0; i < GetShader("WaterHeightMap", &Pixel, WaterPixelShaders); i++) LoadShader(Pixel[i]);
+			for (int i = 0; i < GetShader("WaterDisplacement", &Vertex, WaterVertexShaders); i++) LoadShader(Vertex[i]);
+			for (int i = 0; i < GetShader("WaterDisplacement", &Pixel, WaterPixelShaders); i++) LoadShader(Pixel[i]);
 		}
 	}
 

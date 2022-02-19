@@ -2,7 +2,19 @@
 
 class Hooks {
 public:
-
+	static const UInt32 ReadSetting					= 0x00C44280;
+	static const UInt32 WriteSetting				= 0x00C43E90;
+	static const UInt32 LoadGame					= 0x00847DF0;
+	static const UInt32 NewMain						= 0x0086C160;
+	static const UInt32 InitializeRenderer			= 0x0086D500;
+	static const UInt32 NewTES						= 0x0044FB20;
+	static const UInt32 NewPlayerCharacter			= 0x00938180;
+	static const UInt32 NewSceneGraph				= 0x00878610;
+	static const UInt32 NewMainDataHandler			= 0x0045D270;
+	static const UInt32 NewMenuInterfaceManager		= 0x0070A130;
+	static const UInt32 NewQueuedModelLoader		= 0x00442650;
+	static const UInt32 CreateVertexShader			= 0x00BE0FE0;
+	static const UInt32 CreatePixelShader			= 0x00BE1750;
 };
 
 class Jumpers {
@@ -42,6 +54,15 @@ public:
 		WeatherEx->textureLayers[1].ddsPath.Set(LowerLayer);
 
 	}
+	
+	void SetWindowedMode(UInt8 Fullscreen) {
+
+		if (!Fullscreen) {
+			SafeWrite32(0x0086AF04, WS_POPUP);
+			SafeWrite32(0x0086AF2F, WS_POPUP | WS_VISIBLE);
+		}
+
+	}
 
 };
 
@@ -70,9 +91,8 @@ public:
 			Size = sizeof(S->Vertex) / 4;
 		}
 		else if (!strcmp(Name, "WaterHeightMap")) {
-			WaterShaderHeightMap* S = (WaterShaderHeightMap*)Shaders[19]->Shader;
-			*Shader = &S->Vertex;
-			Size = sizeof(S->Vertex) / 4;
+			*Shader = AdditionalShader;
+			Size = sizeof(AdditionalShader) / 4;
 		}
 		return Size;
 
@@ -89,9 +109,8 @@ public:
 			Size = sizeof(S->Pixel) / 4;
 		}
 		else if (!strcmp(Name, "WaterHeightMap")) {
-			WaterShaderHeightMap* S = (WaterShaderHeightMap*)Shaders[19]->Shader;
-			*Shader = S->Pixel;
-			Size = sizeof(S->Pixel) / 4;
+			*Shader = AdditionalShader;
+			Size = sizeof(AdditionalShader) / 4;
 		}
 		return Size;
 

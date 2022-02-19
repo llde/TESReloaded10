@@ -578,7 +578,8 @@ assert(sizeof(NiCamera) == 0x114);
 
 class SceneGraph : public NiNode {
 public:
-	void			SetCameraFOV(float FoV) { void (__cdecl* UpdateParticleShaderFoVData)(float) = (void (__cdecl*)(float))0x00B54000; ThisCall(0x00C52020, this, FoV, 0, NULL, 0); UpdateParticleShaderFoVData(FoV); }
+	void				UpdateParticleShaderFoV(float FoV) { void (__cdecl* UpdateParticleShaderFoVData)(float) = (void (__cdecl*)(float))0x00B54000; ThisCall(0x00C52020, this, FoV, 0, NULL, 0); UpdateParticleShaderFoVData(FoV); }
+	void				SetNearDistance(float Distance) { float* SettingNearDistance = (float*)0x01203148; *SettingNearDistance = Distance; }
 
 	NiCamera*			camera;					// AC
 	UInt32				unkB0;					// B0

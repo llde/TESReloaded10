@@ -118,6 +118,11 @@
     <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Game.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Hooks.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Render.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Settings.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\ShaderIO.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />

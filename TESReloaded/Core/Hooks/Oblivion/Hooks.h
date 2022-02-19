@@ -148,18 +148,23 @@ void AttachHooks() {
 	SafeWriteJump(0x00497D5A, 0x00497D63); // Unlocks antialising bar if HDR is enabled (video menu)
 	SafeWriteJump(0x005DF8E9, 0x005DF983); // Skips antialising deactivation changing HDR (video menu)
 	SafeWriteJump(0x006738B1, 0x00673935); // Cancels the fPlayerDeathReloadTime
+
 	if (SettingsMain->Shaders.Water) {
 		*Pointers::ShaderParams::WaterHighResolution = 1;
 		SafeWrite8(0x0049EBAC, 0); // Avoids to change the shader for the skydome when underwater
 		SafeWriteJump(0x0053B16F, 0x0053B20C); // Avoids to change atmosphere colors when underwater
 		SafeWriteJump(0x00542F63, 0x00542FC1); // Avoids to remove the sun over the scene when underwater
 	}
+
 	if (SettingsMain->Main.AnisotropicFilter >= 2) {
 		SafeWrite8(0x007BE1D3, SettingsMain->Main.AnisotropicFilter);
 		SafeWrite8(0x007BE32B, SettingsMain->Main.AnisotropicFilter);
 	}
+
 	if (SettingsMain->Main.RemovePrecipitations) SafeWriteJump(0x00543167, 0x00543176);
+
 	if (SettingsMain->FrameRate.SmartControl) SafeWriteJump(Jumpers::UpdateTimeInfo::Hook, (UInt32)UpdateTimeInfoHook);
+
 	if (SettingsMain->FrameRate.SmartBackgroundProcess) {
 		SafeWrite8(0x007635F9, 0x8B); // Patches the NiRenderer::CreateSourceCubeMapRendererData
 		SafeWrite8(0x007635FA, 0xF8); // Patches the NiRenderer::CreateSourceCubeMapRendererData
@@ -175,6 +180,7 @@ void AttachHooks() {
 		SafeWriteJump(0x0077AE6C, 0x0077AE80); // Skips leaving	 SourceDataCriticalSection (NiDX9TextureManager::PrecacheTexture)
 		SafeWriteJump(0x0077AEAF, 0x0077AEC3); // Skips leaving	 SourceDataCriticalSection (NiDX9TextureManager::PrecacheTexture)
 	}
+
 	if (SettingsMain->OcclusionCulling.Enabled) {
 		SafeWriteJump(Jumpers::Occlusion::New1CollisionObjectHook,		(UInt32)New1CollisionObjectHook);
 		SafeWriteJump(Jumpers::Occlusion::New2CollisionObjectHook,		(UInt32)New2CollisionObjectHook);
@@ -184,6 +190,7 @@ void AttachHooks() {
 		SafeWriteJump(Jumpers::Occlusion::CoordinateJackHook,			(UInt32)CoordinateJackHook);
 		SafeWriteJump(Jumpers::Occlusion::ObjectCullHook,				(UInt32)ObjectCullHook);
 	}
+
 	if (SettingsMain->Main.MemoryHeapManagement) {
 		GetCurrentDirectoryA(MAX_PATH, Filename);
 		strcat(Filename, FastMMFile);
@@ -208,8 +215,11 @@ void AttachHooks() {
 		SafeWriteCall(0x00401495, (UInt32)Mem.Free);
 		SafeWriteJump(Jumpers::Memory::MemReallocHook, (UInt32)MemReallocHook);
 	}
+
 	if (SettingsMain->Main.MemoryTextureManagement) SafeWriteCall(Jumpers::Memory::CreateTextureFromFileInMemory, (UInt32)CreateTextureFromFileInMemory);
+
 	if (SettingsMain->GrassMode.Enabled) SafeWriteJump(Jumpers::UpdateGrass::Hook, (UInt32)UpdateGrassHook);
+
 	if (SettingsMain->CameraMode.Enabled) {
 		SafeWriteJump(Jumpers::Camera::UpdateCameraHook,		(UInt32)UpdateCameraHook);
 		SafeWriteJump(Jumpers::Camera::SwitchCameraHook,		(UInt32)SwitchCameraHook);
@@ -220,6 +230,7 @@ void AttachHooks() {
 		SafeWriteJump(0x0066B769, 0x0066B795); // Does not lower the player Z axis value (fixes the bug of the camera on feet after resurrection)
 		SafeWriteJump(0x00666704, 0x0066672D); // Enables the zoom with the bow
 	}
+
 	if (SettingsMain->EquipmentMode.Enabled) {
 		SafeWriteJump(Jumpers::Equipment::PrnHook,							(UInt32)PrnHook);
 		SafeWriteJump(Jumpers::Equipment::SetWeaponRotationPositionHook,	(UInt32)SetWeaponRotationPositionHook);
@@ -248,11 +259,13 @@ void AttachHooks() {
 			SafeWrite16(0x005F4FEF, 0xC031); // Enables stagger animation when mounting
 		}
 	}
+
 	if (SettingsMain->SleepingMode.Enabled) {
 		SafeWriteJump(0x004AEA1C, 0x004AEAEE); // Enables the Player to get into the bed
 		SafeWriteJump(0x004AE961, 0x004AEAEE); // Enables the Player to get into the bed when in prison
 		SafeWriteJump(0x00672BFF, 0x00672C18); // Enables the rest key when in prison
 	}
+
 	if (SettingsMain->Dodge.Enabled) {
 		SafeWrite8(0x00672A17, SettingsMain->Dodge.AcrobaticsLevel);
 		if (SettingsMain->Dodge.DoubleTap) {
@@ -261,6 +274,7 @@ void AttachHooks() {
 			SafeWriteJump(Jumpers::Dodge::DoubleTapHook,	(UInt32)DoubleTapHook);
 		}
 	}
+
 	if (SettingsMain->FlyCam.Enabled) {
 		SafeWriteJump(Jumpers::FlyCam::UpdateForwardFlyCamHook,		(UInt32)UpdateForwardFlyCamHook);
 		SafeWriteJump(Jumpers::FlyCam::UpdateBackwardFlyCamHook,	(UInt32)UpdateBackwardFlyCamHook);

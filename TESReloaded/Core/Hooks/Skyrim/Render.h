@@ -7,6 +7,7 @@ static void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* Ren
 	
 	SettingsMainStruct* SettingsMain = &TheSettingManager->SettingsMain;
 
+	TheFrameRateManager->UpdatePerformance();
 	TheCameraManager->SetSceneGraph();
 	TheShaderManager->UpdateConstants();
 	if (SettingsMain->Develop.TraceShaders && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None) && Global->OnKeyDown(SettingsMain->Develop.TraceShaders)) Logger::Log("START FRAME LOG");
@@ -23,8 +24,8 @@ static bool __cdecl SetupRenderingPassHook(UInt32 PassIndex, BSShader* Shader) {
 	NiD3DPixelShaderEx* PixelShader = *(NiD3DPixelShaderEx**)0x01BABFB0;
 
 	if (VertexShader && PixelShader) {
-		if (VertexShader->ShaderProg) VertexShader->ShaderProg->SetCT();
-		if (PixelShader->ShaderProg) PixelShader->ShaderProg->SetCT();
+		VertexShader->SetupShader(VertexShader->ShaderHandle);
+		PixelShader->SetupShader(PixelShader->ShaderHandle);
 	}
 	return r;
 

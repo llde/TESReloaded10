@@ -33,6 +33,7 @@ class Projectile;
 class MediaSet;
 class MediaLocationController;
 
+class TESSaveLoadGame;
 class TESForm;
 class TESObjectREFR;
 class TESObjectCELL;
@@ -2180,6 +2181,7 @@ public:
 		TList<TESObjectREFR>				list5C;		// 5C
 	};
 	
+	TESWaterForm*			GetWaterForm() { return (TESWaterForm*)ThisCall(0x00547770, this); }
 	float					GetWaterHeight() { return ThisCallF(0x005471E0, this); }
 	ExtraHavok*				GetExtraHavok() { return (ExtraHavok*)extraDataList.GetExtraData(BSExtraData::ExtraDataType::kExtraData_Havok); }
 	NiNode*					GetNode() { return structC4->niNode; }
@@ -3665,6 +3667,7 @@ public:
 	bool				IsVanity() { return *(bool*)0x011E07B8; }
 	void				SetFoV(float FoV) { float* SettingWorldFoV = (float*)0x01203160; float* Setting1stPersonFoV = (float*)0x0120316C; worldFoV = *SettingWorldFoV = *Setting1stPersonFoV = FoV; }
 	float				GetFoV(bool IsSpecialView) { return (IsSpecialView ? firstPersonFoV : worldFoV); }
+	void				ResetCamera() {}
 	bool				IsReloading() { return (ThisCall(0x008A8870, this)); }
 
 	UInt32				unk1C8[(0x244-0x1C8) >> 2];		// 1C8	0224 is a package of type 1C, 208 could be a DialogPackage, 206 questObjectiveTargets is valid
@@ -4159,18 +4162,20 @@ public:
 							breakall:
 							return r;
 						}
+	TESWaterForm*		GetWaterForm() { return currentCell->GetWaterForm(); }
+
 	UInt32								unk04;				// 04
 	GridCellArray*						gridCellArray;		// 08
 	NiNode*								objectLODRoot;		// 0C
 	NiNode*								landLOD;			// 10
 	NiNode*								waterLOD;			// 14
-	BSTempNodeManager*					tempNodeMgr;		// 18
+	BSTempNodeManager*					tempNodeManager;	// 18
 	NiDirectionalLight*					directionalLight;	// 1C
 	void*								ptr20;				// 20
 	SInt32								extCoordX;			// 24
 	SInt32								extCoordY;			// 28
 	SInt32								unk2C[2];			// 2C
-	TESObjectCELL*						currentInterior;	// 34
+	TESObjectCELL*						currentCell;		// 34
 	TESObjectCELL**						interiorsBuffer;	// 38
 	TESObjectCELL**						exteriorsBuffer;	// 3C
 	UInt32								unk40[9];			// 40
@@ -5126,8 +5131,13 @@ assert(sizeof(GameSetting) == 0x0C);
 
 namespace Pointers {
 	namespace Generic {
+		static float*			  MPF					= (float*)0x00000000;
+		static NiPoint3*		  CameraWorldTranslate	= (NiPoint3*)0x011F474C;
+		static NiPoint3*		  CameraLocation		= (NiPoint3*)0x011F426C;
+		static NiNode**			  DetectorWindowNode	= (NiNode**)0x011FA008;
 	}
 	namespace Functions {
+		static void* (__cdecl* MemoryAlloc)(size_t) = (void* (__cdecl*)(size_t))0x00AA13E0;
 		static bool  (__cdecl* ExtractArgs)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...) = (bool (__cdecl*)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...))0x005ACCB0;
 		static void  (* PrintToConsole)(const char*, ...) = (void (*)(const char*, ...))0x00703C00;
 		static char* (__cdecl* GetPassDescription)(UInt32) = (char* (__cdecl*)(UInt32))0x00B4F9D0;
