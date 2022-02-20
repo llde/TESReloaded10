@@ -135,6 +135,7 @@ void AttachHooks() {
 	SafeWriteJump(Jumpers::Shadows::AddCastShadowFlagHook,		(UInt32)AddCastShadowFlagHook);
 	SafeWriteJump(Jumpers::WaterHeightMap::Hook,				(UInt32)WaterHeightMapHook);
 	SafeWriteJump(Jumpers::EndProcess::Hook,					(UInt32)EndProcessHook);
+
 	SafeWriteJump(0x00553EAC, 0x00553EB2); // Patches the use of Lighting30Shader only for the hair
 	SafeWriteJump(0x007D1BC4, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
 	SafeWriteJump(0x007D1BCD, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair

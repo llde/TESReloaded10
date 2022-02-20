@@ -74,7 +74,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
-      <AdditionalDependencies>d3dx9.lib;dxguid.lib;version.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Nvidia\x86\nvapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dx9.lib;dxguid.lib;version.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Nvidia\x86\nvapi.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Bink\binkw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetPath)" "C:\Bethesda Softworks\Fallout New Vegas\Data\NVSE\Plugins\$(TargetName).dll"</Command>
@@ -109,6 +109,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\TESReloaded\Core\BinkManager.h" />
     <ClInclude Include="..\TESReloaded\Core\CameraManager.h" />
     <ClInclude Include="..\TESReloaded\Core\CommandManager.h" />
     <ClInclude Include="..\TESReloaded\Core\Device\Device.h" />
@@ -118,11 +119,13 @@
     <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Forms.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Game.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Hooks.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\ShaderIO.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Shadows.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />
@@ -134,7 +137,11 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\bink.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\binktextures.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\radbase.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Nvidia\nvapi.h" />
     <ClInclude Include="..\TESReloaded\Framework\NewVegas\Base.h" />
     <ClInclude Include="..\TESReloaded\Framework\NewVegas\Defines.h" />
     <ClInclude Include="..\TESReloaded\Framework\NewVegas\Framework.h" />
@@ -146,6 +153,7 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\TESReloaded\Core\BinkManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\CameraManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\CommandManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\Device\Device.cpp" />
@@ -161,6 +169,7 @@
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\Logger.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\PluginVersion.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\SafeWrite.cpp" />
+    <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Bink\binktextures.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\disasm.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\modules.cpp" />

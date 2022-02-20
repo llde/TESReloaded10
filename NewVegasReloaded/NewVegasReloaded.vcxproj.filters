@@ -36,6 +36,12 @@
     <Filter Include="Core\Hooks\NewVegas">
       <UniqueIdentifier>{f0b99bc3-6555-4572-9d48-37b20ad75ba8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Framework\Common\Lib\Bink">
+      <UniqueIdentifier>{89141f2f-9c62-4d4b-9231-accb6c391c28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Common\Lib\Nvidia">
+      <UniqueIdentifier>{48d1ee45-61fd-44e9-bef9-192b8772c194}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -143,6 +149,27 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Render.h">
       <Filter>Core\Hooks\NewVegas</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\BinkManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Forms.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Shadows.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Nvidia\nvapi.h">
+      <Filter>Framework\Common\Lib\Nvidia</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\bink.h">
+      <Filter>Framework\Common\Lib\Bink</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\radbase.h">
+      <Filter>Framework\Common\Lib\Bink</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\binktextures.h">
+      <Filter>Framework\Common\Lib\Bink</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -204,6 +231,12 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\TextureManager.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\BinkManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Bink\binktextures.cpp">
+      <Filter>Framework\Common\Lib\Bink</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

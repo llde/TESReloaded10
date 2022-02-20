@@ -139,6 +139,7 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Nvidia\nvapi.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Base.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Defines.h" />
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Framework.h" />

@@ -174,6 +174,19 @@ static void __cdecl RenderObjectHook(NiCamera* Camera, NiNode* Object, NiCulling
 
 }
 
+static __declspec(naked) void RenderInterfaceHook() {
+	
+	__asm {
+		call	Jumpers::RenderInterface::Method
+		pushad
+		mov		ecx, TheGameMenuManager
+		call	GameMenuManager::Render
+		popad
+		jmp		Jumpers::RenderInterface::Return
+	}
+
+}
+
 static __declspec(naked) void SkipFogPassHook() {
 
 	__asm {

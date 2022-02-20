@@ -13,7 +13,7 @@ static void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* Ren
 
 }
 
-static void (__cdecl* SetupRenderingPass)(UInt32, BSShader*) = (bool (__cdecl*)(UInt32, BSShader*))Hooks::SetupRenderingPass;
+static void (__cdecl* SetupRenderingPass)(UInt32, BSShader*) = (void (__cdecl*)(UInt32, BSShader*))Hooks::SetupRenderingPass;
 static void __cdecl SetupRenderingPassHook(UInt32 PassIndex, BSShader* Shader) {
 	
 	IDirect3DVertexShader9* CurrentVertexHandle = TheRenderManager->renderState->GetVertexShader();
@@ -78,13 +78,14 @@ static void __fastcall RenderReflectionsHook(WaterManager* This, UInt32 edx, NiC
 static void (__thiscall* RenderPipboy)(Main*, NiGeometry*, NiDX9Renderer*) = (void (__thiscall*)(Main*, NiGeometry*, NiDX9Renderer*))Hooks::RenderPipboy;
 static void __fastcall RenderPipboyHook(Main* This, UInt32 edx, NiGeometry* Geo, NiDX9Renderer* Renderer) {
 	
-	WorldSceneGraph->SetCameraFOV(Player->firstPersonFoV);
+	WorldSceneGraph->UpdateParticleShaderFoV(Player->firstPersonFoV);
+	Player->SetFoV(Player->firstPersonFoV);
 	(*RenderPipboy)(This, Geo, Renderer);
 
 }
 
-float (__thiscall* GetWaterHeightLOD)(TESWorldSpace*) = (float (__thiscall*)(TESWorldSpace*))Hooks::GetWaterHeightLOD;
-float __fastcall GetWaterHeightLODHook(TESWorldSpace* This, UInt32 edx) {
+static float (__thiscall* GetWaterHeightLOD)(TESWorldSpace*) = (float (__thiscall*)(TESWorldSpace*))Hooks::GetWaterHeightLOD;
+static float __fastcall GetWaterHeightLODHook(TESWorldSpace* This, UInt32 edx) {
 	
 	float r = This->waterHeight;
 
@@ -95,14 +96,33 @@ float __fastcall GetWaterHeightLODHook(TESWorldSpace* This, UInt32 edx) {
 
 static void RenderMainMenuMovie() {
 
-	if (TheSettingManager->SettingsMain.Main.ReplaceIntro && InterfaceManager->IsActive(Menu::MenuType::kMenuType_Main))
-		Binker::Render(TheRenderManager->device, MainMenuMovie, TheRenderManager->width, TheRenderManager->height);
-	else
-		Binker::Close(TheRenderManager->device);
+	if (TheSettingManager->SettingsMain.Main.ReplaceIntro && InterfaceManager->IsActive(Menu::MenuType::kMenuType_Main)) {
+		if (!TheBinkManager->Bink) TheBinkManager->Open(MainMenuMovie);
+		TheBinkManager->Render();
+	}
+	else {
+		TheBinkManager->Close();
+	}
 
 }
 
-static void SetTileShaderAlpha() {
+static __declspec(naked) void RenderInterfaceHook() {
+	
+	__asm {
+		pushad
+		call	RenderMainMenuMovie
+		popad
+		call	Jumpers::RenderInterface::Method
+		pushad
+		mov		ecx, TheGameMenuManager
+		call	GameMenuManager::Render
+		popad
+		jmp		Jumpers::RenderInterface::Return
+	}
+
+}
+
+static void SetTileShaderConstants() {
 	
 	float ViewProj[16];
 	NiVector4 TintColor = { 1.0f, 1.0f, 1.0f, 0.0f };
@@ -114,14 +134,14 @@ static void SetTileShaderAlpha() {
 
 }
 
-static __declspec(naked) void SetTileShaderConstants() {
+static __declspec(naked) void SetTileShaderConstantsHook() {
 
 	__asm {
 		pushad
-		call	SetTileShaderAlpha
+		call	SetTileShaderConstants
 		popad
 		cmp		byte ptr [esi + 0xAC], 0
-		jmp		kSetTileShaderConstantsReturn
+		jmp		Jumpers::SetTileShaderConstants::Return
 	}
 
 }
@@ -129,5 +149,91 @@ static __declspec(naked) void SetTileShaderConstants() {
 static float MultiBoundWaterHeightFix() {
 
 	return Player->pos.z;
+
+}
+
+static void* (__thiscall* ShowDetectorWindow)(DetectorWindow*, HWND, HINSTANCE, NiNode*, char*, int, int, int, int) = (void* (__thiscall*)(DetectorWindow*, HWND, HINSTANCE, NiNode*, char*, int, int, int, int))::Hooks::ShowDetectorWindow;
+static void* __fastcall ShowDetectorWindowHook(DetectorWindow* This, UInt32 edx, HWND Handle, HINSTANCE Instance, NiNode* RootNode, char* FormCaption, int X, int Y, int Width, int Height) {
+	
+	NiAVObject* Object = NULL;
+	void* r = NULL;
+
+	r = (ShowDetectorWindow)(This, Handle, Instance, RootNode, "Pipeline detector by Alenet", X, Y, 1280, 1024);
+	for (int i = 0; i < RootNode->m_children.end; i++) {
+		NiNode* Node = (NiNode*)RootNode->m_children.data[i];
+		Node->m_children.data[0] = NULL;
+		Node->m_children.data[1] = NULL;
+		Node->m_children.end = 0;
+		Node->m_children.numObjs = 0;
+	}
+	return r;
+
+}
+
+static void DetectorWindowSetNodeName(char* Buffer, int Size, char* Format, char* ClassName, char* Name, float LPosX, float LPosY, float LPosZ) {
+
+	sprintf(Buffer, "%s", Name);
+
+}
+
+static void DetectorWindowCreateTreeView(HWND TreeView) {
+
+	HFONT Font = CreateFontA(14, 0, 0, 0, FW_DONTCARE, NULL, NULL, NULL, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Consolas");
+	SendMessageA(TreeView, WM_SETFONT, (WPARAM)Font, TRUE);
+	SendMessageA(TreeView, TVM_SETBKCOLOR, NULL, 0x001E1E1E);
+	SendMessageA(TreeView, TVM_SETTEXTCOLOR, NULL, 0x00DCDCDC);
+
+}
+
+static __declspec(naked) void DetectorWindowCreateTreeViewHook() {
+
+	__asm {
+		pushad
+		push	eax
+		call	DetectorWindowCreateTreeView
+		pop		eax
+		popad
+		mov     ecx, [ebp - 0x48]
+		mov		[ecx + 0x0C], eax
+		mov     esp, ebp
+		pop     ebp
+		jmp		Jumpers::DetectorWindow::CreateTreeViewReturn
+	}
+
+}
+
+static void DetectorWindowDumpAttributes(HWND TreeView, UInt32 Msg, WPARAM wParam, LPTVINSERTSTRUCTA lParam) {
+
+	TVITEMEXA Item = { NULL };
+	char T[260] = { '\0' };
+
+	Item.pszText = T;
+	Item.mask = TVIF_TEXT;
+	Item.hItem = (HTREEITEM)SendMessageA(TreeView, TVM_GETNEXTITEM, TVGN_PARENT, (LPARAM)lParam->hParent);
+	Item.cchTextMax = 260;
+	SendMessageA(TreeView, TVM_GETITEMA, 0, (LPARAM)&Item);
+	if (!memcmp(Item.pszText, "Pass", 4))
+		SendMessageA(TreeView, TVM_DELETEITEM, 0, (LPARAM)lParam->hParent);
+	else
+		if (strlen(Item.pszText)) SendMessageA(TreeView, Msg, wParam, (LPARAM)lParam);
+
+}
+
+static __declspec(naked) void DetectorWindowDumpAttributesHook() {
+
+	__asm {
+		call	DetectorWindowDumpAttributes
+		add		esp, 16
+		jmp		Jumpers::DetectorWindow::DumpAttributesReturn
+	}
+
+}
+
+static __declspec(naked) void DetectorWindowConsoleCommandHook() {
+
+	__asm {
+		call	DWNode::Create
+		jmp		Jumpers::DetectorWindow::ConsoleCommandReturn
+	}
 
 }

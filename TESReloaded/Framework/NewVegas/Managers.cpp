@@ -1,13 +1,14 @@
-CommandManager*		TheCommandManager = NULL;
-SettingManager*		TheSettingManager = NULL;
-ShaderManager*		TheShaderManager = NULL;
-TextureManager*		TheTextureManager = NULL;
-RenderManager*		TheRenderManager = NULL;
+CommandManager*		TheCommandManager	= NULL;
+SettingManager*		TheSettingManager	= NULL;
+ShaderManager*		TheShaderManager	= NULL;
+TextureManager*		TheTextureManager	= NULL;
+RenderManager*		TheRenderManager	= NULL;
 FrameRateManager*	TheFrameRateManager = NULL;
 GameEventManager*	TheGameEventManager = NULL;
-GameMenuManager*	TheGameMenuManager = NULL;
-ShadowManager*		TheShadowManager = NULL;
-CameraManager*		TheCameraManager = NULL;
+GameMenuManager*	TheGameMenuManager	= NULL;
+ShadowManager*		TheShadowManager	= NULL;
+CameraManager*		TheCameraManager	= NULL;
+BinkManager*		TheBinkManager		= NULL;
 
 Main*					Global			 = NULL;
 TES*					Tes				 = NULL;
@@ -27,5 +28,6 @@ void InitializeManagers() {
 	GameEventManager::Initialize();
 	ShadowManager::Initialize();
 	CameraManager::Initialize();
+	BinkManager::Initialize();
 
 }

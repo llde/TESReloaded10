@@ -147,6 +147,7 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.h" />
+    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Nvidia\nvapi.h" />
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\Base.h" />
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\Defines.h" />
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\Framework.h" />

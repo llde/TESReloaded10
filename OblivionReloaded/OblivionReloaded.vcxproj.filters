@@ -36,6 +36,9 @@
     <Filter Include="Core\Device">
       <UniqueIdentifier>{22e573de-0c2f-4f02-ae27-75f9b3283a9a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Framework\Common\Lib\Nvidia">
+      <UniqueIdentifier>{6014aac5-643c-4efa-bae3-fe9c795a5ba7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TESReloaded\Core\CameraManager.h">
@@ -202,6 +205,9 @@
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Device\Device.h">
       <Filter>Core\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Nvidia\nvapi.h">
+      <Filter>Framework\Common\Lib\Nvidia</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -5132,6 +5132,7 @@ assert(sizeof(GameSetting) == 0x0C);
 namespace Pointers {
 	namespace Generic {
 		static float*			  MPF					= (float*)0x00000000;
+		static BSRenderedTexture* MenuRenderedTexture	= *(BSRenderedTexture**)0x011DED3C;
 		static NiPoint3*		  CameraWorldTranslate	= (NiPoint3*)0x011F474C;
 		static NiPoint3*		  CameraLocation		= (NiPoint3*)0x011F426C;
 		static NiNode**			  DetectorWindowNode	= (NiNode**)0x011FA008;

@@ -52,6 +52,19 @@ static void __fastcall RenderFirstPersonHook(Main* This, UInt32 edx, NiDX9Render
 
 }
 
+static __declspec(naked) void RenderInterfaceHook() {
+	
+	__asm {
+		call	Jumpers::RenderInterface::Method
+		pushad
+		mov		ecx, TheGameMenuManager
+		call	GameMenuManager::Render
+		popad
+		jmp		Jumpers::RenderInterface::Return
+	}
+
+}
+
 static __declspec(naked) void RenderingGeometryHook() {
 
 	__asm {

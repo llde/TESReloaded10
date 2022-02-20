@@ -36,6 +36,9 @@
     <Filter Include="Core\Device">
       <UniqueIdentifier>{af003247-f2a1-49b1-bf3e-63740a504f7a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Framework\Common\Lib\Nvidia">
+      <UniqueIdentifier>{76421924-42f4-4da9-b13b-589f1139da15}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -151,6 +154,9 @@
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h">
       <Filter>Framework\Common\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Nvidia\nvapi.h">
+      <Filter>Framework\Common\Lib\Nvidia</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

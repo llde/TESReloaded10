@@ -66,6 +66,9 @@ Should drop in really quickly and it hides a ton of platform specific ugliness!
 
 */
 
+#ifndef __BINKTEXTURE__
+#define __BINKTEXTURE__
+
 #include "bink.h"
 
 #if defined(__RADPS3__) || defined(__RADWII__) || defined(__RADNGC__)
@@ -249,5 +252,4 @@ RADDEFFUNC void Draw_Bink_textures( if_used_3d_device
 #endif
 
 //=============================================================================
-
-
+#endif

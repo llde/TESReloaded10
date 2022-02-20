@@ -10,6 +10,7 @@ class GameMenuManager;	extern GameMenuManager*		TheGameMenuManager;
 class GameEventManager; extern GameEventManager*	TheGameEventManager;
 class ShadowManager;	extern ShadowManager*		TheShadowManager;
 class CameraManager;	extern CameraManager*		TheCameraManager;
+class BinkManager;		extern BinkManager*			TheBinkManager;
 
 class Main;					extern Main*					Global;
 class TES;					extern TES*						Tes;
@@ -30,5 +31,6 @@ class ShadowSceneNode;		extern ShadowSceneNode*			SceneNode;
 #include "GameMenuManager.h"
 #include "ShadowManager.h"
 #include "CameraManager.h"
+#include "BinkManager.h"
 
 void InitializeManagers();

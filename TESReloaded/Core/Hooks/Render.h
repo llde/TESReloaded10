@@ -14,16 +14,3 @@ static void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRend
 	}
 
 }
-
-static __declspec(naked) void RenderInterfaceHook() {
-	
-	__asm {
-		call	Jumpers::RenderInterface::Method
-		pushad
-		mov		ecx, TheGameMenuManager
-		call	GameMenuManager::Render
-		popad
-		jmp		Jumpers::RenderInterface::Return
-	}
-
-}
