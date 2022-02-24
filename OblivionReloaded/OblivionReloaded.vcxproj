@@ -137,7 +137,6 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Shadows.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Sleeping.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Texture.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Script.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h" />

@@ -137,9 +137,6 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Render.h">
       <Filter>Core\Hooks\Oblivion</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h">
-      <Filter>Core\Hooks</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h">
       <Filter>Framework\Common\Base</Filter>
     </ClInclude>

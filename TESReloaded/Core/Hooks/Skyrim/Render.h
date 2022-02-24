@@ -52,6 +52,14 @@ static void __fastcall RenderFirstPersonHook(Main* This, UInt32 edx, NiDX9Render
 
 }
 
+static void (__cdecl* ProcessImageSpaceShaders)(NiDX9Renderer*, BSRenderedTexture*, BSRenderedTexture*) = (void (__cdecl*)(NiDX9Renderer*, BSRenderedTexture*, BSRenderedTexture*))Hooks::ProcessImageSpaceShaders;
+static void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRenderedTexture* RenderedTexture1, BSRenderedTexture* RenderedTexture2) {
+	
+	ProcessImageSpaceShaders(Renderer, RenderedTexture1, RenderedTexture2);
+	if (!RenderedTexture2 && TheRenderManager->currentRTGroup) TheShaderManager->RenderEffects(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
+
+}
+
 static __declspec(naked) void RenderInterfaceHook() {
 	
 	__asm {

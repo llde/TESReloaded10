@@ -126,7 +126,6 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\ShaderIO.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Shadows.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />
     <ClInclude Include="..\TESReloaded\Core\SettingManager.h" />
