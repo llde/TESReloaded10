@@ -59,7 +59,7 @@ void AttachHooks() {
 	SafeWriteCall(0x00875B86, 0x00710AB0); // Sets the world fov at the end of 1st person rendering instead of 1st person fov
 	SafeWriteCall(0x00875B9D, 0x00710AB0); // Sets the world fov at the end of 1st person rendering instead of 1st person fov
 
-	if (TheSettingManager->SettingsMain.Main.ReplaceIntro) SafeWriteJump(Jumpers::SetTileShaderConstants::Hook, (UInt32)SetTileShaderConstants);
+	if (TheSettingManager->SettingsMain.Main.ReplaceIntro) SafeWriteJump(Jumpers::SetTileShaderConstants::Hook, (UInt32)SetTileShaderConstantsHook);
 	if (TheSettingManager->SettingsMain.Main.RemovePrecipitations) {
 		SafeWriteJump(0x0063AFC4, 0x0063AFD8);
 		SafeWriteJump(0x0063A5CB, 0x0063A5DE);

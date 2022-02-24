@@ -26,7 +26,7 @@ extern "C" {
 	#endif
 #endif
 
-		Logger::Initialize("SkyrimReloaded.log");
+		Logger::Initialize("NewVegasReloaded.log");
 		CommandManager::Initialize(Interface);
 
 		if (!Interface->IsEditor) {

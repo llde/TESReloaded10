@@ -4162,7 +4162,7 @@ public:
 							breakall:
 							return r;
 						}
-	TESWaterForm*		GetWaterForm() { return currentCell->GetWaterForm(); }
+	TESWaterForm*		GetWaterForm() { return currentCell ? currentCell->GetWaterForm() : NULL; }
 
 	UInt32								unk04;				// 04
 	GridCellArray*						gridCellArray;		// 08

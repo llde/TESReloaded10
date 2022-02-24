@@ -3801,7 +3801,7 @@ public:
 
 	void				PurgeCells() {}
 	float				GetWaterHeight(TESObjectREFR* Ref) { return ThisCallF(0x004D62D0, Ref); }
-	TESWaterForm*		GetWaterForm() { return currentCell->GetWaterForm(); }
+	TESWaterForm*		GetWaterForm() { return currentCell ? currentCell->GetWaterForm() : NULL; }
 
 	UInt32				unk04;
 	UInt32				unk08;
