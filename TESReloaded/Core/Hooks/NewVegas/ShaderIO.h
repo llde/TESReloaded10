@@ -10,8 +10,11 @@ static NiD3DVertexShader* __fastcall CreateVertexShaderHook(BSShader* This, UInt
 	VertexShader->ShaderProgI = NULL;
 	VertexShader->ShaderHandleBackup = VertexShader->ShaderHandle;
 	strcpy(VertexShader->ShaderName, ShaderName);
+	if (!memcmp(VertexShader->ShaderName, "ISNOISENORMALMAP", 16)) {
+		strcpy(VertexShader->ShaderName, "WATERHEIGHTMAP.vso");
+		TheShaderManager->WaterVertexShaders[0] = VertexShader;
+	}
 	TheShaderManager->LoadShader(VertexShader);
-	if (!memcmp(VertexShader->ShaderName, "ISNOISENORMALMAP", 16)) TheShaderManager->WaterVertexShaders[0] = VertexShader;
 	return (NiD3DVertexShader*)VertexShader;
 
 }
@@ -26,8 +29,11 @@ static NiD3DPixelShader* __fastcall CreatePixelShaderHook(BSShader* This, UInt32
 	PixelShader->ShaderProgI = NULL;
 	PixelShader->ShaderHandleBackup = PixelShader->ShaderHandle;
 	strcpy(PixelShader->ShaderName, ShaderName);
+	if (!memcmp(PixelShader->ShaderName, "ISNOISENORMALMAP", 16)) {
+		strcpy(PixelShader->ShaderName, "WATERHEIGHTMAP.pso");
+		TheShaderManager->WaterPixelShaders[0] = PixelShader;
+	}
 	TheShaderManager->LoadShader(PixelShader);
-	if (!memcmp(PixelShader->ShaderName, "ISNOISENORMALMAP", 16)) TheShaderManager->WaterPixelShaders[0] = PixelShader;
 	return (NiD3DPixelShader*)PixelShader;
 
 }
