@@ -138,7 +138,6 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Sleeping.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Texture.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Script.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h" />
     <ClInclude Include="..\TESReloaded\Core\OcclusionManager.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h" />

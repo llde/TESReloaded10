@@ -74,9 +74,6 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h">
-      <Filter>Core\Hooks</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Game.h">
       <Filter>Core\Hooks\Skyrim</Filter>
     </ClInclude>

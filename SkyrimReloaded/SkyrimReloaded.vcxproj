@@ -118,7 +118,6 @@
     <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Camera.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Events.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Forms.h" />

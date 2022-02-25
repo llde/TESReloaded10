@@ -27,7 +27,6 @@
 #include "Defines.h"
 #include "Base.h"
 #include "Managers.h"
-#include "../Core/Hooks/Settings.h"
 #include "../Core/Hooks/Game.h"
 #include "../Core/Hooks/Forms.h"
 #include "../Core/Hooks/Sleeping.h"
