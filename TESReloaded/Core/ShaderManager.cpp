@@ -1371,10 +1371,10 @@ void ShaderManager::DisposeShader(const char* Name) {
 		for (int i = 0; i < GetShader(Name, &Vertex, WaterVertexShaders); i++) ((NiD3DVertexShaderEx*)Vertex[i])->DisposeShader();
 		for (int i = 0; i < GetShader(Name, &Pixel, WaterPixelShaders); i++) ((NiD3DPixelShaderEx*)Pixel[i])->DisposeShader();
 		if (!strcmp(Name, "Water")) {
-			for (int i = 0; i < GetShader("WaterHeightMap", &Vertex, NULL); i++) ((NiD3DVertexShaderEx*)Vertex[i])->DisposeShader();
-			for (int i = 0; i < GetShader("WaterHeightMap", &Pixel, NULL); i++) ((NiD3DPixelShaderEx*)Pixel[i])->DisposeShader();
-			for (int i = 0; i < GetShader("WaterDisplacement", &Vertex, NULL); i++) ((NiD3DVertexShaderEx*)Vertex[i])->DisposeShader();
-			for (int i = 0; i < GetShader("WaterDisplacement", &Pixel, NULL); i++) ((NiD3DPixelShaderEx*)Pixel[i])->DisposeShader();
+			for (int i = 0; i < GetShader("WaterHeightMap", &Vertex, WaterVertexShaders); i++) ((NiD3DVertexShaderEx*)Vertex[i])->DisposeShader();
+			for (int i = 0; i < GetShader("WaterHeightMap", &Pixel, WaterPixelShaders); i++) ((NiD3DPixelShaderEx*)Pixel[i])->DisposeShader();
+			for (int i = 0; i < GetShader("WaterDisplacement", &Vertex, WaterVertexShaders); i++) ((NiD3DVertexShaderEx*)Vertex[i])->DisposeShader();
+			for (int i = 0; i < GetShader("WaterDisplacement", &Pixel, WaterPixelShaders); i++) ((NiD3DPixelShaderEx*)Pixel[i])->DisposeShader();
 		}
 	}
 

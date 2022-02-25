@@ -55,9 +55,9 @@ void AttachHooks() {
 	SafeWriteCall(Jumpers::MultiBoundWaterHeight::Fix2,			(UInt32)MultiBoundWaterHeightFix);
 
 	SafeWriteJump(0x004E4C3B, 0x004E4C42); // Fixes reflections when cell water height is not like worldspace water height
-	SafeWriteJump(0x004E4DA4, 0x004E4DAC); // Fixes reflections on distant water
-	SafeWriteCall(0x00875B86, 0x00710AB0); // Sets the world fov at the end of 1st person rendering instead of 1st person fov
-	SafeWriteCall(0x00875B9D, 0x00710AB0); // Sets the world fov at the end of 1st person rendering instead of 1st person fov
+	SafeWriteJump(0x004E4DA4, 0x004E4DAC); // Fixes reflections on the distant water
+	SafeWriteCall(0x00875B86, 0x00710AB0); // Sets the world fov at the end of 1st person rendering
+	SafeWriteCall(0x00875B9D, 0x00710AB0); // Sets the world fov at the end of 1st person rendering
 
 	if (TheSettingManager->SettingsMain.Main.ReplaceIntro) SafeWriteJump(Jumpers::SetTileShaderConstants::Hook, (UInt32)SetTileShaderConstantsHook);
 	if (TheSettingManager->SettingsMain.Main.RemovePrecipitations) {

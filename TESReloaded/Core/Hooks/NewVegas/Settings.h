@@ -23,10 +23,6 @@ static bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, G
 		Setting->iValue = 1;
 	else if (!strcmp(Setting->Name, "bUseBlurShader:BlurShader"))
 		Setting->iValue = 0;
-	else if (!strcmp(Setting->Name, "iPostProcessMilliseconds:BackgroundLoad") && TheSettingManager->SettingsMain.FrameRate.SmartBackgroundProcess)
-		Setting->iValue = TheSettingManager->SettingsMain.FrameRate.BackgroundThreadPriority;
-	else if (!strcmp(Setting->Name, "iPostProcessMillisecondsLoadingQueuedPriority:BackgroundLoad") && TheSettingManager->SettingsMain.FrameRate.SmartBackgroundProcess)
-		Setting->iValue = TheSettingManager->SettingsMain.FrameRate.BackgroundThreadPriority;
 	return r;
 
 }
