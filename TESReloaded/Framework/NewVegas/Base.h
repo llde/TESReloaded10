@@ -26,7 +26,6 @@ public:
 	static const UInt32 GetWaterHeightLOD			= 0x0045CD80;
 	static const UInt32 ShowDetectorWindow			= 0x004D61B0;
 	static const UInt32 LoadForm					= 0x004601D0;
-	 
 };
 
 class Jumpers {

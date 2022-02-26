@@ -24,6 +24,8 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)RenderFirstPerson,			&RenderFirstPersonHook);
 	DetourAttach(&(PVOID&)SetupRenderingPass,			&SetupRenderingPassHook);
 	DetourAttach(&(PVOID&)RenderReflections,			&RenderReflectionsHook);
+	DetourAttach(&(PVOID&)RenderPipboy,					&RenderPipboyHook);
+	DetourAttach(&(PVOID&)GetWaterHeightLOD,			&GetWaterHeightLODHook);
 	DetourAttach(&(PVOID&)ShowDetectorWindow,			&ShowDetectorWindowHook);
 	DetourAttach(&(PVOID&)LoadForm,						&LoadFormHook);
 	DetourTransactionCommit();
