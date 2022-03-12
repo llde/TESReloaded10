@@ -23,6 +23,8 @@ static bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, G
 		Setting->iValue = 1;
 	else if (!strcmp(Setting->Name, "bUseBlurShader:BlurShader"))
 		Setting->iValue = 0;
+	else if (!strcmp(Setting->Name, "bUseWaterHiRes:Water"))
+		Setting->iValue = 1;
 	return r;
 
 }

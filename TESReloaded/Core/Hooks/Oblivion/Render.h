@@ -88,6 +88,7 @@ static UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiG
 		}
 	}
 	return (*SetupShaderPrograms)(This, Geometry, SkinInstance, SkinPartition, GeometryBufferData, PropertyState, EffectState, WorldTransform, WorldBound);
+
 }
 
 static HRESULT (__thiscall* SetSamplerState)(NiDX9RenderState*, UInt32, D3DSAMPLERSTATETYPE, UInt32, UInt8) = (HRESULT (__thiscall*)(NiDX9RenderState*, UInt32, D3DSAMPLERSTATETYPE, UInt32, UInt8))Hooks::SetSamplerState;

@@ -13,22 +13,17 @@ static void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* Ren
 
 }
 
-static void (__cdecl* SetupRenderingPass)(UInt32, BSShader*) = (void (__cdecl*)(UInt32, BSShader*))Hooks::SetupRenderingPass;
-static void __cdecl SetupRenderingPassHook(UInt32 PassIndex, BSShader* Shader) {
+static void (__thiscall* SetShaders)(BSShader*, UInt32) = (void (__thiscall*)(BSShader*, UInt32))Hooks::SetShaders;
+static void __fastcall SetShadersHook(BSShader* This, UInt32 edx, UInt32 PassIndex) {
 	
-	IDirect3DVertexShader9* CurrentVertexHandle = TheRenderManager->renderState->GetVertexShader();
-	IDirect3DPixelShader9* CurrentPixelHandle = TheRenderManager->renderState->GetPixelShader();
-
-	SetupRenderingPass(PassIndex, Shader);
-
 	NiGeometry* Geometry = *(NiGeometry**)(*(void**)0x011F91E0);
 	NiD3DPass* Pass = *(NiD3DPass**)0x0126F74C;
 	NiD3DVertexShaderEx* VertexShader = (NiD3DVertexShaderEx*)Pass->VertexShader;
 	NiD3DPixelShaderEx* PixelShader = (NiD3DPixelShaderEx*)Pass->PixelShader;
 
 	if (VertexShader && PixelShader) {
-		VertexShader->SetupShader(CurrentVertexHandle);
-		PixelShader->SetupShader(CurrentPixelHandle);
+		VertexShader->SetupShader(TheRenderManager->renderState->GetVertexShader());
+		PixelShader->SetupShader(TheRenderManager->renderState->GetPixelShader());
 		if (DWNode::Get()) {
 			char Name[256];
 			sprintf(Name, "Pass %i %s, %s (%s %s)", PassIndex, Pointers::Functions::GetPassDescription(PassIndex), Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
@@ -37,6 +32,7 @@ static void __cdecl SetupRenderingPassHook(UInt32 PassIndex, BSShader* Shader) {
 			DWNode::AddNode(Name, Geometry->m_parent, Geometry);
 		}
 	}
+	(*SetShaders)(This, PassIndex);
 
 }
 

@@ -299,7 +299,7 @@ public:
 class ShaderManagerBase {
 public:
 
-	static int GetShader(const char* Name, NiD3DVertexShader*** Shader, NiD3DVertexShader** AdditionalShader) {
+	static int GetShader(const char* Name, NiD3DVertexShader*** Shader, NiD3DVertexShader** AdditionalShader, int AdditionalShaderSize) {
 
 		ShaderDefinition** Shaders = (ShaderDefinition**)0x00B42EC0;
 		NiD3DVertexShader** PrecipitationVertexShaders = (NiD3DVertexShader**)0x00B466E0;
@@ -360,7 +360,7 @@ public:
 
 	}
 
-	static int GetShader(const char* Name, NiD3DPixelShader*** Shader, NiD3DPixelShader** AdditionalShader) {
+	static int GetShader(const char* Name, NiD3DPixelShader*** Shader, NiD3DPixelShader** AdditionalShader, int AdditionalShaderSize) {
 
 		ShaderDefinition** Shaders = (ShaderDefinition**)0x00B42EC0;
 		NiD3DVertexShader** PrecipitationVertexShaders = (NiD3DVertexShader**)0x00B466E0;

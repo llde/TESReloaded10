@@ -161,33 +161,25 @@ public:
 class ShaderManagerBase {
 public:
 
-	static int GetShader(const char* Name, NiD3DVertexShader*** Shader, NiD3DVertexShader** AdditionalShader) {
+	static int GetShader(const char* Name, NiD3DVertexShader*** Shader, NiD3DVertexShader** AdditionalShader, int AdditionalShaderSize) {
 
 		int Size = 0;
 
 		if (!strcmp(Name, "Water")) {
 			*Shader = AdditionalShader;
-			Size = sizeof(AdditionalShader) / 4;
-		}
-		else {
-			*Shader = NULL;
-			Size = 0;
+			Size = AdditionalShaderSize;
 		}
 		return Size;
 
 	}
 
-	static int GetShader(const char* Name, NiD3DPixelShader*** Shader, NiD3DPixelShader** AdditionalShader) {
+	static int GetShader(const char* Name, NiD3DPixelShader*** Shader, NiD3DPixelShader** AdditionalShader, int AdditionalShaderSize) {
 
 		int Size = 0;
 
 		if (!strcmp(Name, "Water")) {
 			*Shader = AdditionalShader;
-			Size = sizeof(AdditionalShader) / 4;
-		}
-		else {
-			*Shader = NULL;
-			Size = 0;
+			Size = AdditionalShaderSize;
 		}
 		return Size;
 

@@ -17,7 +17,7 @@ public:
 	static const UInt32 CreatePixelShader			= 0x00BE1750;
 	static const UInt32 SetShaderPackage			= 0x00B4F710;
 	static const UInt32 Render						= 0x008706B0;
-	static const UInt32 SetupRenderingPass			= 0x00B99390;
+	static const UInt32 SetShaders					= 0x00BE1F90;
 	static const UInt32 ProcessImageSpaceShaders	= 0x00B55AC0;
 	static const UInt32 RenderWorldSceneGraph		= 0x00873200;
 	static const UInt32 RenderFirstPerson			= 0x00875110;
@@ -133,7 +133,7 @@ public:
 class ShaderManagerBase {
 public:
 
-	static int GetShader(const char* Name, NiD3DVertexShader*** Shader, NiD3DVertexShader** AdditionalShader) {
+	static int GetShader(const char* Name, NiD3DVertexShader*** Shader, NiD3DVertexShader** AdditionalShader, int AdditionalShaderSize) {
 
 		BSShader** Shaders = (BSShader**)0x011F9548;
 		int Size = 0;
@@ -145,13 +145,13 @@ public:
 		}
 		else if (!strcmp(Name, "WaterHeightMap")) {
 			*Shader = AdditionalShader;
-			Size = sizeof(AdditionalShader) / 4;
+			Size = AdditionalShaderSize;
 		}
 		return Size;
 
 	}
 
-	static int GetShader(const char* Name, NiD3DPixelShader*** Shader, NiD3DPixelShader** AdditionalShader) {
+	static int GetShader(const char* Name, NiD3DPixelShader*** Shader, NiD3DPixelShader** AdditionalShader, int AdditionalShaderSize) {
 
 		BSShader** Shaders = (BSShader**)0x011F9548;
 		int Size = 0;
@@ -163,7 +163,7 @@ public:
 		}
 		else if (!strcmp(Name, "WaterHeightMap")) {
 			*Shader = AdditionalShader;
-			Size = sizeof(AdditionalShader) / 4;
+			Size = AdditionalShaderSize;
 		}
 		return Size;
 

@@ -278,7 +278,7 @@ void NiD3DVertexShaderEx::SetupShader(IDirect3DVertexShader9* CurrentVertexHandl
 	else {
 		ShaderHandle = ShaderHandleBackup;
 	}
-
+	
 }
 
 void NiD3DVertexShaderEx::DisposeShader() {

@@ -22,7 +22,7 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)ProcessImageSpaceShaders,		&ProcessImageSpaceShadersHook);
 	DetourAttach(&(PVOID&)RenderWorldSceneGraph,		&RenderWorldSceneGraphHook);
 	DetourAttach(&(PVOID&)RenderFirstPerson,			&RenderFirstPersonHook);
-	DetourAttach(&(PVOID&)SetupRenderingPass,			&SetupRenderingPassHook);
+	DetourAttach(&(PVOID&)SetShaders,					&SetShadersHook);
 	DetourAttach(&(PVOID&)RenderReflections,			&RenderReflectionsHook);
 	DetourAttach(&(PVOID&)RenderPipboy,					&RenderPipboyHook);
 	DetourAttach(&(PVOID&)GetWaterHeightLOD,			&GetWaterHeightLODHook);
