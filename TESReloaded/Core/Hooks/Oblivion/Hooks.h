@@ -196,19 +196,9 @@ void AttachHooks() {
 		GetCurrentDirectoryA(MAX_PATH, Filename);
 		strcat(Filename, FastMMFile);
 		Module = LoadLibraryA(Filename);
-		if (Module) {
-			Mem.Malloc = (void* (*)(size_t))GetProcAddress(Module, "GetMemory");
-			Mem.Free = (void (*)(void*))GetProcAddress(Module, "FreeMemory");
-			Mem.Realloc = (void* (*)(void*, size_t))GetProcAddress(Module, "ReallocMemory");
-			Logger::Log("Fast memory manager loaded correctly.");
-		}
-		else {
-			char Error[160];
-			sprintf(Error, "CRITICAL ERROR: Cannot load the memory manager, please reinstall the package.");
-			Logger::Log(Error);
-			MessageBoxA(NULL, Error, PluginVersion::VersionString, MB_ICONERROR | MB_OK);
-			TerminateProcess(GetCurrentProcess(), 0);
-		}
+		Mem.Malloc = (void* (*)(size_t))GetProcAddress(Module, "GetMemory");
+		Mem.Free = (void (*)(void*))GetProcAddress(Module, "FreeMemory");
+		Mem.Realloc = (void* (*)(void*, size_t))GetProcAddress(Module, "ReallocMemory");
 		SafeWriteJump(0x009D7E40, 0x009D7E60); //Skips MemoryHeap initialization
 		SafeWriteJump(0x0040E3BF, 0x0040E62A); //Skips MemoryHeap pools creation and cleanup assignment
 		SafeWriteJump(0x0040B3A0, 0x0040C008); //Skips MemoryHeap stats

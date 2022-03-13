@@ -340,41 +340,39 @@ void GameMenuManager::Render() {
 			Pages[3] = ListSize / RowsPerPage;
 			Setting = Settings.begin();
 			for (UInt32 i = 0; i < ListSize; i++) {
-				if (Setting->IsMatching()) {
-					if (i >= RowsPerPage * SelectedPage[3] && i < RowsPerPage * (SelectedPage[3] + 1)) {
-						strcpy(SettingText, Setting->Key);
-						strcat(SettingText, " = ");
-						strcat(SettingText, Setting->Value);
-						Rect.top += MenuSettings->TextSize + RowSpace;
-						Rect.bottom += MenuSettings->TextSize + RowSpace;
-						SetRect(&RectShadow, Rect.left + 1, Rect.top + 1, Rect.right + 1, Rect.bottom + 1);
-						if (SelectedRow[3] == Rows[3]) {
-							memcpy((void*)&SelectedNode, Setting._Ptr, sizeof(SettingManager::Configuration::ConfigNode));
-							if (SelectedColumn >= 3) {
-								if (EditingMode) {
-									strcpy(SelectedNode.Value, EditingValue);
-									strcpy(SettingText, Setting->Key);
-									strcat(SettingText, " = ");
-									strcat(SettingText, EditingValue);
-									FontSelected->DrawTextA(NULL, SettingText, -1, &RectShadow, DT_LEFT, TextShadowColorEditing);
-									FontSelected->DrawTextA(NULL, SettingText, -1, &Rect, DT_LEFT, TextColorEditing);
-								}
-								else {
-									FontSelected->DrawTextA(NULL, SettingText, -1, &RectShadow, DT_LEFT, TextShadowColorSelected);
-									FontSelected->DrawTextA(NULL, SettingText, -1, &Rect, DT_LEFT, TextColorSelected);
-								}
+				if (i >= RowsPerPage * SelectedPage[3] && i < RowsPerPage * (SelectedPage[3] + 1)) {
+					strcpy(SettingText, Setting->Key);
+					strcat(SettingText, " = ");
+					strcat(SettingText, Setting->Value);
+					Rect.top += MenuSettings->TextSize + RowSpace;
+					Rect.bottom += MenuSettings->TextSize + RowSpace;
+					SetRect(&RectShadow, Rect.left + 1, Rect.top + 1, Rect.right + 1, Rect.bottom + 1);
+					if (SelectedRow[3] == Rows[3]) {
+						memcpy((void*)&SelectedNode, Setting._Ptr, sizeof(SettingManager::Configuration::ConfigNode));
+						if (SelectedColumn >= 3) {
+							if (EditingMode) {
+								strcpy(SelectedNode.Value, EditingValue);
+								strcpy(SettingText, Setting->Key);
+								strcat(SettingText, " = ");
+								strcat(SettingText, EditingValue);
+								FontSelected->DrawTextA(NULL, SettingText, -1, &RectShadow, DT_LEFT, TextShadowColorEditing);
+								FontSelected->DrawTextA(NULL, SettingText, -1, &Rect, DT_LEFT, TextColorEditing);
 							}
 							else {
-								FontNormal->DrawTextA(NULL, SettingText, -1, &RectShadow, DT_LEFT, TextShadowColorNormal);
-								FontNormal->DrawTextA(NULL, SettingText, -1, &Rect, DT_LEFT, TextColorNormal);
+								FontSelected->DrawTextA(NULL, SettingText, -1, &RectShadow, DT_LEFT, TextShadowColorSelected);
+								FontSelected->DrawTextA(NULL, SettingText, -1, &Rect, DT_LEFT, TextColorSelected);
 							}
 						}
 						else {
 							FontNormal->DrawTextA(NULL, SettingText, -1, &RectShadow, DT_LEFT, TextShadowColorNormal);
 							FontNormal->DrawTextA(NULL, SettingText, -1, &Rect, DT_LEFT, TextColorNormal);
 						}
-						Rows[3]++;
 					}
+					else {
+						FontNormal->DrawTextA(NULL, SettingText, -1, &RectShadow, DT_LEFT, TextShadowColorNormal);
+						FontNormal->DrawTextA(NULL, SettingText, -1, &Rect, DT_LEFT, TextColorNormal);
+					}
+					Rows[3]++;
 				}
 				Setting++;
 			}

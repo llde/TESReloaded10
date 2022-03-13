@@ -538,6 +538,7 @@ public:
 		struct SectionPosition {
 			char* Start;
 			char* End;
+			bool Found;
 		};
 
 		class ConfigNode {
@@ -545,19 +546,17 @@ public:
 			char		Section[40];
 			char		Key[40];
 			char		Value[80];
-			char		Versioning[4];
 			bool		Reboot;
 			UInt32		Type;
 			
 			bool operator < (const ConfigNode& Node) const { return (strcoll(Key, Node.Key) < 0 ? true : false); }
-
-			bool IsMatching() { return TheSettingManager->IsMatching(Versioning); }
 		};
+
 		typedef	std::vector<ConfigNode> SettingList;
 
 		void			Init();
 		SectionPosition	GoToSection(const char* Section, const char* FromPosition = NULL);
-		void			FillNode(ConfigNode* Node, const char* Section, const char* Key);
+		bool			FillNode(ConfigNode* Node, const char* Section, const char* Key);
 		char*			GetAttribute(char* KeyPosition, const char* Attribute, char* AttributeValue);
 		void			FillSections(StringList* Sections, const char* ParentSection);
 		void			FillSettings(SettingList* Nodes, const char* Section);
@@ -571,9 +570,9 @@ public:
 	};
 
 	static void				Initialize();
-	bool					LoadSettings(bool Init);
+	void					LoadSettings();
 	void					SaveSettings();
-	UInt32					GetSettingI(const char* Section, const char* Key);
+	int						GetSettingI(const char* Section, const char* Key);
 	float					GetSettingF(const char* Section, const char* Key);
 	char*					GetSettingS(const char* Section, const char* Key, char* Value);
 	void					SetSetting(const char* Section, const char* Key, float Value);
@@ -582,8 +581,8 @@ public:
 	void					SetSettingWeather(const char* Section, const char* Key, float Value);
 	void					FillMenuSections(StringList* Sections, const char* ParentSection);
 	void					FillMenuSettings(Configuration::SettingList* Settings, const char* Section);
-	void					CreateNodeF(Configuration::ConfigNode* Node, const char* Section, const char* Key, float Value, const char* Versioning, bool Reboot, UInt32 Type);
-	void					CreateNodeS(Configuration::ConfigNode* Node, const char* Section, const char* Key, const char* Value, const char* Versioning, bool Reboot);
+	void					CreateNodeF(Configuration::ConfigNode* Node, const char* Section, const char* Key, float Value, bool Reboot, UInt32 Type);
+	void					CreateNodeS(Configuration::ConfigNode* Node, const char* Section, const char* Key, const char* Value, bool Reboot);
 	bool					GetMenuShaderEnabled(const char* Name);
 	SettingsWaterStruct*	GetSettingsWater(const char* PlayerLocation);
 	SettingsColoringStruct* GetSettingsColoring(const char* PlayerLocation);

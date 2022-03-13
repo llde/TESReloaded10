@@ -94,12 +94,6 @@ public:
 
 class SettingManagerBase {
 public:
-
-	bool IsMatching(char* Versioning) {
-
-		return Versioning[2] == '1';
-
-	}
 	
 	void SetTextureAndHDR(TESWeatherEx* WeatherEx, char* UpperLayer, char* LowerLayer, float* HDR) {
 

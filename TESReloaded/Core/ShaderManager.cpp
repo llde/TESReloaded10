@@ -628,8 +628,6 @@ void ShaderManager::InitializeConstants() {
 	ShaderConst.SnowAccumulation.Params.w = 0.0f;
 	ShaderConst.WetWorld.Data.x = 0.0f;
 	
-	ShaderConst.GameTime.z = 0.0f;
-
 }
 
 void ShaderManager::UpdateConstants() {

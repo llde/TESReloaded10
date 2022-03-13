@@ -60,6 +60,7 @@ void AttachHooks() {
 	SafeWriteJump(0x004E4DA4, 0x004E4DAC); // Fixes reflections on the distant water
 	SafeWriteCall(0x00875B86, 0x00710AB0); // Sets the world fov at the end of 1st person rendering
 	SafeWriteCall(0x00875B9D, 0x00710AB0); // Sets the world fov at the end of 1st person rendering
+	SafeWriteJump(0x00C03F49, 0x00C03F5A); // Fixes wrong rendering for image space effects
 
 	if (TheSettingManager->SettingsMain.Main.ReplaceIntro) SafeWriteJump(Jumpers::SetTileShaderConstants::Hook, (UInt32)SetTileShaderConstantsHook);
 	if (TheSettingManager->SettingsMain.Main.RemovePrecipitations) {
