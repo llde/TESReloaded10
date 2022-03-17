@@ -170,9 +170,9 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 
 ShaderRecord::ShaderRecord() {
 	
-	HasCT = false;
-	HasRB = false;
-	HasDB = false;
+	HasConstantTable = false;
+	HasRenderedBuffer = false;
+	HasDepthBuffer = false;
 
 }
 ShaderRecord::~ShaderRecord() { }
@@ -292,7 +292,7 @@ void ShaderRecord::CreateCT(const char* ShaderSource, ID3DXConstantTable* Consta
 	UINT ConstantCount = 1;
 	UInt32 FloatIndex = 0;
 	UInt32 TextureIndex = 0;
-	
+
 	ConstantTable->GetDesc(&ConstantTableDesc);
     for (UINT c = 0; c < ConstantTableDesc.Constants; c++) {
 		Handle = ConstantTable->GetConstant(NULL, c);
@@ -300,8 +300,8 @@ void ShaderRecord::CreateCT(const char* ShaderSource, ID3DXConstantTable* Consta
 		if (ConstantDesc.RegisterSet == D3DXRS_FLOAT4 && !memcmp(ConstantDesc.Name, "TESR_", 5)) FloatShaderValuesCount += 1;
 		if (ConstantDesc.RegisterSet == D3DXRS_SAMPLER && !memcmp(ConstantDesc.Name, "TESR_", 5)) TextureShaderValuesCount += 1;
     }
-	HasCT = FloatShaderValuesCount + TextureShaderValuesCount;
-    if (HasCT) {
+	HasConstantTable = FloatShaderValuesCount + TextureShaderValuesCount;
+    if (HasConstantTable) {
 		FloatShaderValues = (ShaderValue*)malloc(FloatShaderValuesCount * sizeof(ShaderValue));
 		TextureShaderValues = (ShaderValue*)malloc(TextureShaderValuesCount * sizeof(ShaderValue));
 		for (UINT c = 0; c < ConstantTableDesc.Constants; c++) {
@@ -316,9 +316,7 @@ void ShaderRecord::CreateCT(const char* ShaderSource, ID3DXConstantTable* Consta
 						FloatIndex++;
  						break;
 					case D3DXRS_SAMPLER:
-						if (!strcmp(ConstantDesc.Name, WordRenderedBuffer)) HasRB = true;
-						if (!strcmp(ConstantDesc.Name, WordDepthBuffer)) HasDB = true;
-						TextureShaderValues[TextureIndex].Texture = TheTextureManager->LoadTexture(ShaderSource, ConstantDesc.RegisterIndex);
+						TextureShaderValues[TextureIndex].Texture = TheTextureManager->LoadTexture(ShaderSource, ConstantDesc.Type, ConstantDesc.Name, ConstantDesc.RegisterIndex, &HasRenderedBuffer, &HasDepthBuffer);
 						TextureShaderValues[TextureIndex].RegisterIndex = ConstantDesc.RegisterIndex;
 						TextureShaderValues[TextureIndex].RegisterCount = 1;
 						TextureIndex++;
@@ -334,9 +332,9 @@ void ShaderRecord::SetCT() {
 	
 	ShaderValue* Value;
 
-	if (HasCT) {
-		if (HasRB) TheRenderManager->device->StretchRect(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface, NULL, TheTextureManager->RenderedSurface, NULL, D3DTEXF_NONE);
-		if (HasDB) TheRenderManager->ResolveDepthBuffer();
+	if (HasConstantTable) {
+		if (HasRenderedBuffer) TheRenderManager->device->StretchRect(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface, NULL, TheTextureManager->RenderedSurface, NULL, D3DTEXF_NONE);
+		if (HasDepthBuffer) TheRenderManager->ResolveDepthBuffer();
 		for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
 			Value = &TextureShaderValues[c];
 			if (Value->Texture->Texture) TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
@@ -493,7 +491,7 @@ void EffectRecord::CreateCT(const char* ShaderSource, ID3DXConstantTable* Consta
 					break;
 				case D3DXPC_OBJECT:
 					if (ConstantDesc.Class == D3DXPC_OBJECT && ConstantDesc.Type >= D3DXPT_SAMPLER && ConstantDesc.Type <= D3DXPT_SAMPLERCUBE) {
-						TextureShaderValues[TextureIndex].Texture = TheTextureManager->LoadTexture(ShaderSource, TextureIndex);
+						TextureShaderValues[TextureIndex].Texture = TheTextureManager->LoadTexture(ShaderSource, ConstantDesc.Type, ConstantDesc.Name, TextureIndex, NULL, NULL);
 						TextureShaderValues[TextureIndex].RegisterIndex = TextureIndex;
 						TextureShaderValues[TextureIndex].RegisterCount = 1;
 						TextureIndex++;

@@ -66,10 +66,10 @@ Should drop in really quickly and it hides a ton of platform specific ugliness!
 
 */
 
+#include "bink.h"
+
 #ifndef __BINKTEXTURE__
 #define __BINKTEXTURE__
-
-#include "bink.h"
 
 #if defined(__RADPS3__) || defined(__RADWII__) || defined(__RADNGC__)
   #define if_used_3d_device // no global 3D device handle on ps3, wii or ngc

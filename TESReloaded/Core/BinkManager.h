@@ -4,8 +4,7 @@ class BinkManager { // Never disposed
 public:
 	static void Initialize();
 	
-	void			Open(const char* MovieFilename);
-	void			Render();
+	void			Render(const char* MovieFilename);
 	void			Close();
 
 	HBINK			Bink;

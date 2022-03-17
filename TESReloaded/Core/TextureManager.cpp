@@ -1,13 +1,3 @@
-#define WordSampler2D "sampler2D"
-#define WordSampler3D "sampler3D"
-#define WordSamplerCUBE "samplerCU"
-#define WordSamplerDelimeter "};"
-#define WordSamplerStateDelimeter ";"
-#define WordRegister "register(s"
-#define WordRegisterDelimeter ")"
-#define WordTextureName "string ResourceName = \x22"
-#define WordTextureNameDelimeter "\x22;"
-
 TextureRecord::TextureRecord() {
 
 	Texture = NULL;
@@ -122,210 +112,129 @@ void TextureManager::Initialize() {
 	
 }
 
-TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, UInt32 RegisterIndex) {
+TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, D3DXPARAMETER_TYPE ConstantType, LPCSTR ConstantName, UINT ConstantIndex, bool* HasRenderedBuffer, bool* HasDepthBuffer) {
 	
-	TextureRecord* NewTextureRecord = NULL;
 	char Path[MAX_PATH];
-	char Filename[80];
-	char Register[3];
-	char WordSampler[10];
+	char SamplerValue[40] = { NULL };
 	char SamplerState[20];
-	char SamplerType[2] = { 0 };
-	const char* Sampler = NULL;
-	const char* SamplerRegister = NULL;
-	const char* SamplerParser = NULL;
-	const char* Word = NULL;
-	std::string WordSamplerType[SamplerStatesMax];
-	std::string WordTextureAddress[6];
-	std::string WordTextureFilterType[4];
-	std::string WordSRGBType[2];
+	const char* ParserStart = NULL;
+	const char* ParserEnd = NULL;
 	std::string PathS;
 	TextureRecord::TextureRecordType Type = TextureRecord::TextureRecordType::None;
+	TextureRecord* NewTextureRecord = new TextureRecord();
 
-	WordSamplerType[0] = "";
-	WordSamplerType[D3DSAMP_ADDRESSU] = "ADDRESSU";
-	WordSamplerType[D3DSAMP_ADDRESSV] = "ADDRESSV";
-	WordSamplerType[D3DSAMP_ADDRESSW] = "ADDRESSW";
-	WordSamplerType[D3DSAMP_BORDERCOLOR] = "BORDERCOLOR";
-	WordSamplerType[D3DSAMP_MAGFILTER] = "MAGFILTER";
-	WordSamplerType[D3DSAMP_MINFILTER] = "MINFILTER";
-	WordSamplerType[D3DSAMP_MIPFILTER] = "MIPFILTER";
-	WordSamplerType[D3DSAMP_MIPMAPLODBIAS] = "MIPMAPLODBIAS";
-	WordSamplerType[D3DSAMP_MAXMIPLEVEL] = "MAXMIPLEVEL";
-	WordSamplerType[D3DSAMP_MAXANISOTROPY] = "MAXANISOTROPY";
-	WordSamplerType[D3DSAMP_SRGBTEXTURE] = "SRGBTEXTURE";
+	Type = ConstantType == D3DXPARAMETER_TYPE::D3DXPT_SAMPLER2D ? TextureRecord::TextureRecordType::PlanarBuffer : Type;
+	Type = ConstantType == D3DXPARAMETER_TYPE::D3DXPT_SAMPLER3D ? TextureRecord::TextureRecordType::VolumeBuffer : Type;
+	Type = ConstantType == D3DXPARAMETER_TYPE::D3DXPT_SAMPLERCUBE ? TextureRecord::TextureRecordType::CubeBuffer : Type;
+	Type = !strcmp(ConstantName, "TESR_SourceBuffer") ? TextureRecord::TextureRecordType::SourceBuffer : Type;
+	Type = !strcmp(ConstantName, "TESR_RenderedBuffer") ? TextureRecord::TextureRecordType::RenderedBuffer : Type;
+	Type = !strcmp(ConstantName, "TESR_DepthBuffer") ? TextureRecord::TextureRecordType::DepthBuffer : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowMapBufferNear") ? TextureRecord::TextureRecordType::ShadowMapBufferNear : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowMapBufferFar") ? TextureRecord::TextureRecordType::ShadowMapBufferFar : Type;
+	Type = !strcmp(ConstantName, "TESR_OrthoMapBuffer") ? TextureRecord::TextureRecordType::OrthoMapBuffer : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer0") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer0 : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer1") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer1 : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer2") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer2 : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer3") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer3 : Type;
+	Type = !strcmp(ConstantName, "TESR_WaterHeightMapBuffer") ? TextureRecord::TextureRecordType::WaterHeightMapBuffer : Type;
+	if (HasRenderedBuffer) *HasRenderedBuffer = (Type == TextureRecord::TextureRecordType::RenderedBuffer);
+	if (HasDepthBuffer) *HasDepthBuffer = (Type == TextureRecord::TextureRecordType::DepthBuffer);
+	if (Type) {
+		sprintf(SamplerState, "samplerState%i {", ConstantIndex);
+		ParserStart = strstr(ShaderSource, SamplerState); if (ParserStart) ParserEnd = strstr(ParserStart, "}");
+		if (Type <= TextureRecord::TextureRecordType::CubeBuffer) {
+			GetSamplerValue(0, ParserStart, ParserEnd, SamplerValue);
+			strcpy(Path, "Data\\Textures\\");
+			strcat(Path, SamplerValue);
+		}
+		else {
+			strcpy(Path, ConstantName);
+		}
+		PathS = std::string(Path);
+		TextureList::iterator t = Textures.find(PathS);
+		if (t == Textures.end()) {
+			if (NewTextureRecord->LoadTexture(Type, Path)) {
+				Textures[PathS] = NewTextureRecord;
+				if (NewTextureRecord->Texture) Logger::Log("Texture loaded: %s", Path); else Logger::Log("Texture attached: %s", Path);
+			}
+			else {
+				Logger::Log("ERROR: Cannot load texture %s", Path);
+			}
+		}
+		else {
+			NewTextureRecord->Texture = t->second->Texture;
+			Logger::Log("Texture linked: %s", Path);
+		}
+	}
+	for (int i = 1; i < SamplerStatesMax; i++) {
+		NewTextureRecord->SetSamplerState((D3DSAMPLERSTATETYPE)i, GetSamplerValue(i, ParserStart, ParserEnd, SamplerValue));
+	}
+	return NewTextureRecord;
+
+}
+
+DWORD TextureManager::GetSamplerValue(UInt32 SamplerType, const char* ParserStart, const char* ParserEnd, char* SamplerValue) {
+
+	const char* WordSamplerType[SamplerStatesMax] = { NULL };
+	const char* WordTextureAddress[6] = { NULL };
+	const char* WordTextureFilter[4] = { NULL };
+	const char* WordRGB[2] = { NULL };
+	const char* Parser = NULL;
+	DWORD R = 0;
+
+	WordSamplerType[0] = "TEXTURE = ";
+	WordSamplerType[D3DSAMP_ADDRESSU] = "ADDRESSU = ";
+	WordSamplerType[D3DSAMP_ADDRESSV] = "ADDRESSV = ";
+	WordSamplerType[D3DSAMP_ADDRESSW] = "ADDRESSW = ";
+	WordSamplerType[D3DSAMP_BORDERCOLOR] = "BORDERCOLOR = ";
+	WordSamplerType[D3DSAMP_MAGFILTER] = "MAGFILTER = ";
+	WordSamplerType[D3DSAMP_MINFILTER] = "MINFILTER = ";
+	WordSamplerType[D3DSAMP_MIPFILTER] = "MIPFILTER = ";
+	WordSamplerType[D3DSAMP_MIPMAPLODBIAS] = "MIPMAPLODBIAS = ";
+	WordSamplerType[D3DSAMP_MAXMIPLEVEL] = "MAXMIPLEVEL = ";
+	WordSamplerType[D3DSAMP_MAXANISOTROPY] = "MAXANISOTROPY = ";
+	WordSamplerType[D3DSAMP_SRGBTEXTURE] = "SRGBTEXTURE = ";
 	WordTextureAddress[0] = "";
 	WordTextureAddress[D3DTADDRESS_WRAP] = "WRAP";
 	WordTextureAddress[D3DTADDRESS_MIRROR] = "MIRROR";
 	WordTextureAddress[D3DTADDRESS_CLAMP] = "CLAMP";
 	WordTextureAddress[D3DTADDRESS_BORDER] = "BORDER";
 	WordTextureAddress[D3DTADDRESS_MIRRORONCE] = "MIRRORONCE";
-	WordTextureFilterType[D3DTEXF_NONE] = "NONE";
-	WordTextureFilterType[D3DTEXF_POINT] = "POINT";
-	WordTextureFilterType[D3DTEXF_LINEAR] = "LINEAR";
-	WordTextureFilterType[D3DTEXF_ANISOTROPIC] = "ANISOTROPIC";
-	WordSRGBType[0] = "FALSE";
-	WordSRGBType[1] = "TRUE";
+	WordTextureFilter[D3DTEXF_NONE] = "NONE";
+	WordTextureFilter[D3DTEXF_POINT] = "POINT";
+	WordTextureFilter[D3DTEXF_LINEAR] = "LINEAR";
+	WordTextureFilter[D3DTEXF_ANISOTROPIC] = "ANISOTROPIC";
+	WordRGB[0] = "FALSE";
+	WordRGB[1] = "TRUE";
 
-	for (int i = 0; i < 3; i++) {
-		if (i == 0) strcpy(WordSampler, WordSampler2D);
-		if (i == 1) strcpy(WordSampler, WordSampler3D);
-		if (i == 2) strcpy(WordSampler, WordSamplerCUBE);
-		Sampler = strstr(ShaderSource, WordSampler);
-		while (Sampler) {
-			SamplerRegister = strstr(Sampler, WordRegister);
-			memset(Register, NULL, sizeof(Register));
-			strncpy(Register, SamplerRegister + strlen(WordRegister), strstr(SamplerRegister, WordRegisterDelimeter) - (SamplerRegister + strlen(WordRegister)));
-			if (atoi(Register) == RegisterIndex) {
-				SamplerParser = strstr(Sampler, WordSourceBuffer);
-				if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-					Type = TextureRecord::TextureRecordType::SourceBuffer;
-					strcpy(Filename, WordSourceBuffer);
+	if (ParserStart && ParserEnd) {
+		Parser = strstr(ParserStart, WordSamplerType[0]);
+		if (Parser && Parser < ParserEnd) strncpy(SamplerValue, Parser + strlen(WordSamplerType[SamplerType]), strstr(Parser, ";") - (Parser + strlen(WordSamplerType[SamplerType])));
+		if (SamplerType >= D3DSAMPLERSTATETYPE::D3DSAMP_ADDRESSU && SamplerType <= D3DSAMPLERSTATETYPE::D3DSAMP_ADDRESSW) {
+			for (int i = 1; i < 6; i++) {
+				if (!strcmp(SamplerValue, WordTextureAddress[i])) {
+					R = i;
+					break;
 				}
-				if (!Type) {
-					SamplerParser = strstr(Sampler, WordRenderedBuffer);
-					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecord::TextureRecordType::RenderedBuffer;
-						strcpy(Filename, WordRenderedBuffer);
-					}
-				}
-				if (!Type) {
-					SamplerParser = strstr(Sampler, WordDepthBuffer);
-					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecord::TextureRecordType::DepthBuffer;
-						strcpy(Filename, WordDepthBuffer);
-					}
-				}
-				if (!Type) {
-					SamplerParser = strstr(Sampler, WordShadowMapBufferNear);
-					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecord::TextureRecordType::ShadowMapBufferNear;
-						strcpy(Filename, WordShadowMapBufferNear);
-					}
-				}
-				if (!Type) {
-					SamplerParser = strstr(Sampler, WordShadowMapBufferFar);
-					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecord::TextureRecordType::ShadowMapBufferFar;
-						strcpy(Filename, WordShadowMapBufferFar);
-					}
-				}
-				if (!Type) {
-					SamplerParser = strstr(Sampler, WordOrthoMapBuffer);
-					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecord::TextureRecordType::OrthoMapBuffer;
-						strcpy(Filename, WordOrthoMapBuffer);
-					}
-				}
-				if (!Type) {
-					SamplerParser = strstr(Sampler, WordShadowCubeMapBuffer0);
-					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecord::TextureRecordType::ShadowCubeMapBuffer0;
-						strcpy(Filename, WordShadowCubeMapBuffer0);
-					}
-				}
-				if (!Type) {
-					SamplerParser = strstr(Sampler, WordShadowCubeMapBuffer1);
-					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecord::TextureRecordType::ShadowCubeMapBuffer1;
-						strcpy(Filename, WordShadowCubeMapBuffer1);
-					}
-				}
-				if (!Type) {
-					SamplerParser = strstr(Sampler, WordShadowCubeMapBuffer2);
-					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecord::TextureRecordType::ShadowCubeMapBuffer2;
-						strcpy(Filename, WordShadowCubeMapBuffer2);
-					}
-				}
-				if (!Type) {
-					SamplerParser = strstr(Sampler, WordShadowCubeMapBuffer3);
-					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecord::TextureRecordType::ShadowCubeMapBuffer3;
-						strcpy(Filename, WordShadowCubeMapBuffer3);
-					}
-				}
-				if (!Type) {
-					SamplerParser = strstr(Sampler, WordWaterHeightMapBuffer);
-					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						Type = TextureRecord::TextureRecordType::WaterHeightMapBuffer;
-						strcpy(Filename, WordWaterHeightMapBuffer);
-					}
-				}
-				if (!Type) {
-					SamplerParser = strstr(SamplerRegister, WordTextureName);
-					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						strncpy(SamplerType, Sampler + strlen(WordSampler) - 2, 1);
-						if (SamplerType[0] == '2')
-							Type = TextureRecord::TextureRecordType::PlanarBuffer;
-						else if (SamplerType[0] == '3')
-							Type = TextureRecord::TextureRecordType::VolumeBuffer;
-						else if (SamplerType[0] == 'C')
-							Type = TextureRecord::TextureRecordType::CubeBuffer;
-						memset(Filename, NULL, sizeof(Filename));
-						strncpy(Filename, SamplerParser + strlen(WordTextureName), strstr(SamplerParser, WordTextureNameDelimeter) - (SamplerParser + strlen(WordTextureName)));
-					}
-				}
-				if (Type >= TextureRecord::TextureRecordType::SourceBuffer && Type <= TextureRecord::TextureRecordType::WaterHeightMapBuffer)
-					strcpy(Path, Filename);
-				else {
-					strcpy(Path, "Data\\Textures\\");
-					strcat(Path, Filename);
-				}
-				PathS = std::string(Path);
-				TextureList::iterator t = Textures.find(PathS);
-				if (t == Textures.end()) {
-					NewTextureRecord = new TextureRecord();
-					if (NewTextureRecord->LoadTexture(Type, Path)) {
-						Textures[PathS] = NewTextureRecord;
-						if (NewTextureRecord->Texture)
-							Logger::Log("Texture loaded: %s", Path);
-						else
-							Logger::Log("Texture attached: %s", Path);
-					}
-					else
-						Logger::Log("ERROR: Cannot load texture %s", Path);
-				}
-				else {
-					NewTextureRecord = t->second;
-					Logger::Log("Texture linked: %s", Path);
-				}
-				SamplerParser = strstr(SamplerRegister, WordRegister);
-				for (int s = 1; s < SamplerStatesMax; s++) {
-					Word = WordSamplerType[s].c_str();
-					SamplerParser = strstr(SamplerRegister, Word);
-					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
-						memset(SamplerState, NULL, sizeof(SamplerState));
-						strncpy(SamplerState, SamplerParser + strlen(Word), strstr(SamplerParser, WordSamplerStateDelimeter) - (SamplerParser + strlen(Word)));
-						for (int v = 1; v < 6; v++) {
-							Word = WordTextureAddress[v].c_str();
-							if (strstr(SamplerState, Word)) {
-								NewTextureRecord->SetSamplerState((D3DSAMPLERSTATETYPE)s, v);
-								break;
-							}
-						}
-						for (int v = 0; v < 4; v++) {
-							Word = WordTextureFilterType[v].c_str();
-							if (strstr(SamplerState, Word)) {
-								NewTextureRecord->SetSamplerState((D3DSAMPLERSTATETYPE)s, v);
-								break;
-							}
-						}
-						for (int v = 0; v < 2; v++) {
-							Word = WordSRGBType[v].c_str();
-							if (strstr(SamplerState, Word)) {
-								NewTextureRecord->SetSamplerState((D3DSAMPLERSTATETYPE)s, v);
-								break;
-							}
-						}
-					}
-				}
-				break;
 			}
-			Sampler = strstr(SamplerRegister, WordSampler);
 		}
-		if (Type) break;
+		if (SamplerType >= D3DSAMPLERSTATETYPE::D3DSAMP_MAGFILTER && SamplerType <= D3DSAMPLERSTATETYPE::D3DSAMP_MIPFILTER) {
+			for (int i = 0; i < 4; i++) {
+				if (!strcmp(SamplerValue, WordTextureFilter[i])) {
+					R = i;
+					break;
+				}
+			}
+		}
+		if (SamplerType == D3DSAMPLERSTATETYPE::D3DSAMP_SRGBTEXTURE) {
+			for (int i = 0; i < 2; i++) {
+				if (!strcmp(SamplerValue, WordRGB[i])) {
+					R = i;
+					break;
+				}
+			}
+		}
 	}
-	return NewTextureRecord;
+	return R;
 
 }

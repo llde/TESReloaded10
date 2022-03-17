@@ -3,36 +3,31 @@ void BinkManager::Initialize() {
 	Logger::Log("Starting the bink manager...");
 	TheBinkManager = new BinkManager();
 
-	HBINK Bink = NULL;
-	BINKTEXTURESET BinkTextures = { NULL };
-	Create_Bink_shaders(TheRenderManager->device);
+	TheBinkManager->Bink = NULL;
+	TheBinkManager->BinkTextures = { NULL };
 
 }
 
-void BinkManager::Open(const char* MovieFilename) {
-	
-	char Filename[MAX_PATH] = { NULL };
-
-	if (Bink) Close();
-	GetCurrentDirectoryA(MAX_PATH, Filename);
-	strcat(Filename, MovieFilename);
-	Bink = BinkOpen(Filename, BINKNOFRAMEBUFFERS);
-	if (Bink) {
-		BinkSetVolume(Bink, 0, 0);
-		BinkGetFrameBuffersInfo(Bink, &BinkTextures.bink_buffers);
-		Create_Bink_textures(TheRenderManager->device, &BinkTextures);
-	}
-
-}
-
-void BinkManager::Render() {
+void BinkManager::Render(const char* MovieFilename) {
 
 	IDirect3DBaseTexture9* Texture0 = NULL;
 	IDirect3DBaseTexture9* Texture1 = NULL;
 	IDirect3DBaseTexture9* Texture2 = NULL;
 	bool NewFrame = 0;
 	IDirect3DDevice9* Device = TheRenderManager->device;
+	char Filename[MAX_PATH] = { NULL };
 
+	if (!Bink) {
+		Create_Bink_shaders(Device);
+		GetCurrentDirectoryA(MAX_PATH, Filename);
+		strcat(Filename, MovieFilename);
+		Bink = BinkOpen(Filename, BINKNOFRAMEBUFFERS);
+		if (Bink) {
+			BinkSetVolume(Bink, 0, 0);
+			BinkGetFrameBuffersInfo(Bink, &BinkTextures.bink_buffers);
+			Create_Bink_textures(Device, &BinkTextures);
+		}
+	}
 	if (Bink) {
 		if (!BinkWait(Bink)) NewFrame = 1;
 		if (NewFrame) {
@@ -58,9 +53,10 @@ void BinkManager::Render() {
 void BinkManager::Close() {
 
 	if (Bink) {
-		Free_Bink_textures(TheRenderManager->device, &BinkTextures);
 		BinkClose(Bink);
 		Bink = NULL;
+		Free_Bink_textures(TheRenderManager->device, &BinkTextures);
+		Free_Bink_shaders();
 	}
 
 }

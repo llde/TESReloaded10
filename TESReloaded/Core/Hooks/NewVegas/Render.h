@@ -100,13 +100,10 @@ static void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRend
 
 static void RenderMainMenuMovie() {
 
-	if (TheSettingManager->SettingsMain.Main.ReplaceIntro && InterfaceManager->IsActive(Menu::MenuType::kMenuType_Main)) {
-		if (!TheBinkManager->Bink) TheBinkManager->Open(MainMenuMovie);
-		TheBinkManager->Render();
-	}
-	else {
+	if (TheSettingManager->SettingsMain.Main.ReplaceIntro && InterfaceManager->IsActive(Menu::MenuType::kMenuType_Main))
+		TheBinkManager->Render(MainMenuMovie);
+	else
 		TheBinkManager->Close();
-	}
 
 }
 

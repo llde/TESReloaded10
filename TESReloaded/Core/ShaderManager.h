@@ -195,9 +195,9 @@ public:
 
 	static ShaderRecord*	LoadShader(const char* Name, const char* SubPath);
 	
-	bool					HasCT;
-	bool					HasRB; 
-	bool					HasDB;
+	bool					HasConstantTable;
+	bool					HasRenderedBuffer; 
+	bool					HasDepthBuffer;
 };
 
 class ShaderRecordVertex : public ShaderRecord {
