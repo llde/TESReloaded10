@@ -1,7 +1,18 @@
 TextureRecord::TextureRecord() {
 
 	Texture = NULL;
-	for (int i = 0; i < SamplerStatesMax; i++) SamplerStates[i] = 0;
+	SamplerStates[0] = 0;
+	SamplerStates[D3DSAMP_ADDRESSU] = D3DTADDRESS_WRAP;
+	SamplerStates[D3DSAMP_ADDRESSV] = D3DTADDRESS_WRAP;
+	SamplerStates[D3DSAMP_ADDRESSW] = D3DTADDRESS_WRAP;
+	SamplerStates[D3DSAMP_BORDERCOLOR] = 0;
+	SamplerStates[D3DSAMP_MAGFILTER] = D3DTEXF_POINT;
+	SamplerStates[D3DSAMP_MINFILTER] = D3DTEXF_POINT;
+	SamplerStates[D3DSAMP_MIPFILTER] = D3DTEXF_NONE;
+	SamplerStates[D3DSAMP_MIPMAPLODBIAS] = 0;
+	SamplerStates[D3DSAMP_MAXMIPLEVEL] = 0;
+	SamplerStates[D3DSAMP_MAXANISOTROPY] = 1;
+	SamplerStates[D3DSAMP_SRGBTEXTURE] = 0;
 
 }
 
@@ -62,13 +73,6 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Filename) {
 			break;
 	}	
 	return true;
-
-}
-
-void TextureRecord::SetSamplerState(D3DSAMPLERSTATETYPE SamplerType, DWORD Value) {
-
-	SamplerStates[0] = 1;
-	SamplerStates[SamplerType] = Value;
 
 }
 
@@ -167,7 +171,8 @@ TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, D3DXPARAMET
 		}
 	}
 	for (int i = 1; i < SamplerStatesMax; i++) {
-		NewTextureRecord->SetSamplerState((D3DSAMPLERSTATETYPE)i, GetSamplerValue(i, ParserStart, ParserEnd, SamplerValue));
+		memset(SamplerValue, NULL, sizeof(SamplerValue));
+		NewTextureRecord->SamplerStates[i] = GetSamplerValue(i, ParserStart, ParserEnd, SamplerValue);
 	}
 	return NewTextureRecord;
 
@@ -181,7 +186,7 @@ DWORD TextureManager::GetSamplerValue(UInt32 SamplerType, const char* ParserStar
 	const char* WordRGB[2] = { NULL };
 	const char* Parser = NULL;
 	DWORD R = 0;
-
+	
 	WordSamplerType[0] = "TEXTURE = ";
 	WordSamplerType[D3DSAMP_ADDRESSU] = "ADDRESSU = ";
 	WordSamplerType[D3DSAMP_ADDRESSV] = "ADDRESSV = ";
@@ -208,9 +213,12 @@ DWORD TextureManager::GetSamplerValue(UInt32 SamplerType, const char* ParserStar
 	WordRGB[1] = "TRUE";
 
 	if (ParserStart && ParserEnd) {
-		Parser = strstr(ParserStart, WordSamplerType[0]);
+		Parser = strstr(ParserStart, WordSamplerType[SamplerType]);
 		if (Parser && Parser < ParserEnd) strncpy(SamplerValue, Parser + strlen(WordSamplerType[SamplerType]), strstr(Parser, ";") - (Parser + strlen(WordSamplerType[SamplerType])));
-		if (SamplerType >= D3DSAMPLERSTATETYPE::D3DSAMP_ADDRESSU && SamplerType <= D3DSAMPLERSTATETYPE::D3DSAMP_ADDRESSW) {
+		if (SamplerType == 0) {
+			R = 0;
+		}
+		else if (SamplerType >= D3DSAMP_ADDRESSU && SamplerType <= D3DSAMP_ADDRESSW) {
 			for (int i = 1; i < 6; i++) {
 				if (!strcmp(SamplerValue, WordTextureAddress[i])) {
 					R = i;
@@ -218,7 +226,7 @@ DWORD TextureManager::GetSamplerValue(UInt32 SamplerType, const char* ParserStar
 				}
 			}
 		}
-		if (SamplerType >= D3DSAMPLERSTATETYPE::D3DSAMP_MAGFILTER && SamplerType <= D3DSAMPLERSTATETYPE::D3DSAMP_MIPFILTER) {
+		else if (SamplerType >= D3DSAMP_MAGFILTER && SamplerType <= D3DSAMP_MIPFILTER) {
 			for (int i = 0; i < 4; i++) {
 				if (!strcmp(SamplerValue, WordTextureFilter[i])) {
 					R = i;
@@ -226,13 +234,16 @@ DWORD TextureManager::GetSamplerValue(UInt32 SamplerType, const char* ParserStar
 				}
 			}
 		}
-		if (SamplerType == D3DSAMPLERSTATETYPE::D3DSAMP_SRGBTEXTURE) {
+		else if (SamplerType == D3DSAMP_SRGBTEXTURE) {
 			for (int i = 0; i < 2; i++) {
 				if (!strcmp(SamplerValue, WordRGB[i])) {
 					R = i;
 					break;
 				}
 			}
+		}
+		else {
+			R = atoi(SamplerValue);
 		}
 	}
 	return R;

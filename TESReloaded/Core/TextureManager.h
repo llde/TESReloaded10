@@ -25,7 +25,6 @@ public:
 	};
 
 	bool					LoadTexture(TextureRecordType Type, const char* Filename);
-	void					SetSamplerState(D3DSAMPLERSTATETYPE SamplerType, DWORD Value);
 
 	IDirect3DBaseTexture9*	Texture;
 	DWORD					SamplerStates[SamplerStatesMax];

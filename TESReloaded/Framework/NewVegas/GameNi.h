@@ -1197,7 +1197,7 @@ public:
 	virtual void 							SetTextureStageState(UInt32 Stage, D3DTEXTURESTAGESTATETYPE Type, UInt32 Value, UInt8 BackUp);	// 30
 	virtual UInt32							GetTextureStageState(UInt32 Stage, D3DTEXTURESTAGESTATETYPE Type);								// 31
 	virtual void							func_032();																						// 32
-	virtual void							SetSamplerState(UInt32 Sampler, D3DSAMPLERSTATETYPE Type, UInt32 Value, UInt8 BackUp);			// 33
+	virtual int								SetSamplerState(UInt32 Sampler, D3DSAMPLERSTATETYPE Type, UInt32 Value, UInt8 BackUp);			// 33
 	virtual UInt32 							GetSamplerState(UInt32 Sampler, D3DSAMPLERSTATETYPE Type);										// 34
 	virtual void							RestoreSamplerState(UInt32 Sampler, D3DSAMPLERSTATETYPE Type);									// 35
 	virtual void							ClearTextureList();																				// 36
@@ -1413,7 +1413,10 @@ public:
 		REFRESHRATE_DEFAULT = 0
 	};
 
-	void							SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE State, DWORD Value) { renderState->SetSamplerState(Sampler, State, Value, false); };
+	void							SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE State, DWORD Value) {
+									int a = renderState->SetSamplerState(Sampler, State, Value, false);
+									int b = 1;
+	};
 	void							PackGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiD3DShaderDeclaration* ShaderDeclaration) {}
 	void							PackSkinnedGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiSkinPartition::Partition* Partition, NiD3DShaderDeclaration* ShaderDeclaration) {}
 	void							CalculateBoneMatrixes(NiSkinInstance* SkinInstance, NiTransform* WorldTrasform) { ThisCall(0x00E6FE30, this, SkinInstance, WorldTrasform, false, 3, true); }
