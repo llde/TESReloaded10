@@ -339,7 +339,6 @@ void ShaderRecord::SetCT() {
 			Value = &TextureShaderValues[c];
 			if (Value->Texture->Texture) TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
 			for (int i = 1; i < SamplerStatesMax; i++) {
-				//TheRenderManager->device->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
 				TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
 			}
 		}

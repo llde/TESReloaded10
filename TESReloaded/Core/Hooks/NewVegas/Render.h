@@ -36,6 +36,20 @@ static void __fastcall SetShadersHook(BSShader* This, UInt32 edx, UInt32 PassInd
 
 }
 
+static HRESULT (__thiscall* SetSamplerState)(NiDX9RenderState*, UInt32, D3DSAMPLERSTATETYPE, UInt32, UInt8) = (HRESULT (__thiscall*)(NiDX9RenderState*, UInt32, D3DSAMPLERSTATETYPE, UInt32, UInt8))Hooks::SetSamplerState;
+static HRESULT __fastcall SetSamplerStateHook(NiDX9RenderState* This, UInt32 edx, UInt32 Sampler, D3DSAMPLERSTATETYPE Type, UInt32 Value, UInt8 Save) {
+	
+	UInt16* TypeMap = (UInt16*)0x126F92C;
+	HRESULT r = D3D_OK;
+
+	if (TypeMap[Type] < 5)
+		r = (*SetSamplerState)(This, Sampler, Type, Value, Save);
+	else
+		r = TheRenderManager->device->SetSamplerState(Sampler, Type, Value);
+	return r;
+
+}
+
 static void (__thiscall* RenderWorldSceneGraph)(Main*, Sun*, UInt8, UInt8, UInt8) = (void (__thiscall*)(Main*, Sun*, UInt8, UInt8, UInt8))Hooks::RenderWorldSceneGraph;
 static void __fastcall RenderWorldSceneGraphHook(Main* This, UInt32 edx, Sun* SkySun, UInt8 IsFirstPerson, UInt8 WireFrame, UInt8 Arg4) {
 	

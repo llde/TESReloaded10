@@ -1197,7 +1197,7 @@ public:
 	virtual void 							SetTextureStageState(UInt32 Stage, D3DTEXTURESTAGESTATETYPE Type, UInt32 Value, UInt8 BackUp);	// 30
 	virtual UInt32							GetTextureStageState(UInt32 Stage, D3DTEXTURESTAGESTATETYPE Type);								// 31
 	virtual void							func_032();																						// 32
-	virtual int								SetSamplerState(UInt32 Sampler, D3DSAMPLERSTATETYPE Type, UInt32 Value, UInt8 BackUp);			// 33
+	virtual HRESULT							SetSamplerState(UInt32 Sampler, D3DSAMPLERSTATETYPE Type, UInt32 Value, UInt8 BackUp);			// 33
 	virtual UInt32 							GetSamplerState(UInt32 Sampler, D3DSAMPLERSTATETYPE Type);										// 34
 	virtual void							RestoreSamplerState(UInt32 Sampler, D3DSAMPLERSTATETYPE Type);									// 35
 	virtual void							ClearTextureList();																				// 36
@@ -1212,6 +1212,11 @@ public:
 	virtual UInt8							GetVar_0FF5();																					// 3F
 	virtual void							Reset();																						// 40
 	virtual void							func_041();																						// 41
+	
+	struct NiRenderStateSetting {
+		UInt32 CurrentValue;
+		UInt32 PreviousValue;
+	};
 
 	UInt32							Flags;							// 0008
 	UInt32							unk000C[(0x0074 - 0x000C) >> 2];// 000C
@@ -1222,7 +1227,14 @@ public:
 	float							MaxFogFactor;					// 0084
 	float							MaxFogValue;					// 0088
 	NiColor							CurrentFogColor;				// 008C
-	UInt32                          Unk98[1046];					// 0098
+	UInt32                          Unk98[23];						// 0098
+	UInt32							LeftHanded;						// 00F4
+	UInt32							Unk0F8[10];						// 00F8
+	NiRenderStateSetting			RenderStateSettings[256];		// 0120
+	UInt32							Unk0920[64];					// 0920
+	NiRenderStateSetting			TextureStageStateSettings[128];	// 0A20
+	NiRenderStateSetting			SamplerStateSettings[80];		// 0E20
+	UInt32							unk10A0[20];					// 10A0
 	NiDX9ShaderConstantManager*		ShaderConstantManager;			// 10F0
 	UInt8							ForceNormalizeNormals;			// 10F4
 	UInt8							InternalNormalizeNormals;		// 10F5
@@ -1413,10 +1425,7 @@ public:
 		REFRESHRATE_DEFAULT = 0
 	};
 
-	void							SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE State, DWORD Value) {
-									int a = renderState->SetSamplerState(Sampler, State, Value, false);
-									int b = 1;
-	};
+	void							SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE State, DWORD Value) { renderState->SetSamplerState(Sampler, State, Value, false); }
 	void							PackGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiD3DShaderDeclaration* ShaderDeclaration) {}
 	void							PackSkinnedGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiSkinPartition::Partition* Partition, NiD3DShaderDeclaration* ShaderDeclaration) {}
 	void							CalculateBoneMatrixes(NiSkinInstance* SkinInstance, NiTransform* WorldTrasform) { ThisCall(0x00E6FE30, this, SkinInstance, WorldTrasform, false, 3, true); }

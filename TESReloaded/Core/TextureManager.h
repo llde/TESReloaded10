@@ -38,6 +38,7 @@ public:
 
 	TextureRecord*			LoadTexture(const char* ShaderSource, D3DXPARAMETER_TYPE ConstantType, LPCSTR ConstantName, UINT RegisterIndex, bool* HasRenderedBuffer, bool* HasDepthBuffer);
 	DWORD					GetSamplerValue(UInt32 SamplerType, const char* ParserStart, const char* ParserEnd, char* SamplerValue);
+	void					SetWaterHeightMap(IDirect3DBaseTexture9* WaterHeightMap);
 
 	IDirect3DTexture9*		SourceTexture;
 	IDirect3DSurface9*		SourceSurface;

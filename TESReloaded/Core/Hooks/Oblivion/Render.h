@@ -93,6 +93,9 @@ static UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiG
 
 static HRESULT (__thiscall* SetSamplerState)(NiDX9RenderState*, UInt32, D3DSAMPLERSTATETYPE, UInt32, UInt8) = (HRESULT (__thiscall*)(NiDX9RenderState*, UInt32, D3DSAMPLERSTATETYPE, UInt32, UInt8))Hooks::SetSamplerState;
 static HRESULT __fastcall SetSamplerStateHook(NiDX9RenderState* This, UInt32 edx, UInt32 Sampler, D3DSAMPLERSTATETYPE Type, UInt32 Value, UInt8 Save) {
+	
+	UInt16* TypeMap = (UInt16*)0x00B427B0;
+	HRESULT r = D3D_OK;
 
 	if (TheSettingManager->SettingsMain.Main.AnisotropicFilter >= 2) {
 		if (Type == D3DSAMP_MAGFILTER) {
@@ -105,7 +108,11 @@ static HRESULT __fastcall SetSamplerStateHook(NiDX9RenderState* This, UInt32 edx
 			Value = D3DTEXF_LINEAR;
 		}
 	}
-	return (*SetSamplerState)(This, Sampler, Type, Value, Save);
+	if (TypeMap[Type] < 5)
+		r = (*SetSamplerState)(This, Sampler, Type, Value, Save);
+	else
+		r = TheRenderManager->device->SetSamplerState(Sampler, Type, Value);
+	return r;
 
 }
 

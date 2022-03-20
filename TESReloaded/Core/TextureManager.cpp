@@ -1,3 +1,5 @@
+#define WordWaterHeightMapBuffer "TESR_WaterHeightMapBuffer"
+
 TextureRecord::TextureRecord() {
 
 	Texture = NULL;
@@ -80,7 +82,7 @@ void TextureManager::Initialize() {
 
 	Logger::Log("Starting the textures manager...");
 	TheTextureManager = new TextureManager();
-	
+
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	UInt32 Width = TheRenderManager->width;
 	UInt32 Height = TheRenderManager->height;
@@ -140,7 +142,7 @@ TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, D3DXPARAMET
 	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer1") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer1 : Type;
 	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer2") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer2 : Type;
 	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer3") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer3 : Type;
-	Type = !strcmp(ConstantName, "TESR_WaterHeightMapBuffer") ? TextureRecord::TextureRecordType::WaterHeightMapBuffer : Type;
+	Type = !strcmp(ConstantName, WordWaterHeightMapBuffer) ? TextureRecord::TextureRecordType::WaterHeightMapBuffer : Type;
 	if (HasRenderedBuffer) *HasRenderedBuffer = (Type == TextureRecord::TextureRecordType::RenderedBuffer);
 	if (HasDepthBuffer) *HasDepthBuffer = (Type == TextureRecord::TextureRecordType::DepthBuffer);
 	if (Type) {
@@ -247,5 +249,13 @@ DWORD TextureManager::GetSamplerValue(UInt32 SamplerType, const char* ParserStar
 		}
 	}
 	return R;
+
+}
+
+void TextureManager::SetWaterHeightMap(IDirect3DBaseTexture9* WaterHeightMap) {
+	
+	TextureList::iterator t = Textures.find(WordWaterHeightMapBuffer);
+
+	if (t != TheTextureManager->Textures.end()) t->second->Texture = WaterHeightMap;
 
 }

@@ -1409,7 +1409,7 @@ public:
 	virtual void						 func_031();																// 31
 	virtual void 						 SetTextureStageState(UInt32 Stage, D3DTEXTURESTAGESTATETYPE Type, UInt32 Value, UInt8 BackUp);	// 32
 	virtual UInt32						 GetTextureStageState(UInt32 Stage, D3DTEXTURESTAGESTATETYPE Type);								// 33
-	virtual void						 SetSamplerState(UInt32 Sampler, D3DSAMPLERSTATETYPE Type, UInt32 Value, UInt8 BackUp);			// 34
+	virtual HRESULT						 SetSamplerState(UInt32 Sampler, D3DSAMPLERSTATETYPE Type, UInt32 Value, UInt8 BackUp);			// 34
 	virtual UInt32 						 GetSamplerState(UInt32 Sampler, D3DSAMPLERSTATETYPE Type);										// 35
 	virtual void						 RestoreSamplerState(UInt32 Sampler, D3DSAMPLERSTATETYPE Type);									// 36
 	virtual void						 ClearTextureList();																			// 37
@@ -1445,7 +1445,7 @@ public:
 	NiRenderStateSetting			RenderStateSettings[256];		// 0120
 	NiRenderStateSetting			TextureStageStateSettings[128];	// 0920
 	NiRenderStateSetting			SamplerStateSettings[80];		// 0D20
-	UInt32							unk0FA0[(0x0FF0 - 0x0FA0) >> 2];// 0FA0
+	UInt32							unk0FA0[20];					// 0FA0
 	NiDX9ShaderConstantManager*		ShaderConstantManager;			// 0FF0
 	UInt8							ForceNormalizeNormals;			// 0FF4
 	UInt8							InternalNormalizeNormals;		// 0FF5
@@ -1695,7 +1695,7 @@ public:
 	virtual bool		DeleteTexture(NiTexture* arg);					
 	virtual bool		DeleteDynamicTexture(UInt32 arg);		
 
-	void				SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE State, DWORD Value) { renderState->SetSamplerState(Sampler, State, Value, false); };
+	void				SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE State, DWORD Value) { renderState->SetSamplerState(Sampler, State, Value, false); }
 	void				PackGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiD3DShaderDeclaration* ShaderDeclaration) { ThisCall(0x00767B40, this, GeoData, ModelData, SkinInstance, ShaderDeclaration, 0); }
 	void				PackSkinnedGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiSkinPartition::Partition* Partition, NiD3DShaderDeclaration* ShaderDeclaration) { ThisCall(0x00763130, this, GeoData, ModelData, SkinInstance, Partition, ShaderDeclaration, 0); }
 	void				CalculateBoneMatrixes(NiSkinInstance* SkinInstance, NiTransform* WorldTrasform) { ThisCall(0x007655F0, this, SkinInstance, WorldTrasform, false, 3, true); }

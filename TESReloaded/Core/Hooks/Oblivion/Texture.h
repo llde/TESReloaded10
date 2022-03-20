@@ -2,10 +2,8 @@
 
 static void WaterHeightMap(BSRenderedTexture* WaterHeightMap) {
 	
-	TextureList::iterator t = TheTextureManager->Textures.find(WordWaterHeightMapBuffer);
-
 	Tes->waterManager->HeightMap = WaterHeightMap;
-	if (t != TheTextureManager->Textures.end()) t->second->Texture = WaterHeightMap->RenderedTexture->rendererData->dTexture;
+	TheTextureManager->SetWaterHeightMap(WaterHeightMap->RenderedTexture->rendererData->dTexture);
 	
 }
 
