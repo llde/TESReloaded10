@@ -129,9 +129,9 @@ TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, D3DXPARAMET
 	TextureRecord::TextureRecordType Type = TextureRecord::TextureRecordType::None;
 	TextureRecord* NewTextureRecord = new TextureRecord();
 
-	Type = ConstantType == D3DXPARAMETER_TYPE::D3DXPT_SAMPLER2D ? TextureRecord::TextureRecordType::PlanarBuffer : Type;
-	Type = ConstantType == D3DXPARAMETER_TYPE::D3DXPT_SAMPLER3D ? TextureRecord::TextureRecordType::VolumeBuffer : Type;
-	Type = ConstantType == D3DXPARAMETER_TYPE::D3DXPT_SAMPLERCUBE ? TextureRecord::TextureRecordType::CubeBuffer : Type;
+	Type = (ConstantType >= D3DXPT_SAMPLER && ConstantType <= D3DXPT_SAMPLER2D) ? TextureRecord::TextureRecordType::PlanarBuffer : Type;
+	Type = ConstantType == D3DXPT_SAMPLER3D ? TextureRecord::TextureRecordType::VolumeBuffer : Type;
+	Type = ConstantType == D3DXPT_SAMPLERCUBE ? TextureRecord::TextureRecordType::CubeBuffer : Type;
 	Type = !strcmp(ConstantName, "TESR_SourceBuffer") ? TextureRecord::TextureRecordType::SourceBuffer : Type;
 	Type = !strcmp(ConstantName, "TESR_RenderedBuffer") ? TextureRecord::TextureRecordType::RenderedBuffer : Type;
 	Type = !strcmp(ConstantName, "TESR_DepthBuffer") ? TextureRecord::TextureRecordType::DepthBuffer : Type;
