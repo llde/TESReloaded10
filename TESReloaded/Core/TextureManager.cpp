@@ -18,7 +18,7 @@ TextureRecord::TextureRecord() {
 
 }
 
-bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Filename) {
+bool TextureRecord::LoadTexture(TextureRecordType Type) {
 
 	IDirect3DTexture9* Tex = NULL;
 	IDirect3DVolumeTexture9* TexV = NULL;
@@ -26,17 +26,17 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Filename) {
 
 	switch (Type) {
 		case PlanarBuffer:
-			D3DXCreateTextureFromFileA(TheRenderManager->device, Filename, &Tex);
+			D3DXCreateTextureFromFileA(TheRenderManager->device, Name, &Tex);
 			if (Tex == NULL) return false;
 			Texture = Tex;
 			break;
 		case VolumeBuffer:
-			D3DXCreateVolumeTextureFromFileA(TheRenderManager->device, Filename, &TexV);
+			D3DXCreateVolumeTextureFromFileA(TheRenderManager->device, Name, &TexV);
 			if (TexV == NULL) return false;
 			Texture = TexV;
 			break;
 		case CubeBuffer:
-			D3DXCreateCubeTextureFromFileA(TheRenderManager->device, Filename, &TexC);
+			D3DXCreateCubeTextureFromFileA(TheRenderManager->device, Name, &TexC);
 			if (TexC == NULL) return false;
 			Texture = TexC;
 			break;
@@ -73,7 +73,7 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Filename) {
 		case WaterHeightMapBuffer:
 			Texture = NULL;
 			break;
-	}	
+	}
 	return true;
 
 }
@@ -90,7 +90,7 @@ void TextureManager::Initialize() {
 	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
 	UINT ShadowMapSize = 0;
 	UINT ShadowCubeMapSize = ShadowsInteriors->ShadowCubeMapSize;
-
+	
 	TheTextureManager->SourceTexture = NULL;
 	TheTextureManager->SourceSurface = NULL;
 	TheTextureManager->RenderedTexture = NULL;
@@ -120,12 +120,12 @@ void TextureManager::Initialize() {
 
 TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, D3DXPARAMETER_TYPE ConstantType, LPCSTR ConstantName, UINT ConstantIndex, bool* HasRenderedBuffer, bool* HasDepthBuffer) {
 	
-	char Path[MAX_PATH];
 	char SamplerValue[40] = { NULL };
 	char SamplerState[20];
 	const char* ParserStart = NULL;
 	const char* ParserEnd = NULL;
-	std::string PathS;
+	DWORD SamplerStateValue = 0xFFFFFFFF;
+	TextureRecord* R = NULL;
 	TextureRecord::TextureRecordType Type = TextureRecord::TextureRecordType::None;
 	TextureRecord* NewTextureRecord = new TextureRecord();
 
@@ -143,51 +143,51 @@ TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, D3DXPARAMET
 	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer2") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer2 : Type;
 	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer3") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer3 : Type;
 	Type = !strcmp(ConstantName, WordWaterHeightMapBuffer) ? TextureRecord::TextureRecordType::WaterHeightMapBuffer : Type;
-	if (HasRenderedBuffer) *HasRenderedBuffer = (Type == TextureRecord::TextureRecordType::RenderedBuffer);
-	if (HasDepthBuffer) *HasDepthBuffer = (Type == TextureRecord::TextureRecordType::DepthBuffer);
+	if (HasRenderedBuffer && !*HasRenderedBuffer) *HasRenderedBuffer = (Type == TextureRecord::TextureRecordType::RenderedBuffer);
+	if (HasDepthBuffer && !*HasDepthBuffer) *HasDepthBuffer = (Type == TextureRecord::TextureRecordType::DepthBuffer);
 	if (Type) {
 		sprintf(SamplerState, "samplerState%i {", ConstantIndex);
 		ParserStart = strstr(ShaderSource, SamplerState); if (ParserStart) ParserEnd = strstr(ParserStart, "}");
 		if (Type <= TextureRecord::TextureRecordType::CubeBuffer) {
-			GetSamplerValue(0, ParserStart, ParserEnd, SamplerValue);
-			strcpy(Path, "Data\\Textures\\");
-			strcat(Path, SamplerValue);
+			GetSamplerStateValue(0, ParserStart, ParserEnd, SamplerValue);
+			strcpy(NewTextureRecord->Name, "Data\\Textures\\");
+			strcat(NewTextureRecord->Name, SamplerValue);
 		}
 		else {
-			strcpy(Path, ConstantName);
+			strcpy(NewTextureRecord->Name, ConstantName);
 		}
-		PathS = std::string(Path);
-		TextureList::iterator t = Textures.find(PathS);
-		if (t == Textures.end()) {
-			if (NewTextureRecord->LoadTexture(Type, Path)) {
-				Textures[PathS] = NewTextureRecord;
-				if (NewTextureRecord->Texture) Logger::Log("Texture loaded: %s", Path); else Logger::Log("Texture attached: %s", Path);
+		R = Textures.find(NewTextureRecord->Name);
+		if (!R) {
+			if (NewTextureRecord->LoadTexture(Type)) {
+				if (NewTextureRecord->Texture) Logger::Log("Texture loaded: %s", NewTextureRecord->Name); else Logger::Log("Texture attached: %s", NewTextureRecord->Name);
 			}
 			else {
-				Logger::Log("ERROR: Cannot load texture %s", Path);
+				Logger::Log("ERROR: Cannot load texture %s", NewTextureRecord->Name);
 			}
 		}
 		else {
-			NewTextureRecord->Texture = t->second->Texture;
-			Logger::Log("Texture linked: %s", Path);
+			NewTextureRecord->Texture = R->Texture;
+			Logger::Log("Texture linked: %s", NewTextureRecord->Name);
 		}
-	}
-	for (int i = 1; i < SamplerStatesMax; i++) {
-		memset(SamplerValue, NULL, sizeof(SamplerValue));
-		NewTextureRecord->SamplerStates[i] = GetSamplerValue(i, ParserStart, ParserEnd, SamplerValue);
+		for (int i = 1; i < SamplerStatesMax; i++) {
+			memset(SamplerValue, NULL, sizeof(SamplerValue));
+			SamplerStateValue = GetSamplerStateValue(i, ParserStart, ParserEnd, SamplerValue);
+			if (SamplerStateValue != 0xFFFFFFFF) NewTextureRecord->SamplerStates[i] = SamplerStateValue;
+		}
+		Textures.push_back(NewTextureRecord);
 	}
 	return NewTextureRecord;
 
 }
 
-DWORD TextureManager::GetSamplerValue(UInt32 SamplerType, const char* ParserStart, const char* ParserEnd, char* SamplerValue) {
+DWORD TextureManager::GetSamplerStateValue(UInt32 SamplerType, const char* ParserStart, const char* ParserEnd, char* SamplerValue) {
 
 	const char* WordSamplerType[SamplerStatesMax] = { NULL };
 	const char* WordTextureAddress[6] = { NULL };
 	const char* WordTextureFilter[4] = { NULL };
 	const char* WordRGB[2] = { NULL };
 	const char* Parser = NULL;
-	DWORD R = 0;
+	DWORD R = 0xFFFFFFFF;
 	
 	WordSamplerType[0] = "TEXTURE = ";
 	WordSamplerType[D3DSAMP_ADDRESSU] = "ADDRESSU = ";
@@ -217,35 +217,37 @@ DWORD TextureManager::GetSamplerValue(UInt32 SamplerType, const char* ParserStar
 	if (ParserStart && ParserEnd) {
 		Parser = strstr(ParserStart, WordSamplerType[SamplerType]);
 		if (Parser && Parser < ParserEnd) strncpy(SamplerValue, Parser + strlen(WordSamplerType[SamplerType]), strstr(Parser, ";") - (Parser + strlen(WordSamplerType[SamplerType])));
-		if (SamplerType == 0) {
-			R = 0;
-		}
-		else if (SamplerType >= D3DSAMP_ADDRESSU && SamplerType <= D3DSAMP_ADDRESSW) {
-			for (int i = 1; i < 6; i++) {
-				if (!strcmp(SamplerValue, WordTextureAddress[i])) {
-					R = i;
-					break;
+		if (strlen(SamplerValue) > 0) {
+			if (SamplerType == 0) {
+				R = 0;
+			}
+			else if (SamplerType >= D3DSAMP_ADDRESSU && SamplerType <= D3DSAMP_ADDRESSW) {
+				for (int i = 1; i < 6; i++) {
+					if (!strcmp(SamplerValue, WordTextureAddress[i])) {
+						R = i;
+						break;
+					}
 				}
 			}
-		}
-		else if (SamplerType >= D3DSAMP_MAGFILTER && SamplerType <= D3DSAMP_MIPFILTER) {
-			for (int i = 0; i < 4; i++) {
-				if (!strcmp(SamplerValue, WordTextureFilter[i])) {
-					R = i;
-					break;
+			else if (SamplerType >= D3DSAMP_MAGFILTER && SamplerType <= D3DSAMP_MIPFILTER) {
+				for (int i = 0; i < 4; i++) {
+					if (!strcmp(SamplerValue, WordTextureFilter[i])) {
+						R = i;
+						break;
+					}
 				}
 			}
-		}
-		else if (SamplerType == D3DSAMP_SRGBTEXTURE) {
-			for (int i = 0; i < 2; i++) {
-				if (!strcmp(SamplerValue, WordRGB[i])) {
-					R = i;
-					break;
+			else if (SamplerType == D3DSAMP_SRGBTEXTURE) {
+				for (int i = 0; i < 2; i++) {
+					if (!strcmp(SamplerValue, WordRGB[i])) {
+						R = i;
+						break;
+					}
 				}
 			}
-		}
-		else {
-			R = atoi(SamplerValue);
+			else {
+				R = atoi(SamplerValue);
+			}
 		}
 	}
 	return R;
@@ -254,8 +256,8 @@ DWORD TextureManager::GetSamplerValue(UInt32 SamplerType, const char* ParserStar
 
 void TextureManager::SetWaterHeightMap(IDirect3DBaseTexture9* WaterHeightMap) {
 	
-	TextureList::iterator t = Textures.find(WordWaterHeightMapBuffer);
-
-	if (t != TheTextureManager->Textures.end()) t->second->Texture = WaterHeightMap;
+	for (TextureList::iterator Iter = Textures.begin(); Iter != Textures.end(); ++Iter) {
+		if (!strcmp((*Iter)->Name, WordWaterHeightMapBuffer)) (*Iter)->Texture = WaterHeightMap;
+	}
 
 }

@@ -13,7 +13,7 @@ float4 TESR_SunColor : register(c17);
 float4 TESR_FogColor : register(c18);
 
 sampler2D DecalMap : register(s1);
-sampler2D TESR_DecalNormal : register(s2) < string ResourceName = "Effects\blooddecal_n.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+sampler2D TESR_DecalNormal : register(s2); // samplerState2 { TEXTURE = Effects\blooddecal_n.dds; ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
 
 //
 //

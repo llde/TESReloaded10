@@ -24,20 +24,38 @@ public:
 		WaterHeightMapBuffer,
 	};
 
-	bool					LoadTexture(TextureRecordType Type, const char* Filename);
+	bool					LoadTexture(TextureRecordType Type);
 
 	IDirect3DBaseTexture9*	Texture;
 	DWORD					SamplerStates[SamplerStatesMax];
+	char					Name[80];
 };
 
-typedef std::map<std::string, TextureRecord*> TextureList;
+class TextureList : public std::list<TextureRecord*> {
+public:
+	
+	TextureRecord* find(char* Name) {
+
+		TextureRecord* R = NULL;
+
+		for (TextureList::iterator Iter = this->begin(); Iter != this->end(); ++Iter) {
+			if (!strcmp((*Iter)->Name, Name)) {
+				R = *Iter;
+				break;
+			}
+		}
+		return R;
+
+	}
+
+};
 
 class TextureManager { // Never disposed
 public:
 	static void				Initialize();
 
 	TextureRecord*			LoadTexture(const char* ShaderSource, D3DXPARAMETER_TYPE ConstantType, LPCSTR ConstantName, UINT RegisterIndex, bool* HasRenderedBuffer, bool* HasDepthBuffer);
-	DWORD					GetSamplerValue(UInt32 SamplerType, const char* ParserStart, const char* ParserEnd, char* SamplerValue);
+	DWORD					GetSamplerStateValue(UInt32 SamplerType, const char* ParserStart, const char* ParserEnd, char* SamplerValue);
 	void					SetWaterHeightMap(IDirect3DBaseTexture9* WaterHeightMap);
 
 	IDirect3DTexture9*		SourceTexture;

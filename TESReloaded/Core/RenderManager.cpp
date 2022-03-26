@@ -290,7 +290,7 @@ void NiD3DVertexShaderEx::DisposeShader() {
 }
 
 void NiD3DPixelShaderEx::SetupShader(IDirect3DPixelShader9* CurrentPixelHandle) {
-
+	
 	if (ShaderProgE && Player->GetWorldSpace()) {
 		ShaderHandle = ShaderProgE->ShaderHandle;
 		if (CurrentPixelHandle != ShaderHandle) ShaderProgE->SetCT();

@@ -331,7 +331,7 @@ void ShaderRecord::CreateCT(const char* ShaderSource, ID3DXConstantTable* Consta
 void ShaderRecord::SetCT() {
 	
 	ShaderValue* Value;
-	
+
 	if (HasConstantTable) {
 		if (HasRenderedBuffer) TheRenderManager->device->StretchRect(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface, NULL, TheTextureManager->RenderedSurface, NULL, D3DTEXF_NONE);
 		if (HasDepthBuffer) TheRenderManager->ResolveDepthBuffer();
@@ -508,6 +508,9 @@ void EffectRecord::SetCT() {
 	for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
 		Value = &TextureShaderValues[c];
 		if (Value->Texture->Texture) TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
+		for (int i = 1; i < SamplerStatesMax; i++) {
+			TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
+		}
 	}
 	for (UInt32 c = 0; c < FloatShaderValuesCount; c++) {
 		Value = &FloatShaderValues[c];

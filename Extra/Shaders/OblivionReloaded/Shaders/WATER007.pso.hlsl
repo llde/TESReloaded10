@@ -29,8 +29,8 @@ sampler2D NormalMap : register(s1);
 sampler2D DetailMap : register(s2);
 sampler2D DepthMap : register(s3);
 sampler2D DisplacementMap : register(s4);
-sampler2D TESR_RenderedBuffer : register(s5) = sampler_state { };
-sampler2D TESR_DepthBuffer : register(s6) = sampler_state { };
+sampler2D TESR_RenderedBuffer : register(s5); // samplerState5 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
+sampler2D TESR_DepthBuffer : register(s6); // samplerState6 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
 
 static const float nearZ = TESR_ProjectionTransform._34 / TESR_ProjectionTransform._33;
 static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
