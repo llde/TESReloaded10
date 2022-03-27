@@ -221,6 +221,9 @@ ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 	else if (!memcmp(Name, "Occlusion", 9)) {
 		strcat(FileName, "Occlusion\\");
 	}
+	else if (!memcmp(Name, "Bink", 4)) {
+		strcat(FileName, "Bink\\");
+	}
 	if (SubPath) strcat(FileName, SubPath);
 	strcat(FileName, Name);
 	strcpy(FileNameBinary, FileName);

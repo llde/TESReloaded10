@@ -20,7 +20,6 @@
 #include "../Common/Lib/Detours/detours.h"
 #include "../Common/Lib/Nvidia/nvapi.h"
 #include "../Common/Lib/Bink/bink.h"
-#include "../Common/Lib/Bink/binktextures.h"
 #include "../Common/Base/Logger.h"
 #include "../Common/Base/Types.h"
 #include "../Common/Base/SafeWrite.h"

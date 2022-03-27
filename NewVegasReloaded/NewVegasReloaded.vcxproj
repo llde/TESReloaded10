@@ -136,7 +136,6 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\SafeWrite.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\bink.h" />
-    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\binktextures.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\radbase.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Nvidia\nvapi.h" />
@@ -167,7 +166,6 @@
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\Logger.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\PluginVersion.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\SafeWrite.cpp" />
-    <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Bink\binktextures.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\detours.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\disasm.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\modules.cpp" />

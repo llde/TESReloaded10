@@ -161,9 +161,6 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\radbase.h">
       <Filter>Framework\Common\Lib\Bink</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\binktextures.h">
-      <Filter>Framework\Common\Lib\Bink</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -228,9 +225,6 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\BinkManager.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Bink\binktextures.cpp">
-      <Filter>Framework\Common\Lib\Bink</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
