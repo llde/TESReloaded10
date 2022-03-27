@@ -122,7 +122,7 @@ static void RenderMainMenuMovie() {
 }
 
 static __declspec(naked) void RenderInterfaceHook() {
-	
+
 	__asm {
 		pushad
 		call	RenderMainMenuMovie

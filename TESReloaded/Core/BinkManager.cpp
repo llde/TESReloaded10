@@ -106,8 +106,7 @@ void BinkManager::Draw() {
 	POS_TC_VERTEX vertices[4];
 	float ac[4];
 	IDirect3DDevice9* Device = TheRenderManager->device;
-	//NiDX9RenderState* RenderState = TheRenderManager->renderState;
-	IDirect3DDevice9* RenderState = TheRenderManager->device;
+	NiDX9RenderState* RenderState = TheRenderManager->renderState;
 	BINKFRAMEPLANESET* bp = &Textures.Buffers.Frames[Textures.Buffers.FrameNum];
 	BINKFRAMETEXTURES* bt = &Textures.Textures[Textures.Buffers.FrameNum];
 
@@ -115,20 +114,20 @@ void BinkManager::Draw() {
 	ac[1] = ac[0];
 	ac[2] = ac[0];
 	ac[3] = 1.0f;
-	RenderState->SetTexture(0, bt->Y);
-	RenderState->SetTexture(1, bt->cR);
-	RenderState->SetTexture(2, bt->cB);
-	for (int i = 0; i < 4; i++) {
+	Device->SetTexture(0, bt->Y);
+	Device->SetTexture(1, bt->cR);
+	Device->SetTexture(2, bt->cB);
+	for (int i = 0; i < 3; i++) {
 		TheRenderManager->SetSamplerState(i, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
 		TheRenderManager->SetSamplerState(i, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 		TheRenderManager->SetSamplerState(i, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
 		TheRenderManager->SetSamplerState(i, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 		TheRenderManager->SetSamplerState(i, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	}
-	RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
-	RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE);
-	RenderState->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	RenderState->SetRenderState(D3DRS_ALPHABLENDENABLE, 0);
+	RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE, RenderStateArgs);
+	RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE, RenderStateArgs);
+	RenderState->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE, RenderStateArgs);
+	RenderState->SetRenderState(D3DRS_ALPHABLENDENABLE, 0, RenderStateArgs);
 	Device->SetPixelShader(Pixel->ShaderHandle);
 	Device->SetVertexDeclaration(VertexShaderDeclaration);
 	Device->SetPixelShaderConstantF(0, ac, 1);

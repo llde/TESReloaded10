@@ -1,14 +1,6 @@
 #ifndef __BINKH__
 #define __BINKH__
 
-#define BINKMAJORVERSION 1
-#define BINKMINORVERSION 9
-#define BINKSUBVERSION 3
-#define BINKVERSION "1.9c"
-#define BINKDATE    "2008-01-15"
-
-#ifndef __RADRES__
-
 #ifndef __RADBASEH__
 #include "radbase.h"
 #endif
@@ -80,7 +72,7 @@ typedef void (RADLINK PTR4* BINKSNDCLOSE)      (struct BINKSND PTR4* BnkSnd);
 typedef BINKSNDOPEN  (RADLINK PTR4* BINKSNDSYSOPEN) (UINTa param);
 
 typedef struct BINKSND {
-  // for the spu, we *send* through sndreadpos, but we only return sndwritepos
+
   U8 PTR4* sndwritepos;       // current write position
 
   U32 audiodecompsize;
@@ -92,10 +84,6 @@ typedef struct BINKSND {
 
   U8 PTR4* sndreadpos;        // current read position (needs to be after the pad)
 
-#if defined( BINK_SPU_PROCESS )
-  struct binksnd_hide  // put variables that we don't want to accidentally
-  {                    //   use on the spu into a structure
-#endif
   U32 padding;
 
   U32 orig_freq;
@@ -127,10 +115,6 @@ typedef struct BINKSND {
   BINKSNDCLOSE Close;
   BINKSNDMIXBINS MixBins;
   BINKSNDMIXBINVOLS MixBinVols;
-
-#if defined( BINK_SPU_PROCESS )
-  } spu_hide;
-#endif
 
 } BINKSND;
 
@@ -245,11 +229,6 @@ typedef struct BINK {
 
   U32 changepercent;          // how much roughly did the current frame change?
 
-#if defined( BINK_SPU_PROCESS )
-  struct bink_hide  // put variables that we don't want to accidentally
-  {                 //   use on the spu into a structure
-#endif
-
   void PTR4* preloadptr;      // preloaded compressed frame data
   U32* frameoffsets;          // offsets of each of the frames
 
@@ -317,9 +296,6 @@ typedef struct BINK {
   S32 allkeys;                // are all frames keyframes?
   BINKFRAMEBUFFERS * allocatedframebuffers; // pointer to internally allocated buffers
 
-#if defined( BINK_SPU_PROCESS )
-  } spu_hide;
-#endif
 } BINK;
 
 
@@ -396,8 +372,6 @@ typedef struct BINKHDR {
   U32 NumTracks;              // number of tracks
 } BINKHDR;
 
-
-//=======================================================================
 #define BINKYAINVERT          0x00000800L // Reverse Y and A planes when blitting (for debugging)
 #define BINKFRAMERATE         0x00001000L // Override fr (call BinkFrameRate first)
 #define BINKPRELOADALL        0x00002000L // Preload the entire animation
@@ -457,25 +431,6 @@ typedef struct BINKHDR {
 #define BINKSURFACEYV12       15
 #define BINKSURFACEMASK       15
 
-#ifdef __RADXBOX__
-
-#define BINKSURFACESALL        32
-#define BINKCONVERTERSMONO     64
-#define BINKCONVERTERS2X      256
-
-#define BINKCONVERTERSALL (BINKSURFACESALL|BINKCONVERTERSMONO|BINKCONVERTERS2X)
-
-#define BinkLoad() BinkLoadUnload(1)
-#define BinkUnload() BinkLoadUnload(0)
-
-#define BinkLoadConverter(val) BinkLoadUnloadConverter(val,1)
-#define BinkUnloadConverter(val) BinkLoadUnloadConverter(val,0)
-
-RADEXPFUNC void RADEXPLINK BinkLoadUnload( S32 inout );
-RADEXPFUNC void RADEXPLINK BinkLoadUnloadConverter( U32 surfaces, S32 inout );
-
-#endif
-
 #define BINKGOTOQUICK          1
 #define BINKGOTOQUICKSOUND     2
 
@@ -483,21 +438,6 @@ RADEXPFUNC void RADEXPLINK BinkLoadUnloadConverter( U32 surfaces, S32 inout );
 #define BINKGETKEYNEXT         1
 #define BINKGETKEYCLOSEST      2
 #define BINKGETKEYNOTEQUAL   128
-
-//=======================================================================
-
-#ifdef __RADMAC__
-
-#if !defined(__RADMACH__) && defined(__RADINDLL__)
-#pragma export on
-#endif
-
-  RADEXPFUNC HBINK RADEXPLINK BinkMacOpen(void /*FSSpec*/ * fsp,U32 flags);
-#endif
-
-#ifdef __RADNDS__
-  RADEXPFUNC HBINK RADEXPLINK BinkNDSOpen(void /*FSFileID*/ * fid,U32 flags);
-#endif
 
 RADEXPFUNC void PTR4* RADEXPLINK BinkLogoAddress(void);
 
@@ -536,17 +476,11 @@ RADEXPFUNC void RADEXPLINK BinkGetPalette( void * out_pal );
 #define BINKBGIOWAIT    0x80000000
 
 RADEXPFUNC S32  RADEXPLINK BinkControlBackgroundIO(HBINK bink,U32 control);
-
-
-#if defined( __RADWIN__ ) || defined( __RADXENON__ ) || defined( __RADPS3__ )
-
 RADEXPFUNC S32 RADEXPLINK BinkStartAsyncThread( S32 thread_num, void const * param );
 RADEXPFUNC S32  RADEXPLINK BinkDoFrameAsync(HBINK bink, U32 yplane_thread_num, U32 other_work_thread_num );
 RADEXPFUNC S32  RADEXPLINK BinkDoFrameAsyncWait(HBINK bink, S32 us);
 RADEXPFUNC S32 RADEXPLINK BinkRequestStopAsyncThread( S32 thread_num );
 RADEXPFUNC S32 RADEXPLINK BinkWaitStopAsyncThread( S32 thread_num );
-
-#endif
 
 
 typedef struct BINKTRACK PTR4* HBINKTRACK;
@@ -583,127 +517,25 @@ RADEXPFUNC void RADEXPLINK BinkSetIOSize(U32 iosize);
 
 RADEXPFUNC S32  RADEXPLINK BinkSetSoundSystem(BINKSNDSYSOPEN open, UINTa param);
 
-#ifdef __RADX86__
 #define BINK_CPU_MMX   1
 #define BINK_CPU_3DNOW 2
 #define BINK_CPU_SSE   4
 #define BINK_CPU_SSE2  8
-#elif defined( __RADMAC__ )
-#define BINK_CPU_ALTIVEC 1
-#endif
 
 RADEXPFUNC S32 RADEXPLINK BinkControlPlatformFeatures( S32 use, S32 dont_use );
 
-#ifdef __RADWIN__
+RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenDirectSound(UINTa param); // don't call directly
+#define BinkSoundUseDirectSound(lpDS) BinkSetSoundSystem(BinkOpenDirectSound,(UINTa)lpDS)
 
-  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenDirectSound(UINTa param); // don't call directly
-  #define BinkSoundUseDirectSound(lpDS) BinkSetSoundSystem(BinkOpenDirectSound,(UINTa)lpDS)
+RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenWaveOut(UINTa param); // don't call directly
+#define BinkSoundUseWaveOut() BinkSetSoundSystem(BinkOpenWaveOut,0)
 
-  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenWaveOut(UINTa param); // don't call directly
-  #define BinkSoundUseWaveOut() BinkSetSoundSystem(BinkOpenWaveOut,0)
-
-#endif
-
-#ifdef __RADXENON__
-
-  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenXAudio(UINTa param); // don't call directly
-  #define BinkSoundUseXAudio() BinkSetSoundSystem(BinkOpenXAudio,0)
-
-#endif
-
-
-#ifndef __RADMAC__
-
-  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenMiles(UINTa param); // don't call directly
-  #define BinkSoundUseMiles(hdigdriver) BinkSetSoundSystem(BinkOpenMiles,(UINTa)hdigdriver)
-
-#endif
-
-
-#ifdef __RADMAC__
-
-  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenSoundManager(UINTa param); // don't call directly
-  #define BinkSoundUseSoundManager() BinkSetSoundSystem(BinkOpenSoundManager,0)
-
-#endif
-
-#ifdef __RADLINUX__
-
-  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenSDLMixer(UINTa param); // don't call directly
-  #define BinkSoundUseSDLMixer() BinkSetSoundSystem(BinkOpenSDLMixer,0)
-
-#endif
-
-#if defined( __RADNGC__ ) || defined( __RADWII__ )
-
-  typedef void PTR4 * (RADLINK PTR4* RADARAMALLOC) ( U32 num_bytes );
-  typedef void (RADLINK PTR4* RADARAMFREE)   ( void PTR4 * ptr );
-
-  typedef struct RADARAMCALLBACKS
-  {
-    RADARAMALLOC aram_malloc;
-    RADARAMFREE aram_free;
-  } RADARAMCALLBACKS;
-
-  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenAX(U32 param); // don't call directly
-  #define BinkSoundUseAX( functions ) BinkSetSoundSystem(BinkOpenAX,(U32)functions) // takes a pointer to RADARAMCALLBACKS
-
-  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenMusyXSound(U32 param); // don't call directly
-  #define BinkSoundUseMusyX( ) BinkSetSoundSystem(BinkOpenMusyXSound,0)
-
-#endif
-
-#ifdef __RADPS2__
-
-  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenRAD_IOP(U32 param); // don't call directly
-  #define BinkSoundUseRAD_IOP( which_sound_core ) BinkSetSoundSystem(BinkOpenRAD_IOP,which_sound_core)
-
-#endif
-
-#ifdef __RADPS3__
-
-  RADEXPFUNC void RADEXPLINK BinkFreeGlobals( void );
-
-  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenLibAudio( U32 param );
-  #define BinkSoundUseLibAudio( number_of_speakers ) BinkSetSoundSystem( BinkOpenLibAudio, number_of_speakers )
-
-#endif
-
-#ifdef __RADPSP__
-
-  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenPSPSound( U32 param );
-  #define BinkSoundUsePSPSound( which_pcm_channel ) BinkSetSoundSystem( BinkOpenPSPSound, ((U32)(S32)which_pcm_channel) )
-
-#endif
-
-#ifdef __RADNDS__
-
-  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenNDSSound(U32 param); // don't call directly
-  #define BinkSoundUseNDSSound( param ) BinkSetSoundSystem(BinkOpenNDSSound, param)
-
-  // Packs channel bitmask into loword and alarm bitmask into lobyte of hiword
-  #define BINK_PACK_CHANNEL( ch )    ((U32)(1 << ((ch) & 0xFFFF)))
-  #define BINK_PACK_ALARM( al )      ((U32)(1 << (16 + ((al) & 0xFF))))
-
-#endif
-
-#if defined(__RADXBOX__) || defined(__RADWIN__)
+RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenMiles(UINTa param); // don't call directly
+#define BinkSoundUseMiles(hdigdriver) BinkSetSoundSystem(BinkOpenMiles,(UINTa)hdigdriver)
 
 RADEXPFUNC S32 RADEXPLINK BinkDX8SurfaceType(void* lpD3Ds);
-
-#endif
-
-#if defined(__RADXENON__) || defined(__RADWIN__)
-
 RADEXPFUNC S32 RADEXPLINK BinkDX9SurfaceType(void* lpD3Ds);
 
-#endif
-
-
-// The BinkBuffer API isn't implemented on DOS, or any of the consoles
-#if !defined(__RADDOS__) && !defined(__RADXBOX__) && !defined(__RADNGC__) && !defined(__RADNDS__)
-
-//=========================================================================
 typedef struct BINKBUFFER * HBINKBUFFER;
 
 #define BINKBUFFERSTRETCHXINT    0x80000000
@@ -716,49 +548,6 @@ typedef struct BINKBUFFER * HBINKBUFFER;
 #define BINKBUFFERSHRINKY        0x01000000
 #define BINKBUFFERSCALES         0xff000000
 #define BINKBUFFERRESOLUTION     0x00800000
-
-#ifdef __RADMAC__
-
-//#include <windows.h>
-//#include <palettes.h>
-//#include <qdoffscreen.h>
-
-typedef struct BINKBUFFER {
-  U32 Width;
-  U32 Height;
-  U32 WindowWidth;
-  U32 WindowHeight;
-  U32 SurfaceType;
-  void* Buffer;
-  S32 BufferPitch;
-  U32 ScreenWidth;
-  U32 ScreenHeight;
-  U32 ScreenDepth;
-  U32 ScaleFlags;
-
-  S32 destx,desty;
-  S32 wndx,wndy;
-  U32 wnd;
-
-  S32 noclipping;
-  U32 type;
-  S32 issoftcur;
-  U32 cursorcount;
-
-} BINKBUFFER;
-
-
-#define BINKBUFFERAUTO                0
-#define BINKBUFFERDIRECT              1
-#define BINKBUFFERGWORLD              2
-#define BINKBUFFERTYPEMASK           31
-
-RADEXPFUNC HBINKBUFFER RADEXPLINK BinkBufferOpen( void* /*WindowPtr*/ wnd, U32 width, U32 height, U32 bufferflags);
-RADEXPFUNC S32 RADEXPLINK BinkGDSurfaceType( void* /*GDHandle*/ gd );
-RADEXPFUNC S32 RADEXPLINK BinkIsSoftwareCursor(void* /*GDHandle*/ gd);
-RADEXPFUNC S32 RADEXPLINK BinkCheckCursor(void* /*WindowPtr*/ wp,S32 x,S32 y,S32 w,S32 h);
-
-#else
 
 typedef struct BINKBUFFER {
   U32 Width;
@@ -808,7 +597,6 @@ typedef struct BINKBUFFER {
 
 } BINKBUFFER;
 
-
 #define BINKBUFFERAUTO                0
 #define BINKBUFFERPRIMARY             1
 #define BINKBUFFERDIBSECTION          2
@@ -829,9 +617,6 @@ RADEXPFUNC S32 RADEXPLINK BinkDDSurfaceType(void PTR4* lpDDS);
 RADEXPFUNC S32 RADEXPLINK BinkIsSoftwareCursor(void PTR4* lpDDSP, void* /*HCURSOR*/ cur);
 RADEXPFUNC S32 RADEXPLINK BinkCheckCursor(void* /*HWND*/ wnd,S32 x,S32 y,S32 w,S32 h);
 RADEXPFUNC S32 RADEXPLINK BinkBufferSetDirectDraw(void PTR4* lpDirectDraw, void PTR4* lpPrimary);
-
-#endif
-
 RADEXPFUNC void RADEXPLINK BinkBufferClose( HBINKBUFFER buf);
 RADEXPFUNC S32 RADEXPLINK BinkBufferLock( HBINKBUFFER buf);
 RADEXPFUNC S32 RADEXPLINK BinkBufferUnlock( HBINKBUFFER buf);
@@ -845,26 +630,11 @@ RADEXPFUNC char PTR4* RADEXPLINK BinkBufferGetError();
 RADEXPFUNC void RADEXPLINK BinkRestoreCursor(S32 checkcount);
 RADEXPFUNC S32 RADEXPLINK BinkBufferClear(HBINKBUFFER buf, U32 RGB);
 
-#endif
-
 typedef void PTR4* (RADLINK PTR4* BINKMEMALLOC) (U32 bytes);
 typedef void       (RADLINK PTR4* BINKMEMFREE)  (void PTR4* ptr);
 
 RADEXPFUNC void RADEXPLINK BinkSetMemory(BINKMEMALLOC a,BINKMEMFREE f);
 
-#ifdef __RADMAC__
-
-#if !defined(__RADMACH__) && defined(__RADINDLL__)
-#pragma export off
-#endif
-
-#endif
-
 RADDEFEND
 
 #endif
-
-// @cdep pre $set(INCs,$INCs -I$clipfilename($file)) $ignore(TakeCPP)
-
-#endif
-
