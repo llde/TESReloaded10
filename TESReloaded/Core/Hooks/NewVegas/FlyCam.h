@@ -1,6 +1,6 @@
 #pragma once
-#define FlyCamFBValue [esp + 0x0C]
-#define FlyCamRLValue [esp + 0x08]
+#define FlyCamFBValue [ebp - 0x80]
+#define FlyCamRLValue [ebp - 0x84]
 
 static float Scroll = 0.0f;
 

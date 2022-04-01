@@ -161,6 +161,9 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\radbase.h">
       <Filter>Framework\Common\Lib\Bink</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\FlyCam.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">

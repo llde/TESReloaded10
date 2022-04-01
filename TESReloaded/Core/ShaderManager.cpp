@@ -886,6 +886,8 @@ void ShaderManager::UpdateConstants() {
 			RGBA* rgba = NULL;
 			SettingsWaterStruct* sws = NULL;
 			TESWaterForm* currentWater = Tes->GetWaterForm();
+			
+			WaterManager* w = Tes->waterManager;
 
 			if (currentWater) {
 				UInt32 WaterType = currentWater->GetWaterType();

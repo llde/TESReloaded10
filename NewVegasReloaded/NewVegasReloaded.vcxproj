@@ -119,6 +119,7 @@
     <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\FlyCam.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Forms.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Game.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Hooks.h" />

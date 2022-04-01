@@ -4120,18 +4120,34 @@ class WaterManager {
 public:
 	UInt32				unk00;					// 000
 	UInt32				unk04;					// 004
-	
-	BSRenderedTexture*	Map1;					// 008
-	BSRenderedTexture*	Map2;					// 00C
-	BSRenderedTexture*	Map3;					// 010
-	BSRenderedTexture*	HeightMap;				// 014 to do: find the HeightMap (at the moment this is only to compile)
-	BSRenderedTexture*	Map5;					// 018
-	BSRenderedTexture*	Map6;					// 01C
-	BSRenderedTexture*	Map7;					// 020
-	TESWaterForm*		WaterForm1;
-	TESWaterForm*		WaterForm2;
-
-	UInt32				unk24[29];				// 024
+	UInt32				unk08;					// 008
+	UInt32				unk0C;					// 00C
+	UInt32				unk10;					// 010
+	UInt32				unk14;					// 014
+	UInt32				unk18;					// 018
+	NiSourceTexture*	WaterTexture;			// 01C
+	UInt32				unk20;					// 020
+	float				unk24;					// 024
+	UInt32				unk28;					// 028
+	UInt32				unk2C;					// 02C
+	UInt32				unk30;					// 030
+	UInt8				unk34;					// 034
+	UInt8				pad34[3];
+	float				unk38;					// 038
+	UInt32				unk3C;					// 03C
+	UInt32				unk40;					// 040
+	UInt32				unk44;					// 044
+	UInt32				unk48;					// 048
+	NiTMap<TESObjectREFR*, TESObjectREFR*>		unk4C;	// 04C
+	NiTMap<TESObjectREFR*, TESObjectREFR*>		unk5C;	// 05C
+	NiTMap<TESWaterForm*, bool>					unk6C;	// 06C
+	NiTMap<TESObjectREFR*, void*>				unk7C;	// 07C NiTMap<TESObjectREFR*, WadingWaterData*>
+	UInt32				unk8C;					// 08C
+	UInt32				unk90;					// 090
+	UInt32				unk94;					// 094
+	float				unk98;					// 098
+	UInt8				unk9C;					// 09C
+	UInt8				pad9C[3];
 };
 assert(sizeof(WaterManager) == 0x0A0);
 
@@ -5162,6 +5178,7 @@ namespace Pointers {
 	namespace ShaderParams {
 		static float* GrassWindMagnitudeMax	= (float*)0x00000000;
 		static float* GrassWindMagnitudeMin	= (float*)0x00000000;
+		static UInt8* WaterHighResolution	= (UInt8*)0x01200059;
 		static float* RockParams			= (float*)0x01200658;
 		static float* RustleParams			= (float*)0x01200668;
 		static float* WindMatrixes			= (float*)0x01200688;

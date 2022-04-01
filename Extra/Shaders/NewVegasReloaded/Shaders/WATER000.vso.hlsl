@@ -28,7 +28,6 @@ float ObjectUV : register(c10);
 
 struct VS_INPUT {
     float4 LPOSITION : POSITION;
-    float4 LCOLOR_0 : COLOR0;
     float4 LTEXCOORD_0 : TEXCOORD0;
 };
 
@@ -52,7 +51,7 @@ VS_OUTPUT main(VS_INPUT IN) {
 #define	weight(v)		dot(v, 1)
 #define	sqr(v)			((v) * (v))
 
-    const float4 const_7 = {0.5, 0.001, 0, 0};
+    const float4 const_7 = {0.5, 0.001, 1, 0};
 
     float4 mdl0;
     float2 q4;
@@ -73,8 +72,7 @@ VS_OUTPUT main(VS_INPUT IN) {
     OUT.texcoord_3.xyzw = (r0.x * ModelViewProj[1].xyzw) + mdl0.xyzw;
     OUT.texcoord_4.xyzw = (r0.x * ModelViewProj[2].xyzw) + mdl0.xyzw;
     OUT.texcoord_5.xyzw = ModelViewProj[3].xyzw;
-    OUT.texcoord_6.w = IN.LCOLOR_0.w;
-    OUT.texcoord_6.xyz = IN.LTEXCOORD_0.xyz;
+    OUT.texcoord_6.xyzw = (IN.LTEXCOORD_0.xyzx * const_7.zzzw) + const_7.wwwz;
     r0.x = (-(sqr(ObjectUV.x)) < sqr(ObjectUV.x) ? 1.0 : 0.0);
     OUT.texcoord_7.zw = 0;
     OUT.texcoord_7.xy = (r0.x * ((IN.LTEXCOORD_0.xy / (r0.y * TexScale.x)) - q4.xy)) + q4.xy;

@@ -27,6 +27,7 @@ public:
 	static const UInt32 GetWaterHeightLOD			= 0x0045CD80;
 	static const UInt32 ShowDetectorWindow			= 0x004D61B0;
 	static const UInt32 LoadForm					= 0x004601D0;
+	static const UInt32 UpdateFlyCam				= 0x0094A8C0;
 };
 
 class Jumpers {
@@ -76,6 +77,16 @@ public:
 	struct MultiBoundWaterHeight {
 		static const UInt32 Fix1	= 0x006FAE04;
 		static const UInt32 Fix2	= 0x006FAF50;
+	};
+	struct FlyCam {
+		static const UInt32 UpdateForwardFlyCamHook		= 0x0094ABDF;
+		static const UInt32 UpdateForwardFlyCamReturn	= 0x0094ABEB;
+		static const UInt32 UpdateBackwardFlyCamHook	= 0x0094ABFB;
+		static const UInt32 UpdateBackwardFlyCamReturn	= 0x0094AC07;
+		static const UInt32 UpdateRightFlyCamHook		= 0x0094AC17;
+		static const UInt32 UpdateRightFlyCamReturn		= 0x0094AC29;
+		static const UInt32 UpdateLeftFlyCamHook		= 0x0094AC39;
+		static const UInt32 UpdateLeftFlyCamReturn		= 0x0094AC4B;
 	};
 };
 

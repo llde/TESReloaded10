@@ -39,3 +39,4 @@
 #include "../Core/Hooks/NewVegas/Render.h"
 #include "../Core/Hooks/NewVegas/Forms.h"
 #include "../Core/Hooks/NewVegas/Shadows.h"
+#include "../Core/Hooks/NewVegas/FlyCam.h"
