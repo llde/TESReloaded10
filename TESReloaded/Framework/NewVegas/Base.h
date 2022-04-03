@@ -142,6 +142,7 @@ public:
 	static int GetShader(const char* Name, NiD3DVertexShader*** Shader, NiD3DVertexShader** AdditionalShader, int AdditionalShaderSize) {
 
 		BSShader** Shaders = (BSShader**)0x011F9548;
+		NiD3DVertexShader** ShadowLightVertexShaders = (NiD3DVertexShader**)0x011FDE5C;
 		int Size = 0;
 
 		if (!strcmp(Name, "Water")) {
@@ -153,6 +154,10 @@ public:
 			*Shader = AdditionalShader;
 			Size = AdditionalShaderSize;
 		}
+		else if (!strcmp(Name, "Terrain") || !strcmp(Name, "ExtraShaders")) {
+			*Shader = ShadowLightVertexShaders;
+			Size = 103;
+		}
 		return Size;
 
 	}
@@ -160,6 +165,7 @@ public:
 	static int GetShader(const char* Name, NiD3DPixelShader*** Shader, NiD3DPixelShader** AdditionalShader, int AdditionalShaderSize) {
 
 		BSShader** Shaders = (BSShader**)0x011F9548;
+		NiD3DPixelShader** ShadowLightPixelShaders = (NiD3DPixelShader**)0x011FDB08;
 		int Size = 0;
 
 		if (!strcmp(Name, "Water")) {
@@ -170,6 +176,10 @@ public:
 		else if (!strcmp(Name, "WaterHeightMap")) {
 			*Shader = AdditionalShader;
 			Size = AdditionalShaderSize;
+		}
+		else if (!strcmp(Name, "Terrain") || !strcmp(Name, "ExtraShaders")) {
+			*Shader = ShadowLightPixelShaders;
+			Size = 160;
 		}
 		return Size;
 

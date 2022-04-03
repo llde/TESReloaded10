@@ -297,9 +297,7 @@ public:
 
 		ShaderDefinition** Shaders = (ShaderDefinition**)0x00B42EC0;
 		NiD3DVertexShader** PrecipitationVertexShaders = (NiD3DVertexShader**)0x00B466E0;
-		NiD3DPixelShader** PrecipitationPixelShaders = (NiD3DPixelShader**)0x00B46708;
 		NiD3DVertexShader** ShadowLightVertexShaders = (NiD3DVertexShader**)0x00B45364;
-		NiD3DPixelShader** ShadowLightPixelShaders = (NiD3DPixelShader**)0x00B45144;
 		int Size = 0;
 
 		if (!strcmp(Name, "Water")) {
@@ -357,9 +355,7 @@ public:
 	static int GetShader(const char* Name, NiD3DPixelShader*** Shader, NiD3DPixelShader** AdditionalShader, int AdditionalShaderSize) {
 
 		ShaderDefinition** Shaders = (ShaderDefinition**)0x00B42EC0;
-		NiD3DVertexShader** PrecipitationVertexShaders = (NiD3DVertexShader**)0x00B466E0;
 		NiD3DPixelShader** PrecipitationPixelShaders = (NiD3DPixelShader**)0x00B46708;
-		NiD3DVertexShader** ShadowLightVertexShaders = (NiD3DVertexShader**)0x00B45364;
 		NiD3DPixelShader** ShadowLightPixelShaders = (NiD3DPixelShader**)0x00B45144;
 		int Size = 0;
 
@@ -402,7 +398,7 @@ public:
 			*Shader = S->Pixel;
 			Size = sizeof(S->Pixel) / 4;
 		}
-		else if (!strcmp(Name, "Terrain")) {
+		else if (!strcmp(Name, "Terrain") || !strcmp(Name, "ExtraShaders")) {
 			*Shader = ShadowLightPixelShaders;
 			Size = 82;
 		}

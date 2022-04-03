@@ -170,7 +170,6 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 
 ShaderRecord::ShaderRecord() {
 	
-	HasConstantTable = false;
 	HasRenderedBuffer = false;
 	HasDepthBuffer = false;
 
@@ -241,7 +240,7 @@ ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 		else if (strstr(Name, ".pso"))
 			strcpy(ShaderProfile, "ps_3_0");
 		if (TheSettingManager->SettingsMain.Develop.CompileShaders) {
-			D3DXCompileShaderFromFileA(FileName, NULL, NULL, "main", ShaderProfile, NULL, &Shader, &Errors, &ConstantTable);
+			D3DXCompileShader(ShaderSource, Size, NULL, TheShaderManager, "main", ShaderProfile, NULL, &Shader, &Errors, &ConstantTable);
 			if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
 			if (Shader) {
 				Function = Shader->GetBufferPointer();
@@ -303,28 +302,25 @@ void ShaderRecord::CreateCT(const char* ShaderSource, ID3DXConstantTable* Consta
 		if (ConstantDesc.RegisterSet == D3DXRS_FLOAT4 && !memcmp(ConstantDesc.Name, "TESR_", 5)) FloatShaderValuesCount += 1;
 		if (ConstantDesc.RegisterSet == D3DXRS_SAMPLER && !memcmp(ConstantDesc.Name, "TESR_", 5)) TextureShaderValuesCount += 1;
     }
-	HasConstantTable = FloatShaderValuesCount + TextureShaderValuesCount;
-    if (HasConstantTable) {
-		FloatShaderValues = (ShaderValue*)malloc(FloatShaderValuesCount * sizeof(ShaderValue));
-		TextureShaderValues = (ShaderValue*)malloc(TextureShaderValuesCount * sizeof(ShaderValue));
-		for (UINT c = 0; c < ConstantTableDesc.Constants; c++) {
-			Handle = ConstantTable->GetConstant(NULL, c);
-			ConstantTable->GetConstantDesc(Handle, &ConstantDesc, &ConstantCount);
-			if (!memcmp(ConstantDesc.Name, "TESR_", 5)) {
-				switch (ConstantDesc.RegisterSet) {
-					case D3DXRS_FLOAT4:
-						SetConstantTableValue(ConstantDesc.Name, FloatIndex);
-						FloatShaderValues[FloatIndex].RegisterIndex = ConstantDesc.RegisterIndex;
-						FloatShaderValues[FloatIndex].RegisterCount = ConstantDesc.RegisterCount;
-						FloatIndex++;
- 						break;
-					case D3DXRS_SAMPLER:
-						TextureShaderValues[TextureIndex].Texture = TheTextureManager->LoadTexture(ShaderSource, ConstantDesc.Type, ConstantDesc.Name, ConstantDesc.RegisterIndex, &HasRenderedBuffer, &HasDepthBuffer);
-						TextureShaderValues[TextureIndex].RegisterIndex = ConstantDesc.RegisterIndex;
-						TextureShaderValues[TextureIndex].RegisterCount = 1;
-						TextureIndex++;
-						break;
-				}
+	if (FloatShaderValuesCount) FloatShaderValues = (ShaderValue*)malloc(FloatShaderValuesCount * sizeof(ShaderValue));
+	if (TextureShaderValuesCount) TextureShaderValues = (ShaderValue*)malloc(TextureShaderValuesCount * sizeof(ShaderValue));
+	for (UINT c = 0; c < ConstantTableDesc.Constants; c++) {
+		Handle = ConstantTable->GetConstant(NULL, c);
+		ConstantTable->GetConstantDesc(Handle, &ConstantDesc, &ConstantCount);
+		if (!memcmp(ConstantDesc.Name, "TESR_", 5)) {
+			switch (ConstantDesc.RegisterSet) {
+				case D3DXRS_FLOAT4:
+					SetConstantTableValue(ConstantDesc.Name, FloatIndex);
+					FloatShaderValues[FloatIndex].RegisterIndex = ConstantDesc.RegisterIndex;
+					FloatShaderValues[FloatIndex].RegisterCount = ConstantDesc.RegisterCount;
+					FloatIndex++;
+ 					break;
+				case D3DXRS_SAMPLER:
+					TextureShaderValues[TextureIndex].Texture = TheTextureManager->LoadTexture(ShaderSource, ConstantDesc.Type, ConstantDesc.Name, ConstantDesc.RegisterIndex, &HasRenderedBuffer, &HasDepthBuffer);
+					TextureShaderValues[TextureIndex].RegisterIndex = ConstantDesc.RegisterIndex;
+					TextureShaderValues[TextureIndex].RegisterCount = 1;
+					TextureIndex++;
+					break;
 			}
 		}
 	}
@@ -335,20 +331,18 @@ void ShaderRecord::SetCT() {
 	
 	ShaderValue* Value;
 
-	if (HasConstantTable) {
-		if (HasRenderedBuffer) TheRenderManager->device->StretchRect(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface, NULL, TheTextureManager->RenderedSurface, NULL, D3DTEXF_NONE);
-		if (HasDepthBuffer) TheRenderManager->ResolveDepthBuffer();
-		for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
-			Value = &TextureShaderValues[c];
-			if (Value->Texture->Texture) TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
-			for (int i = 1; i < SamplerStatesMax; i++) {
-				TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
-			}
+	if (HasRenderedBuffer) TheRenderManager->device->StretchRect(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface, NULL, TheTextureManager->RenderedSurface, NULL, D3DTEXF_NONE);
+	if (HasDepthBuffer) TheRenderManager->ResolveDepthBuffer();
+	for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
+		Value = &TextureShaderValues[c];
+		if (Value->Texture->Texture) TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
+		for (int i = 1; i < SamplerStatesMax; i++) {
+			TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
 		}
-		for (UInt32 c = 0; c < FloatShaderValuesCount; c++) {
-			Value = &FloatShaderValues[c];
-			SetShaderConstantF(Value->RegisterIndex, Value->Value, Value->RegisterCount);
-		}
+	}
+	for (UInt32 c = 0; c < FloatShaderValuesCount; c++) {
+		Value = &FloatShaderValues[c];
+		SetShaderConstantF(Value->RegisterIndex, Value->Value, Value->RegisterCount);
 	}
 
 }
@@ -426,7 +420,7 @@ EffectRecord* EffectRecord::LoadEffect(const char* Name) {
 			Compiled = false;
 			ID3DXEffectCompiler* Compiler = NULL;
 			ID3DXBuffer* EffectBuffer = NULL;
-			D3DXCreateEffectCompilerFromFileA(FileName, NULL, NULL, NULL, &Compiler, &Errors);
+			D3DXCreateEffectCompiler(ShaderSource, Size, NULL, NULL, NULL, &Compiler, &Errors);
 			if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
 			if (Compiler) {
 				Compiler->CompileEffect(NULL, &EffectBuffer, &Errors);
@@ -476,8 +470,8 @@ void EffectRecord::CreateCT(const char* ShaderSource, ID3DXConstantTable* Consta
 		if ((ConstantDesc.Class == D3DXPC_VECTOR || ConstantDesc.Class == D3DXPC_MATRIX_ROWS) && !memcmp(ConstantDesc.Name, "TESR_", 5)) FloatShaderValuesCount += 1;
 		if (ConstantDesc.Class == D3DXPC_OBJECT && ConstantDesc.Type >= D3DXPT_SAMPLER && ConstantDesc.Type <= D3DXPT_SAMPLERCUBE && !memcmp(ConstantDesc.Name, "TESR_", 5)) TextureShaderValuesCount += 1;
 	}
-	FloatShaderValues = (ShaderValue*)malloc(FloatShaderValuesCount * sizeof(ShaderValue));
-	TextureShaderValues = (ShaderValue*)malloc(TextureShaderValuesCount * sizeof(ShaderValue));
+	if (FloatShaderValuesCount) FloatShaderValues = (ShaderValue*)malloc(FloatShaderValuesCount * sizeof(ShaderValue));
+	if (TextureShaderValuesCount) TextureShaderValues = (ShaderValue*)malloc(TextureShaderValuesCount * sizeof(ShaderValue));
 	for (UINT c = 0; c < ConstantTableDesc.Parameters; c++) {
 		Handle = Effect->GetParameter(NULL, c);
 		Effect->GetParameterDesc(Handle, &ConstantDesc);
@@ -574,6 +568,7 @@ void ShaderManager::Initialize() {
 	TheShaderManager->ShaderConst.ReciprocalResolution.z = (float)TheRenderManager->width / (float)TheRenderManager->height;
 	TheShaderManager->ShaderConst.ReciprocalResolution.w = 0.0f; // Reserved to store the FoV
 	TheShaderManager->CreateFrameVertex(TheRenderManager->width, TheRenderManager->height, &TheShaderManager->FrameVertex);
+	TheShaderManager->LoadShaderIncludes();
 
 }
 
@@ -593,6 +588,54 @@ void ShaderManager::CreateFrameVertex(UInt32 Width, UInt32 Height, IDirect3DVert
 	(*FrameVertex)->Lock(0, 0, &VertexData, NULL);
 	memcpy(VertexData, FrameVertices, sizeof(FrameVertices));
 	(*FrameVertex)->Unlock();
+
+}
+
+void ShaderManager::LoadShaderIncludes() {
+
+	WIN32_FIND_DATAA File;
+	HANDLE H;
+	UInt32 SourceSize = 0;
+	char* ShaderSource = NULL;
+	char* cFileName = NULL;
+	char Filename[MAX_PATH];
+
+	strcpy(Filename, ShadersPath);
+	strcat(Filename, "Includes\\*.hlsl");
+	H = FindFirstFileA((LPCSTR)Filename, &File);
+	if (H != INVALID_HANDLE_VALUE) {
+		cFileName = (char*)File.cFileName;
+		strcpy(Filename, ShadersPath);
+		strcat(Filename, "Includes\\");
+		strcat(Filename, cFileName);
+		std::ifstream FileSource(Filename, std::ios::in | std::ios::binary | std::ios::ate);
+		if (FileSource.is_open()) {
+			std::streamoff Size = FileSource.tellg();
+			SourceSize = Size + 1;
+			ShaderSource = new char[SourceSize]; memset(ShaderSource, NULL, SourceSize);
+			FileSource.seekg(0, std::ios::beg);
+			FileSource.read(ShaderSource, Size);
+			FileSource.close();
+			ShaderIncludes[cFileName] = ShaderSource;
+		}
+		while (FindNextFileA(H, &File)) {
+			cFileName = (char*)File.cFileName;
+			strcpy(Filename, ShadersPath);
+			strcat(Filename, "Includes\\");
+			strcat(Filename, cFileName);
+			std::ifstream FileSource(Filename, std::ios::in | std::ios::binary | std::ios::ate);
+			if (FileSource.is_open()) {
+				std::streamoff Size = FileSource.tellg();
+				SourceSize = Size + 1;
+				ShaderSource = new char[SourceSize]; memset(ShaderSource, NULL, SourceSize);
+				FileSource.seekg(0, std::ios::beg);
+				FileSource.read(ShaderSource, Size);
+				FileSource.close();
+				ShaderIncludes[cFileName] = ShaderSource;
+			}
+		}
+		FindClose(H);
+	}
 
 }
 
@@ -887,8 +930,6 @@ void ShaderManager::UpdateConstants() {
 			SettingsWaterStruct* sws = NULL;
 			TESWaterForm* currentWater = Tes->GetWaterForm();
 			
-			WaterManager* w = Tes->waterManager;
-
 			if (currentWater) {
 				UInt32 WaterType = currentWater->GetWaterType();
 				if (WaterType == TESWaterForm::WaterType::kWaterType_Blood)

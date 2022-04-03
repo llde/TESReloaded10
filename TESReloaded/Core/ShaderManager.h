@@ -195,7 +195,6 @@ public:
 
 	static ShaderRecord*	LoadShader(const char* Name, const char* SubPath);
 	
-	bool					HasConstantTable;
 	bool					HasRenderedBuffer; 
 	bool					HasDepthBuffer;
 };
@@ -282,10 +281,11 @@ public:
 	ID3DXEffect*			Effect;
 };
 
+typedef std::map<std::string, char*> ShaderIncludesList;
 typedef std::map<std::string, EffectRecord*> ExtraEffectsList;
 typedef std::map<std::string, D3DXVECTOR4> CustomConstants;
 
-__declspec(align(16)) class ShaderManager : public ShaderManagerBase { // Never disposed
+__declspec(align(16)) class ShaderManager : public ShaderManagerBase, public ID3DXInclude { // Never disposed
 public:
 	static void Initialize();
 
@@ -293,6 +293,7 @@ public:
 
 	void					CreateFrameVertex(UInt32 Width, UInt32 Height, IDirect3DVertexBuffer9** FrameVertex);
 	void					CreateEffects();
+	void					LoadShaderIncludes();
 	void					InitializeConstants();
 	void					UpdateConstants();
 	void					CreateShader(const char* Name);
@@ -307,6 +308,22 @@ public:
 	void					SetExtraEffectEnabled(const char* Name, bool Value);
 	
 	struct					FrameVS { float x, y, z, u, v; };
+	
+	HRESULT __stdcall Open(D3DXINCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes) override {
+		
+		char* Include = ShaderIncludes[pFileName];
+
+		*ppData = Include;
+		*pBytes = strlen(Include);
+		return S_OK;
+
+	}
+
+	HRESULT __stdcall Close(LPCVOID pData) override {
+
+		return S_OK;
+
+	}
 
 	ShaderConstants			ShaderConst;
 	CustomConstants			CustomConst;
@@ -333,4 +350,6 @@ public:
 	ExtraEffectsList		ExtraEffects;
 	NiD3DVertexShader*		WaterVertexShaders[51];
 	NiD3DPixelShader*		WaterPixelShaders[51];
+	ShaderIncludesList		ShaderIncludes;
+
 };
