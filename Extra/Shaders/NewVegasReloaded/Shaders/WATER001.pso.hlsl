@@ -17,7 +17,6 @@ float4 SunColor : register(c13);
 float4 TESR_WaveParams : register(c14);
 float4 TESR_WaterVolume : register(c15);
 
-sampler2D ReflectionMap : register(s0);
 sampler2D RefractionMap : register(s1);
 sampler2D NoiseMap : register(s2);
 sampler2D DepthMap : register(s4);
@@ -37,7 +36,6 @@ sampler2D DepthMap : register(s4);
 //   DepthFalloff    const_11      1
 //   SunDir          const_12      1
 //   SunColor        const_13      1
-//   ReflectionMap   texture_0       1
 //   RefractionMap   texture_1       1
 //   NoiseMap        texture_2       1
 //   DepthMap        texture_4       1
@@ -69,33 +67,28 @@ VS_OUTPUT main(VS_INPUT IN) {
 #define	expand(v)		(((v) - 0.5) / 0.5)
 #define	compress(v)		(((v) * 0.5) + 0.5)
 #define	shade(n, l)		max(dot(n, l), 0)
-#define	shades(n, l)	saturate(dot(n, l))
+#define	shades(n, l)		saturate(dot(n, l))
 #define	weight(v)		dot(v, 1)
 #define	sqr(v)			((v) * (v))
 
     const float4 const_14 = {-0.569999993, 0.819999993, 0, 100};
-    const float4 const_6 = {-4, 4, 1, -9.99999975e-005};
-    const int4 const_7 = {0, 2, -1, 1};
+    const int4 const_6 = {0, 2, -1, 1};
+    const float4 const_7 = {-4, 4, 1, -9.99999975e-005};
 
-    float3 q10;
-    float1 q133;
-    float3 q21;
-    float3 q23;
-    float3 q39;
+    float2 q12;
+    float1 q18;
+    float1 q3;
+    float1 q30;
     float1 q4;
-    float1 q47;
     float1 q6;
-    float1 q60;
-    float1 q8;
-    float1 q9;
+    float1 q7;
     float4 r0;
     float4 r1;
     float3 r2;
     float4 r3;
-    float2 r4;
+    float4 r4;
     float3 r5;
     float4 r6;
-    float3 t3;
 	float choppiness = TESR_WaveParams.x;
 	float waveWidth = TESR_WaveParams.y;
 	float reflectivity = TESR_WaveParams.w;
@@ -107,40 +100,40 @@ VS_OUTPUT main(VS_INPUT IN) {
     r1.z = dot(IN.LTEXCOORD_4.xyzw, IN.LTEXCOORD_1.xyzw);
     r1.x = dot(IN.LTEXCOORD_2.xyzw, IN.LTEXCOORD_1.xyzw);
     r0.xyzw = tex2Dproj(DepthMap, r1.xyzw);
-    q133.x = saturate((r0.y - DepthFalloff.x) / (DepthFalloff.y - DepthFalloff.x));
-    r1.xyz = const_6.xyz;
+    r0.z = saturate((r0.y - DepthFalloff.x) / (DepthFalloff.y - DepthFalloff.x));
+    r1.xyz = const_7.xyz;
     r2.xyz = EyePos.xyz - IN.LTEXCOORD_0.xyz;
     r4.xy = saturate(lerp(r0.xy * turbidity, 1, 1 - saturate(1 - ((length(r2.xy) - 4096) * 0.000244140625))));
-    r1.w = length(r2.xyz);
-    q60.x = (r0.y * q133.x) * ((saturate(length(r2.xy) * 0.0002) * (r1.x + VarAmounts.w)) + 4);
-    r1.x = r4.y + r1.w;
-    r1.xw = saturate((FogParam.x - r1.xw) / FogParam.y);
-    q47.x = pow(abs(1 - r1.x), FresnelRI.y);
-    r3.xyz = (q133.x * expand(r3.xyz) * choppiness) + const_7.xxw;
+    q3.x = 1 - saturate((FogParam.z - (r4.x * FogParam.z)) / FogParam.w);
+    r3.xyz = (r0.z * expand(r3.xyz) * choppiness) + const_6.xxw;
     r3.xy = saturate(1 - ((length(r2.xy) - 4096) * 0.000244140625)) * r3.xy;
     r5.xyz = normalize(r3.xyz);
-    r1.x = shades(normalize(r1.zyz * SunDir.xyz), r5.xyz);
-    q9.x = pow(abs(shades(reflect(-normalize(r2.xyz), r5.xyz), SunDir.xyz)), VarAmounts.x);
-    q8.x = pow(abs(saturate(dot(r5.xz, const_14.xy))), 100);
-    r3.zw = (IN.LTEXCOORD_1.z * const_7.wx) + const_7.xw;
-    r3.xy = ((q60.x * r5.xy) / IN.LTEXCOORD_0.w) + IN.LTEXCOORD_1.xy;
-    r6.xyzw = mul(float4x4(IN.LTEXCOORD_2.xyzw, IN.LTEXCOORD_3.xyzw, IN.LTEXCOORD_4.xyzw, IN.LTEXCOORD_5.xyzw), r3.xyzw);
-    t3.xyz = tex2Dproj(ReflectionMap, r6.xyzw).xyz;
-    r3.xzw = r6.xzw;
-    r3.y = r3.w - r6.y;
-    r3.xyzw = tex2Dproj(RefractionMap, r3.xyzw);
-    q6.x = 1 - shades(normalize(r2.xyz), r5.xyz);
-    q21.xyz = (r3.xyz - (q47.x * FogColor.rgb)) / (1 - (q47.x - 9.99999975e-005));
-    q4.x = 1 - saturate((FogParam.z - (r4.x * FogParam.z)) / FogParam.w);
-	r6.xyz = (r4.y * (DeepColor.xyz - ShallowColor.xyz)) + ShallowColor.xyz;
-	r0.xyw = (VarAmounts.y * (t3.xyz - ReflectionColor.rgb)) + ReflectionColor.xyz;
-	r0.z = q133.x * (q4.x * FogColor.a);
-	q21.xyz = (r4.y * (r6.xyz - q21.xyz)) + q21.xyz;
-	q39.xyz = (r0.z * (r6.xyz - q21.xyz)) + q21.xyz;
-	q23.xyz = ((r4.y * 0.5 * lerp(FresnelRI.x, 1, q6.x * sqr(sqr(q6.x)))) * ((r0.xyw * reflectivity * FresnelRI.w) - q39.xyz)) + q39.xyz;
-    q10.xyz = (SunDir.w * ((q8.x + q9.x) * SunColor.rgb)) + q23.xyz;
+    q7.x = pow(abs(shades(reflect(-normalize(r2.xyz), r5.xyz), SunDir.xyz)), VarAmounts.x);
+    q6.x = pow(abs(saturate(dot(r5.xz, const_14.xy) + 0)), 100);
+    q4.x = 1 - shades(normalize(r2.xyz), r5.xyz);
+    r3.zw = (IN.LTEXCOORD_1.z * const_6.wx) + const_6.xw;
+    q12.xy = ((r0.y * r0.z) * ((saturate(length(r2.xy) * 0.0002) * (r1.x + VarAmounts.w)) + 4)) * r5.xy;
+    r0.y = length(r2.xyz);
+    r0.x = r4.y + r0.y;
+    r0.xy = saturate((FogParam.x - r0.xy) / FogParam.y);
+    r1.x = pow(abs(1 - r0.y), FresnelRI.y);
+    q18.x = shades(normalize(r1.zyz * SunDir.xyz), r5.xyz);
+    q30.x = pow(abs(1 - r0.x), FresnelRI.y);
+    r3.xy = ((1.0 / IN.LTEXCOORD_0.w) * q12.xy) + IN.LTEXCOORD_1.xy;
+    r6.w = dot(IN.LTEXCOORD_5.xyzw, r3.xyzw);
+    r6.y = r6.w - dot(IN.LTEXCOORD_3.xyzw, r3.xyzw);
+    r6.z = dot(IN.LTEXCOORD_4.xyzw, r3.xyzw);
+    r6.x = dot(IN.LTEXCOORD_2.xyzw, r3.xyzw);
+    r3.xyzw = tex2Dproj(RefractionMap, r6.xyzw);
+    r0.xyw = (r3.xyz - (q30.x * FogColor.xyz)) / (1 - (q30.x - 9.99999975e-005));
+    r3.xyz = (r4.y * (DeepColor.rgb - ShallowColor.rgb)) + ShallowColor.rgb;
+    r0.xyz = ((r0.z * (q3.x * FogColor.a)) * ((q18.x * r3.xyz) - r0.xyw)) + r0.xyw;
+    r0.w = r4.x * lerp(FresnelRI.x, 1, q4.x * sqr(sqr(q4.x)));
+    r4.xzw = q18.x * r3.xyz;
+    r1.yzw = (r0.w * (ReflectionColor.xyz - (r3.xyz * q18.x))) + r4.xzw;
+    r0.xyz = saturate((SunDir.w * ((q6.x + q7.x) * SunColor.rgb)) + lerp(r0.xyz, r1.yzw, r4.y));
     OUT.color_0.a = IN.LTEXCOORD_6.w;
-    OUT.color_0.rgb = (pow(abs(1 - r1.w), FresnelRI.y) * (FogColor.rgb - q10.xyz)) + q10.xyz;
+    OUT.color_0.rgb = (r1.x * (FogColor.xyz - r0.xyz)) + r0.xyz;
     return OUT;
 	
 };

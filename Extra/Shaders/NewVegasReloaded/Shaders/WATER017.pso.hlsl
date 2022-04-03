@@ -16,6 +16,7 @@ float2 DepthFalloff : register(c11);
 float4 SunDir : register(c12);
 float4 SunColor : register(c13);
 float4 TESR_WaveParams : register(c14);
+float4 TESR_WaterVolume : register(c15);
 
 sampler2D ReflectionMap : register(s0);
 sampler2D RefractionMap : register(s1);
@@ -104,6 +105,7 @@ VS_OUTPUT main(VS_INPUT IN) {
 	float choppiness = TESR_WaveParams.x;
 	float waveWidth = TESR_WaveParams.y;
 	float reflectivity = TESR_WaveParams.w;
+	float turbidity = TESR_WaterVolume.z;
 	
     r3.xyzw = tex2D(NoiseMap, IN.LTEXCOORD_7.xy * waveWidth);
     r5.xyzw = tex2D(DisplacementMap, IN.LTEXCOORD_6.xy);
@@ -121,7 +123,7 @@ VS_OUTPUT main(VS_INPUT IN) {
     r5.xy = (r5.zw - 0.5) * BlendRadius.w;
     r5.z = 0.04;
     r0.w = (r0.y * q51.x) * ((saturate(length(r2.xy) * 0.0002) * (r1.w - 4)) + 4);
-    r4.xy = saturate(lerp(r0.xy * 2, 1, 1 - saturate(1 - ((length(r2.xy) - 4096) * 0.000244140625))));
+    r4.xy = saturate(lerp(r0.xy * turbidity, 1, 1 - saturate(1 - ((length(r2.xy) - 4096) * 0.000244140625))));
     q8.x = 1 - saturate((FogParam.x - (r4.y + length(r2.xyz))) / FogParam.y);
     q10.x = 1 - saturate((FogParam.z - (r4.x * FogParam.z)) / FogParam.w);
     r3.xyz = (q51.x * expand(r3.xyz) * choppiness) + const_16.xxw;

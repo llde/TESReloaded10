@@ -13,6 +13,7 @@ float4 FogParam : register(c9);
 float4 FogColor : register(c10);
 float4 SunDir : register(c12);
 float4 SunColor : register(c13);
+float4 TESR_WaveParams : register(c14);
 
 sampler2D ReflectionMap : register(s0);
 
@@ -67,6 +68,7 @@ VS_OUTPUT main(VS_INPUT IN) {
     float1 q1;
     float3 q10;
     float1 q104;
+	float3 q21;
     float3 q16;
     float3 q3;
     float1 q4;
@@ -76,7 +78,8 @@ VS_OUTPUT main(VS_INPUT IN) {
     float4 r1;
     float3 r2;
     float3 t7;
-
+	float reflectivity = TESR_WaveParams.w;
+	
     r1.yz = VarAmounts.yz;
     r0.xyz = EyePos.xyz - IN.LTEXCOORD_0.xyz;
     q1.x = 1 - saturate((length(r0.xy) - 4096) * 0.000244140625);
@@ -85,14 +88,16 @@ VS_OUTPUT main(VS_INPUT IN) {
     r0.xyz = normalize(r0.xyz);
     r1.w = 1 - saturate(r0.z);
     r0.xyz = (r0.z * const_6.xxy) - r0.xyz;
-    q10.xyz = (q9.x * (DeepColor.rgb - ShallowColor.rgb)) + ShallowColor.rgb;
-    q104.x = lerp(FresnelRI.x, 1, r1.w * sqr(sqr(r1.w)));
+    q104.x = q9.x * 0.5 * lerp(FresnelRI.x, 1, r1.w * sqr(sqr(r1.w)));
     q3.xyz = (pow(abs(shades(r0.xyz, SunDir.xyz)), VarAmounts.x) + 2.40649434e-009) * SunColor.rgb;
     q0.xyzw = (IN.LTEXCOORD_1.xyzx * const_0.wwwx) + const_0.xxxw;
     q6.xyzw = mul(float4x4(IN.LTEXCOORD_2.xyzw, IN.LTEXCOORD_3.xyzw, IN.LTEXCOORD_4.xyzw, IN.LTEXCOORD_5.xyzw), q0.xyzw);
     t7.xyz = tex2Dproj(ReflectionMap, q6.xyzw).xyz;
-    r2.xyz = lerp(ReflectionColor.rgb, t7.xyz, r1.y);
-    q16.xyz = (SunDir.w * q3.xyz) + ((q104.x * ((FresnelRI.w * r2.xyz) - q10.xyz)) + q10.xyz);
+	q10.xyz = (q9.x * (DeepColor.rgb - ShallowColor.rgb)) + ShallowColor.rgb;
+	r2.xyz = (r1.y * (t7.xyz - ReflectionColor.rgb)) + ReflectionColor.xyz;
+	q21.xyz = (pow(abs(q4.x), FresnelRI.y) * (FogColor.rgb - r2.xyz)) + r2.xyz;
+	q10.xyz = (q9.x * (q10.xyz - q21.xyz)) + q21.xyz;
+    q16.xyz = (SunDir.w * q3.xyz) + ((q104.x * ((FresnelRI.w * reflectivity * r2.xyz) - q10.xyz)) + q10.xyz);
     OUT.color_0.a = q9.x * IN.LTEXCOORD_6.w;
     OUT.color_0.rgb = (pow(abs(q4.x), FresnelRI.y) * (FogColor.rgb - q16.xyz)) + q16.xyz;
     return OUT;
