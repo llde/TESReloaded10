@@ -126,6 +126,7 @@ void GameMenuManager::Render() {
 									TheSettingManager->SetSetting(SelectedNode.Section, SelectedNode.Key, atof(SelectedNode.Value) + 0.1f);
 									break;
 							}
+							if (!memcmp(SelectedNode.Key, "CompileShaders", 14)) TheShaderManager->PrepareShaderIncludes();
 						}
 					}
 					if (Global->OnKeyDown(MenuSettings->KeySubtract)) {

@@ -101,7 +101,7 @@ VS_OUTPUT main(VS_INPUT IN) {
 		q28.xyzw = mul(float4x4(WindMatrices[0 + offset.x].xyzw, WindMatrices[1 + offset.x].xyzw, WindMatrices[2 + offset.x].xyzw, WindMatrices[3 + offset.x].xyzw), q59.xyzw);
 		r0.xyzw = (IN.blendindexes.x * (q28.xyzw - q59.xyzw)) + q59.xyzw;
 	}
-    r0 = mul(r0, TESR_ShadowWorldTransform);
+    if (TESR_ShadowData.x != 1.0f) r0 = mul(r0, TESR_ShadowWorldTransform);
 	r0 = mul(r0, TESR_ShadowViewProjTransform);
 	OUT.position = r0;
     OUT.texcoord_0 = r0;

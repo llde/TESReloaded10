@@ -568,7 +568,7 @@ void ShaderManager::Initialize() {
 	TheShaderManager->ShaderConst.ReciprocalResolution.z = (float)TheRenderManager->width / (float)TheRenderManager->height;
 	TheShaderManager->ShaderConst.ReciprocalResolution.w = 0.0f; // Reserved to store the FoV
 	TheShaderManager->CreateFrameVertex(TheRenderManager->width, TheRenderManager->height, &TheShaderManager->FrameVertex);
-	TheShaderManager->LoadShaderIncludes();
+	TheShaderManager->PrepareShaderIncludes();
 
 }
 
@@ -591,7 +591,7 @@ void ShaderManager::CreateFrameVertex(UInt32 Width, UInt32 Height, IDirect3DVert
 
 }
 
-void ShaderManager::LoadShaderIncludes() {
+void ShaderManager::PrepareShaderIncludes() {
 
 	WIN32_FIND_DATAA File;
 	HANDLE H;
@@ -599,26 +599,16 @@ void ShaderManager::LoadShaderIncludes() {
 	char* ShaderSource = NULL;
 	char* cFileName = NULL;
 	char Filename[MAX_PATH];
-
-	strcpy(Filename, ShadersPath);
-	strcat(Filename, "Includes\\*.hlsl");
-	H = FindFirstFileA((LPCSTR)Filename, &File);
-	if (H != INVALID_HANDLE_VALUE) {
-		cFileName = (char*)File.cFileName;
+	
+	if (ShaderIncludes.size() > 0) {
+		for (ShaderIncludesList::iterator Item = ShaderIncludes.begin(); Item != ShaderIncludes.end(); Item++) delete Item->second;
+		ShaderIncludes.clear();
+	}
+	if (TheSettingManager->SettingsMain.Develop.CompileShaders) {
 		strcpy(Filename, ShadersPath);
-		strcat(Filename, "Includes\\");
-		strcat(Filename, cFileName);
-		std::ifstream FileSource(Filename, std::ios::in | std::ios::binary | std::ios::ate);
-		if (FileSource.is_open()) {
-			std::streamoff Size = FileSource.tellg();
-			SourceSize = Size + 1;
-			ShaderSource = new char[SourceSize]; memset(ShaderSource, NULL, SourceSize);
-			FileSource.seekg(0, std::ios::beg);
-			FileSource.read(ShaderSource, Size);
-			FileSource.close();
-			ShaderIncludes[cFileName] = ShaderSource;
-		}
-		while (FindNextFileA(H, &File)) {
+		strcat(Filename, "Includes\\*.hlsl");
+		H = FindFirstFileA((LPCSTR)Filename, &File);
+		if (H != INVALID_HANDLE_VALUE) {
 			cFileName = (char*)File.cFileName;
 			strcpy(Filename, ShadersPath);
 			strcat(Filename, "Includes\\");
@@ -633,8 +623,24 @@ void ShaderManager::LoadShaderIncludes() {
 				FileSource.close();
 				ShaderIncludes[cFileName] = ShaderSource;
 			}
+			while (FindNextFileA(H, &File)) {
+				cFileName = (char*)File.cFileName;
+				strcpy(Filename, ShadersPath);
+				strcat(Filename, "Includes\\");
+				strcat(Filename, cFileName);
+				std::ifstream FileSource(Filename, std::ios::in | std::ios::binary | std::ios::ate);
+				if (FileSource.is_open()) {
+					std::streamoff Size = FileSource.tellg();
+					SourceSize = Size + 1;
+					ShaderSource = new char[SourceSize]; memset(ShaderSource, NULL, SourceSize);
+					FileSource.seekg(0, std::ios::beg);
+					FileSource.read(ShaderSource, Size);
+					FileSource.close();
+					ShaderIncludes[cFileName] = ShaderSource;
+				}
+			}
+			FindClose(H);
 		}
-		FindClose(H);
 	}
 
 }
