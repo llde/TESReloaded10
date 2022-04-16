@@ -279,6 +279,7 @@
     <None Include="Exports.def">
       <Filter>Main</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="OblivionReloaded.rc">

@@ -3,6 +3,7 @@
 
 #define DETOURS_INTERNAL
 #define assert(a) static_assert(a, "Assertion failed")
+#define DIRECTINPUT_VERSION 0x0800
 
 #include <windows.h>
 #include <CommCtrl.h>
