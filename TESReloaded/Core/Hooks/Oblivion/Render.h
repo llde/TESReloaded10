@@ -9,7 +9,7 @@ static void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* Ren
 	TheCameraManager->SetSceneGraph();
 	TheShaderManager->UpdateConstants();
 	if (SettingsMain->OcclusionCulling.Enabled) TheOcclusionManager->PerformOcclusionCulling();
-	TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->defaultRTGroup->RenderTargets[1]->data->Surface;
+	if(TheRenderManager->BackBuffer) TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->defaultRTGroup->RenderTargets[1]->data->Surface;
 	if (SettingsMain->Develop.TraceShaders && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None) && Global->OnKeyDown(SettingsMain->Develop.TraceShaders) && DWNode::Get() == NULL) DWNode::Create();
 	(*Render)(This, RenderedTexture);
 
@@ -18,7 +18,7 @@ static void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* Ren
 static bool (__thiscall* EndTargetGroup)(BSShaderAccumulator*, NiCamera*, NiRenderTargetGroup*) = (bool (__thiscall*)(BSShaderAccumulator*, NiCamera*, NiRenderTargetGroup*))Hooks::EndTargetGroup;
 static bool __fastcall EndTargetGroupHook(BSShaderAccumulator* This, UInt32 edx, NiCamera* Camera, NiRenderTargetGroup* TargetGroup) {
 
-	TargetGroup = TheRenderManager->defaultRTGroup;
+ 	if(TheRenderManager->BackBuffer) TargetGroup = TheRenderManager->defaultRTGroup;
 	return (*EndTargetGroup)(This, Camera, TargetGroup);
 
 }
@@ -185,8 +185,8 @@ static void __cdecl RenderObjectHook(NiCamera* Camera, NiNode* Object, NiCulling
 
 static void (__cdecl* ProcessImageSpaceShaders)(NiDX9Renderer*, BSRenderedTexture*, BSRenderedTexture*) = (void (__cdecl*)(NiDX9Renderer*, BSRenderedTexture*, BSRenderedTexture*))Hooks::ProcessImageSpaceShaders;
 static void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRenderedTexture* RenderedTexture1, BSRenderedTexture* RenderedTexture2) {
-	
-	TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->BackBuffer;
+
+	if(TheRenderManager->BackBuffer) TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->BackBuffer;
 	ProcessImageSpaceShaders(Renderer, RenderedTexture1, RenderedTexture2);
 	TheRenderManager->CheckAndTakeScreenShot(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
 	if (TheRenderManager->IsSaveGameScreenShot) {
