@@ -329,6 +329,11 @@ public:
 			*Shader = S->Vertex;
 			Size = sizeof(S->Vertex) / 4;
 		}
+        else if (!strcmp(Name, "NightEye")) {
+            NightEyeShader* NS = (NightEyeShader*)Shaders[18]->Shader;
+            *Shader = NS->Vertex;
+            Size = 1;
+        }
 		else if (!strcmp(Name, "POM")) {
 			ParallaxShader* S = (ParallaxShader*)Shaders[15]->Shader;
 			*Shader = S->Vertex;
@@ -388,6 +393,11 @@ public:
 			*Shader = S->Pixel;
 			Size = sizeof(S->Pixel) / 4;
 		}
+		else if (!strcmp(Name, "NightEye")) {
+            NightEyeShader* NS = (NightEyeShader*)Shaders[18]->Shader;
+            *Shader = NS->Pixel;
+            Size = 1;
+        }
 		else if (!strcmp(Name, "POM")) {
 			ParallaxShader* S = (ParallaxShader*)Shaders[15]->Shader;
 			*Shader = S->Pixel;

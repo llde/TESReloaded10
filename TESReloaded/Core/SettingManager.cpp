@@ -1275,6 +1275,8 @@ bool SettingManager::GetMenuShaderEnabled(const char* Name) {
 		Value = SettingsMain.Effects.LowHF;
 	else if (!strcmp(Name, "MotionBlur"))
 		Value = SettingsMain.Effects.MotionBlur;
+	else if (!strcmp(Name, "NightEye"))
+		Value = SettingsMain.Shaders.NightEye;
 	else if (!strcmp(Name, "POM"))
 		Value = SettingsMain.Shaders.POM;
 	else if (!strcmp(Name, "Precipitations"))

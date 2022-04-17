@@ -1871,6 +1871,11 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		DisposeEffect(EffectRecord::EffectRecordType::MotionBlur);
 		if (Effects->MotionBlur) CreateEffect(EffectRecord::EffectRecordType::MotionBlur);
 	}
+	else if (!strcmp(Name, "NightEye")) {
+		Shaders->NightEye = !Shaders->NightEye;
+		DisposeShader(Name);
+		if (Shaders->NightEye) CreateShader(Name);
+	}
 	else if (!strcmp(Name, "POM")) {
 		Shaders->POM = !Shaders->POM;
 		DisposeShader(Name);

@@ -1258,6 +1258,15 @@ public:
 };
 assert(sizeof(SkinShader) == 0x114);
 
+
+class NightEyeShader : public BSImageSpaceShader {
+public:
+	NiD3DVertexShader*	Vertex[1];		// 090
+	NiD3DPixelShader*	Pixel[1];		// 094
+	//Incomplete def.
+};
+assert(sizeof(NightEyeShader) == 0x098); //Not the real size
+
 class ShaderDefinition {
 public:
 	NiDX9ShaderDeclaration* ShaderDeclaration;
