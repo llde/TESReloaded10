@@ -218,8 +218,12 @@ void RenderManager::ResolveDepthBuffer() {
 		DWORD dCurrZE;
 		DWORD dCurrZW;
 		DWORD dCurrCW;
-		D3DXVECTOR3 vDummyPoint(0.0f, 0.0f, 0.0f);
+		DWORD dCurrFVF;
+		IDirect3DVertexDeclaration9* pCurrDecl = nullptr;
 
+		D3DXVECTOR3 vDummyPoint(0.0f, 0.0f, 0.0f);
+		device->GetFVF(&dCurrFVF);
+		device->GetVertexDeclaration(&pCurrDecl);
 		device->GetTexture(0, &pCurrTX);
 		device->GetVertexShader(&pCurrVS);
 		device->GetPixelShader(&pCurrPS);
@@ -242,6 +246,8 @@ void RenderManager::ResolveDepthBuffer() {
 		device->SetRenderState(D3DRS_POINTSIZE, RESZ_CODE);
 		device->SetRenderState(D3DRS_POINTSIZE, NULL);
 
+		device->SetFVF(dCurrFVF);
+		device->SetVertexDeclaration(pCurrDecl);
 		device->SetTexture(0, pCurrTX);
 		device->SetVertexShader(pCurrVS);
 		device->SetPixelShader(pCurrPS);
