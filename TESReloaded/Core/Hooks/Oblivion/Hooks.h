@@ -47,11 +47,13 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)NewAnimSequenceMultiple,		&NewAnimSequenceMultipleHook);
 	if (SettingsMain->IKFoot.Enabled) DetourAttach(&(PVOID&)ApplyActorAnimData, &ApplyActorAnimDataHook);
 	DetourAttach(&(PVOID&)LoadAnimGroup,				&LoadAnimGroupHook);
-	DetourAttach(&(PVOID&)ToggleCamera,					&ToggleCameraHook);
-	DetourAttach(&(PVOID&)ToggleBody,					&ToggleBodyHook);
-	DetourAttach(&(PVOID&)SetDialogCamera,				&SetDialogCameraHook);
-	DetourAttach(&(PVOID&)SetAimingZoom,				&SetAimingZoomHook);
-	DetourAttach(&(PVOID&)UpdateCameraCollisions,		&UpdateCameraCollisionsHook);
+ 	if(SettingsMain->CameraMode.Enabled){
+		DetourAttach(&(PVOID&)ToggleCamera,					&ToggleCameraHook);
+		DetourAttach(&(PVOID&)ToggleBody,					&ToggleBodyHook);
+		DetourAttach(&(PVOID&)SetDialogCamera,				&SetDialogCameraHook);
+		DetourAttach(&(PVOID&)SetAimingZoom,				&SetAimingZoomHook);
+		DetourAttach(&(PVOID&)UpdateCameraCollisions,		&UpdateCameraCollisionsHook);
+	}
 	if (SettingsMain->EquipmentMode.Enabled) {
 		DetourAttach(&(PVOID&)NewHighProcess,				&NewHighProcessHook);
 		DetourAttach(&(PVOID&)ManageItem,					&ManageItemHook);
@@ -149,7 +151,7 @@ void AttachHooks() {
 	SafeWriteJump(0x00497D5A, 0x00497D63); // Unlocks antialising bar if HDR is enabled (video menu)
 	SafeWriteJump(0x005DF8E9, 0x005DF983); // Skips antialising deactivation changing HDR (video menu)
 	SafeWriteJump(0x006738B1, 0x00673935); // Cancels the fPlayerDeathReloadTime
-
+	SafeWrite8(0x0040CE11, 0); // Stops to clear the depth buffer when rendering the 1st person node
 	if (SettingsMain->Shaders.Water) {
 		*Pointers::ShaderParams::WaterHighResolution = 1;
 		SafeWrite8(0x0049EBAC, 0); // Avoids to change the shader for the skydome when underwater
