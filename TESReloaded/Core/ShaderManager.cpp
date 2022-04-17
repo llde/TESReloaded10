@@ -681,6 +681,7 @@ void ShaderManager::InitializeConstants() {
 	
 }
 
+
 void ShaderManager::UpdateConstants() {
 	
 	bool IsThirdPersonView = !TheCameraManager->IsFirstPerson();
@@ -1665,6 +1666,7 @@ void ShaderManager::DisposeEffect(EffectRecord::EffectRecordType EffectType) {
 
 }
 
+static TESObjectCELL* prevCell = nullptr;
 void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
@@ -1672,6 +1674,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	IDirect3DSurface9* SourceSurface = TheTextureManager->SourceSurface;
 	IDirect3DSurface9* RenderedSurface = TheTextureManager->RenderedSurface;
 	TESWorldSpace* currentWorldSpace = Player->GetWorldSpace();
+	TESObjectCELL* currentCell = Player->parentCell;
 
 	TheRenderManager->SetupSceneCamera();
 	Device->SetStreamSource(0, FrameVertex, 0, sizeof(FrameVS));
@@ -1706,8 +1709,9 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		BloomEffect->SetCT();
 		BloomEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->Underwater && TheRenderManager->CameraPosition.z < ShaderConst.Water.waterSettings.x + 20.0f) {
-		if (TheRenderManager->CameraPosition.z < ShaderConst.Water.waterSettings.x) {
+	bool isCellTransition = currentCell != prevCell;
+	if (Effects->Underwater  && TheRenderManager->CameraPosition.z < ShaderConst.Water.waterSettings.x + 20.0f) {
+		if (!isCellTransition && TheRenderManager->CameraPosition.z < ShaderConst.Water.waterSettings.x) {
 			ShaderConst.BloodLens.Percent = 0.0f;
 			ShaderConst.WaterLens.Percent = -1.0f;
 		}
@@ -1744,7 +1748,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	if (Effects->DepthOfField && ShaderConst.DepthOfField.Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		DepthOfFieldEffect->SetCT();
-		DepthOfFieldEffect->Render(Device, RenderTarget, RenderedSurface, false);
+		DepthOfFieldEffect->Render(Device, RenderTarget, RenderedSurface, false); static TESObjectCELL* prevCell = nullptr;
 	}
 	if (Effects->BloodLens && ShaderConst.BloodLens.Percent > 0.0f) {
 		BloodLensEffect->SetCT();
@@ -1793,7 +1797,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		D3DXSaveSurfaceToFileA(Filename, D3DXIFF_JPG, RenderTarget, NULL, NULL);
 		InterfaceManager->ShowMessage("Screenshot taken!");
 	}
-
+	prevCell = currentCell;
 }
 
 void ShaderManager::SwitchShaderStatus(const char* Name) {
