@@ -57,6 +57,7 @@ static void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRend
 	
 	ProcessImageSpaceShaders(Renderer, RenderedTexture1, RenderedTexture2);
 	if (!RenderedTexture2 && TheRenderManager->currentRTGroup) TheShaderManager->RenderEffects(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
+	TheRenderManager->CheckAndTakeScreenShot(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
 
 }
 

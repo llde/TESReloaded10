@@ -8,6 +8,7 @@ public:
 	void				GetScreenSpaceBoundSize(NiPoint2* BoundSize, NiBound* Bound, float ZeroTolerance = 1e-5f);
 	void				UpdateSceneCameraData();
 	void				SetupSceneCamera();
+	void				CheckAndTakeScreenShot(IDirect3DSurface9* RenderTarget);
 
 	D3DXMATRIX			WorldViewProjMatrix;
 	D3DXMATRIX			ViewProjMatrix;

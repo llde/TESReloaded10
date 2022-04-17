@@ -28,6 +28,7 @@ static void __fastcall HDRRenderHook(HDRShader* This, UInt32 edx, NiScreenElemen
 	
 	TheRenderManager->clearColor = D3DCOLOR_ARGB(0, 0, 0, 0);
 	(HDRRender)(This, ScreenElements, RenderedTexture1, RenderedTexture2, Arg4);
+	if (TheRenderManager->currentRTGroup) TheShaderManager->RenderEffects(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
 
 }
 
@@ -187,7 +188,7 @@ static void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRend
 	
 	TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->BackBuffer;
 	ProcessImageSpaceShaders(Renderer, RenderedTexture1, RenderedTexture2);
-	if (!RenderedTexture2 && TheRenderManager->currentRTGroup) TheShaderManager->RenderEffects(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
+	TheRenderManager->CheckAndTakeScreenShot(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
 	if (TheRenderManager->IsSaveGameScreenShot) {
 		if (Pointers::Generic::MenuRenderedTexture)
 			TheRenderManager->device->StretchRect(Pointers::Generic::MenuRenderedTexture->RenderTargetGroup->RenderTargets[0]->data->Surface, NULL, TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface, &TheRenderManager->SaveGameScreenShotRECT, D3DTEXF_NONE);

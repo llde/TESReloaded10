@@ -267,6 +267,24 @@ void RenderManager::ResolveDepthBuffer() {
 
 }
 
+void RenderManager::CheckAndTakeScreenShot(IDirect3DSurface9* RenderTarget){
+	if (Global->OnKeyDown(TheSettingManager->SettingsMain.Main.ScreenshotKey)) {
+		char Filename[MAX_PATH];
+		char Name[80];
+		time_t CurrentTime = time(NULL);
+
+		GetCurrentDirectoryA(MAX_PATH, Filename);
+		strcat(Filename, "\\Screenshots");
+		if (GetFileAttributesA(Filename) == INVALID_FILE_ATTRIBUTES) CreateDirectoryA(Filename, NULL);
+		strftime(Name, 80, "\\%Y%m%d %H.%M.%S", localtime(&CurrentTime));
+		strcat(Filename, Name);
+		strcat(Filename, ".jpg");
+		D3DXSaveSurfaceToFileA(Filename, D3DXIFF_JPG, RenderTarget, NULL, NULL);
+		InterfaceManager->ShowMessage("Screenshot taken!");
+	}
+}
+
+
 void NiD3DVertexShaderEx::SetupShader(IDirect3DVertexShader9* CurrentVertexHandle) {
 
 	if (ShaderProgE && Player->GetWorldSpace()) {
