@@ -69,6 +69,7 @@ public:
 	static const UInt32 CloseSleepWaitMenu			= 0x005D6A10;
 	static const UInt32 ShowSleepWaitMenu			= 0x0057B420;
 	static const UInt32 UpdateFlyCam				= 0x006643A0;
+ 	static const UInt32 UnkSub7C2420				= 0x007C2420;
 };
 
 class Jumpers {
@@ -125,8 +126,8 @@ public:
 		static const UInt32 EditorCastShadowFlagReturn	= 0x005498E3;
 	};
 	struct WaterHeightMap {
-		static const UInt32 Hook	= 0x0049D9FF;
-		static const UInt32 Return	= 0x0049DA08;
+		static const UInt32 Hook	= 0x0049D9FA;
+		static const UInt32 Return	= 0x0049D9FF;
 	};
 	struct EndProcess {
 		static const UInt32 Hook	= 0x0040F488;
