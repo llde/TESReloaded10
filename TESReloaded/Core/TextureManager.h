@@ -38,7 +38,7 @@ public:
 	static void				Initialize();
 
 	TextureRecord*			LoadTexture(ID3DXBuffer* ShaderSource, D3DXPARAMETER_TYPE ConstantType, LPCSTR ConstantName, UINT RegisterIndex, bool* HasRenderedBuffer, bool* HasDepthBuffer);
-	DWORD					GetSamplerStateValue(UInt32 SamplerType, const char* ParserStart, const char* ParserEnd, char* SamplerValue);
+	void 					GetSamplerStates(std::string& samplerStateSubstring, TextureRecord* textureRecord );
 	void					SetWaterHeightMap(IDirect3DBaseTexture9* WaterHeightMap);
 	std::string				GetFilenameForTexture(std::string&  resourceSubstring);
     IDirect3DBaseTexture9* 	GetCachedTexture(std::string& pathS);

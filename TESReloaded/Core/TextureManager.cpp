@@ -1,3 +1,7 @@
+#include <string>
+#include <regex>
+#include <algorithm>
+
 #define WordWaterHeightMapBuffer "TESR_WaterHeightMapBuffer"
 
 TextureRecord::TextureRecord() {
@@ -120,12 +124,6 @@ void TextureManager::Initialize() {
 
 TextureRecord* TextureManager::LoadTexture(ID3DXBuffer* ShaderSourceBuffer, D3DXPARAMETER_TYPE ConstantType, LPCSTR ConstantName, UINT ConstantIndex, bool* HasRenderedBuffer, bool* HasDepthBuffer) {
 	
-	char SamplerValue[40] = { NULL };
-	char SamplerState[20];
-	const char* ParserStart = NULL;
-	const char* ParserEnd = NULL;
-	DWORD SamplerStateValue = 0xFFFFFFFF;
-	TextureRecord* R = NULL;
 	TextureRecord::TextureRecordType Type = TextureRecord::TextureRecordType::None;
 	std::string Source = std::string((const char*) ShaderSourceBuffer->GetBufferPointer());
 	std::string TexturePath;
@@ -162,13 +160,13 @@ TextureRecord* TextureManager::LoadTexture(ID3DXBuffer* ShaderSourceBuffer, D3DX
 			std::string TextureString = Source.substr(StartTexture +1, EndTexture - StartTexture - 1);
 			TexturePath = GetFilenameForTexture(TextureString);
 		}
-		size_t StartStatePos = Source.find("sampler_state {", SamplerPos) -1;
-		size_t EndStatePos = Source.find("}", SamplerPos) -1;
+		size_t StartStatePos = Source.find("{", SamplerPos);
+		size_t EndStatePos = Source.find("}", SamplerPos);
 		if(EndStatePos == std::string::npos || StartStatePos == std::string::npos) {
 			Logger::Log("[ERROR] %s  cannot be binded", ConstantName);
 			return nullptr;
 		}
-		std::string SamplerString = Source.substr(StartStatePos + sizeof("sampler_state {"), EndStatePos - StartStatePos - sizeof("sampler_state {"));
+		std::string SamplerString = Source.substr(StartStatePos + 1, EndStatePos - StartStatePos - 1);
 //		Logger::Log("%s \n", SamplerString.c_str());
 		TextureRecord* NewTextureRecord = new TextureRecord();
 	    if(Type == TextureRecord::TextureRecordType::WaterHeightMapBuffer){
@@ -198,6 +196,8 @@ TextureRecord* TextureManager::LoadTexture(ID3DXBuffer* ShaderSourceBuffer, D3DX
 				Logger::Log("Game Texture %s Binded", ConstantName);
 			}
 		}
+
+		GetSamplerStates(SamplerString, NewTextureRecord);
 		return NewTextureRecord;
 	}
 	Logger::Log("[ERROR] Sampler %s doesn't have a valid type", ConstantName);
@@ -210,12 +210,23 @@ IDirect3DBaseTexture9* TextureManager::GetCachedTexture(std::string& pathS){
     return t->second;
 }
 
+std::string ltrim(const std::string& s) {
+	return std::regex_replace(s, std::regex("^\\s+"), "");
+}
+std::string rtrim(const std::string& s) {
+	return std::regex_replace(s, std::regex("\\s+$"), "");
+}
+
+std::string trim(const std::string& s ) {
+	return ltrim(rtrim(s));
+}
+
 std::string TextureManager::GetFilenameForTexture(std::string& resourceSubstring){
 	std::string PathS;
 	if (resourceSubstring.find("ResourceName") != std::string::npos) {
 		size_t StartPath = resourceSubstring.find("\"");
 		size_t EndPath = resourceSubstring.rfind("\"");
-		PathS = resourceSubstring.substr(StartPath + 1, EndPath - 1 - StartPath);
+		PathS = trim(resourceSubstring.substr(StartPath + 1, EndPath - 1 - StartPath));
 		PathS.insert(0, "Data\\Textures\\");
 	}
 	else{
@@ -224,78 +235,88 @@ std::string TextureManager::GetFilenameForTexture(std::string& resourceSubstring
 	return PathS;
 }
 
-DWORD TextureManager::GetSamplerStateValue(UInt32 SamplerType, const char* ParserStart, const char* ParserEnd, char* SamplerValue) {
 
-	const char* WordSamplerType[SamplerStatesMax] = { NULL };
-	const char* WordTextureAddress[6] = { NULL };
-	const char* WordTextureFilter[4] = { NULL };
-	const char* WordRGB[2] = { NULL };
-	const char* Parser = NULL;
-	DWORD R = 0xFFFFFFFF;
-	
-	WordSamplerType[0] = "TEXTURE = ";
-	WordSamplerType[D3DSAMP_ADDRESSU] = "ADDRESSU = ";
-	WordSamplerType[D3DSAMP_ADDRESSV] = "ADDRESSV = ";
-	WordSamplerType[D3DSAMP_ADDRESSW] = "ADDRESSW = ";
-	WordSamplerType[D3DSAMP_BORDERCOLOR] = "BORDERCOLOR = ";
-	WordSamplerType[D3DSAMP_MAGFILTER] = "MAGFILTER = ";
-	WordSamplerType[D3DSAMP_MINFILTER] = "MINFILTER = ";
-	WordSamplerType[D3DSAMP_MIPFILTER] = "MIPFILTER = ";
-	WordSamplerType[D3DSAMP_MIPMAPLODBIAS] = "MIPMAPLODBIAS = ";
-	WordSamplerType[D3DSAMP_MAXMIPLEVEL] = "MAXMIPLEVEL = ";
-	WordSamplerType[D3DSAMP_MAXANISOTROPY] = "MAXANISOTROPY = ";
-	WordSamplerType[D3DSAMP_SRGBTEXTURE] = "SRGBTEXTURE = ";
+void TextureManager::GetSamplerStates(std::string& samplerStateSubstring, TextureRecord* textureRecord ) {
+	std::string WordSamplerType[SamplerStatesMax];
+	std::string WordTextureAddress[6];
+	std::string WordTextureFilterType[4];
+	std::string WordSRGBType[2];
+	WordSamplerType[0] = "";
+	WordSamplerType[D3DSAMP_ADDRESSU] = "ADDRESSU";
+	WordSamplerType[D3DSAMP_ADDRESSV] = "ADDRESSV";
+	WordSamplerType[D3DSAMP_ADDRESSW] = "ADDRESSW";
+	WordSamplerType[D3DSAMP_BORDERCOLOR] = "BORDERCOLOR";
+	WordSamplerType[D3DSAMP_MAGFILTER] = "MAGFILTER";
+	WordSamplerType[D3DSAMP_MINFILTER] = "MINFILTER";
+	WordSamplerType[D3DSAMP_MIPFILTER] = "MIPFILTER";
+	WordSamplerType[D3DSAMP_MIPMAPLODBIAS] = "MIPMAPLODBIAS";
+	WordSamplerType[D3DSAMP_MAXMIPLEVEL] = "MAXMIPLEVEL";
+	WordSamplerType[D3DSAMP_MAXANISOTROPY] = "MAXANISOTROPY";
+	WordSamplerType[D3DSAMP_SRGBTEXTURE] = "SRGBTEXTURE";
+    WordSamplerType[D3DSAMP_ELEMENTINDEX] = "";
+    WordSamplerType[D3DSAMP_DMAPOFFSET] = "";
 	WordTextureAddress[0] = "";
 	WordTextureAddress[D3DTADDRESS_WRAP] = "WRAP";
 	WordTextureAddress[D3DTADDRESS_MIRROR] = "MIRROR";
 	WordTextureAddress[D3DTADDRESS_CLAMP] = "CLAMP";
 	WordTextureAddress[D3DTADDRESS_BORDER] = "BORDER";
 	WordTextureAddress[D3DTADDRESS_MIRRORONCE] = "MIRRORONCE";
-	WordTextureFilter[D3DTEXF_NONE] = "NONE";
-	WordTextureFilter[D3DTEXF_POINT] = "POINT";
-	WordTextureFilter[D3DTEXF_LINEAR] = "LINEAR";
-	WordTextureFilter[D3DTEXF_ANISOTROPIC] = "ANISOTROPIC";
-	WordRGB[0] = "FALSE";
-	WordRGB[1] = "TRUE";
+	WordTextureFilterType[D3DTEXF_NONE] = "NONE";
+	WordTextureFilterType[D3DTEXF_POINT] = "POINT";
+	WordTextureFilterType[D3DTEXF_LINEAR] = "LINEAR";
+	WordTextureFilterType[D3DTEXF_ANISOTROPIC] = "ANISOTROPIC";
+	WordSRGBType[0] = "FALSE";
+	WordSRGBType[1] = "TRUE";
 
-	if (ParserStart && ParserEnd) {
-		Parser = strstr(ParserStart, WordSamplerType[SamplerType]);
-		if (Parser && Parser < ParserEnd) strncpy(SamplerValue, Parser + strlen(WordSamplerType[SamplerType]), strstr(Parser, ";") - (Parser + strlen(WordSamplerType[SamplerType])));
-		if (strlen(SamplerValue) > 0) {
-			if (SamplerType == 0) {
-				R = 0;
-			}
-			else if (SamplerType >= D3DSAMP_ADDRESSU && SamplerType <= D3DSAMP_ADDRESSW) {
-				for (int i = 1; i < 6; i++) {
-					if (!strcmp(SamplerValue, WordTextureAddress[i])) {
-						R = i;
-						break;
-					}
-				}
-			}
-			else if (SamplerType >= D3DSAMP_MAGFILTER && SamplerType <= D3DSAMP_MIPFILTER) {
-				for (int i = 0; i < 4; i++) {
-					if (!strcmp(SamplerValue, WordTextureFilter[i])) {
-						R = i;
-						break;
-					}
-				}
-			}
-			else if (SamplerType == D3DSAMP_SRGBTEXTURE) {
-				for (int i = 0; i < 2; i++) {
-					if (!strcmp(SamplerValue, WordRGB[i])) {
-						R = i;
-						break;
-					}
-				}
-			}
-			else {
-				R = atoi(SamplerValue);
+	std::stringstream samplerSettings = std::stringstream(trim(samplerStateSubstring));
+	std::string setting;
+	while (std::getline(samplerSettings, setting, ';')) {
+		size_t newlinePos = setting.find("\n");
+		if (newlinePos != std::string::npos) setting.erase(newlinePos, 1);
+		std::string opt = trim(setting.substr(0, setting.find("=") - 1));
+		std::string val = trim(setting.substr(setting.find("=") + 1, setting.length()));
+        std::transform(opt.begin(), opt.end(),opt.begin(), ::toupper);
+        std::transform(val.begin(), val.end(),val.begin(), ::toupper);
+	//	Logger::Log("%s : %s", opt.c_str(), val.c_str());
+		size_t optIdx = 0;
+		for (size_t i = 1; i < 12; i++) {
+			if (opt == WordSamplerType[i]) {
+				optIdx = i;
+				break;
 			}
 		}
+		if (optIdx >= D3DSAMP_ADDRESSU && optIdx <= D3DSAMP_ADDRESSW) {
+			for (size_t i = 1; i < 6; i++) {
+				if (val == WordTextureAddress[i]) {
+					textureRecord->SamplerStates[(D3DSAMPLERSTATETYPE)optIdx] = i;
+					break;
+				}
+			}
+		}
+		else if (optIdx >= D3DSAMP_MAGFILTER && optIdx <= D3DSAMP_MIPFILTER) {
+			for (size_t i = 0; i < 4; i++) {
+				if (val == WordTextureFilterType[i]) {
+					textureRecord->SamplerStates[(D3DSAMPLERSTATETYPE)optIdx] = i;
+					break;
+				}
+			}
+		}
+		else if (optIdx == D3DSAMP_SRGBTEXTURE) {
+			for (size_t i = 0; i < 2; i++) {
+				if (val == WordSRGBType[i]) {
+					textureRecord->SamplerStates[(D3DSAMPLERSTATETYPE)optIdx] = i;
+					break;
+				}
+			}
+		}
+		else if(optIdx == D3DSAMP_BORDERCOLOR){
+            float va = std::stof(val);
+			textureRecord->SamplerStates[(D3DSAMPLERSTATETYPE)optIdx] = *((DWORD*)&va);
+        }
+		else if(optIdx == D3DSAMP_MAXANISOTROPY){
+			textureRecord->SamplerStates[(D3DSAMPLERSTATETYPE)optIdx] = std::stoi(val);
+        }
 	}
-	return R;
-
 }
 
 void TextureManager::SetWaterHeightMap(IDirect3DBaseTexture9* WaterHeightMap) {
