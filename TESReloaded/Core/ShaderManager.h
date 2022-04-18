@@ -174,7 +174,7 @@ public:
 	virtual ~ShaderProgram();
 	
 	virtual void			SetCT() = 0;
-	virtual void			CreateCT(const char* ShaderSource, ID3DXConstantTable* ConstantTable) = 0;
+	virtual void			CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* ConstantTable) = 0;
 
 	void					SetConstantTableValue(LPCSTR Name, UInt32 Index);
 
@@ -190,7 +190,7 @@ public:
 	virtual ~ShaderRecord();
 	
 	virtual void			SetCT();
-	virtual void			CreateCT(const char* ShaderSource, ID3DXConstantTable* ConstantTable);
+ 	virtual void			CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* ConstantTable);
 	virtual void			SetShaderConstantF(UInt32 RegisterIndex, D3DXVECTOR4* Value, UInt32 RegisterCount) = 0;
 
 	static ShaderRecord*	LoadShader(const char* Name, const char* SubPath);
@@ -271,7 +271,7 @@ public:
 	};
 
 	virtual void			SetCT();
-	virtual void			CreateCT(const char* ShaderSource, ID3DXConstantTable* ConstantTable);
+	virtual void			CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* ConstantTable);
 
 	static EffectRecord*	LoadEffect(const char* Name);
 
@@ -281,11 +281,10 @@ public:
 	ID3DXEffect*			Effect;
 };
 
-typedef std::map<std::string, char*> ShaderIncludesList;
 typedef std::map<std::string, EffectRecord*> ExtraEffectsList;
 typedef std::map<std::string, D3DXVECTOR4> CustomConstants;
 
-__declspec(align(16)) class ShaderManager : public ShaderManagerBase, public ID3DXInclude { // Never disposed
+__declspec(align(16)) class ShaderManager : public ShaderManagerBase { // Never disposed
 public:
 	static void Initialize();
 
@@ -309,22 +308,6 @@ public:
 	
 	struct					FrameVS { float x, y, z, u, v; };
 	
-	HRESULT __stdcall Open(D3DXINCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes) override {
-		
-		char* Include = ShaderIncludes[pFileName];
-
-		*ppData = Include;
-		*pBytes = strlen(Include);
-		return S_OK;
-
-	}
-
-	HRESULT __stdcall Close(LPCVOID pData) override {
-
-		return S_OK;
-
-	}
-
 	ShaderConstants			ShaderConst;
 	CustomConstants			CustomConst;
 	IDirect3DVertexBuffer9*	FrameVertex;
@@ -350,6 +333,5 @@ public:
 	ExtraEffectsList		ExtraEffects;
 	NiD3DVertexShader*		WaterVertexShaders[51];
 	NiD3DPixelShader*		WaterPixelShaders[51];
-	ShaderIncludesList		ShaderIncludes;
 
 };

@@ -3,7 +3,7 @@
 TextureRecord::TextureRecord() {
 
 	Texture = NULL;
-	SamplerStates[0] = 0;
+	SamplerStates[0] = 0; //This isn't used. Just to simplify  the matching between index and meaning
 	SamplerStates[D3DSAMP_ADDRESSU] = D3DTADDRESS_WRAP;
 	SamplerStates[D3DSAMP_ADDRESSV] = D3DTADDRESS_WRAP;
 	SamplerStates[D3DSAMP_ADDRESSW] = D3DTADDRESS_WRAP;
@@ -18,7 +18,7 @@ TextureRecord::TextureRecord() {
 
 }
 
-bool TextureRecord::LoadTexture(TextureRecordType Type) {
+bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Name) {
 
 	IDirect3DTexture9* Tex = NULL;
 	IDirect3DVolumeTexture9* TexV = NULL;
@@ -118,7 +118,7 @@ void TextureManager::Initialize() {
 	
 }
 
-TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, D3DXPARAMETER_TYPE ConstantType, LPCSTR ConstantName, UINT ConstantIndex, bool* HasRenderedBuffer, bool* HasDepthBuffer) {
+TextureRecord* TextureManager::LoadTexture(ID3DXBuffer* ShaderSourceBuffer, D3DXPARAMETER_TYPE ConstantType, LPCSTR ConstantName, UINT ConstantIndex, bool* HasRenderedBuffer, bool* HasDepthBuffer) {
 	
 	char SamplerValue[40] = { NULL };
 	char SamplerState[20];
@@ -127,8 +127,8 @@ TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, D3DXPARAMET
 	DWORD SamplerStateValue = 0xFFFFFFFF;
 	TextureRecord* R = NULL;
 	TextureRecord::TextureRecordType Type = TextureRecord::TextureRecordType::None;
-	TextureRecord* NewTextureRecord = new TextureRecord();
-
+	std::string Source = std::string((const char*) ShaderSourceBuffer->GetBufferPointer());
+	std::string TexturePath;
 	Type = (ConstantType >= D3DXPT_SAMPLER && ConstantType <= D3DXPT_SAMPLER2D) ? TextureRecord::TextureRecordType::PlanarBuffer : Type;
 	Type = ConstantType == D3DXPT_SAMPLER3D ? TextureRecord::TextureRecordType::VolumeBuffer : Type;
 	Type = ConstantType == D3DXPT_SAMPLERCUBE ? TextureRecord::TextureRecordType::CubeBuffer : Type;
@@ -146,38 +146,82 @@ TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, D3DXPARAMET
 	if (HasRenderedBuffer && !*HasRenderedBuffer) *HasRenderedBuffer = (Type == TextureRecord::TextureRecordType::RenderedBuffer);
 	if (HasDepthBuffer && !*HasDepthBuffer) *HasDepthBuffer = (Type == TextureRecord::TextureRecordType::DepthBuffer);
 	if (Type) {
-		sprintf(SamplerState, "samplerState%i {", ConstantIndex);
-		ParserStart = strstr(ShaderSource, SamplerState); if (ParserStart) ParserEnd = strstr(ParserStart, "}");
-		if (Type <= TextureRecord::TextureRecordType::CubeBuffer) {
-			GetSamplerStateValue(0, ParserStart, ParserEnd, SamplerValue);
-			strcpy(NewTextureRecord->Name, "Data\\Textures\\");
-			strcat(NewTextureRecord->Name, SamplerValue);
+		size_t SamplerPos = Source.find(("register ( s" + std::to_string(ConstantIndex) + " )"));
+		if(SamplerPos == std::string::npos) {
+			Logger::Log("[ERROR] %s  cannot be binded", ConstantName);
+			return nullptr;
 		}
-		else {
-			strcpy(NewTextureRecord->Name, ConstantName);
+		if(Type >= TextureRecord::TextureRecordType::PlanarBuffer && Type <= TextureRecord::TextureRecordType::CubeBuffer){
+			//Only these samplers are bindable to an arbitrary texture
+			size_t StartTexture = Source.find("<", SamplerPos +1);
+			size_t EndTexture = Source.find(">", SamplerPos +1);
+			if(StartTexture == std::string::npos || EndTexture == std::string::npos) {
+				Logger::Log("[ERROR] %s  cannot be binded", ConstantName);
+				return nullptr;
+			}
+			std::string TextureString = Source.substr(StartTexture +1, EndTexture - StartTexture - 1);
+			TexturePath = GetFilenameForTexture(TextureString);
 		}
-		R = Textures.find(NewTextureRecord->Name);
-		if (!R) {
-			if (NewTextureRecord->LoadTexture(Type)) {
-				if (NewTextureRecord->Texture) Logger::Log("Texture loaded: %s", NewTextureRecord->Name); else Logger::Log("Texture attached: %s", NewTextureRecord->Name);
+		size_t StartStatePos = Source.find("sampler_state {", SamplerPos) -1;
+		size_t EndStatePos = Source.find("}", SamplerPos) -1;
+		if(EndStatePos == std::string::npos || StartStatePos == std::string::npos) {
+			Logger::Log("[ERROR] %s  cannot be binded", ConstantName);
+			return nullptr;
+		}
+		std::string SamplerString = Source.substr(StartStatePos + sizeof("sampler_state {"), EndStatePos - StartStatePos - sizeof("sampler_state {"));
+//		Logger::Log("%s \n", SamplerString.c_str());
+		TextureRecord* NewTextureRecord = new TextureRecord();
+	    if(Type == TextureRecord::TextureRecordType::WaterHeightMapBuffer){
+			WaterHeightMapTextures.push_back(NewTextureRecord);
+			Logger::Log("Game Texture %s Attached", ConstantName); /*WaterHeightMap are provided from a game hook*/
+		}
+		else if(Type >= TextureRecord::TextureRecordType::PlanarBuffer && Type <= TextureRecord::TextureRecordType::CubeBuffer){ //Cache only non game textures
+			IDirect3DBaseTexture9* cached = GetCachedTexture(TexturePath);
+			if(!cached) {
+				if (NewTextureRecord->LoadTexture(Type, TexturePath.c_str())) {
+					if (NewTextureRecord->Texture){
+						Logger::Log("Texture loaded: %s", TexturePath.c_str());
+						Textures[TexturePath] = NewTextureRecord->Texture;
+					}
+				}
+				else {
+					Logger::Log("ERROR: Cannot load texture %s", TexturePath.c_str());
+				}
 			}
 			else {
-				Logger::Log("ERROR: Cannot load texture %s", NewTextureRecord->Name);
+				NewTextureRecord->Texture = cached;
+				Logger::Log("Texture linked: %s", TexturePath.c_str());
 			}
 		}
 		else {
-			NewTextureRecord->Texture = R->Texture;
-			Logger::Log("Texture linked: %s", NewTextureRecord->Name);
+			if (NewTextureRecord->LoadTexture(Type, nullptr)) {
+				Logger::Log("Game Texture %s Binded", ConstantName);
+			}
 		}
-		for (int i = 1; i < SamplerStatesMax; i++) {
-			memset(SamplerValue, NULL, sizeof(SamplerValue));
-			SamplerStateValue = GetSamplerStateValue(i, ParserStart, ParserEnd, SamplerValue);
-			if (SamplerStateValue != 0xFFFFFFFF) NewTextureRecord->SamplerStates[i] = SamplerStateValue;
-		}
-		Textures.push_back(NewTextureRecord);
+		return NewTextureRecord;
 	}
-	return NewTextureRecord;
+	Logger::Log("[ERROR] Sampler %s doesn't have a valid type", ConstantName);
+	return nullptr;
+}
 
+IDirect3DBaseTexture9* TextureManager::GetCachedTexture(std::string& pathS){
+    TextureList::iterator t = Textures.find(pathS);
+    if (t == Textures.end()) return nullptr;
+    return t->second;
+}
+
+std::string TextureManager::GetFilenameForTexture(std::string& resourceSubstring){
+	std::string PathS;
+	if (resourceSubstring.find("ResourceName") != std::string::npos) {
+		size_t StartPath = resourceSubstring.find("\"");
+		size_t EndPath = resourceSubstring.rfind("\"");
+		PathS = resourceSubstring.substr(StartPath + 1, EndPath - 1 - StartPath);
+		PathS.insert(0, "Data\\Textures\\");
+	}
+	else{
+		Logger::Log("[ERROR] Cannot parse bindable texture");
+	}
+	return PathS;
 }
 
 DWORD TextureManager::GetSamplerStateValue(UInt32 SamplerType, const char* ParserStart, const char* ParserEnd, char* SamplerValue) {
@@ -255,9 +299,7 @@ DWORD TextureManager::GetSamplerStateValue(UInt32 SamplerType, const char* Parse
 }
 
 void TextureManager::SetWaterHeightMap(IDirect3DBaseTexture9* WaterHeightMap) {
-	
-	for (TextureList::iterator Iter = Textures.begin(); Iter != Textures.end(); ++Iter) {
-		if (!strcmp((*Iter)->Name, WordWaterHeightMapBuffer)) (*Iter)->Texture = WaterHeightMap;
+	for (WaterHeightMapList::iterator it = TheTextureManager->WaterHeightMapTextures.begin(); it != TheTextureManager->WaterHeightMapTextures.end(); it++){
+		 (*it)->Texture = WaterHeightMap;
 	}
-
 }

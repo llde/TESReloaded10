@@ -179,7 +179,7 @@ ShaderRecord::~ShaderRecord() { }
 ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 	
 	ShaderRecord* ShaderProg = NULL;
-	char* ShaderSource = NULL;
+	ID3DXBuffer* ShaderSource = NULL;
 	ID3DXBuffer* Shader = NULL;
 	ID3DXBuffer* Errors = NULL;
 	ID3DXConstantTable* ConstantTable = NULL;
@@ -227,20 +227,15 @@ ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 	strcat(FileName, Name);
 	strcpy(FileNameBinary, FileName);
 	strcat(FileName, ".hlsl");
-	std::ifstream FileSource(FileName, std::ios::in | std::ios::binary | std::ios::ate);
-	if (FileSource.is_open()) {
-		std::streamoff Size = FileSource.tellg();
-		SourceSize = Size + 1;
-		ShaderSource = new char[SourceSize]; memset(ShaderSource, NULL, SourceSize);
-		FileSource.seekg(0, std::ios::beg);
-		FileSource.read(ShaderSource, Size);
-		FileSource.close();
+
+    HRESULT prepass = D3DXPreprocessShaderFromFileA(FileName, NULL, NULL, &ShaderSource , &Errors);
+	if (prepass == D3D_OK) {
 		if (strstr(Name, ".vso"))
 			strcpy(ShaderProfile, "vs_3_0");
 		else if (strstr(Name, ".pso"))
 			strcpy(ShaderProfile, "ps_3_0");
 		if (TheSettingManager->SettingsMain.Develop.CompileShaders) {
-			D3DXCompileShader(ShaderSource, Size, NULL, TheShaderManager, "main", ShaderProfile, NULL, &Shader, &Errors, &ConstantTable);
+			D3DXCompileShaderFromFileA(FileName, NULL, NULL, "main", ShaderProfile, NULL, &Shader, &Errors, &ConstantTable);
 			if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
 			if (Shader) {
 				Function = Shader->GetBufferPointer();
@@ -254,7 +249,7 @@ ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 		else {
 			std::ifstream FileBinary(FileNameBinary, std::ios::in | std::ios::binary | std::ios::ate);
 			if (FileBinary.is_open()) {
-				Size = FileBinary.tellg();
+				std::streamoff Size = FileBinary.tellg();
 				D3DXCreateBuffer(Size, &Shader);
 				FileBinary.seekg(0, std::ios::beg);
 				Function = Shader->GetBufferPointer();
@@ -279,14 +274,18 @@ ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 			Logger::Log("Shader loaded: %s", FileNameBinary);
 		}
 	}
-	if (ShaderSource) delete ShaderSource;
+	else {
+		if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
+	}
+
+	if (ShaderSource) ShaderSource->Release();
 	if (Shader) Shader->Release();
 	if (Errors) Errors->Release();
 	return ShaderProg;
 
 }
 
-void ShaderRecord::CreateCT(const char* ShaderSource, ID3DXConstantTable* ConstantTable) {
+void ShaderRecord::CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* ConstantTable) {
 
 	D3DXCONSTANTTABLE_DESC ConstantTableDesc;
 	D3DXCONSTANT_DESC ConstantDesc;
@@ -399,7 +398,7 @@ EffectRecord::~EffectRecord() {
 EffectRecord* EffectRecord::LoadEffect(const char* Name) {
 	
 	EffectRecord* EffectProg = NULL;
-	char* ShaderSource = NULL;
+	ID3DXBuffer* ShaderSource = NULL;
 	ID3DXBuffer* Errors = NULL;
 	ID3DXEffect* Effect = NULL;
 	UInt32 SourceSize = 0;
@@ -408,19 +407,13 @@ EffectRecord* EffectRecord::LoadEffect(const char* Name) {
 
 	strcpy(FileName, Name);
 	strcat(FileName, ".hlsl");
-	std::ifstream FileSource(FileName, std::ios::in | std::ios::binary | std::ios::ate);
-	if (FileSource.is_open()) {
-		std::streamoff Size = FileSource.tellg();
-		SourceSize = Size + 1;
-		ShaderSource = new char[SourceSize]; memset(ShaderSource, NULL, SourceSize);
-		FileSource.seekg(0, std::ios::beg);
-		FileSource.read(ShaderSource, Size);
-		FileSource.close();
+    HRESULT prepass = D3DXPreprocessShaderFromFileA(FileName, NULL, NULL, &ShaderSource , &Errors);
+	if (prepass == D3D_OK) {
 		if (TheSettingManager->SettingsMain.Develop.CompileEffects) {
 			Compiled = false;
 			ID3DXEffectCompiler* Compiler = NULL;
 			ID3DXBuffer* EffectBuffer = NULL;
-			D3DXCreateEffectCompiler(ShaderSource, Size, NULL, NULL, NULL, &Compiler, &Errors);
+			D3DXCreateEffectCompilerFromFileA(FileName, NULL, NULL, NULL, &Compiler, &Errors);
 			if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
 			if (Compiler) {
 				Compiler->CompileEffect(NULL, &EffectBuffer, &Errors);
@@ -448,13 +441,17 @@ EffectRecord* EffectRecord::LoadEffect(const char* Name) {
 			}
 		}
 	}
-	if (ShaderSource) delete ShaderSource;
+
+	else {
+		if (Errors) Errors->Release();
+	}
+	if (ShaderSource) ShaderSource->Release();
 	if (Errors) Errors->Release();
 	return EffectProg;
 
 }
 
-void EffectRecord::CreateCT(const char* ShaderSource, ID3DXConstantTable* ConstantTable) {
+void EffectRecord::CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* ConstantTable) {
 
 	D3DXEFFECT_DESC ConstantTableDesc;
 	D3DXPARAMETER_DESC ConstantDesc;
@@ -568,7 +565,6 @@ void ShaderManager::Initialize() {
 	TheShaderManager->ShaderConst.ReciprocalResolution.z = (float)TheRenderManager->width / (float)TheRenderManager->height;
 	TheShaderManager->ShaderConst.ReciprocalResolution.w = 0.0f; // Reserved to store the FoV
 	TheShaderManager->CreateFrameVertex(TheRenderManager->width, TheRenderManager->height, &TheShaderManager->FrameVertex);
-	TheShaderManager->PrepareShaderIncludes();
 
 }
 
@@ -588,60 +584,6 @@ void ShaderManager::CreateFrameVertex(UInt32 Width, UInt32 Height, IDirect3DVert
 	(*FrameVertex)->Lock(0, 0, &VertexData, NULL);
 	memcpy(VertexData, FrameVertices, sizeof(FrameVertices));
 	(*FrameVertex)->Unlock();
-
-}
-
-void ShaderManager::PrepareShaderIncludes() {
-
-	WIN32_FIND_DATAA File;
-	HANDLE H;
-	UInt32 SourceSize = 0;
-	char* ShaderSource = NULL;
-	char* cFileName = NULL;
-	char Filename[MAX_PATH];
-	
-	if (ShaderIncludes.size() > 0) {
-		for (ShaderIncludesList::iterator Item = ShaderIncludes.begin(); Item != ShaderIncludes.end(); Item++) delete Item->second;
-		ShaderIncludes.clear();
-	}
-	if (TheSettingManager->SettingsMain.Develop.CompileShaders) {
-		strcpy(Filename, ShadersPath);
-		strcat(Filename, "Includes\\*.hlsl");
-		H = FindFirstFileA((LPCSTR)Filename, &File);
-		if (H != INVALID_HANDLE_VALUE) {
-			cFileName = (char*)File.cFileName;
-			strcpy(Filename, ShadersPath);
-			strcat(Filename, "Includes\\");
-			strcat(Filename, cFileName);
-			std::ifstream FileSource(Filename, std::ios::in | std::ios::binary | std::ios::ate);
-			if (FileSource.is_open()) {
-				std::streamoff Size = FileSource.tellg();
-				SourceSize = Size + 1;
-				ShaderSource = new char[SourceSize]; memset(ShaderSource, NULL, SourceSize);
-				FileSource.seekg(0, std::ios::beg);
-				FileSource.read(ShaderSource, Size);
-				FileSource.close();
-				ShaderIncludes[cFileName] = ShaderSource;
-			}
-			while (FindNextFileA(H, &File)) {
-				cFileName = (char*)File.cFileName;
-				strcpy(Filename, ShadersPath);
-				strcat(Filename, "Includes\\");
-				strcat(Filename, cFileName);
-				std::ifstream FileSource(Filename, std::ios::in | std::ios::binary | std::ios::ate);
-				if (FileSource.is_open()) {
-					std::streamoff Size = FileSource.tellg();
-					SourceSize = Size + 1;
-					ShaderSource = new char[SourceSize]; memset(ShaderSource, NULL, SourceSize);
-					FileSource.seekg(0, std::ios::beg);
-					FileSource.read(ShaderSource, Size);
-					FileSource.close();
-					ShaderIncludes[cFileName] = ShaderSource;
-				}
-			}
-			FindClose(H);
-		}
-	}
 
 }
 
