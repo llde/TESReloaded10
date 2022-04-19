@@ -17,7 +17,7 @@ struct PS_INPUT
 	float4 noiseCoord : TEXCOORD1;
 };
 
-sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { };
+sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR;  };
 sampler2D TESR_waterlensSampler : register(s1) < string ResourceName = "Effects\water_NRM_lens.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 static const float timea = TESR_GameTime.z * TESR_WaterLensData.x;

@@ -17,8 +17,8 @@ struct PS_INPUT
 	float4 noiseCoord : TEXCOORD1;
 };
 
-sampler2D TESR_RenderedBuffer : register(s0); // samplerState0 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
-sampler2D TESR_WaterLensSampler : register(s1); // samplerState1 { TEXTURE = Effects\water_NRM_lens.dds; ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
+sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR;  };
+sampler2D TESR_waterlensSampler : register(s1) < string ResourceName = "Effects\water_NRM_lens.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 static const float timea = TESR_GameTime.z * TESR_WaterLensData.x;
 static const float timeb = TESR_GameTime.z * TESR_WaterLensData.y;
@@ -44,8 +44,8 @@ VS_OUTPUT WaterLensVS (float4 position : POSITION)
 
 float4 WaterLensPS (PS_INPUT Input) : COLOR
 {
-	float4 normalColor = (tex2D(TESR_WaterLensSampler, Input.noiseCoord.xy) * 2.0f) - 1.0f;
-	float4 animColor = (tex2D(TESR_WaterLensSampler, Input.noiseCoord.zw) * 2.0f) - 1.0f;
+	float4 normalColor = (tex2D(TESR_waterlensSampler, Input.noiseCoord.xy) * 2.0f) - 1.0f;
+	float4 animColor = (tex2D(TESR_waterlensSampler, Input.noiseCoord.zw) * 2.0f) - 1.0f;
 
 	normalColor.z += animColor.w;
 	float3 normal = normalize(normalColor.xyz);
