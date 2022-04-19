@@ -10,8 +10,8 @@ float4 PSLightColor[10] : register(c3);
 float4 TESR_FogColor : register(c15);
 float4 PSLightDir : register(c18);
 float4 TESR_ShadowData : register(c32);
-sampler2D TESR_ShadowMapBufferNear : register(s14); // samplerState14 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
-sampler2D TESR_ShadowMapBufferFar : register(s15); // samplerState15 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
+sampler2D TESR_ShadowMapBufferNear : register(s14) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+sampler2D TESR_ShadowMapBufferFar : register(s15) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 // Registers:
 //
@@ -43,7 +43,7 @@ struct PS_OUTPUT {
     float4 color_0 : COLOR0;
 };
 
-#include "Shadow.hlsl"
+#include "Includes/Shadow.hlsl"
 
 PS_OUTPUT main(VS_INPUT IN) {
     PS_OUTPUT OUT;

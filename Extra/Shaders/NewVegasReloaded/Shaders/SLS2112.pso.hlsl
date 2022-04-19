@@ -22,8 +22,8 @@ sampler2D TESR_ShadowMapBufferFar : register(s15) = sampler_state { ADDRESSU = C
 //   PSLightColor[0]    const_3       4
 //   PSLightDir      const_18      1
 //   PSLightPosition[0] const_19      3
-//   BaseMap         texture_0       6
-//   NormalMap       texture_7       6
+//   BaseMap         texture_0       3
+//   NormalMap       texture_7       3
 //
 
 
@@ -31,7 +31,6 @@ sampler2D TESR_ShadowMapBufferFar : register(s15) = sampler_state { ADDRESSU = C
 
 struct VS_INPUT {
 	float3 LCOLOR_0 : COLOR0;
-	float4 LCOLOR_1 : COLOR1;
     float3 BaseUV : TEXCOORD0;
     float3 texcoord_1 : TEXCOORD1_centroid;
 	float3 texcoord_2 : TEXCOORD2_centroid;
@@ -56,81 +55,63 @@ PS_OUTPUT main(VS_INPUT IN) {
 #define	shade(n, l)		max(dot(n, l), 0)
 #define	shades(n, l)		saturate(dot(n, l))
 
-    float3 m61;
-    float3 m63;
-    float3 m64;
-    float3 m69;
+    float3 m51;
+    float3 m53;
+    float3 m55;
+    float3 m59;
     float3 q0;
     float3 q1;
     float3 q10;
     float3 q11;
-    float3 q12;
-    float3 q16;
     float3 q2;
-    float3 q26;
-    float3 q27;
+    float3 q24;
+    float3 q25;
     float3 q3;
-    float3 q39;
     float3 q4;
     float3 q5;
     float3 q6;
-    float3 q62;
     float3 q7;
     float3 q8;
     float3 q9;
     float4 r0;
     float4 r1;
-    float4 r10;
-    float4 r11;
     float4 r2;
     float4 r3;
     float4 r4;
     float4 r5;
-    float4 r6;
-    float4 r7;
-    float4 r8;
-    float4 r9;
 
     r2.xyzw = tex2D(NormalMap[2], IN.BaseUV.xy);
     r0.xyzw = tex2D(NormalMap[1], IN.BaseUV.xy);
     r1.xyzw = tex2D(NormalMap[0], IN.BaseUV.xy);
-    r11.xyzw = tex2D(BaseMap[5], IN.BaseUV.xy);
-    r10.xyzw = tex2D(BaseMap[4], IN.BaseUV.xy);
-    r9.xyzw = tex2D(BaseMap[3], IN.BaseUV.xy);
-    r8.xyzw = tex2D(BaseMap[2], IN.BaseUV.xy);
-    r5.xyzw = tex2D(NormalMap[5], IN.BaseUV.xy);
-    r4.xyzw = tex2D(NormalMap[4], IN.BaseUV.xy);
-    r3.xyzw = tex2D(NormalMap[3], IN.BaseUV.xy);
-    r6.xyzw = tex2D(BaseMap[1], IN.BaseUV.xy);
-    r7.xyzw = tex2D(BaseMap[0], IN.BaseUV.xy);
-    q2.xyz = normalize(IN.texcoord_5.xyz);
+    r5.xyzw = tex2D(BaseMap[2], IN.BaseUV.xy);
+    r3.xyzw = tex2D(BaseMap[1], IN.BaseUV.xy);
+    r4.xyzw = tex2D(BaseMap[0], IN.BaseUV.xy);
+    q0.xyz = normalize(IN.texcoord_5.xyz);
     q1.xyz = normalize(IN.texcoord_4.xyz);
     q3.xyz = normalize(IN.texcoord_3.xyz);
-    m64.xyz = mul(float3x3(q3.xyz, q1.xyz, q2.xyz), PSLightDir.xyz);
+    m53.xyz = mul(float3x3(q3.xyz, q1.xyz, q0.xyz), PSLightDir.xyz);
     q7.xyz = PSLightPosition[2].xyz - IN.texcoord_2.xyz;
     q8.xyz = q7.xyz / PSLightPosition[2].w;
-    m69.xyz = mul(float3x3(q3.xyz, q1.xyz, q2.xyz), q7.xyz);
+    m59.xyz = mul(float3x3(q3.xyz, q1.xyz, q0.xyz), q7.xyz);
     q5.xyz = PSLightPosition[1].xyz - IN.texcoord_2.xyz;
     q6.xyz = q5.xyz / PSLightPosition[1].w;
-    m63.xyz = mul(float3x3(q3.xyz, q1.xyz, q2.xyz), q5.xyz);
-    q0.xyz = PSLightPosition[0].xyz - IN.texcoord_2.xyz;
-    q4.xyz = q0.xyz / PSLightPosition[0].w;
-    m61.xyz = mul(float3x3(q3.xyz, q1.xyz, q2.xyz), q0.xyz);
-    q9.xyz = (IN.LCOLOR_0.z * r8.xyz) + ((IN.LCOLOR_0.x * r7.xyz) + (r6.xyz * IN.LCOLOR_0.y));
-    q10.xyz = (IN.LCOLOR_1.z * r11.xyz) + ((IN.LCOLOR_1.y * r10.xyz) + ((IN.LCOLOR_1.x * r9.xyz) + q9.xyz));
+    m55.xyz = mul(float3x3(q3.xyz, q1.xyz, q0.xyz), q5.xyz);
+    q2.xyz = PSLightPosition[0].xyz - IN.texcoord_2.xyz;
+    q4.xyz = q2.xyz / PSLightPosition[0].w;
+    m51.xyz = mul(float3x3(q3.xyz, q1.xyz, q0.xyz), q2.xyz);
+    q9.xyz = (IN.LCOLOR_0.z * r5.xyz) + ((IN.LCOLOR_0.x * r4.xyz) + (r3.xyz * IN.LCOLOR_0.y));
     r0.xyz = (2 * ((r1.xyz - 0.5) * IN.LCOLOR_0.x)) + (2 * ((r0.xyz - 0.5) * IN.LCOLOR_0.y));	// [0,1] to [-1,+1]
-    q16.xyz = (2 * ((r3.xyz - 0.5) * IN.LCOLOR_1.x)) + ((2 * ((r2.xyz - 0.5) * IN.LCOLOR_0.z)) + r0.xyz);	// [0,1] to [-1,+1]
-    q39.xyz = normalize((2 * ((r5.xyz - 0.5) * IN.LCOLOR_1.z)) + ((2 * ((r4.xyz - 0.5) * IN.LCOLOR_1.y)) + q16.xyz));	// [0,1] to [-1,+1]
-    q62.xyz = shades(q39.xyz, normalize(m61.xyz)) * (1 - shades(q4.xyz, q4.xyz)) * PSLightColor[1].xyz;
-    r2.xyz = (shades(q39.xyz, m64.xyz) * PSLightColor[0].rgb) + q62.xyz;
-    q26.xyz = ((shades(q39.xyz, normalize(m63.xyz)) * (1 - shades(q6.xyz, q6.xyz))) * PSLightColor[2].xyz) + r2.xyz;
-    q27.xyz = ((shades(q39.xyz, normalize(m69.xyz)) * (1 - shades(q8.xyz, q8.xyz))) * PSLightColor[3].xyz) + q26.xyz;
-    q11.xyz = ((GetLightAmount(IN.texcoord_6, IN.texcoord_7) * q27.xyz) + AmbientColor.rgb) * q10.xyz;
-    q12.xyz = (IN.BaseUV.z * (TESR_FogColor.xyz - (IN.texcoord_1.xyz * q11.xyz))) + (q11.xyz * IN.texcoord_1.xyz);
+    r1.xyz = normalize((2 * ((r2.xyz - 0.5) * IN.LCOLOR_0.z)) + r0.xyz);	// [0,1] to [-1,+1]
+    r2.xyz = shades(r1.xyz, normalize(m51.xyz)) * (1 - shades(q4.xyz, q4.xyz)) * PSLightColor[1].xyz;
+    r2.xyz = (shades(r1.xyz, m53.xyz) * PSLightColor[0].rgb) + r2.xyz;
+    q24.xyz = ((shades(r1.xyz, normalize(m55.xyz)) * (1 - shades(q6.xyz, q6.xyz))) * PSLightColor[2].xyz) + r2.xyz;
+    q25.xyz = ((shades(r1.xyz, normalize(m59.xyz)) * (1 - shades(q8.xyz, q8.xyz))) * PSLightColor[3].xyz) + q24.xyz;
+    q10.xyz = ((GetLightAmount(IN.texcoord_6, IN.texcoord_7) * q25.xyz) + AmbientColor.rgb) * q9.xyz;
+    q11.xyz = (IN.BaseUV.z * (TESR_FogColor.xyz - (IN.texcoord_1.xyz * q10.xyz))) + (q10.xyz * IN.texcoord_1.xyz);
     OUT.color_0.a = 1;
-    OUT.color_0.rgb = q12.xyz;
+    OUT.color_0.rgb = q11.xyz;
+
     return OUT;
-	
 };
 
-// approximately 103 instruction slots used (12 texture, 91 arithmetic)
+// approximately 85 instruction slots used (6 texture, 79 arithmetic)

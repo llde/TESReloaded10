@@ -20,8 +20,8 @@ sampler2D TESR_ShadowMapBufferFar : register(s15) = sampler_state { ADDRESSU = C
 //   AmbientColor const_1       1
 //   PSLightColor[0] const_3       1
 //   PSLightDir   const_18      1
-//   BaseMap      texture_0       5
-//   NormalMap    texture_7       5
+//   BaseMap      texture_0       3
+//   NormalMap    texture_7       3
 //
 
 
@@ -29,7 +29,6 @@ sampler2D TESR_ShadowMapBufferFar : register(s15) = sampler_state { ADDRESSU = C
 
 struct VS_INPUT {
 	float3 LCOLOR_0 : COLOR0;
-	float4 LCOLOR_1 : COLOR1;
     float3 BaseUV : TEXCOORD0;
     float3 texcoord_1 : TEXCOORD1_centroid;
     float3 texcoord_3 : TEXCOORD3_centroid;
@@ -53,50 +52,39 @@ PS_OUTPUT main(VS_INPUT IN) {
 #define	shade(n, l)		max(dot(n, l), 0)
 #define	shades(n, l)		saturate(dot(n, l))
 
-    float3 m29;
+    float3 m23;
     float3 q0;
     float3 q1;
     float3 q2;
     float3 q3;
     float3 q4;
-    float3 q6;
-    float3 q7;
+    float3 q5;
     float4 r0;
     float4 r1;
     float4 r2;
     float4 r3;
     float4 r4;
     float4 r5;
-    float4 r6;
-    float4 r7;
-    float4 r8;
-    float4 r9;
 
     r2.xyzw = tex2D(NormalMap[2], IN.BaseUV.xy);
     r0.xyzw = tex2D(NormalMap[1], IN.BaseUV.xy);
     r1.xyzw = tex2D(NormalMap[0], IN.BaseUV.xy);
-    r9.xyzw = tex2D(BaseMap[4], IN.BaseUV.xy);
-    r8.xyzw = tex2D(BaseMap[3], IN.BaseUV.xy);
-    r7.xyzw = tex2D(BaseMap[2], IN.BaseUV.xy);
-    r4.xyzw = tex2D(NormalMap[4], IN.BaseUV.xy);
-    r3.xyzw = tex2D(NormalMap[3], IN.BaseUV.xy);
-    r5.xyzw = tex2D(BaseMap[1], IN.BaseUV.xy);
-    r6.xyzw = tex2D(BaseMap[0], IN.BaseUV.xy);
-    q3.xyz = normalize(IN.texcoord_5.xyz);
+    r5.xyzw = tex2D(BaseMap[2], IN.BaseUV.xy);
+    r3.xyzw = tex2D(BaseMap[1], IN.BaseUV.xy);
+    r4.xyzw = tex2D(BaseMap[0], IN.BaseUV.xy);
+    q2.xyz = normalize(IN.texcoord_5.xyz);
     q0.xyz = normalize(IN.texcoord_4.xyz);
-    q2.xyz = normalize(IN.texcoord_3.xyz);
-    m29.xyz = mul(float3x3(q2.xyz, q0.xyz, q3.xyz), PSLightDir.xyz);
-    q4.xyz = (IN.LCOLOR_0.z * r7.xyz) + ((IN.LCOLOR_0.x * r6.xyz) + (r5.xyz * IN.LCOLOR_0.y));
+    q1.xyz = normalize(IN.texcoord_3.xyz);
+    m23.xyz = mul(float3x3(q1.xyz, q0.xyz, q2.xyz), PSLightDir.xyz);
+    q3.xyz = (IN.LCOLOR_0.z * r5.xyz) + ((IN.LCOLOR_0.x * r4.xyz) + (r3.xyz * IN.LCOLOR_0.y));
     r0.xyz = (2 * ((r1.xyz - 0.5) * IN.LCOLOR_0.x)) + (2 * ((r0.xyz - 0.5) * IN.LCOLOR_0.y));	// [0,1] to [-1,+1]
-    r0.xyz = (2 * ((r2.xyz - 0.5) * IN.LCOLOR_0.z)) + r0.xyz;	// [0,1] to [-1,+1]
-    q1.xyz = (2 * ((r4.xyz - 0.5) * IN.LCOLOR_1.y)) + ((2 * ((r3.xyz - 0.5) * IN.LCOLOR_1.x)) + r0.xyz);	// [0,1] to [-1,+1]
-    r0.xyz = (GetLightAmount(IN.texcoord_6, IN.texcoord_7) * (shades(normalize(q1.xyz), m29.xyz) * PSLightColor[0].rgb)) + AmbientColor.rgb;
-    q6.xyz = r0.xyz * ((IN.LCOLOR_1.y * r9.xyz) + ((IN.LCOLOR_1.x * r8.xyz) + q4.xyz));
-    q7.xyz = (IN.BaseUV.z * (TESR_FogColor.xyz - (IN.texcoord_1.xyz * q6.xyz))) + (q6.xyz * IN.texcoord_1.xyz);
+    r1.xyz = normalize((2 * ((r2.xyz - 0.5) * IN.LCOLOR_0.z)) + r0.xyz);	// [0,1] to [-1,+1]
+    q4.xyz = ((GetLightAmount(IN.texcoord_6, IN.texcoord_7) * (shades(r1.xyz, m23.xyz) * PSLightColor[0].rgb)) + AmbientColor.rgb) * q3.xyz;
+    q5.xyz = (IN.BaseUV.z * (TESR_FogColor.xyz - (IN.texcoord_1.xyz * q4.xyz))) + (q4.xyz * IN.texcoord_1.xyz);
     OUT.color_0.a = 1;
-    OUT.color_0.rgb = q7.xyz;
+    OUT.color_0.rgb = q5.xyz;
 
     return OUT;
 };
 
-// approximately 55 instruction slots used (10 texture, 45 arithmetic)
+// approximately 43 instruction slots used (6 texture, 37 arithmetic)
