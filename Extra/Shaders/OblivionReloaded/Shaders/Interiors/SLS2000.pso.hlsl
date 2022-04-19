@@ -12,7 +12,7 @@ float4 TESR_ShadowCubeMapBlend : register(c13);
 
 sampler2D BaseMap : register(s0);
 sampler2D NormalMap : register(s1);
-samplerCUBE TESR_ShadowCubeMapBuffer0 : register(s8); // samplerState8 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
+samplerCUBE TESR_ShadowCubeMapBuffer0 : register(s8) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 // Registers:
 //

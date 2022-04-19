@@ -13,7 +13,7 @@ float4 TESR_TerrainData : register(c8);
 sampler2D BaseMap : register(s0);
 sampler2D NormalMap : register(s1);
 sampler2D NoiseMap : register(s2);
-sampler2D TESR_Noise : register(s10); // samplerState10 { TEXTURE = Effects\TerrainNoise_n.dds; ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = POINT; MINFILTER = POINT; MIPFILTER = NONE; }
+sampler2D TESR_Noise : register(s10) < string ResourceName = "Effects\TerrainNoise_n.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = MINDEF; MIPFILTER = MIPDEF; };
 
 //
 //

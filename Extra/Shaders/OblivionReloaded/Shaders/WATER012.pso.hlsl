@@ -21,7 +21,7 @@ float4x4 TESR_ViewTransform : register(c19);
 float4x4 TESR_ProjectionTransform : register(c23);
 
 sampler2D ReflectionMap : register(s0);
-sampler2D TESR_WaterHeightMapBuffer : register(s1); // samplerState1 { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
+sampler2D TESR_WaterHeightMapBuffer : register(s1) = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = NONE; };
 
 static const float4x4 ditherMat = { 0.0588, 0.5294, 0.1765, 0.6471,
 									0.7647, 0.2941, 0.8824, 0.4118,

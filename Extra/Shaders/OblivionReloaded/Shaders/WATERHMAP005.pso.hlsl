@@ -9,8 +9,8 @@ float4 TESR_WaveParams : register(c4);
 float4 TESR_RainData : register(c5);
 
 sampler2D amplitudeSamp : register(s0);
-sampler3D TESR_Water : register(s1); // samplerState1 { TEXTURE = Water\water_NRM.dds; ADDRESSU = WRAP; ADDRESSV = WRAP; ADDRESSW = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
-sampler2D TESR_RippleSampler : register(s2); // samplerState2 { TEXTURE = Precipitations\ripples.dds; ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
+sampler3D TESR_Water : register(s1) < string ResourceName = "Water\water_NRM.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; ADDRESSW = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = NONE; };
+sampler2D TESR_RippleSampler : register(s2) < string ResourceName = "Precipitations\ripples.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 static const float PI = 3.14159265;
 static const float time1 = frac(TESR_GameTime.z * 0.90f);

@@ -14,10 +14,10 @@ float4 TESR_ShadowCubeMapBlend : register(c15);
 sampler2D BaseMap : register(s0);
 sampler2D NormalMap : register(s1);
 sampler2D AttenuationMap : register(s4);
-samplerCUBE TESR_ShadowCubeMapBuffer0 : register(s8); // samplerState8 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
-samplerCUBE TESR_ShadowCubeMapBuffer1 : register(s9); // samplerState9 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
-samplerCUBE TESR_ShadowCubeMapBuffer2 : register(s10); // samplerState10 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
-samplerCUBE TESR_ShadowCubeMapBuffer3 : register(s11); // samplerState11 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
+samplerCUBE TESR_ShadowCubeMapBuffer0 : register(s8) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer1 : register(s9) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer2 : register(s10) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer3 : register(s11) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 //
 //

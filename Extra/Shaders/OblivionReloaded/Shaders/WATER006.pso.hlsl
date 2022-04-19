@@ -25,7 +25,7 @@ float4x4 TESR_ProjectionTransform : register(c23);
 
 sampler2D NormalMap : register(s1);
 sampler2D DetailMap : register(s2);
-sampler2D TESR_RenderedBuffer : register(s5); // samplerState5 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
+sampler2D TESR_RenderedBuffer : register(s5) = sampler_state { };
 
 static const float4x4 ditherMat = { 0.0588, 0.5294, 0.1765, 0.6471,
 									0.7647, 0.2941, 0.8824, 0.4118,

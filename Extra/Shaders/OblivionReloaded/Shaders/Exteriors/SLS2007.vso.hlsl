@@ -72,9 +72,9 @@ VS_OUTPUT main(VS_INPUT IN) {
     OUT.texcoord_1.xyz = normalize(q6.xyz);
     OUT.texcoord_2.xyz = mul(float3x3(IN.LTANGENT.xyz, IN.LBINORMAL.xyz, IN.LNORMAL.xyz), normalize(lit0.xyz));
     OUT.texcoord_4.w = 0.5;
-    OUT.texcoord_4.xyz = compress(lit0.xyz / LightPosition[1].w);
-    OUT.texcoord_6.xyzw = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[0]);
-	OUT.texcoord_7.xyzw = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[1]);
+    OUT.texcoord_4.xyz = compress(lit0.xyz / LightPosition[1].w);	// [-1,+1] to [0,1]
+    OUT.texcoord_6 = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[0]);
+	OUT.texcoord_7 = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[1]);
     return OUT;
 };
 
