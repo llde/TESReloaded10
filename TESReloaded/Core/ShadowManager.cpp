@@ -94,7 +94,10 @@ TESObjectREFR* ShadowManager::GetRef(TESObjectREFR* Ref, SettingsShadowStruct::F
 
 	if (Ref && Ref->GetNode()) {
 		TESForm* Form = Ref->baseForm;
-		if (!(Ref->flags & TESForm::FormFlags::kFormFlags_NotCastShadows)) {
+		ExtraRefractionProperty* RefractionExtraProperty = (ExtraRefractionProperty*)Ref->extraDataList.GetExtraData(BSExtraData::ExtraDataType::kExtraData_RefractionProperty);
+		float Refraction = RefractionExtraProperty ? (1 - RefractionExtraProperty->refractionAmount) : 0.0f;
+
+		if (!(Ref->flags & TESForm::FormFlags::kFormFlags_NotCastShadows) && Refraction <= 0.5) {
 			UInt8 TypeID = Form->formType;
 			if ((TypeID == TESForm::FormType::kFormType_Activator && Forms->Activators) ||
 				(TypeID == TESForm::FormType::kFormType_Apparatus && Forms->Apparatus) ||

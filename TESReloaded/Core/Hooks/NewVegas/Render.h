@@ -108,9 +108,10 @@ static void (__cdecl* ProcessImageSpaceShaders)(NiDX9Renderer*, BSRenderedTextur
 static void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRenderedTexture* RenderedTexture1, BSRenderedTexture* RenderedTexture2) {
 	
 	ProcessImageSpaceShaders(Renderer, RenderedTexture1, RenderedTexture2);
-	if (!RenderedTexture2 && TheRenderManager->currentRTGroup) TheShaderManager->RenderEffects(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
-	TheRenderManager->CheckAndTakeScreenShot(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
-
+	if (!RenderedTexture2 && TheRenderManager->currentRTGroup) {
+		TheShaderManager->RenderEffects(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
+		TheRenderManager->CheckAndTakeScreenShot(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
+	}
 }
 
 static void RenderMainMenuMovie() {

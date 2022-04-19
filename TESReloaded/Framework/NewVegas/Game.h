@@ -451,6 +451,14 @@ public:
 };
 assert(sizeof(ExtraHavok) == 0x014);
 
+
+class ExtraRefractionProperty : public BSExtraData
+{
+public:
+	float		refractionAmount;		// range of 0-1
+};
+assert(sizeof(ExtraRefractionProperty) == 0x010);  //TODO check
+//
 class ExtraDataList {
 public:
 	virtual	void				Destroy(bool bNoDealloc);	// removes and frees all of m_data

@@ -63,6 +63,11 @@ class BSTempNodeManager;
 class BSAnimGroupSequence;
 class BSFile;
 
+
+static void* (__cdecl* RTDynamicCast)(void*, UInt32, const void*, const void*, UInt32) = (void* (__cdecl*)(void*, UInt32, const void*, const void*, UInt32))0x009832E6;
+static const void * RTTI_TESForm = (void *)0xB02F9C;
+static const void * RTTI_TESFullName = (void *)0xB03298;
+
 class CommandParam {
 public:
 	enum ParamType {
@@ -298,6 +303,14 @@ public:
 	UInt32			unk10;	// 010
 };
 assert(sizeof(ExtraHavok) == 0x014);
+
+
+class ExtraRefractionProperty : public BSExtraData
+{
+public:
+	float		refractionAmount;		// range of 0-1
+};
+assert(sizeof(ExtraRefractionProperty) == 0x010);
 
 class ExtraDataList {
 public:
