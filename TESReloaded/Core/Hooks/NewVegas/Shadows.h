@@ -29,7 +29,7 @@ static void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointL
 			LightPoint->CanCarry = 2;
 		}
 	}		
-	else if (Ref->baseForm->formType == TESForm::FormType::kFormType_Light) {
+	else if (Ref && Ref->baseForm && Ref->baseForm->formType == TESForm::FormType::kFormType_Light) {
 		LightPoint->CastShadows = !(Ref->flags & TESForm::FormFlags::kFormFlags_NotCastShadows);
 		LightPoint->CanCarry = 0;
 	}
