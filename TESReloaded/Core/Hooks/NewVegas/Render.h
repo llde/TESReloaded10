@@ -56,7 +56,7 @@ static void __fastcall RenderWorldSceneGraphHook(Main* This, UInt32 edx, Sun* Sk
 	bool CameraMode = TheSettingManager->SettingsMain.CameraMode.Enabled;
 
 	(*RenderWorldSceneGraph)(This, SkySun, IsFirstPerson, WireFrame, Arg4);
-	if (CameraMode || !TheCameraManager->IsFirstPerson()) TheRenderManager->ResolveDepthBuffer();
+	if (!IsFirstPerson) TheRenderManager->ResolveDepthBuffer();
 
 }
 
@@ -65,9 +65,10 @@ static void __fastcall RenderFirstPersonHook(Main* This, UInt32 edx, NiDX9Render
 	
 	(*RenderFirstPerson)(This, Renderer, Geo, SkySun, RenderedTexture);
 	TheRenderManager->ResolveDepthBuffer();
-	TheRenderManager->Clear(NULL, NiRenderer::kClear_ZBUFFER);
-	ThisCall(0x00874C10, Global);
-	(*RenderFirstPerson)(This, Renderer, Geo, SkySun, RenderedTexture);
+ //TODO check if NV actually need this
+//	TheRenderManager->Clear(NULL, NiRenderer::kClear_ZBUFFER);
+//	ThisCall(0x00874C10, Global);
+//	(*RenderFirstPerson)(This, Renderer, Geo, SkySun, RenderedTexture);
 
 }
 
