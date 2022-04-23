@@ -57,7 +57,6 @@ static void __fastcall RenderWorldSceneGraphHook(Main* This, UInt32 edx, Sun* Sk
 
 	(*RenderWorldSceneGraph)(This, SkySun, IsFirstPerson, WireFrame, Arg4);
 	if (!IsFirstPerson) TheRenderManager->ResolveDepthBuffer();
-
 }
 
 static void (__thiscall* RenderFirstPerson)(Main*, NiDX9Renderer*, NiGeometry*, Sun*, BSRenderedTexture*) = (void (__thiscall*)(Main*, NiDX9Renderer*, NiGeometry*, Sun*, BSRenderedTexture*))Hooks::RenderFirstPerson;
@@ -65,10 +64,10 @@ static void __fastcall RenderFirstPersonHook(Main* This, UInt32 edx, NiDX9Render
 	
 	(*RenderFirstPerson)(This, Renderer, Geo, SkySun, RenderedTexture);
 	TheRenderManager->ResolveDepthBuffer();
- //TODO check if NV actually need this
-//	TheRenderManager->Clear(NULL, NiRenderer::kClear_ZBUFFER);
-//	ThisCall(0x00874C10, Global);
-//	(*RenderFirstPerson)(This, Renderer, Geo, SkySun, RenderedTexture);
+ //It is nencessary otherwise gltiches when a vanilla DoF effect render on some player related node
+	TheRenderManager->Clear(NULL, NiRenderer::kClear_ZBUFFER);
+	ThisCall(0x00874C10, Global);
+	(*RenderFirstPerson)(This, Renderer, Geo, SkySun, RenderedTexture);
 
 }
 
