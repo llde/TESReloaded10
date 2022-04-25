@@ -3673,7 +3673,11 @@ public:
 	bool				IsAlive() { return !GetDead(1); }
 	bool				IsFirstPerson() { return !isThirdPerson; }
 	bool				IsVanity() { return *(bool*)0x011E07B8; }
-	void				SetFoV(float FoV) { float* SettingWorldFoV = (float*)0x01203160; float* Setting1stPersonFoV = (float*)0x0120316C; worldFoV = *SettingWorldFoV = *Setting1stPersonFoV = FoV; }
+	void				SetFoV(float FoV) {
+							float* SettingWorldFoV = (float*)0x01203160;
+							float* Setting1stPersonFoV = (float*)0x0120316C;
+							worldFoV = *SettingWorldFoV = *Setting1stPersonFoV = FoV;
+						}
 	float				GetFoV(bool IsSpecialView) { return (IsSpecialView ? firstPersonFoV : worldFoV); }
 	void				ResetCamera() {}
 	bool				IsReloading() { return (ThisCall(0x008A8870, this)); }

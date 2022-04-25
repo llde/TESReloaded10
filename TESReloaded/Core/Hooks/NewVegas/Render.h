@@ -52,9 +52,6 @@ static HRESULT __fastcall SetSamplerStateHook(NiDX9RenderState* This, UInt32 edx
 
 static void (__thiscall* RenderWorldSceneGraph)(Main*, Sun*, UInt8, UInt8, UInt8) = (void (__thiscall*)(Main*, Sun*, UInt8, UInt8, UInt8))Hooks::RenderWorldSceneGraph;
 static void __fastcall RenderWorldSceneGraphHook(Main* This, UInt32 edx, Sun* SkySun, UInt8 IsFirstPerson, UInt8 WireFrame, UInt8 Arg4) {
-	
-	bool CameraMode = TheSettingManager->SettingsMain.CameraMode.Enabled;
-
 	(*RenderWorldSceneGraph)(This, SkySun, IsFirstPerson, WireFrame, Arg4);
 	if (!IsFirstPerson) TheRenderManager->ResolveDepthBuffer();
 }
@@ -64,7 +61,7 @@ static void __fastcall RenderFirstPersonHook(Main* This, UInt32 edx, NiDX9Render
 	
 	(*RenderFirstPerson)(This, Renderer, Geo, SkySun, RenderedTexture);
 	TheRenderManager->ResolveDepthBuffer();
- //It is nencessary otherwise gltiches when a vanilla DoF effect render on some player related node
+ //It is necessary otherwise gltiches when a vanilla DoF effect render on some player related node
 	TheRenderManager->Clear(NULL, NiRenderer::kClear_ZBUFFER);
 	ThisCall(0x00874C10, Global);
 	(*RenderFirstPerson)(This, Renderer, Geo, SkySun, RenderedTexture);
@@ -82,14 +79,12 @@ static void __fastcall RenderReflectionsHook(WaterManager* This, UInt32 edx, NiC
 	(*RenderReflections)(This, Camera, SceneNode);
 	ShadowData->x = ShadowDataBackup;
 	if (DWNode::Get()) DWNode::AddNode("END REFLECTIONS RENDERING", NULL, NULL);
-
 }
 
 static void (__thiscall* RenderPipboy)(Main*, NiGeometry*, NiDX9Renderer*) = (void (__thiscall*)(Main*, NiGeometry*, NiDX9Renderer*))Hooks::RenderPipboy;
 static void __fastcall RenderPipboyHook(Main* This, UInt32 edx, NiGeometry* Geo, NiDX9Renderer* Renderer) {
-	
 	WorldSceneGraph->UpdateParticleShaderFoV(Player->firstPersonFoV);
-	Player->SetFoV(Player->firstPersonFoV);
+//	Player->SetFoV(Player->firstPersonFoV);
 	(*RenderPipboy)(This, Geo, Renderer);
 
 }
