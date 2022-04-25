@@ -23,12 +23,12 @@ float GetLightAmountFar(float4 ShadowPos) {
 
     ShadowPos.x = ShadowPos.x *  0.5f + 0.5f;
     ShadowPos.y = ShadowPos.y * -0.5f + 0.5f;
-	for (y = -0.5f; y <= 0.5f; y += 0.5f) {
-		for (x = -0.5f; x <= 0.5f; x += 0.5f) {
+	for (y = -1.5f; y <= 1.5f; y += 1.0f) {
+		for (x = -1.5f; x <= 1.5f; x += 1.0f) {
 			Shadow += LookupFar(ShadowPos, float2(x, y));
 		}
 	}
-	Shadow /= 9.0f;
+	Shadow /= 16.0f;
 	return Shadow;
 	
 }
