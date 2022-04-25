@@ -6,7 +6,7 @@ float4 TESR_ReciprocalResolution;
 float4 TESR_MotionBlurParams;
 float4 TESR_MotionBlurData;
 
-sampler2D TESR_RenderedBuffer : register(s0); // samplerState0 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
+sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 struct VSOUT
 {

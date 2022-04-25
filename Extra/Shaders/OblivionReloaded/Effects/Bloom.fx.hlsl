@@ -6,8 +6,8 @@ float4 TESR_ReciprocalResolution;
 float4 TESR_BloomData;
 float4 TESR_BloomValues;
 
-sampler2D TESR_RenderedBuffer : register(s0); // samplerState0 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
-sampler2D TESR_SourceBuffer : register(s1); // samplerState1 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
+sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+sampler2D TESR_SourceBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 static const float2 OffsetMaskH = float2(1.0f, 0.0f);
 static const float2 OffsetMaskV = float2(0.0f, 1.0f);

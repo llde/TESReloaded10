@@ -6,7 +6,7 @@
 float4 TESR_ReciprocalResolution;
 float4 TESR_SharpeningData;
 
-sampler2D TESR_RenderedBuffer : register(s0); // samplerState0 { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; }
+sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 static const float3 CoefLuma = {0.2126, 0.7152, 0.0722};
 
