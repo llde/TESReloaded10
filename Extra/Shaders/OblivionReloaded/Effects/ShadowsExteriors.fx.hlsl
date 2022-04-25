@@ -16,11 +16,11 @@ sampler2D TESR_SourceBuffer : register(s2) = sampler_state { ADDRESSU = CLAMP; A
 sampler2D TESR_ShadowMapBufferNear : register(s3) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_ShadowMapBufferFar : register(s4) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
+#include "../Shaders/Includes/Shadow.hlsl"
 static const float nearZ = TESR_ProjectionTransform._43 / TESR_ProjectionTransform._33;
 static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
 static const float Zmul = nearZ * farZ;
 static const float Zdiff = farZ - nearZ;
-static const float BIAS = 0.002f;
 static const float2 OffsetMaskH = float2(1.0f, 0.0f);
 static const float2 OffsetMaskV = float2(0.0f, 1.0f);
 
@@ -89,56 +89,6 @@ float3 toWorld(float2 tex)
     return v;
 }
 
-float LookupFar(float4 ShadowPos) {
-	
-	float Shadow = tex2D(TESR_ShadowMapBufferFar, ShadowPos.xy).r;
-	if (Shadow < ShadowPos.z - BIAS) return TESR_ShadowData.y;
-	return 1.0f;
-	
-}
-
-float GetLightAmountFar(float4 ShadowPos) {
-
-	float x;
-	float y;
-	
-	ShadowPos.xyz /= ShadowPos.w;
-    if (ShadowPos.x < -1.0f || ShadowPos.x > 1.0f ||
-        ShadowPos.y < -1.0f || ShadowPos.y > 1.0f ||
-        ShadowPos.z <  0.0f || ShadowPos.z > 1.0f)
-		return 1.0f;
-
-    ShadowPos.x = ShadowPos.x *  0.5f + 0.5f;
-    ShadowPos.y = ShadowPos.y * -0.5f + 0.5f;
-	return LookupFar(ShadowPos);
-	
-}
-
-float Lookup(float4 ShadowPos) {
-	
-	float Shadow = tex2D(TESR_ShadowMapBufferNear, ShadowPos.xy).r;
-	if (Shadow < ShadowPos.z - BIAS) return TESR_ShadowData.y;
-	return 1.0f;
-	
-}
-
-float GetLightAmount(float4 ShadowPos, float4 ShadowPosFar) {
-	
-	float x;
-	float y;
-	
-	ShadowPos.xyz /= ShadowPos.w;
-    if (ShadowPos.x < -1.0f || ShadowPos.x > 1.0f ||
-        ShadowPos.y < -1.0f || ShadowPos.y > 1.0f ||
-        ShadowPos.z <  0.0f || ShadowPos.z > 1.0f)
-		return GetLightAmountFar(ShadowPosFar);
- 
-    ShadowPos.x = ShadowPos.x *  0.5f + 0.5f;
-    ShadowPos.y = ShadowPos.y * -0.5f + 0.5f;
-	return Lookup(ShadowPos);
-	
-}
-
 float4 Shadow( VSOUT IN ) : COLOR0 {
 	
 	float Shadow = 1.0f;
@@ -150,7 +100,7 @@ float4 Shadow( VSOUT IN ) : COLOR0 {
 		float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 		float4 ShadowNear = mul(pos, TESR_ShadowCameraToLightTransformNear);
 		float4 ShadowFar = mul(pos, TESR_ShadowCameraToLightTransformFar);	
-		Shadow = GetLightAmount(ShadowNear, ShadowFar);
+		Shadow = GetLightAmountPP(ShadowNear, ShadowFar);
 	}
     return float4(Shadow, Shadow, Shadow, 1.0f);
 	

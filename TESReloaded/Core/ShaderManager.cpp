@@ -443,7 +443,7 @@ EffectRecord* EffectRecord::LoadEffect(const char* Name) {
 	}
 
 	else {
-		if (Errors) Errors->Release();
+		if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
 	}
 	if (ShaderSource) ShaderSource->Release();
 	if (Errors) Errors->Release();
