@@ -4169,25 +4169,21 @@ public:
 	
 	void				PurgeCells() {}
 	float				GetWaterHeight(TESObjectREFR* Ref) {
+//							Logger::Log("Get Water Height");
 							TESObjectCELL* Cell = Ref->parentCell;
 							float r = worldSpace->defaultWaterHeight;
 
 							if (Cell && Cell->flags0 & TESObjectCELL::kFlags0_HasWater) {
-								if (Ref->renderData) r = Ref->renderData->waterHeight; else r = Cell->GetWaterHeight();
-							}
-							else {
-								UInt8 GridSize = gridCellArray->size;
-								for (int x = 0; x < GridSize; x++) {
-									for (int y = 0; y < GridSize; y++) {
-										Cell = gridCellArray->GetCell(x, y);
-										if (Cell && Cell->flags0 & TESObjectCELL::kFlags0_HasWater) {
-											r = Cell->GetWaterHeight();
-											goto breakall;
-										}
-									}
+								if (Ref->renderData) {
+									r = Ref->renderData->waterHeight;
+//									Logger::Log("Ref->renderData %f", r);
+								}
+								else {
+									r = Cell->GetWaterHeight();
+//									Logger::Log("Cell %f", r);
 								}
 							}
-							breakall:
+//							Logger::Log("default %f", r);
 							return r;
 						}
 	TESWaterForm*		GetWaterForm() { return currentCell ? currentCell->GetWaterForm() : NULL; }

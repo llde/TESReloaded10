@@ -9,7 +9,6 @@ static __declspec(naked) void RenderShadowMapHook() {
 		popad
 		jmp		Jumpers::Shadows::RenderShadowMapReturn
 	}
-
 }
 
 static void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* LightPoint) {
@@ -67,11 +66,12 @@ static void LeavesNodeName(BSTreeNode* TreeNode) {
 static __declspec(naked) void LeavesNodeNameHook() {
 
 	__asm {
-		pushad
+		mov [ebp - 0x70], eax
+//		pushad
 		push	eax 
 		call	LeavesNodeName
 		pop		eax
-		popad
+//		popad
 		jmp		Jumpers::Shadows::LeavesNodeNameReturn
 	}
 

@@ -28,6 +28,7 @@ public:
 	static const UInt32 ShowDetectorWindow			= 0x004D61B0;
 	static const UInt32 LoadForm					= 0x004601D0;
 	static const UInt32 UpdateFlyCam				= 0x0094A8C0;
+	static const UInt32	RenderShadowMaps			= 0x00871290;
 };
 
 class Jumpers {
@@ -61,9 +62,11 @@ public:
 	struct Shadows {
 		static const UInt32 RenderShadowMapHook			= 0x00870C39;
 		static const UInt32 RenderShadowMapReturn		= 0x00870C41;
+		static const UInt32 RenderShadowMap1Hook		= 0x0087084E;
+		static const UInt32 RenderShadowMap1Return		= 0x00870856;
 		static const UInt32 AddCastShadowFlagHook		= 0x0050DD06;
 		static const UInt32 AddCastShadowFlagReturn		= 0x0050DD0B;
-		static const UInt32 LeavesNodeNameHook			= 0x0066A115;
+		static const UInt32 LeavesNodeNameHook			= 0x0066A112;
 		static const UInt32 LeavesNodeNameReturn		= 0x0066A11E;
 	};
 	struct SetTileShaderConstants {
