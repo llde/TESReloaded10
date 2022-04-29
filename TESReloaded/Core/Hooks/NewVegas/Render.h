@@ -29,6 +29,7 @@ static void __fastcall SetShadersHook(BSShader* This, UInt32 edx, UInt32 PassInd
 			sprintf(Name, "Pass %i %s, %s (%s %s)", PassIndex, Pointers::Functions::GetPassDescription(PassIndex), Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
 			if (VertexShader->ShaderHandle == VertexShader->ShaderHandleBackup) strcat(Name, " - Vertex: vanilla");
 			if (PixelShader->ShaderHandle == PixelShader->ShaderHandleBackup) strcat(Name, " - Pixel: vanilla");
+			Logger::Log("%s", Name);
 			DWNode::AddNode(Name, Geometry->m_parent, Geometry);
 		}
 	}
