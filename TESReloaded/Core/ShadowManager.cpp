@@ -455,6 +455,9 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, S
 	
 }
 
+
+//static 	NiDX9RenderState::NiRenderStateSetting* RenderStateSettings = nullptr;
+
 void ShadowManager::RenderShadowMaps() {
 	
 	SettingsMainStruct::EquipmentModeStruct* EquipmentModeSettings = &TheSettingManager->SettingsMain.EquipmentMode;
@@ -465,10 +468,33 @@ void ShadowManager::RenderShadowMaps() {
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
 	IDirect3DSurface9* DepthSurface = NULL;
+	IDirect3DSurface9* RenderSurface = NULL;
+	D3DVIEWPORT9 viewport;
+/*	if(RenderStateSettings == nullptr){
+		RenderStateSettings = (NiDX9RenderState::NiRenderStateSetting*)malloc(sizeof(NiDX9RenderState::NiRenderStateSetting) * 256);
+		memcpy(RenderStateSettings, RenderState->RenderStateSettings, sizeof(NiDX9RenderState::NiRenderStateSetting) * 256);
+	}
+	else{
+		bool print = false;
+		for(size_t i = 0; i < 256; i++){
+			if(RenderStateSettings[i].CurrentValue != RenderState->RenderStateSettings[i].CurrentValue){
+				Logger::Log("Different state between iterations: State %0X was %u is %0X",i, RenderStateSettings[i].CurrentValue, RenderState->RenderStateSettings[i].CurrentValue);
+				RenderStateSettings[i].CurrentValue = RenderState->RenderStateSettings[i].CurrentValue;
+				print = true;
+
+			}
+		}
+		if(print) Logger::Log("End");
+	} */
 	D3DXVECTOR4* ShadowData = &TheShaderManager->ShaderConst.Shadow.Data;
 	D3DXVECTOR4* OrthoData = &TheShaderManager->ShaderConst.Shadow.OrthoData;
-
 	Device->GetDepthStencilSurface(&DepthSurface);
+	Device->GetRenderTarget(0, &RenderSurface);
+	Device->GetViewport(&viewport);
+	RenderState->SetRenderState(D3DRS_STENCILENABLE , 0 ,RenderStateArgs);
+	RenderState->SetRenderState(D3DRS_STENCILREF , 0 ,RenderStateArgs);
+ 	RenderState->SetRenderState(D3DRS_STENCILFUNC , 8 ,RenderStateArgs);
+
 	TheRenderManager->SetupSceneCamera();
 	if (Player->GetWorldSpace()) {
 		D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
@@ -542,6 +568,8 @@ void ShadowManager::RenderShadowMaps() {
 		ShadowData->z = 1.0f / (float)ShadowsInteriors->ShadowCubeMapSize;
 	}
 	Device->SetDepthStencilSurface(DepthSurface);
+	Device->SetRenderTarget(0, RenderSurface);
+	Device->SetViewport(&viewport);
 
 #if DEBUGSH
 	if (TheKeyboardManager->OnKeyDown(26)) {
