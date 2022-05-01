@@ -923,6 +923,34 @@ assert(sizeof(NiRenderedTexture) == 0x040);
 class NiD3DTextureStage;
 class NiD3DShaderConstantMap;
 
+enum ShaderDefinitionEnum
+{
+  kShaderDefinition_ShadowLightShader = 0x1,
+  kShaderDefinition_TallGrassShader = 0x2,
+  kShaderDefinition_DistantLODShader = 0x3,
+  kShaderDefinition_SpeedTreeBranchShader = 0x4,
+  kShaderDefinition_SpeedTreeFrondShader = 0x5,
+  kShaderDefinition_SpeedTreeLeafShader = 0x6,
+  kShaderDefinition_BSShaderBloodSplatter = 0x7,
+  kShaderDefinition_BSDistantTreeShader = 0x8,
+  kShaderDefinition_NiD3DDefaultShader = 0x9,
+  kShaderDefinition_SkyShader = 0xA,
+  kShaderDefinition_HairShader = 0xD,
+  kShaderDefinition_SkinShader = 0xE,
+  kShaderDefinition_ParallaxShader = 0xF,
+  kShaderDefinition_NiDX9ShaderDeclaration = 0x10,
+  kShaderDefinition_WaterShader = 0x11,
+  kShaderDefinition_ParticleShader = 0x18,
+  kShaderDefinition_BoltShader = 0x19,
+  kShaderDefinition_BeamShader = 0x1A,
+  kShaderDefinition_Lighting30Shader = 0x1D,
+  kShaderDefinition_PrecipitationShader = 0x1E,
+  kShaderDefinition_TileShader = 0x20,
+  kShaderDefinition_BSShaderNoLighting = 0x21,
+  kShaderDefinition_VolumetricFogShader = 0x22,
+};
+
+
 class NiD3DShaderDeclaration : public NiObject {
 public:
 	NiDX9Renderer*				Renderer;		// 008
@@ -933,7 +961,9 @@ public:
 	UInt32						Unk01C;			// 01C
 	UInt32						StreamCount;	// 020
 	UInt32						Unk024;			// 024
-	UInt32						Unk028;			// 028
+	UInt8						Unk028;			// 028
+	UInt8						Unk029[3];		// 029
+
 };
 assert(sizeof(NiD3DShaderDeclaration) == 0x02C);
 
@@ -941,7 +971,9 @@ class NiDX9ShaderDeclaration : public NiD3DShaderDeclaration {
 public:
 	UInt32		Unk02C;			// 02C
 	UInt32		Unk030;			// 030
-	UInt32		Unk034;			// 034
+	UInt8		Unk034;			// 034
+	UInt8		Unk035[3];		// 035
+
 };
 assert(sizeof(NiDX9ShaderDeclaration) == 0x038);
 
@@ -1058,6 +1090,21 @@ public:
 	UInt32				Unk238[6];		// 238
 };
 assert(sizeof(WaterShader) == 0x250);
+
+
+class ShadowLightShader : public BSShader{
+public:
+	UInt32 unk07C[4];
+};
+assert(sizeof(ShadowLightShader) == 0x8C);
+
+
+class ParallaxShader : public ShadowLightShader{
+public:
+	NiD3DVertexShader*  Vertex[20];
+ 	NiD3DPixelShader*   Pixel[33];
+};
+assert(sizeof(ParallaxShader) == 0x160);
 
 class BSImageSpaceShader : public BSShader {
 public:
