@@ -211,8 +211,8 @@ struct SettingsMainStruct {
 	};
 
 	struct DevelopStruct {
-		bool	CompileShaders;
-		bool	CompileEffects;
+		UInt8	CompileShaders;  // 1 Compile All, 2 Compile modified or missing only, 3 Compile only in menu
+		UInt8	CompileEffects;
 		UInt8	TraceShaders;
 	};
 

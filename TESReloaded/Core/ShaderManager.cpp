@@ -176,6 +176,42 @@ ShaderRecord::ShaderRecord() {
 }
 ShaderRecord::~ShaderRecord() { }
 
+bool ShaderProgram::ShouldCompileShader(const char* fileBin, const char* fileHlsl, UInt8 CompileStatus){
+	if(CompileStatus == 1) return  true;
+	if(CompileStatus == 0) return  false;
+
+	if(CompileStatus == 3) return TheShaderManager->IsMenuSwitch ? true : false;
+
+	if(CompileStatus == 2) {
+		WIN32_FILE_ATTRIBUTE_DATA attributesBin = {0};
+		WIN32_FILE_ATTRIBUTE_DATA attributesSource = {0};
+		BOOL hr = GetFileAttributesExA(fileBin, GetFileExInfoStandard, &attributesBin); // from winbase.h
+		if(hr == FALSE) {
+// 			Logger::Log("File %s not present, compile", fileHlsl);
+			return true; //File not present compile
+		}
+		else{
+			BOOL hr = GetFileAttributesExA(fileHlsl, GetFileExInfoStandard, &attributesSource); // from winbase.h
+			if(hr == FALSE) {
+//				Logger::Log("[ERROR] Can't open source %s", fileHlsl);
+				return true; //BOH
+			}
+
+			ULARGE_INTEGER timeBin, timeSource;
+			timeBin.LowPart = attributesBin.ftLastWriteTime.dwLowDateTime;
+			timeBin.HighPart = attributesBin.ftLastWriteTime.dwHighDateTime;
+			timeSource.LowPart = attributesSource.ftLastWriteTime.dwLowDateTime;
+			timeSource.HighPart = attributesSource.ftLastWriteTime.dwHighDateTime;
+
+			if(timeBin.QuadPart < timeSource.QuadPart){
+				Logger::Log("Binary older then source, compile %s", fileHlsl);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 	
 	ShaderRecord* ShaderProg = NULL;
@@ -229,12 +265,13 @@ ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 	strcat(FileName, ".hlsl");
 
     HRESULT prepass = D3DXPreprocessShaderFromFileA(FileName, NULL, NULL, &ShaderSource , &Errors);
+	bool Compile = ShouldCompileShader(FileNameBinary, FileName, TheSettingManager->SettingsMain.Develop.CompileShaders);
 	if (prepass == D3D_OK) {
 		if (strstr(Name, ".vso"))
 			strcpy(ShaderProfile, "vs_3_0");
 		else if (strstr(Name, ".pso"))
 			strcpy(ShaderProfile, "ps_3_0");
-		if (TheSettingManager->SettingsMain.Develop.CompileShaders) {
+		if (Compile) {
 			D3DXCompileShaderFromFileA(FileName, NULL, NULL, "main", ShaderProfile, NULL, &Shader, &Errors, &ConstantTable);
 			if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
 			if (Shader) {
@@ -408,8 +445,10 @@ EffectRecord* EffectRecord::LoadEffect(const char* Name) {
 	strcpy(FileName, Name);
 	strcat(FileName, ".hlsl");
     HRESULT prepass = D3DXPreprocessShaderFromFileA(FileName, NULL, NULL, &ShaderSource , &Errors);
+	bool Compile = ShouldCompileShader(Name, FileName, TheSettingManager->SettingsMain.Develop.CompileEffects);
+
 	if (prepass == D3D_OK) {
-		if (TheSettingManager->SettingsMain.Develop.CompileEffects) {
+		if (Compile) {
 			Compiled = false;
 			ID3DXEffectCompiler* Compiler = NULL;
 			ID3DXBuffer* EffectBuffer = NULL;
@@ -565,6 +604,9 @@ void ShaderManager::Initialize() {
 	TheShaderManager->ShaderConst.ReciprocalResolution.z = (float)TheRenderManager->width / (float)TheRenderManager->height;
 	TheShaderManager->ShaderConst.ReciprocalResolution.w = 0.0f; // Reserved to store the FoV
 	TheShaderManager->CreateFrameVertex(TheRenderManager->width, TheRenderManager->height, &TheShaderManager->FrameVertex);
+
+    TheShaderManager->PreviousCell = nullptr;
+    TheShaderManager->IsMenuSwitch = false;
 
 }
 
@@ -1608,7 +1650,6 @@ void ShaderManager::DisposeEffect(EffectRecord::EffectRecordType EffectType) {
 
 }
 
-static TESObjectCELL* prevCell = nullptr;
 void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
@@ -1651,7 +1692,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		BloomEffect->SetCT();
 		BloomEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	bool isCellTransition = currentCell != prevCell;
+ 	bool isCellTransition = currentCell != PreviousCell;
 	if (Effects->Underwater  && TheRenderManager->CameraPosition.z < ShaderConst.Water.waterSettings.x + 20.0f) {
 		if (!isCellTransition && TheRenderManager->CameraPosition.z < ShaderConst.Water.waterSettings.x) {
 			ShaderConst.BloodLens.Percent = 0.0f;
@@ -1725,14 +1766,14 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		CinemaEffect->SetCT();
 		CinemaEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	prevCell = currentCell;
+	PreviousCell = currentCell;
 }
 
 void ShaderManager::SwitchShaderStatus(const char* Name) {
 	
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
 	SettingsMainStruct::ShadersStruct* Shaders = &TheSettingManager->SettingsMain.Shaders;
-
+	IsMenuSwitch = true;
 	if (!strcmp(Name, "AmbientOcclusion")) {
 		Effects->AmbientOcclusion = !Effects->AmbientOcclusion;
 		DisposeEffect(EffectRecord::EffectRecordType::AmbientOcclusion);
@@ -1873,7 +1914,7 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		DisposeEffect(EffectRecord::EffectRecordType::ShadowsInteriors);
 		if (Effects->ShadowsInteriors) CreateEffect(EffectRecord::EffectRecordType::ShadowsInteriors);
 	}
-
+	IsMenuSwitch = false;
 }
 
 void ShaderManager::SetCustomConstant(const char* Name, D3DXVECTOR4 Value) {

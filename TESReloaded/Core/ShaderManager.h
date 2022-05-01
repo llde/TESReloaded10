@@ -177,6 +177,7 @@ public:
 	virtual void			CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* ConstantTable) = 0;
 
 	void					SetConstantTableValue(LPCSTR Name, UInt32 Index);
+	static bool ShouldCompileShader(const char* fileBin, const char* fileHlsl, UInt8 CompileStatus);
 
 	ShaderValue*			FloatShaderValues;
 	UInt32					FloatShaderValuesCount;
@@ -333,5 +334,6 @@ public:
 	ExtraEffectsList		ExtraEffects;
 	NiD3DVertexShader*		WaterVertexShaders[51];
 	NiD3DPixelShader*		WaterPixelShaders[51];
-
+    TESObjectCELL*          PreviousCell;
+    bool                    IsMenuSwitch;
 };
