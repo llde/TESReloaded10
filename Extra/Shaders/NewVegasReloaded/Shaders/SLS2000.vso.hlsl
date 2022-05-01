@@ -7,6 +7,7 @@ float3 FogColor : register(c15);
 float4 FogParam : register(c14);
 float4 LightData[10] : register(c25);
 row_major float4x4 ModelViewProj : register(c0);
+
 row_major float4x4 TESR_ShadowCameraToLightTransform[2] : register(c35);
 
 // Registers:
