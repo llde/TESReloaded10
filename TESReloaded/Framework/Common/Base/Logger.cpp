@@ -1,5 +1,5 @@
 #include "Logger.h"
-char	Logger::MessageBuffer[1024];
+//char	Logger::MessageBuffer[8192];
 FILE*	Logger::LogFile;
 
 void Logger::Initialize(char* FileName) {
@@ -14,9 +14,9 @@ void Logger::Log(char* Message, ...) {
 
 	if (LogFile) {
 		va_start(Args, Message);
-		vsprintf_s(MessageBuffer, sizeof(MessageBuffer), Message, Args);
+		vfprintf_s(LogFile, Message, Args);
 		va_end(Args);
-		fputs(MessageBuffer, LogFile);
+//		fputs(MessageBuffer, LogFile);
 		fputc('\n', LogFile);
 		fflush(LogFile);
 	}
