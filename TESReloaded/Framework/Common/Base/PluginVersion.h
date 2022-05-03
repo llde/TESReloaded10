@@ -27,16 +27,25 @@ public:
 
 			if (GetFileVersionInfoA(FileName, VersionHandle, VersionSize, VersionData)) {
 				if (VerQueryValueA(VersionData, "\\StringFileInfo\\040904b0\\ProductName", &BufferData, &BufferSize)) {
+                    if(!VersionString) VersionString = (char*) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize +1);
+                    else VersionString = (char*) HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY , VersionString ,VersionLen + BufferSize + 1);
+                    VersionLen += BufferSize;
 					strcat(VersionString, (char*)BufferData);
 					strcat(VersionString, " v");
 				}
-				if (VerQueryValueA(VersionData, "\\StringFileInfo\\040904b0\\ProductVersion", &BufferData, &BufferSize)) strcat(VersionString, (char*)BufferData);
+				if (VerQueryValueA(VersionData, "\\StringFileInfo\\040904b0\\ProductVersion", &BufferData, &BufferSize)){
+                    if(!VersionString) VersionString = (char*) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize +1);
+                    else VersionString = (char*) HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY , VersionString , VersionLen + BufferSize + 1);
+                    VersionLen += BufferSize;
+                    strcat(VersionString, (char*)BufferData);
+                }
 			}
 			delete VersionData;
 		}
 
 	}
 
-	static char VersionString[64];
 
+	static UInt32 VersionLen;
+	static char* VersionString;
 };

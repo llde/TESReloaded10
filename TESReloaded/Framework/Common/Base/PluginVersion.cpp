@@ -1,1 +1,2 @@
-char PluginVersion::VersionString[64];
+UInt32 PluginVersion::VersionLen = 0;
+char* PluginVersion::VersionString = nullptr;
