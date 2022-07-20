@@ -21,6 +21,13 @@ struct SettingsMainStruct {
 		float	FlowControl;
 	};
 
+	struct CullingProcessStruct {
+		bool EnableCulling;
+		bool EnableReflectionCulling;
+		float CullMinSize;
+		float CullMinSizeReflection;
+	};
+
 	struct OcclusionCullingStruct {
 		bool	Enabled;
 		bool	OccludingStatic;
@@ -32,7 +39,6 @@ struct SettingsMainStruct {
 		float	OccludedStaticMin;
 		float	OccludedStaticMax;
 		float	OccludedDistantStaticMax;
-		float	OccludedReflectionsMin;
 	};
 
 	struct CameraModeStruct {
@@ -217,6 +223,7 @@ struct SettingsMainStruct {
 	};
 
 	MainStruct					Main;
+	CullingProcessStruct		CullingProcess;
 	OcclusionCullingStruct		OcclusionCulling;
 	CameraModeStruct			CameraMode;
 	IKFootStruct				IKFoot;

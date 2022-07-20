@@ -11,6 +11,7 @@ public:
 	void					RenderTerrain(NiAVObject* Object);
 	void					RenderWater(NiAVObject* Object);
 	void					Render(NiGeometry* Geo);
+	void					ManageDistantStatic();
 	void					ManageDistantStatic(NiAVObject* Object, float MaxBoundSize);
 	void					RenderDistantStatic(NiAVObject* Object);
 	void					RenderOcclusionMap(SettingsMainStruct::OcclusionCullingStruct* OcclusionCulling);

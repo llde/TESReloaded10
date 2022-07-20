@@ -189,11 +189,12 @@ void AttachHooks() {
 		SafeWriteJump(Jumpers::Occlusion::New2CollisionObjectHook,		(UInt32)New2CollisionObjectHook);
 		SafeWriteJump(Jumpers::Occlusion::New3CollisionObjectHook,		(UInt32)New3CollisionObjectHook);
 		SafeWriteJump(Jumpers::Occlusion::DisposeCollisionObjectHook,	(UInt32)DisposeCollisionObjectHook);
-		SafeWriteJump(Jumpers::Occlusion::MaterialPropertyHook,			(UInt32)MaterialPropertyHook);
-		SafeWriteJump(Jumpers::Occlusion::CoordinateJackHook,			(UInt32)CoordinateJackHook);
-		SafeWriteJump(Jumpers::Occlusion::ObjectCullHook,				(UInt32)ObjectCullHook);
+		SafeWriteJump(Jumpers::Occlusion::MaterialPropertyHook, (UInt32)MaterialPropertyHook);
+		SafeWriteJump(Jumpers::Occlusion::CoordinateJackHook, (UInt32)CoordinateJackHook);
 	}
-
+	if (SettingsMain->OcclusionCulling.Enabled || SettingsMain->CullingProcess.EnableCulling) {
+		SafeWriteJump(Jumpers::Occlusion::ObjectCullHook, (UInt32)ObjectCullHook);
+	}
 	if (SettingsMain->Main.MemoryHeapManagement) {
 		GetCurrentDirectoryA(MAX_PATH, Filename);
 		strcat(Filename, FastMMFile);

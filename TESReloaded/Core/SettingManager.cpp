@@ -301,6 +301,11 @@ void SettingManager::LoadSettings() {
 	SettingsMain.FrameRate.SmartBackgroundProcess = GetSettingI("Main.FrameRate.Stuttering", "SmartBackgroundProcess");
 	SettingsMain.FrameRate.BackgroundThreadPriority = GetSettingI("Main.FrameRate.Stuttering", "BackgroundThreadPriority");
 
+	SettingsMain.CullingProcess.EnableCulling = GetSettingI("Main.CullingProcess.Main", "EnableCulling");
+	SettingsMain.CullingProcess.EnableReflectionCulling = GetSettingI("Main.CullingProcess.Main", "EnableReflectionCulling");
+	SettingsMain.CullingProcess.CullMinSize = GetSettingF("Main.CullingProcess.Main", "CullMinSize");
+	SettingsMain.CullingProcess.CullMinSizeReflection = GetSettingF("Main.CullingProcess.Main", "CullMinSizeReflection");
+
 	SettingsMain.OcclusionCulling.Enabled = GetSettingI("Main.OcclusionCulling.Main", "Enabled");
 	SettingsMain.OcclusionCulling.OcclusionMapRatio = GetSettingI("Main.OcclusionCulling.Main", "OcclusionMapRatio");
 	SettingsMain.OcclusionCulling.OccludingStatic = GetSettingI("Main.OcclusionCulling.Main", "OccludingStatic");
@@ -311,7 +316,6 @@ void SettingManager::LoadSettings() {
 	SettingsMain.OcclusionCulling.OccludedStaticMin = GetSettingF("Main.OcclusionCulling.Main", "OccludedStaticMin");
 	SettingsMain.OcclusionCulling.OccludedStaticMax = GetSettingF("Main.OcclusionCulling.Main", "OccludedStaticMax");
 	SettingsMain.OcclusionCulling.OccludedDistantStaticMax = GetSettingF("Main.OcclusionCulling.Main", "OccludedDistantStaticMax");
-	SettingsMain.OcclusionCulling.OccludedReflectionsMin = GetSettingF("Main.OcclusionCulling.Main", "OccludedReflectionsMin");
 
 	SettingsMain.CameraMode.Enabled = GetSettingI("Main.CameraMode.Main", "Enabled");
 	SettingsMain.CameraMode.Crosshair = GetSettingI("Main.CameraMode.Main", "Crosshair");

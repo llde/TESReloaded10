@@ -283,6 +283,16 @@ void OcclusionManager::ManageDistantStatic(NiAVObject* Object, float MaxBoundSiz
 	}
 
 }
+void OcclusionManager::ManageDistantStatic() {
+	NiNode* DistantRefLOD = *(NiNode**)0x00B34424;
+	SettingsMainStruct::OcclusionCullingStruct* OcclusionCulling = &TheSettingManager->SettingsMain.OcclusionCulling;
+	if (Player->GetWorldSpace() && !Player->isMovingToNewSpace) {
+		for (int i = 1; i < DistantRefLOD->m_children.end; i++) {
+			NiNode* ChildNode = (NiNode*)DistantRefLOD->m_children.data[i];
+			ManageDistantStatic(ChildNode, OcclusionCulling->OccludedDistantStaticMax);
+		}
+	}
+}
 
 void OcclusionManager::RenderDistantStatic(NiAVObject* Object) {
 
@@ -386,16 +396,11 @@ void OcclusionManager::RenderOcclusionMap(SettingsMainStruct::OcclusionCullingSt
 
 void OcclusionManager::PerformOcclusionCulling() {
 	
-	NiNode* DistantRefLOD = *(NiNode**)0x00B34424;
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	IDirect3DSurface9* DepthSurface = NULL;
 	SettingsMainStruct::OcclusionCullingStruct* OcclusionCulling = &TheSettingManager->SettingsMain.OcclusionCulling;
 
 	if (Player->GetWorldSpace() && !Player->isMovingToNewSpace) {
-		for (int i = 1; i < DistantRefLOD->m_children.end; i++) {
-			NiNode* ChildNode = (NiNode*)DistantRefLOD->m_children.data[i];
-			ManageDistantStatic(ChildNode, OcclusionCulling->OccludedDistantStaticMax);
-		}
 		Device->GetDepthStencilSurface(&DepthSurface);
 		TheRenderManager->SetupSceneCamera();
 		RenderOcclusionMap(OcclusionCulling);

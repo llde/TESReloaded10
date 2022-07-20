@@ -9,6 +9,7 @@ static void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* Ren
 	TheCameraManager->SetSceneGraph();
 	TheShaderManager->UpdateConstants();
 	if (SettingsMain->OcclusionCulling.Enabled) TheOcclusionManager->PerformOcclusionCulling();
+	if (SettingsMain->CullingProcess.EnableCulling)  TheOcclusionManager->ManageDistantStatic();
 	if(TheRenderManager->BackBuffer) TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->defaultRTGroup->RenderTargets[1]->data->Surface;
 	if (SettingsMain->Develop.TraceShaders && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None) && Global->OnKeyDown(SettingsMain->Develop.TraceShaders) && DWNode::Get() == NULL) DWNode::Create();
 	(*Render)(This, RenderedTexture);
@@ -144,11 +145,11 @@ static void __fastcall WaterCullingProcessHook(TESWaterCullingProcess* This, UIn
 	float BoundBox = 0.0f;
 	void* VFT = *(void**)Object;
 	
-	if (VFT == Pointers::VirtualTables::BSFadeNode && TheSettingManager->SettingsMain.OcclusionCulling.Enabled) {
+	if (VFT == Pointers::VirtualTables::BSFadeNode && TheSettingManager->SettingsMain.CullingProcess.EnableReflectionCulling) {
 		NiBound* Bound = Object->GetWorldBound();
 		TheRenderManager->GetScreenSpaceBoundSize(&BoundSize, Bound);
 		BoundBox = (BoundSize.x * 100.f) * (BoundSize.y * 100.0f);
-		if (Object->m_flags & NiAVObject::kFlag_IsOccluded || BoundBox < TheSettingManager->SettingsMain.OcclusionCulling.OccludedReflectionsMin || Object->m_worldTransform.pos.z + Bound->Radius < TheShaderManager->ShaderConst.Water.waterSettings.x) return;
+		if (BoundBox < TheSettingManager->SettingsMain.CullingProcess.CullMinSizeReflection || Object->m_worldTransform.pos.z + Bound->Radius < TheShaderManager->ShaderConst.Water.waterSettings.x) return;
 	}
 	(*WaterCullingProcess)(This, Object);
 
