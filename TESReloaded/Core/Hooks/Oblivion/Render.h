@@ -8,8 +8,8 @@ static void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* Ren
 	TheFrameRateManager->UpdatePerformance();
 	TheCameraManager->SetSceneGraph();
 	TheShaderManager->UpdateConstants();
+	if (SettingsMain->CullingProcess.EnableCulling) TheOcclusionManager->ManageDistantStatic();
 	if (SettingsMain->OcclusionCulling.Enabled) TheOcclusionManager->PerformOcclusionCulling();
-	if (SettingsMain->CullingProcess.EnableCulling)  TheOcclusionManager->ManageDistantStatic();
 	if(TheRenderManager->BackBuffer) TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->defaultRTGroup->RenderTargets[1]->data->Surface;
 	if (SettingsMain->Develop.TraceShaders && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None) && Global->OnKeyDown(SettingsMain->Develop.TraceShaders) && DWNode::Get() == NULL) DWNode::Create();
 	(*Render)(This, RenderedTexture);

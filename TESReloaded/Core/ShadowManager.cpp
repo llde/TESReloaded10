@@ -467,6 +467,7 @@ void ShadowManager::RenderShadowMaps() {
 	SettingsShadowStruct::ExcludedFormsList* ShadowsInteriorsExcludedForms = &ShadowsInteriors->ExcludedForms;
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
+	if (!ShadowsExteriors->Enabled && !ShadowsInteriors->Enabled) return;
 	IDirect3DSurface9* DepthSurface = NULL;
 	IDirect3DSurface9* RenderSurface = NULL;
 	D3DVIEWPORT9 viewport;
@@ -496,7 +497,7 @@ void ShadowManager::RenderShadowMaps() {
  	RenderState->SetRenderState(D3DRS_STENCILFUNC , 8 ,RenderStateArgs);
 
 	TheRenderManager->SetupSceneCamera();
-	if (Player->GetWorldSpace()) {
+	if (Player->GetWorldSpace() && ShadowsExteriors->Enabled) {
 		D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
 		D3DXVECTOR4 OrthoDir = D3DXVECTOR3(0.05f, 0.05f, 1.0f);
 		NiNode* PlayerNode = Player->GetNode();
@@ -525,7 +526,7 @@ void ShadowManager::RenderShadowMaps() {
 		
 		OrthoData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapOrtho];
 	}
-	else {
+	else if(ShadowsInteriors->Enabled){
 		std::map<int, NiPointLight*> SceneLights;
 		NiPointLight* Lights[ShadowCubeMapsMax] = { NULL };
 		int LightIndex = -1;

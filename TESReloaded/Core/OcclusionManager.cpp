@@ -285,11 +285,11 @@ void OcclusionManager::ManageDistantStatic(NiAVObject* Object, float MaxBoundSiz
 }
 void OcclusionManager::ManageDistantStatic() {
 	NiNode* DistantRefLOD = *(NiNode**)0x00B34424;
-	SettingsMainStruct::OcclusionCullingStruct* OcclusionCulling = &TheSettingManager->SettingsMain.OcclusionCulling;
-	if (Player->GetWorldSpace() && !Player->isMovingToNewSpace) {
+	SettingsMainStruct::CullingProcessStruct* CullingProcess = &TheSettingManager->SettingsMain.CullingProcess;
+	if (Player->GetWorldSpace() && !Player->isMovingToNewSpace && DistantRefLOD) {
 		for (int i = 1; i < DistantRefLOD->m_children.end; i++) {
 			NiNode* ChildNode = (NiNode*)DistantRefLOD->m_children.data[i];
-			ManageDistantStatic(ChildNode, OcclusionCulling->OccludedDistantStaticMax);
+			ManageDistantStatic(ChildNode, CullingProcess->CullMinSize);
 		}
 	}
 }

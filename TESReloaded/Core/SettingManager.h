@@ -264,6 +264,7 @@ struct SettingsShadowStruct {
 	};
 
 	struct ExteriorsStruct {
+		bool				Enabled;
 		FormsStruct			Forms[3];
 		bool				AlphaEnabled[3];
 		int					Quality;
@@ -275,6 +276,7 @@ struct SettingsShadowStruct {
 	};
 	
 	struct InteriorsStruct {
+		bool				Enabled;
 		FormsStruct			Forms;
 		bool				AlphaEnabled;
 		bool				TorchesCastShadows;

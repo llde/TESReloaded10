@@ -751,6 +751,7 @@ void SettingManager::LoadSettings() {
 	SettingsPrecipitations.SnowAccumulation.BlurRadiusMultiplier = GetSettingF("Shaders.Precipitations.SnowAccumulation", "BlurRadiusMultiplier");
 
 
+	SettingsShadows.Exteriors.Enabled = GetSettingI("Shaders.ShadowsExteriors.Near", "Enabled");
 	SettingsShadows.Exteriors.AlphaEnabled[ShadowManagerBase::ShadowMapTypeEnum::MapNear] = GetSettingI("Shaders.ShadowsExteriors.Near", "AlphaEnabled");
 	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapNear].Activators = GetSettingI("Shaders.ShadowsExteriors.Near", "Activators");
 	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapNear].Actors = GetSettingI("Shaders.ShadowsExteriors.Near", "Actors");
@@ -809,6 +810,7 @@ void SettingManager::LoadSettings() {
 	}
 	if (List.size()) std::sort(SettingsShadows.Exteriors.ExcludedForms.begin(), SettingsShadows.Exteriors.ExcludedForms.end());
 
+	SettingsShadows.Interiors.Enabled = GetSettingI("Shaders.ShadowsInteriors.Main", "Enabled");
 	SettingsShadows.Interiors.AlphaEnabled = GetSettingI("Shaders.ShadowsInteriors.Main", "AlphaEnabled");
 	SettingsShadows.Interiors.Forms.Activators = GetSettingI("Shaders.ShadowsInteriors.Main", "Activators");
 	SettingsShadows.Interiors.Forms.Actors = GetSettingI("Shaders.ShadowsInteriors.Main", "Actors");
