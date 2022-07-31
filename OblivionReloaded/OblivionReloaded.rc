@@ -51,8 +51,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 10,0,0,0
- PRODUCTVERSION 10,0,0,0
+ FILEVERSION 10,0,1,0
+ PRODUCTVERSION 10,0,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -69,12 +69,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Alessio Tamburini"
             VALUE "FileDescription", "Oblivion Reloaded"
-            VALUE "FileVersion", "10.0.0.0"
+            VALUE "FileVersion", "10.0.1.0"
             VALUE "InternalName", "OblivionReloaded.dll"
             VALUE "LegalCopyright", "Copyright (C) 2021"
             VALUE "OriginalFilename", "OblivionReloaded.dll"
             VALUE "ProductName", "Oblivion Reloaded"
-            VALUE "ProductVersion", "10.0.0.0"
+            VALUE "ProductVersion", "10.0.1.0"
         END
     END
     BLOCK "VarFileInfo"
