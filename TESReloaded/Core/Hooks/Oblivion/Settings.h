@@ -21,12 +21,24 @@ static bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, G
 		Setting->iValue = 1;
 	else if (!strcmp(Setting->Name, "bUseBlurShader:BlurShader"))
 		Setting->iValue = 0;
-/*	else if (!strcmp(Setting->Name, "bUseWaterDepth:Water") && TheSettingManager->SettingsMain.Shaders.Water)
-		Setting->iValue = 0; */
 	else if (!strcmp(Setting->Name, "iPostProcessMilliseconds:BackgroundLoad") && TheSettingManager->SettingsMain.FrameRate.SmartBackgroundProcess)
 		Setting->iValue = TheSettingManager->SettingsMain.FrameRate.BackgroundThreadPriority;
 	else if (!strcmp(Setting->Name, "iPostProcessMillisecondsLoadingQueuedPriority:BackgroundLoad") && TheSettingManager->SettingsMain.FrameRate.SmartBackgroundProcess)
 		Setting->iValue = TheSettingManager->SettingsMain.FrameRate.BackgroundThreadPriority;
+    else if(TheSettingManager->SettingsMain.Shaders.Water){
+        if (!strcmp(Setting->Name, "bUseWaterDepth:Water"))
+            Setting->iValue = 0; 
+        else if (!strcmp(Setting->Name, "bUseWaterDisplacements:Water"))  //TODO ENB require 0. WHY?
+            Setting->iValue = 1;
+        else if (!strcmp(Setting->Name, "bUseWaterReflections:Water")) //TODO rmeove and implement proper shaders
+            Setting->iValue = 1;
+        else if (!strcmp(Setting->Name, "bUseWaterHiRes:Water"))
+            Setting->iValue = 1;
+        else if (!strcmp(Setting->Name, "bUseWaterShader:Water"))
+            Setting->iValue = 1;
+        else if (!strcmp(Setting->Name, "bUseWaterLOD:Water"))
+            Setting->iValue = 1;
+    }
 	return r;
 
 }
