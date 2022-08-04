@@ -127,7 +127,7 @@ void AttachHooks() {
 	SafeWriteJump(Jumpers::DetectorWindow::ConsoleCommandHook,	(UInt32)DetectorWindowConsoleCommandHook);
 	SafeWriteCall(Jumpers::DetectorWindow::SetNodeName,			(UInt32)DetectorWindowSetNodeName);
 	SafeWriteJump(Jumpers::RenderInterface::Hook,				(UInt32)RenderInterfaceHook);
-	SafeWriteJump(Jumpers::SkipFogPass::Hook,					(UInt32)SkipFogPassHook);
+//	SafeWriteJump(Jumpers::SkipFogPass::Hook,					(UInt32)SkipFogPassHook); //Disable this and remvoe the releavnt shader changes. Then put it back properly (If the performance is significative )
 	SafeWriteJump(Jumpers::SetRegionEditorName::Hook,			(UInt32)SetRegionEditorNameHook);
 	SafeWriteJump(Jumpers::SetWeatherEditorName::Hook,			(UInt32)SetWeatherEditorNameHook);
 	SafeWriteJump(Jumpers::HitEvent::Hook,						(UInt32)HitEventHook);
