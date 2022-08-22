@@ -127,7 +127,6 @@ void AttachHooks() {
 	SafeWriteJump(Jumpers::DetectorWindow::ConsoleCommandHook,	(UInt32)DetectorWindowConsoleCommandHook);
 	SafeWriteCall(Jumpers::DetectorWindow::SetNodeName,			(UInt32)DetectorWindowSetNodeName);
 	SafeWriteJump(Jumpers::RenderInterface::Hook,				(UInt32)RenderInterfaceHook);
-//	SafeWriteJump(Jumpers::SkipFogPass::Hook,					(UInt32)SkipFogPassHook); //Disable this and remvoe the releavnt shader changes. Then put it back properly (If the performance is significative )
 	SafeWriteJump(Jumpers::SetRegionEditorName::Hook,			(UInt32)SetRegionEditorNameHook);
 	SafeWriteJump(Jumpers::SetWeatherEditorName::Hook,			(UInt32)SetWeatherEditorNameHook);
 	SafeWriteJump(Jumpers::HitEvent::Hook,						(UInt32)HitEventHook);
@@ -137,6 +136,8 @@ void AttachHooks() {
 	SafeWriteJump(Jumpers::Shadows::AddCastShadowFlagHook,		(UInt32)AddCastShadowFlagHook);
 	SafeWriteJump(Jumpers::WaterHeightMap::Hook,				(UInt32)WaterHeightMapHook);
 	SafeWriteJump(Jumpers::EndProcess::Hook,					(UInt32)EndProcessHook);
+    
+    if(SettingsMain->Main.SkipFog) 	SafeWriteJump(Jumpers::SkipFogPass::Hook, (UInt32)SkipFogPassHook); 
 
 	SafeWriteJump(0x00553EAC, 0x00553EB2); // Patches the use of Lighting30Shader only for the hair
 	SafeWriteJump(0x007D1BC4, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair

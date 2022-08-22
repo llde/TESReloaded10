@@ -8,6 +8,7 @@ struct SettingsMainStruct {
 		bool	MemoryHeapManagement;
 		bool	MemoryTextureManagement;
 		bool	ReplaceIntro;
+        bool    SkipFog;
 		UInt8	AnisotropicFilter;
 		UInt16	ScreenshotKey;
 		float	FarPlaneDistance;

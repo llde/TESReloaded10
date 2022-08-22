@@ -212,11 +212,15 @@ static __declspec(naked) void RenderInterfaceHook() {
 
 }
 
+
+/*
+ This works once, when the fog pass is on and is disabled (skipped). After that when trying to reenable the pass it crashes. Keep the settings only for startup and not for in game changes
+ */
 static __declspec(naked) void SkipFogPassHook() {
 
 	__asm {
-		cmp		edi, 0x190
-		jnz		short loc_continue
+        cmp     edi, 0x190
+		jne		short loc_continue
 		add		edi, 1
 	loc_continue:
 		cmp     edi, 0x198

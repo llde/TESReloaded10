@@ -37,7 +37,6 @@ struct VS_INPUT {
 	float4 texcoord_5 : TEXCOORD5;
     float4 texcoord_6 : TEXCOORD6;
 	float4 texcoord_7 : TEXCOORD7;
-    float4 color_0 : COLOR0;
 };
 
 struct VS_OUTPUT {
@@ -68,7 +67,7 @@ VS_OUTPUT main(VS_INPUT IN) {
 	spclr = smoothstep(0.0f, 0.25f, length(r0.rgb)) * (r0.b * 2.0f * TESR_TerrainData.z) + 1.0f;
 	q5.xyz = q2.xyz * r0.xyz * IN.texcoord_2.xyz * spclr;
     OUT.color_0.a = q0.x;
-    OUT.color_0.rgb = (IN.color_0.w * (IN.color_0.xyz - q5.xyz)) + q5.xyz;
+    OUT.color_0.rgb = q5.xyz;
     return OUT;
 	
 };

@@ -1,0 +1,2 @@
+/*****/
+#define SUN_PCS

@@ -7,8 +7,8 @@ row_major float4x4 ModelViewProj : register(c0);
 float3 LightDirection[3] : register(c13);
 float4 ShadowProjTransform : register(c23);
 float4 ShadowProjData : register(c24);
-float4 TESR_FogData : register(c25);
-float4 TESR_FogColor : register(c26);
+//float4 TESR_FogData : register(c25);
+//float4 TESR_FogColor : register(c26);
 
 // Registers:
 //
@@ -27,16 +27,20 @@ float4 TESR_FogColor : register(c26);
 // Structures:
 
 struct VS_INPUT {
-    float4 LPOSITION : POSITION;
-    float4 LTEXCOORD_0 : TEXCOORD0;
+    float4 position : POSITION;
+    float4 texcoord_0 : TEXCOORD0;
+    float4 texcoord_1 : TEXCOORD1;
+    float4 texcoord_2 : TEXCOORD2;
 };
 
 struct VS_OUTPUT {
+    float4 color_0 : COLOR0;
+    float4 color_1 : COLOR1;
     float4 position : POSITION;
     float2 texcoord_0 : TEXCOORD0;
+    float2 texcoord_1 : TEXCOORD1;
     float4 texcoord_2 : TEXCOORD2;
     float3 texcoord_3 : TEXCOORD3;
-	float4 color_0 : COLOR0;
 };
 
 // Code:
@@ -46,20 +50,18 @@ VS_OUTPUT main(VS_INPUT IN) {
 
     float2 q0;
     float2 q1;
-	float4 r0;
-	
-    q0.xy = ShadowProjTransform.zw - IN.LPOSITION.xy;
-	r0.xyzw = mul(ModelViewProj, IN.LPOSITION.xyzw);
-    OUT.position.xyzw = r0.xyzw;
-    q1.xy = (IN.LTEXCOORD_0.xy / 512) + ShadowProjTransform.xy;
-    OUT.texcoord_0.xy = q1.xy;
-	OUT.texcoord_2.xyz = 1.0f;
-    OUT.texcoord_2.w = 1.0f - saturate((ShadowProjData.x - length(q0.xy)) / ShadowProjData.y);
-    OUT.texcoord_3.xyz = LightDirection[0].xyz;
-    OUT.color_0.a = 1 - saturate((TESR_FogData.y - length(r0.xyz)) / (TESR_FogData.y - TESR_FogData.x));
-    OUT.color_0.rgb = TESR_FogColor.rgb;
-    return OUT;
-	
-};
 
+    q0.xy = ShadowProjTransform.zw - IN.position.xy;
+    OUT.color_0.rgba = IN.texcoord_1.xyzw;
+    OUT.color_1.rgba = IN.texcoord_2.xyzw;
+    OUT.position.xyzw = mul(ModelViewProj, IN.position.xyzw);
+    q1.xy = (IN.texcoord_0.xy / 512) + ShadowProjTransform.xy;
+    OUT.texcoord_0.xy = q1.xy;
+    OUT.texcoord_1.xy = q1.xy;
+    OUT.texcoord_2.w = 1 - saturate((ShadowProjData.x - length(q0.xy)) / ShadowProjData.y);
+    OUT.texcoord_2.xyz = 1;
+    OUT.texcoord_3.xyz = LightDirection[0].xyz;
+
+    return OUT;
+}
 // approximately 23 instruction slots used
