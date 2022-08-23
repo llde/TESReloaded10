@@ -83,6 +83,7 @@ void AttachHooks() {
 		DetourAttach(&(PVOID&)ShowSleepWaitMenu,			&ShowSleepWaitMenuHook);
 	}
 	if (SettingsMain->FlyCam.Enabled) DetourAttach(&(PVOID&)UpdateFlyCam, &UpdateFlyCamHook);
+  //  DetourAttach(&(PVOID&)LoadTextureFile,				&LoadTextureFileHook);
 	DetourTransactionCommit();
 	
 	SafeWrite8(0x00801BCB,	sizeof(NiD3DVertexShaderEx));
@@ -210,8 +211,9 @@ void AttachHooks() {
 		SafeWriteJump(Jumpers::Memory::MemReallocHook, (UInt32)MemReallocHook);
 	}
 
-	if (SettingsMain->Main.MemoryTextureManagement) SafeWriteCall(Jumpers::Memory::CreateTextureFromFileInMemory, (UInt32)CreateTextureFromFileInMemory);
-
+	if (SettingsMain->Main.MemoryTextureManagement){
+        SafeWriteCall(Jumpers::Memory::CreateTextureFromFileInMemory, (UInt32)CreateTextureFromFileInMemory);
+    }
 	if (SettingsMain->GrassMode.Enabled) SafeWriteJump(Jumpers::UpdateGrass::Hook, (UInt32)UpdateGrassHook);
 
 	if (SettingsMain->CameraMode.Enabled) {
