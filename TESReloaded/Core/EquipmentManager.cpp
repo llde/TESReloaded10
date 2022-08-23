@@ -31,12 +31,12 @@ void EquipmentManager::SetRotationPosition(NiAVObject* Object, PositionRotationT
 
 	NiPoint3 RotationZero = { 0.0f, 0.0f, 0.0f };
 	NiPoint3 PositionZero = { 0.0f, 0.0f, 0.0f };
+    if(Object == nullptr) return;
 
 	NiMatrix33* m = &Object->m_localTransform.rot;
 	NiPoint3* v = &Object->m_localTransform.pos;
 	NiPoint3* Rotation = NULL;
 	NiPoint3* Position = NULL;
-
 	switch (Type) {
 		case EquipmentManager::None:
 			Rotation = &RotationZero;
@@ -99,7 +99,8 @@ void EquipmentManager::SetRotationPosition(NiAVObject* Object, PositionRotationT
 }
 
 void EquipmentManager::SetTorchLight(Actor* Act, NiAVObject* Torch, UInt8 Enable) {
-
+    if(Torch == nullptr) return;
+    /*The functions check for null Torch, but in certain conditions nullptr is passed, WHY? Maybe one of the functions between this and the if assign the pointer value?*/
 	NiAVObject* FlameCap = Torch->GetObjectByName(FlameCapName);
 	NiAVObject* FlameNode0 = Torch->GetObjectByName(FlameNode0Name);
 	NiAVObject* FlameNode1 = Torch->GetObjectByName(FlameNode1Name);
