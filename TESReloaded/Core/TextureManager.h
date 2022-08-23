@@ -48,6 +48,7 @@ public:
 	IDirect3DTexture9* 		RenderedTexture;
 	IDirect3DSurface9*		RenderedSurface;
 	IDirect3DTexture9*		DepthTexture;
+	IDirect3DTexture9*		DepthTextureINTZ;
 	IDirect3DSurface9*		DepthSurface;
 	IDirect3DTexture9*		ShadowMapTexture[3];
 	IDirect3DSurface9*		ShadowMapSurface[3];

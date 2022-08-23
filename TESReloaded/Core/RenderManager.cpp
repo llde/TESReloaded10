@@ -259,10 +259,24 @@ void RenderManager::ResolveDepthBuffer() {
 	else {
 		if (!TheTextureManager->DepthSurface) {
 			device->GetDepthStencilSurface(&TheTextureManager->DepthSurface);
-			NvAPI_D3D9_RegisterResource(TheTextureManager->DepthSurface);
+            D3DSURFACE_DESC desc;
+            TheTextureManager->DepthSurface->GetDesc(&desc);
+			if (desc.Format == (D3DFORMAT)MAKEFOURCC('I', 'N', 'T', 'Z')) {
+				void* Container = NULL;
+				TheTextureManager->DepthSurface->GetContainer(IID_IDirect3DTexture9, &Container);
+				TheTextureManager->DepthTextureINTZ = (IDirect3DTexture9*)Container;
+				NvAPI_D3D9_RegisterResource(TheTextureManager->DepthTextureINTZ);
+			}
+			else {
+                NvAPI_D3D9_RegisterResource(TheTextureManager->DepthSurface);
+            }
+            
 			NvAPI_D3D9_RegisterResource(TheTextureManager->DepthTexture);
 		}
-		NvAPI_D3D9_StretchRectEx(device, TheTextureManager->DepthSurface, NULL, TheTextureManager->DepthTexture, NULL, D3DTEXF_NONE);
+		if (TheTextureManager->DepthTextureINTZ)
+            NvAPI_D3D9_StretchRectEx(device, TheTextureManager->DepthTextureINTZ, NULL, TheTextureManager->DepthTexture, NULL, D3DTEXF_NONE);
+        else 
+            NvAPI_D3D9_StretchRectEx(device, TheTextureManager->DepthSurface, NULL, TheTextureManager->DepthTexture, NULL, D3DTEXF_NONE);
 	}
 
 }
