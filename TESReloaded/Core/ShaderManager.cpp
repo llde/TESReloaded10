@@ -259,6 +259,8 @@ ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 	else if (!memcmp(Name, "Bink", 4)) {
 		strcat(FileName, "Bink\\");
 	}
+	else if(!TheSettingManager->SettingsMain.Shaders.Extra) return false;
+    
 	if (SubPath) strcat(FileName, SubPath);
 	strcat(FileName, Name);
 	strcpy(FileNameBinary, FileName);
