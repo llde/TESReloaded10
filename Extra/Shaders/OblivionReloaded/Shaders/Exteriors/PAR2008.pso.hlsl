@@ -53,7 +53,7 @@ VS_OUTPUT main(VS_INPUT IN) {
 #define	uvtile(w)		(((w) * 0.04) - 0.02)
 #define	shades(n, l)	saturate(dot(n, l))
 
-    float3 noxel2;
+    float4 noxel2;
     float3 q15;
     float3 q3;
     float1 q4;
@@ -66,9 +66,9 @@ VS_OUTPUT main(VS_INPUT IN) {
 	
 	uv.xy = ParallaxMapping(IN.BaseUV, IN.texcoord_6);
     r0.xyzw = tex2D(BaseMap, uv.xy);
-    noxel2.xyz = tex2D(NormalMap, uv.xy).xyz;
+    noxel2 = tex2D(NormalMap, uv.xy);
     q3.xyz = normalize(expand(noxel2.xyz));
-    q5.x = pow(abs(shades(q3.xyz, IN.texcoord_3.xyz)), Toggles.z) / length(IN.texcoord_6.xyz);
+    q5.x = noxel2.w * pow(abs(shades(q3.xyz, IN.texcoord_3.xyz)), Toggles.z);
     q4.x = dot(q3.xyz, IN.texcoord_1.xyz);
     q6.xyz = saturate((0.2 >= q4.x ? (q5.x * max(q4.x + 0.5, 0)) : q5.x) * PSLightColor[0].rgb);
     r1.xyz = (Toggles.x <= 0.0 ? r0.xyz : (r0.xyz * IN.LCOLOR_0.xyz));

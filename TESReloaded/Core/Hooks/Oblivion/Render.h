@@ -80,7 +80,10 @@ static UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiG
 	if (VertexShader && PixelShader) {
 		VertexShader->SetupShader(TheRenderManager->renderState->GetVertexShader());
 		PixelShader->SetupShader(TheRenderManager->renderState->GetPixelShader());
-		Toggles->y = 1.0f;
+        /*This was 1.0. This code is supposed to make the shader render the fog color on objects, however it lack depth, causing a "washed out" effect. 
+         Also not all shaders consider this Toggle, so there are only some objects that are rnedered that way.
+		 Using 0 it render the normal (non-fog) color, and in case use the volumetric fog shader to render the fog effect. */
+		if(TheSettingManager->SettingsMain.Main.SkipFog) Toggles->y = 0.0f; 
 		if (DWNode::Get()) {
 			char Name[256];
 			sprintf(Name, "Pass %i %s, %s (%s %s)", PassIndex, Pointers::Functions::GetPassDescription(PassIndex), Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);

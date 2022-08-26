@@ -59,7 +59,7 @@ VS_OUTPUT main(VS_INPUT IN) {
     OUT.texcoord_1.xyz = normalize(q12.xyz);
     eye0.xyz = normalize(EyePosition.xyz - IN.LPOSITION.xyz);
     q3.xyz = normalize(eye0.xyz + LightDirection[0].xyz);
-    OUT.texcoord_3.xyz = mul(float3x3(IN.LTANGENT.xyz, IN.LBINORMAL.xyz, IN.LNORMAL.xyz), q3.xyz);
+    OUT.texcoord_3.xyz = normalize(mul(float3x3(IN.LTANGENT.xyz, IN.LBINORMAL.xyz, IN.LNORMAL.xyz), q3.xyz));
     q16.xyz = mul(float3x3(IN.LTANGENT.xyz, IN.LBINORMAL.xyz, IN.LNORMAL.xyz), eye0.xyz);
     OUT.texcoord_6.xyz = normalize(q16.xyz);
 	OUT.texcoord_5.xyzw = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[0]);

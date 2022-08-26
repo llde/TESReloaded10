@@ -49,7 +49,7 @@ VS_OUTPUT main(VS_INPUT IN) {
 #define	uvtile(w)		(((w) * 0.04) - 0.02)
 #define	shades(n, l)	saturate(dot(n, l))
 #define	weight(v)		dot(v, 1)
-
+/*
 	float3 q3;
     float1 q4;
 	float1 q5;
@@ -67,6 +67,22 @@ VS_OUTPUT main(VS_INPUT IN) {
     q6.xyz = GetLightAmount(IN.texcoord_5, IN.texcoord_7) * (0.2 >= q4.x ? (q5.x * max(q4.x + 0.5, 0)) : q5.x) * PSLightColor[0].rgb;
     OUT.color_0.a = weight(q6.xyz);
     OUT.color_0.rgb = saturate(q6.xyz);
+  */  
+        float1 q2;
+    float3 q3;
+    float1 q8;
+    float4 r0;
+    float2 uv0;
+
+ //   r0.xyzw = tex2D(BaseMap, IN.BaseUV.xy);			// partial precision
+    uv0.xy = ParallaxMapping(IN.BaseUV, IN.texcoord_6);		// partial precision
+    r0.xyzw = tex2D(NormalMap, uv0.xy);			// partial precision
+    q8.x = r0.w * pow(abs(shades(normalize(expand(r0.xyz)), IN.texcoord_3.xyz)), Toggles.z);			// partial precision
+    q2.x = dot(normalize(expand(r0.xyz)), IN.texcoord_1.xyz);			// partial precision
+    q3.xyz = (0.2 >= q2.x ? (q8.x * max(q2.x + 0.5, 0)) : q8.x) * GetLightAmount(IN.texcoord_5, IN.texcoord_7) * PSLightColor[0].rgb;			// partial precision
+    OUT.color_0.a = weight(q3.xyz);			// partial precision
+    OUT.color_0.rgb = saturate(q3.xyz);			// partial precision
+
     return OUT;
 	
 };
