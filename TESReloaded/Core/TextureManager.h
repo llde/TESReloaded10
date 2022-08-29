@@ -58,4 +58,5 @@ public:
 	IDirect3DSurface9*		ShadowCubeMapDepthSurface;
 	TextureList				Textures;
     WaterHeightMapList  	WaterHeightMapTextures;
+    IDirect3DBaseTexture9*  WaterHeightMapB;
 };

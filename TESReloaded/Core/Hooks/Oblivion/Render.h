@@ -40,7 +40,7 @@ static void __fastcall WaterHeightMapRenderHook(WaterShaderHeightMap* This, UInt
 	NiRenderTargetGroup* TargetGroup = NULL;
 	NiViewport Viewport = { 0.0f, 1.0f, 1.0f, 0.0f };
 	
-	if (TheSettingManager->SettingsMain.Shaders.Water) {
+	if (TheSettingManager->SettingsMain.Shaders.Water) { //TODO separate option. Currently the LOD and the Near water have a noticeable seam when coming closer with tfc. Lava LOD is darker then near Lava
 		ShaderHeightMap->Unk090 = 1.0f;
 		ShaderHeightMap->Unk094 = 1.0f;
 		ShaderHeightMap->Unk098 = 0.5f / 256.0f;
@@ -52,7 +52,7 @@ static void __fastcall WaterHeightMapRenderHook(WaterShaderHeightMap* This, UInt
 		ThisCall(0x00709C60, ScreenElements, TheRenderManager);
 		Pointers::Functions::EndRendering();
 	}
-	else {
+	else { 
 		(*WaterHeightMapRender)(This, ScreenElements, RenderedTexture1, RenderedTexture2, Arg4);
 	}
 
@@ -68,6 +68,7 @@ static float __fastcall FarPlaneHook(SceneGraph* This, UInt32 edx) {
 
 }
 
+
 static UInt32 (__thiscall* SetupShaderPrograms)(NiShader*, NiGeometry*, NiSkinInstance*, NiSkinPartition::Partition*, NiGeometryBufferData*, NiPropertyState*, NiDynamicEffectState*, NiTransform*, UInt32) = (UInt32 (__thiscall*)(NiShader*, NiGeometry*, NiSkinInstance*, NiSkinPartition::Partition*, NiGeometryBufferData*, NiPropertyState*, NiDynamicEffectState*, NiTransform*, UInt32))Hooks::SetupShaderPrograms;
 static UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiGeometry* Geometry, NiSkinInstance* SkinInstance, NiSkinPartition::Partition* SkinPartition, NiGeometryBufferData* GeometryBufferData, NiPropertyState* PropertyState, NiDynamicEffectState* EffectState, NiTransform* WorldTransform, UInt32 WorldBound) {
 	
@@ -76,7 +77,8 @@ static UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiG
 	NiD3DVertexShaderEx* VertexShader = (NiD3DVertexShaderEx*)Pass->VertexShader;
 	NiD3DPixelShaderEx* PixelShader = (NiD3DPixelShaderEx*)Pass->PixelShader;
 	UInt32 PassIndex = *(UInt32*)0x00B42E90;
-	
+//    UInt8* IsLava = (UInt8*)0x00B47844;
+//    *IsLava = 1;  Unlock pass 410 instead of 380/409
 	if (VertexShader && PixelShader) {
 		VertexShader->SetupShader(TheRenderManager->renderState->GetVertexShader());
 		PixelShader->SetupShader(TheRenderManager->renderState->GetPixelShader());
@@ -92,7 +94,22 @@ static UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiG
 			DWNode::AddNode(Name, Geometry->m_parent, Geometry);
 		}
 	}
-	return (*SetupShaderPrograms)(This, Geometry, SkinInstance, SkinPartition, GeometryBufferData, PropertyState, EffectState, WorldTransform, WorldBound);
+	UInt32 result =  (*SetupShaderPrograms)(This, Geometry, SkinInstance, SkinPartition, GeometryBufferData, PropertyState, EffectState, WorldTransform, WorldBound);
+	if (PassIndex == 380  || PassIndex == 409 || PassIndex == 410){ //WaterLOD
+        //data[2] difuse, data[1] nothing
+ //       Logger::Log("Pass %u : %u",  PassIndex, *IsLava);
+    //    TheRenderManager->renderState->SetTexture(1, TheRenderManager->CurrentWaterTexture);
+    }
+    //if (PassIndex == 409 && Pass->Stages.numObjs == 1){
+    //	if (TheKeyboardManager->OnKeyDown(44)) {
+      //      NiTArray<NiD3DTextureStage*> stages = Pass->Stages;
+        //    for(UInt32 i = 0; i < Pass->Stages.numObjs; i++){
+          //      IDirect3DBaseTexture9* text = Pass->Stages.data[i]->Texture->rendererData->dTexture; 
+       //         D3DXSaveTextureToFile(".\\0.jpg", D3DXIFF_JPG, text, NULL);
+      //      }
+     //   }
+   // }
+    return result;
 
 }
 

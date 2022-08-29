@@ -170,6 +170,7 @@ TextureRecord* TextureManager::LoadTexture(ID3DXBuffer* ShaderSourceBuffer, D3DX
 //		Logger::Log("%s \n", SamplerString.c_str());
 		TextureRecord* NewTextureRecord = new TextureRecord();
 	    if(Type == TextureRecord::TextureRecordType::WaterHeightMapBuffer){
+            NewTextureRecord->Texture = WaterHeightMapB; /*Assign water height map. It's NULL on start, assigned in the hook*/
 			WaterHeightMapTextures.push_back(NewTextureRecord);
 			Logger::Log("Game Texture %s Attached", ConstantName); /*WaterHeightMap are provided from a game hook*/
 		}
@@ -320,6 +321,9 @@ void TextureManager::GetSamplerStates(std::string& samplerStateSubstring, Textur
 }
 
 void TextureManager::SetWaterHeightMap(IDirect3DBaseTexture9* WaterHeightMap) {
+    if (WaterHeightMapB == WaterHeightMap) return;
+    WaterHeightMapB = WaterHeightMap;  //This may cause crashes on certain conditions
+//    Logger::Log("Binding %0X", WaterHeightMap);
 	for (WaterHeightMapList::iterator it = TheTextureManager->WaterHeightMapTextures.begin(); it != TheTextureManager->WaterHeightMapTextures.end(); it++){
 		 (*it)->Texture = WaterHeightMap;
 	}
