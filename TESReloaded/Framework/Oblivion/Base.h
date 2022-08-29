@@ -71,6 +71,7 @@ public:
 	static const UInt32 UpdateFlyCam				= 0x006643A0;
  	static const UInt32 UnkSub7C2420				= 0x007C2420;
     static const UInt32 LoadTextureData             = 0x00760DA0;
+    static const UInt32 WaterSurfacePass            = 0x0049D7B0;
 };
 
 class Jumpers {

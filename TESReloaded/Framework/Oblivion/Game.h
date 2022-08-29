@@ -1125,10 +1125,11 @@ public:
 	Character*						character;			// 074
 	void*							ptr078;				// 078
 	TESWorldSpace*					parentWorldspace;	// 07C
-	UInt32							unk080[(0xC0 - 0x80) >> 2];	// 080
+	TESWaterForm*                   WaterForm;           // 080
+	UInt32							unk080[15];	// 084
 	BSString						editorID;			// 0C0
 	NiTMap<UInt32, void>			map0C8;				// 0C8
-	UInt32							unk0D8[(0xE0 - 0xD8) >> 2];	// 0D8
+	UInt32							unk0D8[2];	// 0D8
 };
 assert(sizeof(TESWorldSpace) == 0x0E0);
 

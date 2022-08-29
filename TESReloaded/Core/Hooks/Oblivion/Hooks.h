@@ -84,6 +84,7 @@ void AttachHooks() {
 	}
 	if (SettingsMain->FlyCam.Enabled) DetourAttach(&(PVOID&)UpdateFlyCam, &UpdateFlyCamHook);
   //  DetourAttach(&(PVOID&)LoadTextureFile,				&LoadTextureFileHook);
+    DetourAttach(&(PVOID&)WaterSurfacePass,				&WaterSurfacePassHook);
 	DetourTransactionCommit();
 	
 	SafeWrite8(0x00801BCB,	sizeof(NiD3DVertexShaderEx));
@@ -135,7 +136,7 @@ void AttachHooks() {
 	SafeWriteJump(Jumpers::RemoveSequence::Hook,				(UInt32)RemoveSequenceHook);
 	SafeWriteJump(Jumpers::Shadows::RenderShadowMapHook,		(UInt32)RenderShadowMapHook);
 	SafeWriteJump(Jumpers::Shadows::AddCastShadowFlagHook,		(UInt32)AddCastShadowFlagHook);
-	SafeWriteJump(Jumpers::WaterHeightMap::Hook,				(UInt32)WaterHeightMapHook);
+//	SafeWriteJump(Jumpers::WaterHeightMap::Hook,				(UInt32)WaterHeightMapHook);
 	SafeWriteJump(Jumpers::EndProcess::Hook,					(UInt32)EndProcessHook);
     
     if(SettingsMain->Main.SkipFog) 	SafeWriteJump(Jumpers::SkipFogPass::Hook, (UInt32)SkipFogPassHook); 

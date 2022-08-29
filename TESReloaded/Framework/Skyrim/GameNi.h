@@ -53,7 +53,7 @@ class NiDX9Renderer;
 class NiDX9RenderState;
 class NiDX92DBufferData;
 class NiDX9ShaderDeclaration;
-
+class NiD3DPass;
 class ShadowSceneLight;
 class AnimSequenceBase;
 
