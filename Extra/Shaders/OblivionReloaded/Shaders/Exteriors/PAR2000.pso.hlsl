@@ -31,6 +31,7 @@ sampler2D TESR_ShadowMapBufferFar : register(s7) = sampler_state { ADDRESSU = CL
 struct VS_INPUT {
     float2 BaseUV : TEXCOORD0;
     float3 texcoord_1 : TEXCOORD1_centroid;
+    float3 texcoord_3 : TEXCOORD3_centroid;
 	float4 texcoord_5 : TEXCOORD5;
     float3 texcoord_6 : TEXCOORD6_centroid;
 	float4 texcoord_7 : TEXCOORD7;
@@ -52,23 +53,29 @@ VS_OUTPUT main(VS_INPUT IN) {
 #define	uvtile(w)		(((w) * 0.04) - 0.02)
 #define	shades(n, l)	saturate(dot(n, l))
 
-    float3 noxel1;
-    float3 q2;
-    float3 q4;
-    float3 q5;
+    float4 noxel2;
+    float3 q15;
+    float3 q3;
+    float1 q4;
+    float1 q5;
     float3 q6;
     float4 r0;
+    float3 r1;
     float2 uv;
+	float Shadow;
 	
 	uv.xy = ParallaxMapping(IN.BaseUV, IN.texcoord_6);
-	r0.xyzw = tex2D(BaseMap, uv.xy);
-    noxel1.xyz = tex2D(NormalMap, uv.xy).xyz;
-    q2.xyz = GetLightAmount(IN.texcoord_5, IN.texcoord_7) * shades(normalize(expand(noxel1.xyz)), IN.texcoord_1.xyz) * PSLightColor[0].rgb + AmbientColor.rgb;
-    q4.xyz = (Toggles.x <= 0.0 ? r0.xyz : (r0.xyz * IN.LCOLOR_0.xyz));
-    q5.xyz = max(q2.xyz, 0) * q4.xyz;
-    q6.xyz = (Toggles.y <= 0.0 ? q5.xyz : ((IN.LCOLOR_1.w * (IN.LCOLOR_1.xyz - q5.xyz)) + q5.xyz));
+    r0.xyzw = tex2D(BaseMap, uv.xy);
+    noxel2 = tex2D(NormalMap, uv.xy);
+    q3.xyz = normalize(expand(noxel2.xyz));
+    q5.x = noxel2.w * pow(abs(shades(q3.xyz, IN.texcoord_3.xyz)), Toggles.z);
+    q4.x = dot(q3.xyz, IN.texcoord_1.xyz);
+    q6.xyz = saturate((0.2 >= q4.x ? (q5.x * max(q4.x + 0.5, 0)) : q5.x) * PSLightColor[0].rgb);
+    r1.xyz = (Toggles.x <= 0.0 ? r0.xyz : (r0.xyz * IN.LCOLOR_0.xyz));
+	Shadow = GetLightAmount(IN.texcoord_5, IN.texcoord_7);	
+    q15.xyz = (r1.xyz * max((Shadow * saturate(q4.x) * PSLightColor[0].rgb) + AmbientColor.rgb, 0)) + (q6.xyz * Shadow);
     OUT.color_0.a = AmbientColor.a;
-    OUT.color_0.rgb = q6.xyz;
+    OUT.color_0.rgb = (Toggles.y <= 0.0 ? q15.xyz : lerp(q15.xyz, IN.LCOLOR_1.xyz, IN.LCOLOR_1.w));
     return OUT;
 	
 };

@@ -42,6 +42,7 @@ struct VS_OUTPUT {
     float4 position : POSITION;
     float2 texcoord_0 : TEXCOORD0;
     float3 texcoord_1 : TEXCOORD1;
+    float3 texcoord_3 : TEXCOORD3;
 	float4 texcoord_5 : TEXCOORD5;
     float3 texcoord_6 : TEXCOORD6;
 	float4 texcoord_7 : TEXCOORD7;
@@ -61,12 +62,14 @@ VS_OUTPUT main(VS_INPUT IN) {
     eye0.xyz = normalize(EyePosition.xyz - IN.LPOSITION.xyz);
     m5.xyz = mul(float3x3(IN.LTANGENT.xyz, IN.LBINORMAL.xyz, IN.LNORMAL.xyz), eye0.xyz);
     q3.xyz = mul(float3x3(IN.LTANGENT.xyz, IN.LBINORMAL.xyz, IN.LNORMAL.xyz), LightDirection[0].xyz);
+    float3 light_eye = normalize(eye0.xyz + LightDirection[0].xyz);
     OUT.color_0.rgba = IN.LCOLOR_0.xyzw;
     OUT.color_1.a = 1 - saturate((FogParam.x - length(r0.xyz)) / FogParam.y);
     OUT.color_1.rgb = FogColor.rgb;
     OUT.position.xyzw = r0.xyzw;
     OUT.texcoord_0.xy = IN.LTEXCOORD_0.xy;
     OUT.texcoord_1.xyz = normalize(q3.xyz);
+    OUT.texcoord_3.xyz = normalize(mul(float3x3(IN.LTANGENT.xyz, IN.LBINORMAL.xyz, IN.LNORMAL.xyz), light_eye));
     OUT.texcoord_6.xyz = normalize(m5.xyz);
 	OUT.texcoord_5.xyzw = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[0]);
 	OUT.texcoord_7.xyzw = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[1]);
