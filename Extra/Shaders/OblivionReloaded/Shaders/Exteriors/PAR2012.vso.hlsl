@@ -47,18 +47,17 @@ struct VS_INPUT {
 };
 
 struct VS_OUTPUT {
-    float4 color_0 : COLOR0;
+    float3 color_0 : COLOR0; //Alpha passed but not use in PSO (PAR2026.pso), maybe another pso use the same tandem?
     float4 color_1 : COLOR1;
     float4 position : POSITION;
-    float2 texcoord_0 : TEXCOORD0;
-    float3 texcoord_1 : TEXCOORD1;
-    float3 texcoord_2 : TEXCOORD2;
+    float4 BaseUV : TEXCOORD0;
+    float4 texcoord_1 : TEXCOORD1;
+    float4 texcoord_2 : TEXCOORD2;
     float3 texcoord_3 : TEXCOORD3;
     float3 texcoord_4 : TEXCOORD4;
     float4 texcoord_5 : TEXCOORD5;
     float3 texcoord_6 : TEXCOORD6;
     float4 texcoord_7 : TEXCOORD7; 
-    float4 texcoord_8 : TEXCOORD8; 
 };
 
 // Code:
@@ -75,13 +74,14 @@ VS_OUTPUT main(VS_INPUT IN) {
 
     mdl27.xyz = mul(float3x4(ModelViewProj[0].xyzw, ModelViewProj[1].xyzw, ModelViewProj[2].xyzw), IN.position.xyzw);
     lit3.xyz = LightPosition[1].xyz - IN.position.xyz;
-    OUT.color_0.rgba = IN.color_0.rgba;
+   // OUT.color_0.rgba = IN.color_0.rgba;
+    OUT.color_0.rgb = IN.color_0.rgb;
     eye0.xyz = EyePosition.xyz - IN.position.xyz;
     OUT.color_1.a = 1 - saturate((FogParam.x - length(mdl27.xyz)) / FogParam.y);
     OUT.color_1.rgb = FogColor.rgb;
     OUT.position.w = dot(ModelViewProj[3].xyzw, IN.position.xyzw);
     OUT.position.xyz = mdl27.xyz;
-    OUT.texcoord_0.xy = IN.texcoord_0.xy;
+    OUT.BaseUV.xy = IN.texcoord_0.xy;
     OUT.texcoord_1.xyz = normalize(mul(TanSpaceProj, LightDirection[0].xyz));
     OUT.texcoord_2.xyz = mul(TanSpaceProj, normalize(lit3.xyz));
     OUT.texcoord_3.xyz = normalize(mul(TanSpaceProj, normalize(normalize(eye0.xyz) + LightDirection[0].xyz)));
@@ -89,9 +89,12 @@ VS_OUTPUT main(VS_INPUT IN) {
     OUT.texcoord_5.w = 0.5;
     OUT.texcoord_5.xyz = compress(lit3.xyz / LightPosition[1].w);	// [-1,+1] to [0,1]
     OUT.texcoord_6.xyz = normalize(mul(TanSpaceProj, normalize(eye0.xyz)));
-	OUT.texcoord_7.xyzw = mul(OUT.position.xyzw, TESR_ShadowCameraToLightTransform[0]);
-	OUT.texcoord_8.xyzw = mul(OUT.position.xyzw, TESR_ShadowCameraToLightTransform[1]);
-
+	OUT.texcoord_7 = mul(OUT.position.xyzw, TESR_ShadowCameraToLightTransform[0]);
+	float4 shadowFar = mul(OUT.position.xyzw, TESR_ShadowCameraToLightTransform[1]);
+    OUT.BaseUV.zw = shadowFar.xy;
+    OUT.texcoord_1.w = shadowFar.z;
+    OUT.texcoord_2.w = shadowFar.w;
+    
     return OUT;
 };
 

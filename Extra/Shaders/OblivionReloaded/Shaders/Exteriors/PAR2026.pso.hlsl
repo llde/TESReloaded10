@@ -35,15 +35,14 @@ sampler2D TESR_ShadowMapBufferFar : register(s7) = sampler_state { ADDRESSU = CL
 // Structures:
 
 struct VS_OUTPUT {
-    float2 BaseUV : TEXCOORD0;			// partial precisionr1
-    float3 texcoord_1 : TEXCOORD1_centroid;			// partial precision
-    float3 texcoord_2 : TEXCOORD2_centroid;			// partial precision
+    float4 BaseUV : TEXCOORD0;			// partial precisionr1
+    float4 texcoord_1 : TEXCOORD1_centroid;			// partial precision
+    float4 texcoord_2 : TEXCOORD2_centroid;			// partial precision
     float3 texcoord_3 : TEXCOORD3_centroid;			// partial precision
     float3 texcoord_4 : TEXCOORD4_centroid;			// partial precision
     float4 texcoord_5 : TEXCOORD5;			// partial precision
     float3 texcoord_6 : TEXCOORD6_centroid;			// partial precision
     float4 texcoord_7 : TEXCOORD7; 
-    float4 texcoord_8 : TEXCOORD8; 
     float3 color_0 : COLOR0;
     float4 color_1 : COLOR1;
 };
@@ -80,13 +79,15 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     float4 r0;
     float4 r1;
     float2 uv2;
-
+    float4 ShadowNear = IN.texcoord_7;
+    float4 ShadowFar = float4(IN.BaseUV.xy, IN.texcoord_1.w, IN.texcoord_2.w);
+    
   //  r0.xyzw = tex2D(BaseMap, IN.BaseUV.xy);			// partial precision
     att1.x = tex2D(AttenuationMap, IN.texcoord_5.zw).x;			// partial precision
     att0.x = tex2D(AttenuationMap, IN.texcoord_5.xy).x;			// partial precision
     q7.x = saturate((1 - att0.x) - att1.x);			// partial precision
    // uv2.xy = (uvtile(r0.w) * (IN.texcoord_6.xy / length(IN.texcoord_6.xyz))) + IN.BaseUV.xy;
-    uv2.xy = ParallaxMapping(IN.BaseUV, IN.texcoord_6);	
+    uv2.xy = ParallaxMapping(IN.BaseUV.xy, IN.texcoord_6);	
     r1.xyzw = tex2D(NormalMap, uv2.xy);			// partial precision
     r0.xyzw = tex2D(BaseMap, uv2.xy);			// partial precision
     q3.xyz = normalize(expand(r1.xyz));			// partial precision
@@ -95,7 +96,7 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     q6.x = dot(q3.xyz, normalize(IN.texcoord_2.xyz));			// partial precision
     q9.xyz = saturate(q7.x * ((0.2 >= q6.x ? (q4.x * max(q6.x + 0.5, 0)) : q4.x) * PSLightColor[1].rgb));			// partial precision
     q8.x = dot(q3.xyz, IN.texcoord_1.xyz);			// partial precision
-    float Shadow = GetLightAmount(IN.texcoord_7, IN.texcoord_8);
+    float Shadow = GetLightAmount(ShadowNear, ShadowFar);
     q10.xyz = saturate((0.2 >= q8.x ? (q17.x * max(q8.x + 0.5, 0)) : q17.x) * PSLightColor[0].rgb *Shadow);			// partial precision
     q11.xyz = (saturate(q8.x) * PSLightColor[0].rgb * Shadow) + (q7.x * (saturate(q6.x) * PSLightColor[1].rgb));			// partial precision
     r1.xyz = (Toggles.x <= 0.0 ? r0.xyz : (r0.xyz * IN.color_0.rgb));			// partial precision
