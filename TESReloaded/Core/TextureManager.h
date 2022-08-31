@@ -21,7 +21,8 @@ public:
 		ShadowCubeMapBuffer1,
 		ShadowCubeMapBuffer2,
 		ShadowCubeMapBuffer3,
-		WaterHeightMapBuffer,
+		WaterHeightMapBuffer, /*Textures assigned after init*/
+        WaterReflectionMapBuffer,
 	};
 
 	bool					LoadTexture(TextureRecordType Type, const char* Filename);
@@ -31,7 +32,7 @@ public:
 };
 
 typedef std::map<std::string, IDirect3DBaseTexture9*> TextureList;
-typedef std::vector<TextureRecord*> WaterHeightMapList;
+typedef std::vector<TextureRecord*> WaterMapList;
 
 class TextureManager { // Never disposed
 public:
@@ -40,6 +41,7 @@ public:
 	TextureRecord*			LoadTexture(ID3DXBuffer* ShaderSource, D3DXPARAMETER_TYPE ConstantType, LPCSTR ConstantName, UINT RegisterIndex, bool* HasRenderedBuffer, bool* HasDepthBuffer);
 	void 					GetSamplerStates(std::string& samplerStateSubstring, TextureRecord* textureRecord );
 	void					SetWaterHeightMap(IDirect3DBaseTexture9* WaterHeightMap);
+    void                    SetWaterReflectionMap(IDirect3DBaseTexture9* WaterReflectionMap);
 	std::string				GetFilenameForTexture(std::string&  resourceSubstring);
     IDirect3DBaseTexture9* 	GetCachedTexture(std::string& pathS);
 
@@ -57,6 +59,10 @@ public:
 	IDirect3DSurface9*		ShadowCubeMapSurface[ShadowCubeMapsMax][6];
 	IDirect3DSurface9*		ShadowCubeMapDepthSurface;
 	TextureList				Textures;
-    WaterHeightMapList  	WaterHeightMapTextures;
+    WaterMapList         	WaterHeightMapTextures;
+    WaterMapList         	WaterReflectionMapTextures;
+
     IDirect3DBaseTexture9*  WaterHeightMapB;
+    IDirect3DBaseTexture9*  WaterReflectionMapB;
+
 };

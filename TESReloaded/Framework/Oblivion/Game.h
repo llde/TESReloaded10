@@ -3306,10 +3306,10 @@ assert(sizeof(GridCellArray) == 0x028);
 class WaterManager {
 public:
 	NiCamera*			Camera;					// 000
-	BSRenderedTexture*	ReflectionMap;			// 004
+	BSRenderedTexture*	ReflectionMap;			// 004 //Reflection Texture
 	BSRenderedTexture*	BaseHeightMap;			// 008
 	BSRenderedTexture*	DisplacementMap;		// 00C
-	BSRenderedTexture*	HeightMap;				// 010
+	BSRenderedTexture*	HeightMap;				// 010   //Full HeightMap/NormalMap
 	BSRenderedTexture*	BaseDisplacementMap;	// 014
 	float				unk18;					// 018
 	UInt32				unk1C;					// 01C

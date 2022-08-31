@@ -11,6 +11,7 @@ static void __fastcall WaterSurfacePassHook(WaterManager* This, UInt32 edx, NiCa
     
     (*WaterSurfacePass)(This,Camera);
     TheTextureManager->SetWaterHeightMap(This->HeightMap->RenderedTexture->rendererData->dTexture);
+    if(This->ReflectionMap) TheTextureManager->SetWaterReflectionMap(This->ReflectionMap->RenderedTexture->rendererData->dTexture);
 }
 /*
 static __declspec(naked) void WaterHeightMapHook() {

@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #define WordWaterHeightMapBuffer "TESR_WaterHeightMapBuffer"
+#define WordWaterReflectionMapBuffer "TESR_WaterReflectionMapBuffer"
 
 TextureRecord::TextureRecord() {
 
@@ -74,9 +75,6 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Name) {
 		case ShadowCubeMapBuffer3:
 			Texture = TheTextureManager->ShadowCubeMapTexture[3];
 			break;
-		case WaterHeightMapBuffer:
-			Texture = NULL;
-			break;
 	}
 	return true;
 
@@ -141,6 +139,8 @@ TextureRecord* TextureManager::LoadTexture(ID3DXBuffer* ShaderSourceBuffer, D3DX
 	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer2") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer2 : Type;
 	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer3") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer3 : Type;
 	Type = !strcmp(ConstantName, WordWaterHeightMapBuffer) ? TextureRecord::TextureRecordType::WaterHeightMapBuffer : Type;
+	Type = !strcmp(ConstantName, WordWaterReflectionMapBuffer) ? TextureRecord::TextureRecordType::WaterReflectionMapBuffer : Type;
+
 	if (HasRenderedBuffer && !*HasRenderedBuffer) *HasRenderedBuffer = (Type == TextureRecord::TextureRecordType::RenderedBuffer);
 	if (HasDepthBuffer && !*HasDepthBuffer) *HasDepthBuffer = (Type == TextureRecord::TextureRecordType::DepthBuffer);
 	if (Type) {
@@ -169,11 +169,17 @@ TextureRecord* TextureManager::LoadTexture(ID3DXBuffer* ShaderSourceBuffer, D3DX
 		std::string SamplerString = Source.substr(StartStatePos + 1, EndStatePos - StartStatePos - 1);
 //		Logger::Log("%s \n", SamplerString.c_str());
 		TextureRecord* NewTextureRecord = new TextureRecord();
-	    if(Type == TextureRecord::TextureRecordType::WaterHeightMapBuffer){
-            NewTextureRecord->Texture = WaterHeightMapB; /*Assign water height map. It's NULL on start, assigned in the hook*/
-			WaterHeightMapTextures.push_back(NewTextureRecord);
-			Logger::Log("Game Texture %s Attached", ConstantName); /*WaterHeightMap are provided from a game hook*/
-		}
+        if(Type >= TextureRecord::TextureRecordType::WaterHeightMapBuffer){ /*Texture assigned after init*/
+            if(Type == TextureRecord::TextureRecordType::WaterHeightMapBuffer){
+                NewTextureRecord->Texture = WaterHeightMapB; 
+                WaterHeightMapTextures.push_back(NewTextureRecord);
+            }
+            else if(Type == TextureRecord::TextureRecordType::WaterReflectionMapBuffer){
+                NewTextureRecord->Texture = WaterReflectionMapB; 
+                WaterHeightMapTextures.push_back(NewTextureRecord);
+            }
+            Logger::Log("Game Texture %s Attached", ConstantName);
+        }
 		else if(Type >= TextureRecord::TextureRecordType::PlanarBuffer && Type <= TextureRecord::TextureRecordType::CubeBuffer){ //Cache only non game textures
 			IDirect3DBaseTexture9* cached = GetCachedTexture(TexturePath);
 			if(!cached) {
@@ -324,7 +330,16 @@ void TextureManager::SetWaterHeightMap(IDirect3DBaseTexture9* WaterHeightMap) {
     if (WaterHeightMapB == WaterHeightMap) return;
     WaterHeightMapB = WaterHeightMap;  //This may cause crashes on certain conditions
 //    Logger::Log("Binding %0X", WaterHeightMap);
-	for (WaterHeightMapList::iterator it = TheTextureManager->WaterHeightMapTextures.begin(); it != TheTextureManager->WaterHeightMapTextures.end(); it++){
+	for (WaterMapList::iterator it = TheTextureManager->WaterHeightMapTextures.begin(); it != TheTextureManager->WaterHeightMapTextures.end(); it++){
 		 (*it)->Texture = WaterHeightMap;
+	}
+}
+
+void TextureManager::SetWaterReflectionMap(IDirect3DBaseTexture9* WaterReflectionMap) {
+    if (WaterReflectionMapB == WaterReflectionMap) return;
+    WaterReflectionMapB = WaterReflectionMap;
+//    Logger::Log("Binding %0X", WaterReflectionMap);
+	for (WaterMapList::iterator it = TheTextureManager->WaterReflectionMapTextures.begin(); it != TheTextureManager->WaterReflectionMapTextures.end(); it++){
+		 (*it)->Texture = WaterReflectionMap;
 	}
 }
