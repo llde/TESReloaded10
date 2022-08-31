@@ -41,3 +41,10 @@ void SafeWriteCall(UInt32 jumpSrc, UInt32 jumpTgt) {
 	SafeWrite32(jumpSrc + 1, jumpTgt - jumpSrc - 1 - 4);
 
 }
+
+void SafeWriteNop(UInt32 jumpSrc, UInt8 num){
+    for(UInt8 n = 0; n < num; n++){
+        SafeWrite8(jumpSrc + n, 0x90);
+    }
+    
+}

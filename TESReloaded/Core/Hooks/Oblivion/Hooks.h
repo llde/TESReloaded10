@@ -155,6 +155,9 @@ void AttachHooks() {
 	SafeWriteJump(0x005DF8E9, 0x005DF983); // Skips antialising deactivation changing HDR (video menu)
 	SafeWriteJump(0x006738B1, 0x00673935); // Cancels the fPlayerDeathReloadTime
 	SafeWrite8(0x0040CE11, 0); // Stops to clear the depth buffer when rendering the 1st person node
+    SafeWriteNop(0x00498968, 2); // Stops Disabling refraction shaders when MSAA, Non detection path
+    SafeWriteJump(0x004988D8, 0x0049896A);// Stops Disabling refraction shaders when MSAA, AMD Path
+    
 	if (SettingsMain->Shaders.Water) {
 		*Pointers::ShaderParams::WaterHighResolution = 1;
 		SafeWrite8(0x0049EBAC, 0); // Avoids to change the shader for the skydome when underwater
