@@ -43,7 +43,7 @@ struct VS_OUTPUT {
     float4 texcoord_5 : TEXCOORD5;
     float3 texcoord_7 : TEXCOORD7_centroid;
     float4 texcoord_8 : TEXCOORD8;
-    float4 texcoord_9 : TEXCOORD9;
+    float4 texcoord_6 : TEXCOORD6;
 };
 
 struct PS_OUTPUT {
@@ -74,28 +74,27 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     float4 r0;
     float4 r4;
     float2 uv12;
-//BUG?: in this case extracting the normal form parallaxed uv cause horrible distortions
-//     fetch Normal from parallaxed position. This comment was from an older version of POM 
+//BUG: in this case extracting the normal form parallaxed uv cause horrible distortions
+//     fetch Normal from parallaxed position.
 
-    att5.x = tex2D(AttenuationMap, IN.texcoord_5.zw);			// partial precision
-    att4.x = tex2D(AttenuationMap, IN.texcoord_5.xy);			// partial precision
-    att1.x = tex2D(AttenuationMap, IN.texcoord_4.zw);			// partial precision
-    att0.x = tex2D(AttenuationMap, IN.texcoord_4.xy);			// partial precision
-	uv12.xy = ParallaxMapping(IN.BaseUV, IN.texcoord_6);
-//    r0.xyzw = tex2D(BaseMap, IN.BaseUV.xy);			// partial precision
-    r0.xyzw = tex2D(BaseMap, uv12.xy);			// partial precision
-
- //   uv12.xy = (uvtile(r0.w) * (IN.texcoord_7.xy / length(IN.texcoord_7.xyz))) + IN.BaseUV.xy;
+    att5.x = tex2D(AttenuationMap, IN.texcoord_5.zw).x;			// partial precision
+    att4.x = tex2D(AttenuationMap, IN.texcoord_5.xy).x;			// partial precision
+    att1.x = tex2D(AttenuationMap, IN.texcoord_4.zw).x;			// partial precision
+    att0.x = tex2D(AttenuationMap, IN.texcoord_4.xy).x;			// partial precision
+  //	uv12.xy = ParallaxMapping(IN.BaseUV, IN.texcoord_7);
+    r0.xyzw = tex2D(BaseMap, IN.BaseUV.xy);			// partial precision
+//     r0.xyzw = tex2D(BaseMap, uv12.xy);			// partial precision
+    uv12.xy = (uvtile(r0.w) * (IN.texcoord_7.xy / length(IN.texcoord_7.xyz))) + IN.BaseUV.xy;
     r4.xyzw = tex2D(NormalMap, uv12.xy);			// partial precision
     r0.w = saturate((1 - att4.x) - att5.x);			// partial precision
     q2.xyz = normalize(expand(r4.xyz));			// partial precision
-    float Shadow = GetLightAmount(IN.texcoord_8, IN.texcoord_9);
+    float Shadow = GetLightAmount(IN.texcoord_8, IN.texcoord_6);
     r0.xyz = shades(q2.xyz, normalize(IN.texcoord_3.xyz)) * PSLightColor[2].rgb;			// partial precision
     q3.xyz = saturate((1 - att0.x) - att1.x) * (shades(q2.xyz, normalize(IN.texcoord_2.xyz)) * PSLightColor[1].rgb);			// partial precision
     q17.xyz = (r0.w * r0.xyz) + ((shades(q2.xyz, IN.texcoord_1.xyz) * PSLightColor[0].rgb * Shadow) + q3.xyz);			// partial precision
     OUT.color_0.a = 1;			// partial precision
     OUT.color_0.rgb = q17.xyz + AmbientColor.rgb;			// partial precision
-
+//OUT.color_0.rgb = float4(1,1,1,1);
     return OUT;
 };
 

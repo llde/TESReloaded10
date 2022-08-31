@@ -39,7 +39,7 @@ struct VS_OUTPUT {
     float4 texcoord_5 : TEXCOORD5;			// partial precision
     float3 texcoord_7 : TEXCOORD7_centroid;			// partial precision
     float4 texcoord_8 : TEXCOORD8;
-    float4 texcoord_9 : TEXCOORD9;
+    float4 texcoord_6 : TEXCOORD6;
 
 };
 
@@ -71,18 +71,21 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     float4 r2;
     float2 uv8;
 
-    r0.xyzw = tex2D(BaseMap, IN.BaseUV.xy);			// partial precision
-    att3.x = tex2D(AttenuationMap, IN.texcoord_5.zw);			// partial precision
-    att2.x = tex2D(AttenuationMap, IN.texcoord_5.xy);			// partial precision
-    uv8.xy = (uvtile(r0.w) * (IN.texcoord_7.xy / length(IN.texcoord_7.xyz))) + IN.BaseUV.xy;			// partial precision
+//\    r0.xyzw = tex2D(BaseMap, IN.BaseUV.xy);			// partial precision
+	uv8.xy = ParallaxMapping(IN.BaseUV, IN.texcoord_7);
+    r0.xyzw = tex2D(BaseMap, uv8.xy);			// partial precision
+
+    att3.x = tex2D(AttenuationMap, IN.texcoord_5.zw).x;			// partial precision
+    att2.x = tex2D(AttenuationMap, IN.texcoord_5.xy).x;			// partial precision
+ //   uv8.xy = (uvtile(r0.w) * (IN.texcoord_7.xy / length(IN.texcoord_7.xyz))) + IN.BaseUV.xy;			// partial precision
     r2.xyzw = tex2D(NormalMap, uv8.xy);			// partial precision
     r0.w = saturate((1 - att2.x) - att3.x);			// partial precision
     q1.x = dot(normalize(expand(r2.xyz)), normalize(IN.texcoord_1.xyz));			// partial precision
     q12.x = r2.w * pow(abs(shades(normalize(expand(r2.xyz)), normalize(IN.texcoord_3.xyz))), Toggles.z);			// partial precision
-    q13.xyz = ((0.2 >= q1.x ? (q12.x * max(q1.x + 0.5, 0)) : q12.x) * PSLightColor[0].rgb * GetLightAmount(IN.texcoord_8, IN.texcoord_9)) * r0.w;			// partial precision
+    q13.xyz = ((0.2 >= q1.x ? (q12.x * max(q1.x + 0.5, 0)) : q12.x) * PSLightColor[0].rgb * GetLightAmount(IN.texcoord_8, IN.texcoord_6)) * r0.w;			// partial precision
     OUT.color_0.a = weight(q13.xyz);			// partial precision
     OUT.color_0.rgb = saturate(q13.xyz);			// partial precision
-
+//OUT.color_0.rgb = float3(1,1,1);
     return OUT;
 };
 
