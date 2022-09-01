@@ -111,8 +111,10 @@
     <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h" />
     <ClInclude Include="..\TESReloaded\Core\GameEventManager.h" />
     <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\FormsCommon.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\GameCommon.cpp" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\FormsCommon.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\GameCommon.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\FlyCam.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Forms.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Game.h" />
@@ -176,7 +178,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-     <Import Project="..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets" Condition="Exists('..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets')" />
+    <Import Project="..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets" Condition="Exists('..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

@@ -115,9 +115,11 @@
     <ClInclude Include="..\TESReloaded\Core\Device\Hook.h" />
     <ClInclude Include="..\TESReloaded\Core\EquipmentManager.h" />
     <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\FormsCommon.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\GameCommon.cpp" />
     <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Animation.cpp" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\FormsCommon.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\GameCommon.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Animation.h" />
     <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Camera.cpp" />
     <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Dodge.cpp" />
@@ -157,8 +159,10 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Shadows.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Sleeping.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Texture.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Script.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\SleepingCommon.cpp" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Script.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\SleepingCommon.h" />
     <ClInclude Include="..\TESReloaded\Core\OcclusionManager.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Logger.h" />
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h" />

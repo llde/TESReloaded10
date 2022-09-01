@@ -71,9 +71,6 @@
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\GameNi.h">
       <Filter>Framework\Skyrim</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h">
-      <Filter>Core\Hooks</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Game.h">
       <Filter>Core\Hooks\Skyrim</Filter>
     </ClInclude>
@@ -95,9 +92,6 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Forms.h">
       <Filter>Core\Hooks\Skyrim</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h">
-      <Filter>Core\Hooks</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Events.h">
       <Filter>Core\Hooks\Skyrim</Filter>
     </ClInclude>
@@ -106,9 +100,6 @@
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Sleeping.h">
       <Filter>Core\Hooks\Skyrim</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h">
-      <Filter>Core\Hooks</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Skyrim\Managers.h">
       <Filter>Framework\Skyrim</Filter>
@@ -151,6 +142,15 @@
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Nvidia\nvapi.h">
       <Filter>Framework\Common\Lib\Nvidia</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\FormsCommon.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\GameCommon.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\SleepingCommon.h">
+      <Filter>Core\Hooks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -210,6 +210,15 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Framework\Common\Base\PluginVersion.cpp">
       <Filter>Framework\Common\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\FormsCommon.cpp">
+      <Filter>Core\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\SleepingCommon.cpp">
+      <Filter>Core\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\GameCommon.cpp">
+      <Filter>Core\Hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

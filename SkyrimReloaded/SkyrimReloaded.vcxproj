@@ -110,8 +110,10 @@
     <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h" />
     <ClInclude Include="..\TESReloaded\Core\GameEventManager.h" />
     <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\FormsCommon.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\GameCommon.cpp" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\FormsCommon.h" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\GameCommon.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Camera.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Events.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Forms.h" />
@@ -121,7 +123,8 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\ShaderIO.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Sleeping.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\SleepingCommon.cpp" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\SleepingCommon.h" />
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />
     <ClInclude Include="..\TESReloaded\Core\SettingManager.h" />
     <ClInclude Include="..\TESReloaded\Core\ShaderManager.h" />
@@ -171,7 +174,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-     <Import Project="..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets" Condition="Exists('..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets')" />
+    <Import Project="..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets" Condition="Exists('..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

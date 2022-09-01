@@ -113,23 +113,11 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h">
       <Filter>Framework\Common\Base</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h">
-      <Filter>Core\Hooks</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\Plugin.h">
       <Filter>Framework\Oblivion</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h">
       <Filter>Framework\Common\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h">
-      <Filter>Core\Hooks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Script.h">
-      <Filter>Core\Hooks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h">
-      <Filter>Core\Hooks</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\Managers.h">
       <Filter>Framework\Oblivion</Filter>
@@ -202,6 +190,18 @@
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Equipment.h">
       <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\FormsCommon.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\GameCommon.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Script.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\SleepingCommon.h">
+      <Filter>Core\Hooks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -333,6 +333,18 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Equipment.cpp">
       <Filter>Core\Hooks\Oblivion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\FormsCommon.cpp">
+      <Filter>Core\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\GameCommon.cpp">
+      <Filter>Core\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\SleepingCommon.cpp">
+      <Filter>Core\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Script.cpp">
+      <Filter>Core\Hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

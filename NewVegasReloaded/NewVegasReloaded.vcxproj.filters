@@ -122,12 +122,6 @@
     <ClInclude Include="..\TESReloaded\Core\TextureManager.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h">
-      <Filter>Core\Hooks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h">
-      <Filter>Core\Hooks</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Hooks.h">
       <Filter>Core\Hooks\NewVegas</Filter>
     </ClInclude>
@@ -163,6 +157,12 @@
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\FlyCam.h">
       <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\FormsCommon.h">
+      <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\GameCommon.h">
+      <Filter>Core\Hooks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -228,6 +228,12 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\BinkManager.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\GameCommon.cpp">
+      <Filter>Core\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\FormsCommon.cpp">
+      <Filter>Core\Hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
