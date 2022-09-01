@@ -122,29 +122,8 @@
     <ClInclude Include="..\TESReloaded\Core\TextureManager.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Hooks.h">
-      <Filter>Core\Hooks\NewVegas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Settings.h">
-      <Filter>Core\Hooks\NewVegas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Game.h">
-      <Filter>Core\Hooks\NewVegas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\ShaderIO.h">
-      <Filter>Core\Hooks\NewVegas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Render.h">
-      <Filter>Core\Hooks\NewVegas</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\BinkManager.h">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Forms.h">
-      <Filter>Core\Hooks\NewVegas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Shadows.h">
-      <Filter>Core\Hooks\NewVegas</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Nvidia\nvapi.h">
       <Filter>Framework\Common\Lib\Nvidia</Filter>
@@ -155,14 +134,35 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Lib\Bink\radbase.h">
       <Filter>Framework\Common\Lib\Bink</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\FlyCam.h">
-      <Filter>Core\Hooks\NewVegas</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\FormsCommon.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\GameCommon.h">
       <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Forms.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\FlyCam.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Game.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Hooks.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Shadows.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\ShaderIO.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Settings.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Render.h">
+      <Filter>Core\Hooks\NewVegas</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -234,6 +234,30 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\Hooks\FormsCommon.cpp">
       <Filter>Core\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\NewVegas\Forms.cpp">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\NewVegas\FlyCam.cpp">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\NewVegas\Game.cpp">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\NewVegas\Hooks.cpp">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\NewVegas\Shadows.cpp">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\NewVegas\ShaderIO.cpp">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\NewVegas\Settings.cpp">
+      <Filter>Core\Hooks\NewVegas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\NewVegas\Render.cpp">
+      <Filter>Core\Hooks\NewVegas</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
