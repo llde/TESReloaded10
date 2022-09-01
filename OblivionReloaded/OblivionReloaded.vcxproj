@@ -117,24 +117,33 @@
     <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Animation.cpp" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Animation.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Camera.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Dodge.cpp" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Dodge.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Equipment.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Events.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\FlyCam.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Forms.cpp" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Forms.h" />
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\FrameRate.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\FrameRate.cpp" />
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Framerate.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Game.cpp" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Game.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Grass.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Hooks.cpp" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Hooks.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Memory.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Mounted.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Occlusion.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Render.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Settings.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\ShaderIO.cpp" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\ShaderIO.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Shadows.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Sleeping.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Texture.cpp" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Sleeping.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Texture.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Script.h" />
@@ -198,7 +207,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-     <Import Project="..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets" Condition="Exists('..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets')" />
+    <Import Project="..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets" Condition="Exists('..\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
