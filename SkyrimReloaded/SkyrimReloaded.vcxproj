@@ -123,6 +123,15 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Settings.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\ShaderIO.h" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\Skyrim\Sleeping.h" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Camera.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Events.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Forms.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Game.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Hooks.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Render.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Settings.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\ShaderIO.cpp" />
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Sleeping.cpp" />
     <ClCompile Include="..\TESReloaded\Core\Hooks\SleepingCommon.cpp" />
     <ClInclude Include="..\TESReloaded\Core\Hooks\SleepingCommon.h" />
     <ClInclude Include="..\TESReloaded\Core\RenderManager.h" />

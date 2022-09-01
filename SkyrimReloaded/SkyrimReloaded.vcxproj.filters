@@ -220,6 +220,33 @@
     <ClCompile Include="..\TESReloaded\Core\Hooks\GameCommon.cpp">
       <Filter>Core\Hooks</Filter>
     </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Camera.cpp">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Events.cpp">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Forms.cpp">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Game.cpp">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Hooks.cpp">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Render.cpp">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Settings.cpp">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\ShaderIO.cpp">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Skyrim\Sleeping.cpp">
+      <Filter>Core\Hooks\Skyrim</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Exports.def">
