@@ -113,17 +113,11 @@
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\Types.h">
       <Filter>Framework\Common\Base</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Settings.h">
-      <Filter>Core\Hooks\Oblivion</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Game.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\Plugin.h">
       <Filter>Framework\Oblivion</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Render.h">
-      <Filter>Core\Hooks\Oblivion</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Common\Base\PluginVersion.h">
       <Filter>Framework\Common\Base</Filter>
@@ -131,38 +125,11 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Forms.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Events.h">
-      <Filter>Core\Hooks\Oblivion</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Script.h">
       <Filter>Core\Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Shadows.h">
-      <Filter>Core\Hooks\Oblivion</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Occlusion.h">
-      <Filter>Core\Hooks\Oblivion</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Memory.h">
-      <Filter>Core\Hooks\Oblivion</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Grass.h">
-      <Filter>Core\Hooks\Oblivion</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Camera.h">
-      <Filter>Core\Hooks\Oblivion</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Equipment.h">
-      <Filter>Core\Hooks\Oblivion</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Mounted.h">
-      <Filter>Core\Hooks\Oblivion</Filter>
-    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Sleeping.h">
       <Filter>Core\Hooks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\FlyCam.h">
-      <Filter>Core\Hooks\Oblivion</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Framework\Oblivion\Managers.h">
       <Filter>Framework\Oblivion</Filter>
@@ -191,7 +158,7 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Texture.h">
       <Filter>Core\Hooks\Oblivion</Filter>
     </ClInclude>
-    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Framerate.h">
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\FrameRate.h">
       <Filter>Core\Hooks\Oblivion</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\ShaderIO.h">
@@ -201,6 +168,39 @@
       <Filter>Core\Hooks\Oblivion</Filter>
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Game.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Settings.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Occlusion.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Camera.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Memory.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Mounted.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Shadows.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Render.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Grass.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Events.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\FlyCam.h">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Hooks\Oblivion\Equipment.h">
       <Filter>Core\Hooks\Oblivion</Filter>
     </ClInclude>
   </ItemGroup>
@@ -299,6 +299,39 @@
       <Filter>Core\Hooks\Oblivion</Filter>
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Game.cpp">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Settings.cpp">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Occlusion.cpp">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Memory.cpp">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Camera.cpp">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Mounted.cpp">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Shadows.cpp">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Render.cpp">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Grass.cpp">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Events.cpp">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\FlyCam.cpp">
+      <Filter>Core\Hooks\Oblivion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Equipment.cpp">
       <Filter>Core\Hooks\Oblivion</Filter>
     </ClCompile>
   </ItemGroup>
