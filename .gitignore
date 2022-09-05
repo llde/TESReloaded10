@@ -5,3 +5,5 @@ NewVegasReloaded/Release
 SkyrimReloaded/Debug
 SkyrimReloaded/Release
 packages
+.vs/*
+*.aps
