@@ -76,7 +76,6 @@ void RenderManager::SetupSceneCamera() {
 		NiPoint3 Forward = { 0.0f, 0.0f, 0.0f };
 		NiPoint3 Up = { 0.0f, 0.0f, 0.0f };
 		NiPoint3 Right = { 0.0f, 0.0f, 0.0f };
-		D3DXMATRIX InvProj;
 		NiMatrix33* WorldRotate = &Camera->m_worldTransform.rot;
 		NiPoint3* WorldTranslate = &Camera->m_worldTransform.pos;
 		NiFrustum* Frustum = &Camera->Frustum;
@@ -169,8 +168,8 @@ void RenderManager::SetupSceneCamera() {
 
 		WorldViewProjMatrix = worldMatrix * viewMatrix * projMatrix;
 		ViewProjMatrix = viewMatrix * projMatrix;
-		D3DXMatrixInverse(&InvProj, NULL, &projMatrix);
-		InvViewProjMatrix = InvProj * invViewMatrix;
+		D3DXMatrixInverse(&InvProjMatrix, NULL, &projMatrix);
+		InvViewProjMatrix = InvProjMatrix * invViewMatrix;
 
 		CameraForward.x = Forward.x;
 		CameraForward.y = Forward.y;

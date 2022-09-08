@@ -13,6 +13,7 @@ public:
 	D3DXMATRIX			WorldViewProjMatrix;
 	D3DXMATRIX			ViewProjMatrix;
 	D3DXMATRIX			InvViewProjMatrix;
+	D3DXMATRIX			InvProjMatrix;
 	D3DXVECTOR4			CameraForward;
 	D3DXVECTOR4			CameraPosition;
 	IDirect3DSurface9*	BackBuffer;
