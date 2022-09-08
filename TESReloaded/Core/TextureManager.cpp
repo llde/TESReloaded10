@@ -75,6 +75,8 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Name) {
 		case ShadowCubeMapBuffer3:
 			Texture = TheTextureManager->ShadowCubeMapTexture[3];
 			break;
+        default:
+            return false; //Texture is invalid or not assigned here.
 	}
 	return true;
 
@@ -117,7 +119,7 @@ void TextureManager::Initialize() {
 		}
 	}
 	Device->CreateDepthStencilSurface(ShadowCubeMapSize, ShadowCubeMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &TheTextureManager->ShadowCubeMapDepthSurface, NULL);
-	
+
 }
 
 TextureRecord* TextureManager::LoadTexture(ID3DXBuffer* ShaderSourceBuffer, D3DXPARAMETER_TYPE ConstantType, LPCSTR ConstantName, UINT ConstantIndex, bool* HasRenderedBuffer, bool* HasDepthBuffer) {
@@ -202,6 +204,9 @@ TextureRecord* TextureManager::LoadTexture(ID3DXBuffer* ShaderSourceBuffer, D3DX
 			if (NewTextureRecord->LoadTexture(Type, nullptr)) {
 				Logger::Log("Game Texture %s Binded", ConstantName);
 			}
+			else {
+                Logger::Log("ERROR: Cannot bind texture %s", ConstantName);
+            }
 		}
 
 		GetSamplerStates(SamplerString, NewTextureRecord);
