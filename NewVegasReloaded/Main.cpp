@@ -21,9 +21,9 @@ extern "C" {
 	#if WaitForDebugger
 		while (!IsDebuggerPresent()) Sleep(10);
 	#endif
-	#if HookDevice
+#endif
+#if HookDevice
 		AttachDeviceHooks();
-	#endif
 #endif
 
 		Logger::Initialize("NewVegasReloaded.log");

@@ -495,7 +495,9 @@ void ShadowManager::RenderShadowMaps() {
 	RenderState->SetRenderState(D3DRS_STENCILENABLE , 0 ,RenderStateArgs);
 	RenderState->SetRenderState(D3DRS_STENCILREF , 0 ,RenderStateArgs);
  	RenderState->SetRenderState(D3DRS_STENCILFUNC , 8 ,RenderStateArgs);
-
+  //  Logger::Log("Depth Bias %f",   RenderState->GetRenderState(D3DRS_DEPTHBIAS));
+  //  Logger::Log("Depth Slope Scale Bias %f",   RenderState->GetRenderState(D3DRS_SLOPESCALEDEPTHBIAS));
+    
 	TheRenderManager->SetupSceneCamera();
 	if (Player->GetWorldSpace() && ShadowsExteriors->Enabled) {
 		D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
@@ -573,18 +575,17 @@ void ShadowManager::RenderShadowMaps() {
 	Device->SetViewport(&viewport);
 
 #if DEBUGSH
-	if (TheKeyboardManager->OnKeyDown(26)) {
-		D3DXSaveSurfaceToFileA("C:\\Archivio\\Downloads\\shadowmap0.jpg", D3DXIFF_JPG, ShadowMapSurface[0], NULL, NULL);
-		D3DXSaveSurfaceToFileA("C:\\Archivio\\Downloads\\shadowmap1.jpg", D3DXIFF_JPG, ShadowMapSurface[1], NULL, NULL);
-		D3DXSaveSurfaceToFileA("C:\\Archivio\\Downloads\\shadowmap2.jpg", D3DXIFF_JPG, ShadowMapSurface[2], NULL, NULL);
-	}
-	if (TheKeyboardManager->OnKeyDown(26)) {
-		D3DXSaveSurfaceToFileA("C:\\Archivio\\Downloads\\shadowcubemap0.jpg", D3DXIFF_JPG, ShadowCubeMapSurface[0][0], NULL, NULL);
-		D3DXSaveSurfaceToFileA("C:\\Archivio\\Downloads\\shadowcubemap1.jpg", D3DXIFF_JPG, ShadowCubeMapSurface[0][1], NULL, NULL);
-		D3DXSaveSurfaceToFileA("C:\\Archivio\\Downloads\\shadowcubemap2.jpg", D3DXIFF_JPG, ShadowCubeMapSurface[0][2], NULL, NULL);
-		D3DXSaveSurfaceToFileA("C:\\Archivio\\Downloads\\shadowcubemap3.jpg", D3DXIFF_JPG, ShadowCubeMapSurface[0][3], NULL, NULL);
-		D3DXSaveSurfaceToFileA("C:\\Archivio\\Downloads\\shadowcubemap4.jpg", D3DXIFF_JPG, ShadowCubeMapSurface[0][4], NULL, NULL);
-		D3DXSaveSurfaceToFileA("C:\\Archivio\\Downloads\\shadowcubemap5.jpg", D3DXIFF_JPG, ShadowCubeMapSurface[0][5], NULL, NULL);
+	if (Global->OnKeyDown(0x17)) {
+		char Filename[MAX_PATH];
+
+		time_t CurrentTime = time(NULL);
+		GetCurrentDirectoryA(MAX_PATH, Filename);
+        strcat(Filename, "\\Test");
+		if (GetFileAttributesA(Filename) == INVALID_FILE_ATTRIBUTES) CreateDirectoryA(Filename, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap0.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[0], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap1.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[1], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap2.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[2], NULL, NULL);
+		InterfaceManager->ShowMessage("Textures taken!");
 	}
 #endif
 
