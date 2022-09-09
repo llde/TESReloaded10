@@ -829,6 +829,8 @@ public:
 	void*				BoneMatrixes;			// 20 Matrixes array for the bones D3DMATRIX
 	UInt32				BoneRegisters;			// 24
 	void*				SkinToWorldWorldToSkin;	// 28 D3DMATRIX
+	
+	bool               IsPartitionEnabled(UInt32 partitionIndex) {return true;}
 };
 assert(sizeof(NiSkinInstance) == 0x02C);
 

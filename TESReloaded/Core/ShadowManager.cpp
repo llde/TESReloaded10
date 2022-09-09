@@ -276,6 +276,7 @@ void ShadowManager::Render(NiGeometry* Geo) {
 		TheRenderManager->CalculateBoneMatrixes(SkinInstance, &Geo->m_worldTransform);
 		if (SkinInstance->SkinToWorldWorldToSkin) memcpy(&TheShaderManager->ShaderConst.ShadowMap.ShadowWorld, SkinInstance->SkinToWorldWorldToSkin, 0x40);
 		for (UInt32 p = 0; p < SkinPartition->PartitionsCount; p++) {
+            if (!SkinInstance->IsPartitionEnabled(p)) continue;
 			StartIndex = 0;
 			StartRegister = 9;
 			NiSkinPartition::Partition* Partition = &SkinPartition->Partitions[p];
