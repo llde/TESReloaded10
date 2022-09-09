@@ -190,6 +190,9 @@
     <ClCompile Include="..\TESReloaded\Framework\NewVegas\Managers.cpp">
       <Filter>Framework\NewVegas</Filter>
     </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\NewVegas\GameNi.cpp">
+      <Filter>Framework\NewVegas</Filter>
+    </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\Device\Device.cpp">
       <Filter>Core\Device</Filter>
     </ClCompile>

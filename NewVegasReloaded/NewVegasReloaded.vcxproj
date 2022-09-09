@@ -175,6 +175,7 @@
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\disasm.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Common\Lib\Detours\modules.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\NewVegas\Managers.cpp" />
+    <ClCompile Include="..\TESReloaded\Framework\NewVegas\GameNi.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
