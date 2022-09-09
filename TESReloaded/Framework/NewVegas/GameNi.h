@@ -748,7 +748,6 @@ public:
 	NiTransform			RootParentToSkin;	// 0C
 	BoneData*			BoneData;			// 40
 	UInt32				Bones;				// 44
-
 };
 assert(sizeof(NiSkinData) == 0x48);
 
@@ -765,8 +764,28 @@ public:
 	void*				BoneMatrixes;			// 28 Matrixes array for the bones D3DMATRIX
 	void*				SkinToWorldWorldToSkin;	// 2C D3DMATRIX
 	UInt32				Unk30;					// 30
+	
+	bool IsPartitionEnabled(UInt32 partitionIndex);
+    
 };
 assert(sizeof(NiSkinInstance) == 0x34);
+
+class DismemberPartition {
+public:
+    UInt8 Enabled;
+    UInt8 StartCap;  //Questionable, but it's the only way I can make sense of that code
+    UInt16 bodyPart;
+}; 
+assert(sizeof(DismemberPartition) == 4);
+
+class BSDismemberSkinInstance : public NiSkinInstance {
+public:
+    UInt32 partitionNumber;
+    DismemberPartition* partitions;
+    UInt8  IsRenderable;  //In Load this is made in OR with every partition->Enabled flag
+    UInt8  pad[3];
+};
+assert(sizeof(BSDismemberSkinInstance) == 0x40);
 
 class NiProperty : public NiObjectNET {
 public:
