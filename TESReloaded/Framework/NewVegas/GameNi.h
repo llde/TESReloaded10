@@ -460,6 +460,9 @@ public:
 	virtual void		Unk_20();
 	virtual void		Unk_21();
 	virtual void		Unk_22();
+    
+    
+    void LogObjectAttributes();
 };
 assert(sizeof(NiObject) == 0x008);
 

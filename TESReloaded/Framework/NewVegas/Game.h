@@ -5163,6 +5163,9 @@ namespace Pointers {
 	}
 	namespace Functions {
 		static void* (__cdecl* MemoryAlloc)(size_t) = (void* (__cdecl*)(size_t))0x00AA13E0;
+        static void* (__cdecl* FormMemoryAlloc)(size_t) = (void* (__cdecl*)(size_t))0x00401000;
+        static void* (__cdecl* FormMemoryDeAlloc)(void*) = (void* (__cdecl*)(void*))0x00401030;
+
 		static bool  (__cdecl* ExtractArgs)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...) = (bool (__cdecl*)(CommandParam*, void*, UInt32*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptEventList*, ...))0x005ACCB0;
 		static void  (* PrintToConsole)(const char*, ...) = (void (*)(const char*, ...))0x00703C00;
 		static char* (__cdecl* GetPassDescription)(UInt32) = (char* (__cdecl*)(UInt32))0x00B4F9D0;

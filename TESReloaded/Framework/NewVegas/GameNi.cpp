@@ -12,3 +12,13 @@ bool NiSkinInstance::IsPartitionEnabled(UInt32 partitionIndex) {
     }
     return true;
 } 
+
+void NiObject::LogObjectAttributes(){
+    NiTArray<char*>* debug = (NiTArray<char*>*) Pointers::Functions::FormMemoryAlloc(sizeof(NiTArray<char*>));
+    memset(debug, 0, sizeof(NiTArray<char*>));
+    *(void**)debug = (void*)0x0102102C;  //NiTArray<char*> vtbl;
+    debug->growSize = 16; //Must be initialized > 0    
+    this->DumpAttributes(debug);
+    for (int i = 0; i < debug->numObjs; i++){Logger::Log("%s", debug->data[i]); }
+    Pointers::Functions::FormMemoryDeAlloc(debug);
+}
