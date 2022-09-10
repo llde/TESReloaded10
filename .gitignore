@@ -7,3 +7,4 @@ SkyrimReloaded/Release
 packages
 .vs/*
 *.aps
+/build/*
