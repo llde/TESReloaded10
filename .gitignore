@@ -1,9 +1,5 @@
-OblivionReloaded/Debug
-OblivionReloaded/Release
-NewVegasReloaded/Debug
-NewVegasReloaded/Release
-SkyrimReloaded/Debug
-SkyrimReloaded/Release
+*/Debug
+*/Release
 packages
 .vs/*
 *.aps
