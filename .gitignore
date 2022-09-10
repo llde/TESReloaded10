@@ -7,4 +7,5 @@ SkyrimReloaded/Release
 packages
 .vs/*
 *.aps
+*.fx
 /build/*
