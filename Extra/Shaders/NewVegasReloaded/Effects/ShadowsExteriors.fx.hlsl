@@ -26,7 +26,7 @@ static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_Project
 static const float Zmul = nearZ * farZ;
 static const float Zdiff = farZ - nearZ;
 
-static const float darkness = 0.3f;
+static const float darkness = TESR_ShadowData.y;
 static const float deferredNormBias = -0.035f;
 static const float deferredFarNormBias = -0.035f;
 //static const float deferredSlopeConstBias = 0.0004f;
@@ -145,7 +145,6 @@ float GetLightAmount(float4 WorldPos, float4 ShadowPos, float4 ShadowPosFar, flo
 	float Shadow = 0.0f;
 	float x;
 	float y;
-	float distToExternalLight;
 
 	ShadowPos.xyz /= ShadowPos.w;
 	if (ShadowPos.x < -1.0f || ShadowPos.x > 1.0f ||
@@ -168,19 +167,14 @@ float GetLightAmount(float4 WorldPos, float4 ShadowPos, float4 ShadowPosFar, flo
 }
 
 float4 Shadow(VSOUT IN) : COLOR0{
-
-	float3 color = tex2D(TESR_RenderedBuffer, IN.UVCoord).rgb;
-
-	/*if (length(color) > 1.4f) {
-		return float4(color, 1.0f);
-	}*/
+	float3 color = float3(1.0f, 1.0f, 1.0f);
 
 	float depth = readDepth(IN.UVCoord);
 	float3 camera_vector = toWorld(IN.UVCoord) * depth;
 	float4 world_pos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
 
 	if (world_pos.z > 1.0f) {
-		float fogCoeff = (saturate((distance(world_pos, TESR_CameraPosition.xyz) - ((TESR_FogData.y - 2000))) / 1000)) + 1.0f;
+		float fogCoeff = (saturate((distance(world_pos.rgb, TESR_CameraPosition.xyz) - ((TESR_FogData.y - 2000))) / 1000)) + 1.0f;
 		//float fogCoeff = 1.0f;
 		float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 		float4 farPos = pos;
@@ -202,9 +196,10 @@ float4 Shadow(VSOUT IN) : COLOR0{
 		float4 ShadowNear = mul(pos, TESR_ShadowCameraToLightTransformNear);
 		float4 ShadowFar = mul(farPos, TESR_ShadowCameraToLightTransformFar);
 		float Shadow = GetLightAmount(world_pos_trans, ShadowNear, ShadowFar, bias);
-		color.rgb *= saturate(Shadow * fogCoeff) * float3(1.0f, 1.0f, 1.0f);
+		color = saturate(Shadow * fogCoeff) * float3(1.0f, 1.0f, 1.0f);
 	}
 	return float4(color, 1.0f);
+}
 
 // photoshop overlay blend mode code from https://www.ryanjuckett.com/photoshop-blend-modes-in-hlsl/
 float BlendMode_Overlay(float base, float blend)
@@ -249,6 +244,11 @@ technique {
 	pass {
 		VertexShader = compile vs_3_0 FrameVS();
 		PixelShader = compile ps_3_0 Shadow();
+	}
+
+	pass {
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 CombineShadow();
 	}
 
 }
