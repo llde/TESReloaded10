@@ -99,7 +99,7 @@ float4 getNormals(float2 UVCoord)
 float Lookup(sampler2D ShadowBuffer, float3 ShadowPos, float bias) {
 	// returns a binary lookup 0 = in shadow, 1 = in light.
 	float ShadowDepth = tex2D(ShadowBuffer, ShadowPos.xy).r;
-	return (tex2D(ShadowBuffer, ShadowPos.xy).r > ShadowPos.z - bias);
+	return (ShadowDepth > ShadowPos.z - bias);
 }
 
 float PCFSampling(sampler2D ShadowBuffer, float4 coordinates, float bias, float areaSize, float step)
