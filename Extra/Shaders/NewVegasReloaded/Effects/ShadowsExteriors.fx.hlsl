@@ -32,6 +32,9 @@ static const float deferredFarNormBias = -0.035f;
 //static const float deferredSlopeConstBias = 0.0004f;
 static const float deferredConstBias = 0.0002f;
 static const float deferredFarConstBias = 0.001f;
+static const float2 OffsetMaskH = float2(1.0f, 0.0f);
+static const float2 OffsetMaskV = float2(0.0f, 1.0f);
+
 
 struct VSOUT
 {
@@ -93,11 +96,27 @@ float4 getNormals(float2 UVCoord)
 }
 
 
-// float Lookup(sampler2D ShadowBuffer, float4 ShadowPos) {
-// 	// returns a binary lookup 0 = in shadow, 1 = in light.
-// 	float ShadowDepth = tex2D(ShadowBuffer, ShadowPos.xy).r;
-// 	return (tex2D(ShadowBuffer, ShadowPos.xy).r > ShadowPos.z);
-// }
+float Lookup(sampler2D ShadowBuffer, float3 ShadowPos, float bias) {
+	// returns a binary lookup 0 = in shadow, 1 = in light.
+	float ShadowDepth = tex2D(ShadowBuffer, ShadowPos.xy).r;
+	return (tex2D(ShadowBuffer, ShadowPos.xy).r > ShadowPos.z - bias);
+}
+
+float PCFSampling(sampler2D ShadowBuffer, float4 coordinates, float bias, float areaSize, float step)
+{
+	// samples values around the position to soften shadows
+	float x, y;
+	float value = 0.0f;
+	float halfSize = (areaSize * step)/2;
+
+	for (x = -halfSize; x <= halfSize; x += step){
+		for (y = -halfSize; y<= halfSize; y += step){
+			value += Lookup(ShadowBuffer, float3 (coordinates.xy + float2(x, y) * TESR_ShadowData.w, coordinates.z), bias);
+		}
+	}
+
+	return value /= areaSize * areaSize;
+}
 
 
 float GetLightAmountFar(float4 ShadowPos) {
@@ -108,14 +127,18 @@ float GetLightAmountFar(float4 ShadowPos) {
 		ShadowPos.z < 0.0f || ShadowPos.z > 1.0f)
 		return 1.0f;
 
-	ShadowPos.x = ShadowPos.x * 0.5f + 0.5f + TESR_ShadowData.w;
-	ShadowPos.y = ShadowPos.y * -0.5f + 0.5f + TESR_ShadowData.w;
+	ShadowPos.x = ShadowPos.x * 0.5f + 0.5f ;//+ TESR_ShadowData.w;
+	ShadowPos.y = ShadowPos.y * -0.5f + 0.5f;// + TESR_ShadowData.w;
 
-	float ShadowMapDepth = tex2D(TESR_ShadowMapBufferFar, ShadowPos.xy).r;
-	return ShadowMapDepth > ShadowPos.z; // 1 in light, 0 in shadow
+	// float ShadowMapDepth = tex2D(TESR_ShadowMapBufferFar, ShadowPos.xy).r;
+	// float Shadow = ShadowMapDepth > ShadowPos.z; // 1 in light, 0 in shadow
+
+	float Shadow = PCFSampling(TESR_ShadowMapBufferFar, ShadowPos, deferredFarConstBias, 3, 1.0);
+
+	return Shadow;
 }
 
-float GetLightAmount(float4 ShadowPos, float4 ShadowPosFar, float bias) {
+float GetLightAmount(float4 ShadowPos, float4 ShadowPosFar) {
 	// apply perspective
 	ShadowPos.xyz /= ShadowPos.w;
 
@@ -126,11 +149,15 @@ float GetLightAmount(float4 ShadowPos, float4 ShadowPosFar, float bias) {
 		return GetLightAmountFar(ShadowPosFar);
 
 	//convert from -1/1 (perspective division) to range to 0/1 (shadowMap range);
-	ShadowPos.x = ShadowPos.x * 0.5f + 0.5f + TESR_ShadowData.z;
-	ShadowPos.y = ShadowPos.y * -0.5f + 0.5f + TESR_ShadowData.z;
+	ShadowPos.x = ShadowPos.x * 0.5f + 0.5f ;//+ TESR_ShadowData.z;
+	ShadowPos.y = ShadowPos.y * -0.5f + 0.5f;// + TESR_ShadowData.z;
 
-	float ShadowMapDepth = tex2D(TESR_ShadowMapBufferNear, ShadowPos.xy).r;
-	return ShadowMapDepth > ShadowPos.z; // 1 in light, 0 in shadow
+	// float ShadowMapDepth = tex2D(TESR_ShadowMapBufferNear, ShadowPos.xy).r;
+	// float Shadow = ShadowMapDepth > ShadowPos.z;  // 1 in light, 0 in shadow
+
+	float Shadow = PCFSampling(TESR_ShadowMapBufferNear, ShadowPos, deferredConstBias, 5, 0.2);
+	
+	return Shadow;
 }
 
 // float AddProximityLight(float4 WorldPos, float4 ExternalLightPos) {
@@ -257,7 +284,7 @@ float4 Shadow(VSOUT IN) : COLOR0
 
 		float4 ShadowNear = mul(pos, TESR_ShadowCameraToLightTransformNear);
 		float4 ShadowFar = mul(farPos, TESR_ShadowCameraToLightTransformFar);
-		float Shadow = GetLightAmount(ShadowNear, ShadowFar, bias);
+		float Shadow = GetLightAmount(ShadowNear, ShadowFar);
 
 		// brighten shadow value from 0 to darkness from config value
 		Shadow += darkness;
@@ -266,6 +293,47 @@ float4 Shadow(VSOUT IN) : COLOR0
 	}
 	return float4(color, 1.0f);
 }
+
+
+
+static const int cKernelSize = 7;
+
+static const float BlurWeights[cKernelSize] = 
+{
+    0.064759,
+    0.120985,
+    0.176033,
+    0.199471,
+    0.176033,
+    0.120985,
+    0.064759,
+};
+ 
+static const float2 BlurOffsets[cKernelSize] = 
+{
+	float2(-3.0f * TESR_ReciprocalResolution.x, -3.0f * TESR_ReciprocalResolution.y),
+	float2(-2.0f * TESR_ReciprocalResolution.x, -2.0f * TESR_ReciprocalResolution.y),
+	float2(-1.0f * TESR_ReciprocalResolution.x, -1.0f * TESR_ReciprocalResolution.y),
+	float2( 0.0f * TESR_ReciprocalResolution.x,  0.0f * TESR_ReciprocalResolution.y),
+	float2( 1.0f * TESR_ReciprocalResolution.x,  1.0f * TESR_ReciprocalResolution.y),
+	float2( 2.0f * TESR_ReciprocalResolution.x,  2.0f * TESR_ReciprocalResolution.y),
+	float2( 3.0f * TESR_ReciprocalResolution.x,  3.0f * TESR_ReciprocalResolution.y),
+};
+
+float4 BlurPass(VSOUT IN, uniform float2 OffsetMask) : COLOR0
+{
+	float3 Color = 0.0f;
+	float w = 0.0f;
+
+    for (int i = 0; i < cKernelSize; i++) {
+		float2 uvOff = (BlurOffsets[i] * OffsetMask);
+		Color += tex2D(TESR_RenderedBuffer, IN.UVCoord + uvOff).rgb * BlurWeights[i];
+		w += BlurWeights[i];
+    }
+	Color /= w;
+    return float4(Color, 1.0f);
+}
+
 
 // photoshop overlay blend mode code from https://www.ryanjuckett.com/photoshop-blend-modes-in-hlsl/
 float BlendMode_Overlay(float base, float blend)
@@ -307,15 +375,25 @@ float4 CombineShadow( VSOUT IN ) : COLOR0 {
 
 technique {
 
-	pass {
-		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 VarianceShadow();
-	}
-
 	// pass {
 	// 	VertexShader = compile vs_3_0 FrameVS();
-	// 	PixelShader = compile ps_3_0 Shadow();
+	// 	PixelShader = compile ps_3_0 VarianceShadow();
 	// }
+
+	pass {
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 Shadow();
+	}
+
+	pass {
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 BlurPass(OffsetMaskH);
+	}
+	
+	pass {
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 BlurPass(OffsetMaskV);
+	}
 
 	pass {
 		VertexShader = compile vs_3_0 FrameVS();
