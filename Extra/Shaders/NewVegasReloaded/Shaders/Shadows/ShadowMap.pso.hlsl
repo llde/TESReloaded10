@@ -17,17 +17,19 @@ PS_OUTPUT main(VS_OUTPUT IN) {
 	
 	float4 r0;
 	float r1;
-	
+	float color;
+
 	if (TESR_ShadowData.x == 2.0f || TESR_ShadowData.y == 1.0f) { // Leaves (Speedtrees) or alpha is required
 		r0.rgba = tex2D(DiffuseMap, IN.texcoord_1.xy);
 		if (r0.a > 0.2f) 
 			r1 = IN.texcoord_0.z / IN.texcoord_0.w;
 		else
 			discard;
-		OUT.color_0 = r1;
-		return OUT;
+		color = r1;
+	} else {
+    	color = IN.texcoord_0.z / IN.texcoord_0.w;
 	}
-    OUT.color_0 = IN.texcoord_0.z / IN.texcoord_0.w;
-    return OUT;
-	
+
+	OUT.color_0 = float4(color, color*color, 0.0f, 1.0f);
+    return OUT;	
 };
