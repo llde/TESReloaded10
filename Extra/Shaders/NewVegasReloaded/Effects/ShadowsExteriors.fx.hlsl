@@ -30,7 +30,7 @@ static const float darkness = TESR_ShadowData.y;
 static const float deferredNormBias = -0.035f;
 static const float deferredFarNormBias = -0.035f;
 //static const float deferredSlopeConstBias = 0.0004f;
-static const float deferredConstBias = 0.0002f;
+static const float deferredConstBias = 0.0005f;
 static const float deferredFarConstBias = 0.001f;
 static const float2 OffsetMaskH = float2(1.0f, 0.0f);
 static const float2 OffsetMaskV = float2(0.0f, 1.0f);
@@ -94,7 +94,6 @@ float4 getNormals(float2 UVCoord)
 
 	return float4((norm + 1) / 2, 1);
 }
-
 
 float Lookup(sampler2D ShadowBuffer, float3 ShadowPos, float bias) {
 	// returns a binary lookup 0 = in shadow, 1 = in light.
@@ -184,7 +183,8 @@ float4 ChebyshevUpperBound(float2 moments, float distance)
 	float d = distance - moments.x;
 	float p_max = Variance / (Variance + d*d);
 
-	p_max = 1.0 - p_max; // it seems p_max has inverted values 0=light 1=shadow?
+	// p_max = p_max; // it seems p_max has inverted values 0=light 1=shadow?
+	// return p_max;
 	return max(p, p_max);
 }
 
@@ -247,7 +247,7 @@ float4 VarianceShadow(VSOUT IN) : COLOR0
 
 		float4 ShadowPosNear = mul(pos, TESR_ShadowCameraToLightTransformNear);
 		float4 ShadowPosFar = mul(farPos, TESR_ShadowCameraToLightTransformFar);
-		float shadow = saturate(GetLightAmountVariance(ShadowPosNear, ShadowPosFar));
+		float shadow = saturate(GetLightAmountVariance(ShadowPosNear, ShadowPosFar) + darkness);
 		color *= shadow;
 	}
 	return float4(color, 1.0f);
@@ -293,7 +293,6 @@ float4 Shadow(VSOUT IN) : COLOR0
 	}
 	return float4(color, 1.0f);
 }
-
 
 
 static const int cKernelSize = 7;
@@ -370,30 +369,32 @@ float4 CombineShadow( VSOUT IN ) : COLOR0 {
 	float shadow = 1.0f - tex2D(TESR_RenderedBuffer, IN.UVCoord).r;
 	float4 shadowColor = float4(color.rgb, shadow);
 
+	return tex2D(TESR_RenderedBuffer, IN.UVCoord).r * color; // old style blending (for testing)
+
 	return BlendMode_Overlay(color, Desaturate(shadowColor));
 }
 
 technique {
 
+	pass {
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 VarianceShadow();
+	}
+
 	// pass {
 	// 	VertexShader = compile vs_3_0 FrameVS();
-	// 	PixelShader = compile ps_3_0 VarianceShadow();
+	// 	PixelShader = compile ps_3_0 Shadow();
 	// }
 
-	pass {
-		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 Shadow();
-	}
-
-	pass {
-		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 BlurPass(OffsetMaskH);
-	}
+	// pass {
+	// 	VertexShader = compile vs_3_0 FrameVS();
+	// 	PixelShader = compile ps_3_0 BlurPass(OffsetMaskH);
+	// }
 	
-	pass {
-		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 BlurPass(OffsetMaskV);
-	}
+	// pass {
+	// 	VertexShader = compile vs_3_0 FrameVS();
+	// 	PixelShader = compile ps_3_0 BlurPass(OffsetMaskV);
+	// }
 
 	pass {
 		VertexShader = compile vs_3_0 FrameVS();
