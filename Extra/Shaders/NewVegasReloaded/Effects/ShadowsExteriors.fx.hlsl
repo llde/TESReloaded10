@@ -93,97 +93,158 @@ float4 getNormals(float2 UVCoord)
 }
 
 
-float LookupFar(float4 ShadowPos, float2 OffSet) {
-	float Shadow = tex2D(TESR_ShadowMapBufferFar, ShadowPos.xy + float2(OffSet.x * TESR_ShadowData.w, OffSet.y * TESR_ShadowData.w)).r;
-	if (Shadow < ShadowPos.z - deferredFarConstBias) return darkness;
-	return 1.0f;
-}
+// float Lookup(sampler2D ShadowBuffer, float4 ShadowPos) {
+// 	// returns a binary lookup 0 = in shadow, 1 = in light.
+// 	float ShadowDepth = tex2D(ShadowBuffer, ShadowPos.xy).r;
+// 	return (tex2D(ShadowBuffer, ShadowPos.xy).r > ShadowPos.z);
+// }
+
 
 float GetLightAmountFar(float4 ShadowPos) {
-
-	float Shadow = 0.0f;
-	float x;
-	float y;
-
+	// check distance where shadows are still displayed
 	ShadowPos.xyz /= ShadowPos.w;
 	if (ShadowPos.x < -1.0f || ShadowPos.x > 1.0f ||
 		ShadowPos.y < -1.0f || ShadowPos.y > 1.0f ||
 		ShadowPos.z < 0.0f || ShadowPos.z > 1.0f)
 		return 1.0f;
 
-	ShadowPos.x = ShadowPos.x * 0.5f + 0.5f;
-	ShadowPos.y = ShadowPos.y * -0.5f + 0.5f;
-	for (x = -0.5f; x <= 0.5f; x += 0.5f) {
-		for (y = -0.5f; y <= 0.5f; y += 0.5f) {
-			Shadow += LookupFar(ShadowPos, float2(x, y));
-		}
-	}
-	Shadow /= 9.0f;
-	return Shadow;
+	ShadowPos.x = ShadowPos.x * 0.5f + 0.5f + TESR_ShadowData.w;
+	ShadowPos.y = ShadowPos.y * -0.5f + 0.5f + TESR_ShadowData.w;
 
+	float ShadowMapDepth = tex2D(TESR_ShadowMapBufferFar, ShadowPos.xy).r;
+	return ShadowMapDepth > ShadowPos.z; // 1 in light, 0 in shadow
 }
 
-float Lookup(float4 ShadowPos, float2 OffSet, float bias) {
-	
-	float Shadow = tex2D(TESR_ShadowMapBufferNear, ShadowPos.xy + float2(OffSet.x * TESR_ShadowData.z, OffSet.y * TESR_ShadowData.z)).r;
-	if (Shadow < ShadowPos.z - bias) return darkness;
-	return 1.0f;
-}
-
-float AddProximityLight(float4 WorldPos, float4 ExternalLightPos) {
-
-	if (ExternalLightPos.w) {
-		float distToExternalLight = distance(WorldPos.xyz, ExternalLightPos.xyz);
-		return (saturate(1.000f - (distToExternalLight / (ExternalLightPos.w))));
-	}
-	return 0.0f;
-}
-
-
-float GetLightAmount(float4 WorldPos, float4 ShadowPos, float4 ShadowPosFar, float bias) {
-
-	float Shadow = 0.0f;
-	float x;
-	float y;
-
+float GetLightAmount(float4 ShadowPos, float4 ShadowPosFar, float bias) {
+	// apply perspective
 	ShadowPos.xyz /= ShadowPos.w;
+
+	// check distance to detect far or near shadows
 	if (ShadowPos.x < -1.0f || ShadowPos.x > 1.0f ||
 		ShadowPos.y < -1.0f || ShadowPos.y > 1.0f ||
 		ShadowPos.z < 0.0f || ShadowPos.z > 1.0f)
 		return GetLightAmountFar(ShadowPosFar);
 
-	ShadowPos.x = ShadowPos.x * 0.5f + 0.5f;
-	ShadowPos.y = ShadowPos.y * -0.5f + 0.5f;
+	//convert from -1/1 (perspective division) to range to 0/1 (shadowMap range);
+	ShadowPos.x = ShadowPos.x * 0.5f + 0.5f + TESR_ShadowData.z;
+	ShadowPos.y = ShadowPos.y * -0.5f + 0.5f + TESR_ShadowData.z;
 
-	for (y = -2.5f; y <= 2.5f; y += 1.0f) {
-		for (x = -2.5f; x <= 2.5f; x += 1.0f) {
-			Shadow += Lookup(ShadowPos, float2(x, y), bias);
-		}
-	}
-	Shadow /= 36.0f;
-
-	return saturate(Shadow);
-
+	float ShadowMapDepth = tex2D(TESR_ShadowMapBufferNear, ShadowPos.xy).r;
+	return ShadowMapDepth > ShadowPos.z; // 1 in light, 0 in shadow
 }
 
-float4 Shadow(VSOUT IN) : COLOR0{
+// float AddProximityLight(float4 WorldPos, float4 ExternalLightPos) {
+
+// 	if (ExternalLightPos.w) {
+// 		float distToExternalLight = distance(WorldPos.xyz, ExternalLightPos.xyz);
+// 		return (saturate(1.000f - (distToExternalLight / (ExternalLightPos.w))));
+// 	}
+// 	return 0.0f;
+// }
+
+
+
+float4 ChebyshevUpperBound(float2 moments, float distance)
+{
+	// get traditional shadow value
+	float p = (moments.x > distance); //0: in shadow, 1: in light
+
+	// Compute variance.    
+	float Variance = moments.y - moments.x * moments.x;
+	Variance = max(Variance, 0.00001);
+
+	// Compute the Chebyshev upper bound.
+	float d = distance - moments.x;
+	float p_max = Variance / (Variance + d*d);
+
+	p_max = 1.0 - p_max; // it seems p_max has inverted values 0=light 1=shadow?
+	return max(p, p_max);
+}
+
+float GetLightAmountVarianceFar(float4 coordinates)
+{
+	// apply perspective
+	coordinates.xyz /= coordinates.w;
+	
+	// check distance to detect if shadows are out of far range
+	if (coordinates.x < -1.0f || coordinates.x > 1.0f ||
+		coordinates.y < -1.0f || coordinates.y > 1.0f ||
+		coordinates.z < 0.0f || coordinates.z > 1.0f)
+		return 1.0f;
+
+	//convert from -1/1 (perspective division) to range to 0/1 (shadowMap range);
+	coordinates.x = coordinates.x * 0.5f + 0.5f + TESR_ShadowData.w;
+	coordinates.y = coordinates.y * -0.5f + 0.5f + TESR_ShadowData.w;
+
+	float2 Moments = tex2D(TESR_ShadowMapBufferFar, coordinates.xy).xy;
+
+	return ChebyshevUpperBound(Moments, coordinates.z);
+}
+
+
+float GetLightAmountVariance(float4 coordinates, float4 coordinatesFar)
+{
+	// check distance to detect far or near shadows
+	coordinates.xyz /= coordinates.w;
+	if (coordinates.x < -1.0f || coordinates.x > 1.0f ||
+		coordinates.y < -1.0f || coordinates.y > 1.0f ||
+		coordinates.z < 0.0f || coordinates.z > 1.0f)
+		return GetLightAmountVarianceFar(coordinatesFar);
+
+	//convert from -1/1 (perspective division) to range to 0/1 (shadowMap range);
+	coordinates.x = coordinates.x * 0.5f + 0.5f + TESR_ShadowData.z;
+	coordinates.y = coordinates.y * -0.5f + 0.5f + TESR_ShadowData.z;
+
+	float2 Moments = tex2D(TESR_ShadowMapBufferNear, coordinates.xy).xy;
+
+	return ChebyshevUpperBound(Moments, coordinates.z);
+}
+
+
+float4 VarianceShadow(VSOUT IN) : COLOR0
+{
+	float3 color = float3(1.0f, 1.0f, 1.0f);
+	float depth = readDepth(IN.UVCoord);
+	float3 camera_vector = toWorld(IN.UVCoord) * depth;
+	float4 world_pos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
+
+	// check if surface is above water
+	if (world_pos.z > TESR_WaterSettings.x) {
+		float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
+		float4 farPos = pos;
+
+		// float4 normal = getNormals(IN.UVCoord);
+		// float bias = deferredConstBias;
+		// pos.xyz = pos.xyz + (normal.xyz * deferredNormBias);
+		// farPos.xyz = farPos.xyz + (normal.xyz * deferredFarNormBias);
+
+		float4 ShadowPosNear = mul(pos, TESR_ShadowCameraToLightTransformNear);
+		float4 ShadowPosFar = mul(farPos, TESR_ShadowCameraToLightTransformFar);
+		float shadow = saturate(GetLightAmountVariance(ShadowPosNear, ShadowPosFar));
+		color *= shadow;
+	}
+	return float4(color, 1.0f);
+}
+
+
+float4 Shadow(VSOUT IN) : COLOR0
+{
 	float3 color = float3(1.0f, 1.0f, 1.0f);
 
 	float depth = readDepth(IN.UVCoord);
 	float3 camera_vector = toWorld(IN.UVCoord) * depth;
 	float4 world_pos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
 
-	if (world_pos.z > 1.0f) {
-		float fogCoeff = (saturate((distance(world_pos.rgb, TESR_CameraPosition.xyz) - ((TESR_FogData.y - 2000))) / 1000)) + 1.0f;
+	if (world_pos.z > TESR_WaterSettings.x) {
+		float fogCoeff = (saturate((distance(world_pos.xyz, TESR_CameraPosition.xyz) - ((TESR_FogData.y - 2000))) / 1000)) + 1.0f;
 		//float fogCoeff = 1.0f;
 		float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 		float4 farPos = pos;
-		float4 world_pos_trans = mul(world_pos, TESR_WorldTransform);
 		float4 normal = getNormals(IN.UVCoord);
-		float4 lightDir = abs(TESR_SunDirection);
-
+		
 		//Slope Scale
 		/*
+		float4 lightDir = abs(TESR_SunDirection);
 		float3 n = normalize(normal);
 		float3 l = normalize(lightDir);
 		float cosTheta = clamp(dot(n, l), 0, 1);
@@ -193,40 +254,17 @@ float4 Shadow(VSOUT IN) : COLOR0{
 		float bias = deferredConstBias;
 		pos.xyz = pos.xyz + (normal.xyz * deferredNormBias);
 		farPos.xyz = farPos.xyz + (normal.xyz * deferredFarNormBias);
+
 		float4 ShadowNear = mul(pos, TESR_ShadowCameraToLightTransformNear);
 		float4 ShadowFar = mul(farPos, TESR_ShadowCameraToLightTransformFar);
-		float Shadow = GetLightAmount(world_pos_trans, ShadowNear, ShadowFar, bias);
+		float Shadow = GetLightAmount(ShadowNear, ShadowFar, bias);
+
+		// brighten shadow value from 0 to darkness from config value
+		Shadow += darkness;
+
 		color = saturate(Shadow * fogCoeff) * float3(1.0f, 1.0f, 1.0f);
 	}
 	return float4(color, 1.0f);
-}
-
-// photoshop overlay blend mode code from https://www.ryanjuckett.com/photoshop-blend-modes-in-hlsl/
-float BlendMode_Overlay(float base, float blend)
-{
-	return (base <= 0.5f) ? 2.0f*base*blend : 1.0f - 2.0f*(1.0f-base)*(1.0f-blend);
-}
-
-float4 alphaBlend(float4 base, float4 blend)
-{
-	return base*base.a +(1-base.a)*blend;
-}
-
-float4 Desaturate(float4 input)
-{
-	float greyscale = input.r * 0.3f + input.g * 0.59f +input.b * 0.11f;
-	return float4(greyscale, greyscale, greyscale, input.a);
-}
-
-float4 BlendMode_Overlay(float4 base, float4 blend)
-{
-	float4 result = float4(0,0,0,0);
-	result.r = BlendMode_Overlay(base.r, blend.r);
-	result.g = BlendMode_Overlay(base.g, blend.g);
-	result.b = BlendMode_Overlay(base.b, blend.b);
-	result.a = blend.a;
-
-	return alphaBlend(result, base);
 }
 
 // photoshop overlay blend mode code from https://www.ryanjuckett.com/photoshop-blend-modes-in-hlsl/
@@ -271,8 +309,13 @@ technique {
 
 	pass {
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 Shadow();
+		PixelShader = compile ps_3_0 VarianceShadow();
 	}
+
+	// pass {
+	// 	VertexShader = compile vs_3_0 FrameVS();
+	// 	PixelShader = compile ps_3_0 Shadow();
+	// }
 
 	pass {
 		VertexShader = compile vs_3_0 FrameVS();
