@@ -1,4 +1,3 @@
-#define FrameFVF D3DFVF_XYZ | D3DFVF_TEX1
 
 ShaderProgram::ShaderProgram() {
 
@@ -1733,7 +1732,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	if (Effects->DepthOfField && ShaderConst.DepthOfField.Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		DepthOfFieldEffect->SetCT();
-		DepthOfFieldEffect->Render(Device, RenderTarget, RenderedSurface, false); static TESObjectCELL* prevCell = nullptr;
+		DepthOfFieldEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 	if (Effects->BloodLens && ShaderConst.BloodLens.Percent > 0.0f) {
 		BloodLensEffect->SetCT();

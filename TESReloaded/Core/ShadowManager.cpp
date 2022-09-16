@@ -1,10 +1,10 @@
-#define DEBUGSH 0
+#define DEBUGSH 1
 
 void ShadowManager::Initialize() {
 	
 	Logger::Log("Starting the shadows manager...");
 	TheShadowManager = new ShadowManager();
-	
+
 	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
 	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
 	UINT ShadowMapSize = 0;
@@ -14,8 +14,20 @@ void ShadowManager::Initialize() {
 	TheShadowManager->ShadowMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowMap.pso", NULL);
 	TheShadowManager->ShadowCubeMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowCubeMap.vso", NULL);
 	TheShadowManager->ShadowCubeMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowCubeMap.pso", NULL);
+    
+    ShadowMapSize = ShadowsExteriors->ShadowMapSize[0];
+    TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[0]);
+    ShadowMapSize = ShadowsExteriors->ShadowMapSize[1];
+    TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[1]);
+
+    char Filename[MAX_PATH];
+    strcpy(Filename, ShadersPath);
+    strcat(Filename, "\\Shadows\\");
+    strcat(Filename, "BlurShadowMap.fx"); //TODO move to Shader/Shadows
+    Logger::Log(Filename);
+    TheShadowManager->ShadowMapBlur = EffectRecord::LoadEffect(Filename);
     if (TheShadowManager->ShadowMapVertex == nullptr || TheShadowManager->ShadowMapPixel == nullptr 
-        || TheShadowManager->ShadowCubeMapVertex == nullptr || TheShadowManager->ShadowCubeMapPixel == nullptr ){
+        || TheShadowManager->ShadowCubeMapVertex == nullptr || TheShadowManager->ShadowCubeMapPixel == nullptr || TheShadowManager->ShadowMapBlur  == nullptr ){
         Logger::Log("[ERROR]: Could not load one or more of the ShadowMap generation shaders. Reinstall the mod.");
         
     }
@@ -525,7 +537,9 @@ void ShadowManager::RenderShadowMaps() {
 		RenderShadowMap(MapNear, ShadowsExteriors, &At, SunDir);
 		RenderShadowMap(MapFar, ShadowsExteriors, &At, SunDir);
 		RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir);
-
+        BlurShadowMap(MapNear);
+        BlurShadowMap(MapFar);
+        
 		ShadowData->x = ShadowsExteriors->Quality;
 		if (TheSettingManager->SettingsMain.Effects.ShadowsExteriors) ShadowData->x = -1; // Disable the forward shadowing
 		ShadowData->y = ShadowsExteriors->Darkness;
@@ -596,6 +610,9 @@ void ShadowManager::RenderShadowMaps() {
 		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap0.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[0], NULL, NULL);
 		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap1.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[1], NULL, NULL);
 		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap2.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[2], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap0B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[0], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap1B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[1], NULL, NULL);
+
 		InterfaceManager->ShowMessage("Textures taken!");
 	}
 #endif
@@ -637,3 +654,32 @@ void ShadowManager::CalculateBlend(NiPointLight** Lights, int LightIndex) {
 	}
 	
 }
+void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
+    IDirect3DDevice9* Device = TheRenderManager->device;
+    NiDX9RenderState* RenderState = TheRenderManager->renderState;
+    IDirect3DTexture9* SourceShadowMap = TheTextureManager->ShadowMapTexture[ShadowMapType];
+    IDirect3DSurface9* TargetShadowMap = TheTextureManager->ShadowMapSurfaceBlurred[ShadowMapType];
+    
+	Device->SetFVF(FrameFVF);
+	Device->SetStreamSource(0, BlurShadowVertex[ShadowMapType], 0, sizeof(FrameVS));
+    Device->SetRenderTarget(0, TargetShadowMap);
+ //   Device->Clear(0L, NULL, D3DCLEAR_TARGET, D3DXCOLOR(0, 0, 0, 0), 1.0f, 0L);
+    Device->SetTexture(0, SourceShadowMap);
+    ShadowMapBlur->SetCT();
+    RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE, RenderStateArgs);
+    RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE, RenderStateArgs);
+	Device->SetDepthStencilSurface(NULL);
+    
+	UINT Passes;
+
+	ShadowMapBlur->Effect->Begin(&Passes, NULL);
+//	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
+
+	for (UINT p = 0; p < Passes; p++) {
+		ShadowMapBlur->Effect->BeginPass(p);
+		Device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
+		ShadowMapBlur->Effect->EndPass();
+	}
+	ShadowMapBlur->Effect->End();
+}
+

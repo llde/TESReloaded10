@@ -25,8 +25,9 @@ public:
 	void					RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors);
 	void					RenderShadowMaps();
 	void					CalculateBlend(NiPointLight** Lights, int LightIndex);
-
-	ShaderRecordVertex*		ShadowMapVertex;
+    void                    BlurShadowMap(ShadowMapTypeEnum ShadowMapType);    
+	
+    ShaderRecordVertex*		ShadowMapVertex;
 	ShaderRecordPixel*		ShadowMapPixel;
 	D3DVIEWPORT9			ShadowMapViewPort[3];
 	D3DXPLANE				ShadowMapFrustum[3][6];
@@ -34,6 +35,10 @@ public:
 	NiVector4				BillboardUp;
 	ShaderRecordVertex*		ShadowCubeMapVertex;
 	ShaderRecordPixel*		ShadowCubeMapPixel;
+    
+    EffectRecord*           ShadowMapBlur;
+    IDirect3DVertexBuffer9* BlurShadowVertex[2];
+    
 	D3DVIEWPORT9			ShadowCubeMapViewPort;
 	NiPointLight*			ShadowCubeMapLights[4];
 	ShaderRecordVertex*		CurrentVertex;

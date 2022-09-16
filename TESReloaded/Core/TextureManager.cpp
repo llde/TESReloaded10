@@ -55,10 +55,10 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Name) {
 			Texture = TheTextureManager->DepthTexture;
 			break;
 		case ShadowMapBufferNear:
-			Texture = TheTextureManager->ShadowMapTexture[ShadowManagerBase::ShadowMapTypeEnum::MapNear];
+			Texture = TheTextureManager->ShadowMapTextureBlurred[ShadowManagerBase::ShadowMapTypeEnum::MapNear];
 			break;
 		case ShadowMapBufferFar:
-			Texture = TheTextureManager->ShadowMapTexture[ShadowManagerBase::ShadowMapTypeEnum::MapFar];
+			Texture = TheTextureManager->ShadowMapTextureBlurred[ShadowManagerBase::ShadowMapTypeEnum::MapFar];
 			break;
 		case OrthoMapBuffer:
 			Texture = TheTextureManager->ShadowMapTexture[ShadowManagerBase::ShadowMapTypeEnum::MapOrtho];
@@ -111,13 +111,18 @@ void TextureManager::Initialize() {
 		Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_G32R32F, D3DPOOL_DEFAULT, &TheTextureManager->ShadowMapTexture[i], NULL);
 		TheTextureManager->ShadowMapTexture[i]->GetSurfaceLevel(0, &TheTextureManager->ShadowMapSurface[i]);
 		Device->CreateDepthStencilSurface(ShadowMapSize, ShadowMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &TheTextureManager->ShadowMapDepthSurface[i], NULL);
-	}
+        if (i < 2){ //Don't blur orthomap
+            Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_G32R32F, D3DPOOL_DEFAULT, &TheTextureManager->ShadowMapTextureBlurred[i], NULL);
+            TheTextureManager->ShadowMapTextureBlurred[i]->GetSurfaceLevel(0, &TheTextureManager->ShadowMapSurfaceBlurred[i]);
+        }
+    }
 	for (int i = 0; i < ShadowCubeMapsMax; i++) {
 		Device->CreateCubeTexture(ShadowCubeMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &TheTextureManager->ShadowCubeMapTexture[i], NULL);
 		for (int j = 0; j < 6; j++) {
 			TheTextureManager->ShadowCubeMapTexture[i]->GetCubeMapSurface((D3DCUBEMAP_FACES)j, 0, &TheTextureManager->ShadowCubeMapSurface[i][j]);
 		}
 	}
+
 	Device->CreateDepthStencilSurface(ShadowCubeMapSize, ShadowCubeMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &TheTextureManager->ShadowCubeMapDepthSurface, NULL);
 
 }

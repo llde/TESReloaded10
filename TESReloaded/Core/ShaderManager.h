@@ -1,4 +1,5 @@
 #pragma once
+#define FrameFVF D3DFVF_XYZ | D3DFVF_TEX1
 
 struct ShaderConstants {
 	
@@ -285,6 +286,8 @@ public:
 typedef std::map<std::string, EffectRecord*> ExtraEffectsList;
 typedef std::map<std::string, D3DXVECTOR4> CustomConstants;
 
+struct		FrameVS { float x, y, z, u, v; };
+
 __declspec(align(16)) class ShaderManager : public ShaderManagerBase { // Never disposed
 public:
 	static void Initialize();
@@ -306,9 +309,7 @@ public:
 	void					SwitchShaderStatus(const char* Name);
 	void					SetCustomConstant(const char* Name, D3DXVECTOR4 Value);
 	void					SetExtraEffectEnabled(const char* Name, bool Value);
-	
-	struct					FrameVS { float x, y, z, u, v; };
-	
+		
 	ShaderConstants			ShaderConst;
 	CustomConstants			CustomConst;
 	IDirect3DVertexBuffer9*	FrameVertex;
