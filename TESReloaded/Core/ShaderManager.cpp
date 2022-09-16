@@ -15,6 +15,9 @@ ShaderProgram::~ShaderProgram() {
 
 }
 
+/* 
+Declares the constants that can be accessed from the shader code from the Constant Table, and gives them a readable name.
+*/
 void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 	
 	if (!strcmp(Name, "TESR_ToneMapping"))
@@ -175,6 +178,12 @@ ShaderRecord::ShaderRecord() {
 }
 ShaderRecord::~ShaderRecord() { }
 
+/**
+* @param fileBin the name of the compiled shader file
+* @param fileHlsl the name of the hlsl source file for this shader
+* @param CompileStatus an integer for the status of the compilation. If set to 2, will compare file dates to return status. 
+* @returns wether the shader should be compiled, from a given binary shader and corresponding hlsl.
+*/
 bool ShaderProgram::ShouldCompileShader(const char* fileBin, const char* fileHlsl, UInt8 CompileStatus){
 	if(CompileStatus == 1) return  true;
 	if(CompileStatus == 0) return  false;
@@ -211,6 +220,10 @@ bool ShaderProgram::ShouldCompileShader(const char* fileBin, const char* fileHls
 	return false;
 }
 
+/* 
+Loads the shader by name from a given subfolder (optionally). Shader will be compiled if needed.
+@returns the ShaderRecord for this shader.
+*/
 ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 	
 	ShaderRecord* ShaderProg = NULL;
@@ -323,6 +336,11 @@ ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 
 }
 
+/**
+* Creates the constants table for the Shader.
+* @param ShaderSource
+* @param ConstantTable
+*/
 void ShaderRecord::CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* ConstantTable) {
 
 	D3DXCONSTANTTABLE_DESC ConstantTableDesc;
@@ -364,6 +382,9 @@ void ShaderRecord::CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* Const
 
 }
 
+/* 
+* Sets the Constant Table for the shader
+*/
 void ShaderRecord::SetCT() {
 	
 	ShaderValue* Value;
@@ -420,6 +441,9 @@ void ShaderRecordPixel::SetShaderConstantF(UInt32 RegisterIndex, D3DXVECTOR4* Va
 
 }
 
+/*
+* Class that wraps an effect shader, in order to load it/render it/set constants.
+*/
 EffectRecord::EffectRecord() {
 
 	Enabled = false;
@@ -433,6 +457,12 @@ EffectRecord::~EffectRecord() {
 
 }
 
+
+/**
+* Loads an effect shader by name (The post process effects stored in the Effects folder)
+* @param Name the name for the effect
+* @returns an EffectRecord describing the effect shader.
+*/
 EffectRecord* EffectRecord::LoadEffect(const char* Name) {
 	
 	EffectRecord* EffectProg = NULL;
@@ -491,6 +521,9 @@ EffectRecord* EffectRecord::LoadEffect(const char* Name) {
 
 }
 
+/**
+Creates the Constant Table for the Effect Record. 
+*/
 void EffectRecord::CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* ConstantTable) {
 
 	D3DXEFFECT_DESC ConstantTableDesc;
@@ -535,6 +568,9 @@ void EffectRecord::CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* Const
 
 }
 
+/*
+*Sets the Effect Shader constants table and texture registers.
+*/
 void EffectRecord::SetCT() {
 
 	ShaderValue* Value;
@@ -556,6 +592,10 @@ void EffectRecord::SetCT() {
 
 }
 
+
+/**
+* Renders the given effect shader.
+*/
 void EffectRecord::Render(IDirect3DDevice9* Device, IDirect3DSurface9* RenderTarget, IDirect3DSurface9* RenderedSurface, bool ClearRenderTarget) {
 
 	UINT Passes;
@@ -572,6 +612,10 @@ void EffectRecord::Render(IDirect3DDevice9* Device, IDirect3DSurface9* RenderTar
 
 }
 
+/**
+* Initializes the Shader Manager Singleton.
+* The Shader Manager creates and holds onto the Effects activated in the Settings Manager, and sets the constants.
+*/
 void ShaderManager::Initialize() {
 
 	Logger::Log("Starting the shaders manager...");
@@ -630,6 +674,9 @@ void ShaderManager::CreateFrameVertex(UInt32 Width, UInt32 Height, IDirect3DVert
 
 }
 
+/*
+* Initializes the Effect Record for each effect activated in the settings.
+*/
 void ShaderManager::CreateEffects() {
 	
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
@@ -667,6 +714,9 @@ void ShaderManager::InitializeConstants() {
 }
 
 
+/*
+Updates the values of the constants that can be accessed from shader code, with values representing the state of the game's elements.
+*/
 void ShaderManager::UpdateConstants() {
 	
 	bool IsThirdPersonView = !TheCameraManager->IsFirstPerson();
@@ -1443,6 +1493,9 @@ void ShaderManager::DisposeShader(const char* Name) {
 
 }
 
+/*
+* Loads an Effect Shader from the corresponding fx file based on the Effect Record effect Type.
+*/
 void ShaderManager::CreateEffect(EffectRecord::EffectRecordType EffectType) {
 	
 	char Filename[MAX_PATH];
@@ -1581,6 +1634,10 @@ void ShaderManager::CreateEffect(EffectRecord::EffectRecordType EffectType) {
 
 }
 
+
+/*
+* Deletes an Effect based on the Effect Record effect type. 
+*/
 void ShaderManager::DisposeEffect(EffectRecord::EffectRecordType EffectType) {
 
 	switch (EffectType) {
@@ -1651,6 +1708,9 @@ void ShaderManager::DisposeEffect(EffectRecord::EffectRecordType EffectType) {
 
 }
 
+/*
+* Renders the effect that have been set to enabled.
+*/
 void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
@@ -1770,6 +1830,10 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	PreviousCell = currentCell;
 }
 
+/*
+* Writes the settings corresponding to the shader/effect name, to switch it between enabled/disabled.*
+* Also creates or deletes the corresponding Effect Record.
+*/
 void ShaderManager::SwitchShaderStatus(const char* Name) {
 	
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;

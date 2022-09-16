@@ -127,6 +127,9 @@ void TextureManager::Initialize() {
 
 }
 
+/*
+* Binds texture buffers to a given register name
+*/
 TextureRecord* TextureManager::LoadTexture(ID3DXBuffer* ShaderSourceBuffer, D3DXPARAMETER_TYPE ConstantType, LPCSTR ConstantName, UINT ConstantIndex, bool* HasRenderedBuffer, bool* HasDepthBuffer) {
 	
 	TextureRecord::TextureRecordType Type = TextureRecord::TextureRecordType::None;
