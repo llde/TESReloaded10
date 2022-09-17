@@ -112,6 +112,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.sunColor;
 	else if (!strcmp(Name, "TESR_FogData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.fogData;
+	else if (!strcmp(Name, "TESR_FogDistance"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.fogDistance;
 	else if (!strcmp(Name, "TESR_AmbientOcclusionAOData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.AmbientOcclusion.AOData;
 	else if (!strcmp(Name, "TESR_AmbientOcclusionData"))
@@ -922,6 +924,10 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.oldfogEnd = ShaderConst.pWeather->GetFogDayFar();
 				}
 
+				ShaderConst.fogDistance.x = ShaderConst.currentfogStart;
+				ShaderConst.fogDistance.y = ShaderConst.currentfogEnd;
+				ShaderConst.fogDistance.z = weatherPercent;
+				ShaderConst.fogDistance.w = currentWeather->GetSunGlare();
 				ShaderConst.oldsunGlare = ShaderConst.pWeather->GetSunGlare();
 				ShaderConst.oldwindSpeed = ShaderConst.pWeather->GetWindSpeed();
 				ShaderConst.currentsunGlare = (ShaderConst.oldsunGlare - ((ShaderConst.oldsunGlare - currentWeather->GetSunGlare()) * weatherPercent)) / 255.0f;
@@ -965,6 +971,11 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.fogData.x = LightData->fogNear;
 			ShaderConst.fogData.y = LightData->fogFar;
 			ShaderConst.fogData.z = ShaderConst.currentsunGlare;
+
+			ShaderConst.fogDistance.x = ShaderConst.currentfogStart;
+			ShaderConst.fogDistance.y = ShaderConst.currentfogEnd;
+			ShaderConst.fogDistance.z = 1.0f;
+			ShaderConst.fogDistance.w = ShaderConst.currentsunGlare;
 		}
 
 		if (TheSettingManager->SettingsMain.Shaders.Water || TheSettingManager->SettingsMain.Effects.Underwater) {

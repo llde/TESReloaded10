@@ -14,6 +14,7 @@ float4 TESR_SunDirection;;
 float4 TESR_ReciprocalResolution;
 float4 TESR_ShadowBiasDeferred;
 float4 TESR_FogData;
+float4 TESR_FogDistance;
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
@@ -60,7 +61,7 @@ VSOUT FrameVS(VSIN IN)
 float readDepth(in float2 coord : TEXCOORD0)
 {
 	float posZ = tex2D(TESR_DepthBuffer, coord).x;
-	posZ = Zmul / ((posZ * Zdiff) - farZ);
+	posZ = nearZ * farZ / ((posZ * (farZ - nearZ)) - farZ);
 	return posZ;
 }
 
@@ -224,9 +225,12 @@ float GetLightAmountVariance(float4 coordinates, float4 coordinatesFar)
 	return ChebyshevUpperBound(Moments, coordinates.z);
 }
 
+float invLerp(float from, float to, float value){
+  return (value - from) / (to - from);
+}
 
-float fogCoeff(float3 world_pos){
-	return saturate((distance(world_pos.xyz, TESR_CameraPosition.xyz) - ((TESR_FogData.y- 2000))) / 1000) + 1.0f;
+float fogCoeff(float depth){
+	return clamp(invLerp(TESR_FogDistance.x, TESR_FogDistance.y, depth), 0.0, 1.0);
 }
 
 float4 VarianceShadow(VSOUT IN) : COLOR0
@@ -247,12 +251,14 @@ float4 VarianceShadow(VSOUT IN) : COLOR0
 		float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 		float4 farPos = pos;
 
+		// return float4(fogCoeff(depth) * float3(1.0, 1.0, 1.0), 1.0);
+
 		float4 ShadowPosNear = mul(pos, TESR_ShadowCameraToLightTransformNear);
 		float4 ShadowPosFar = mul(farPos, TESR_ShadowCameraToLightTransformFar);
 		float Shadow = saturate(GetLightAmountVariance(ShadowPosNear, ShadowPosFar));
 
 		// apply fog attenuation
-		Shadow = saturate(Shadow * fogCoeff(world_pos.xyz));
+		Shadow = saturate(Shadow + fogCoeff(depth) * 4);
 
 		// brighten shadow value from 0 to darkness from config value
 		Shadow = lerp(darkness, 1.0f, Shadow);
@@ -294,7 +300,7 @@ float4 Shadow(VSOUT IN) : COLOR0
 		float Shadow = GetLightAmount(ShadowNear, ShadowFar);
 
 		// apply fog attenuation
-		Shadow = saturate(Shadow * fogCoeff(world_pos.xyz));
+		Shadow = saturate(Shadow + fogCoeff(depth));
 
 		// brighten shadow value from 0 to darkness from config value
 		Shadow = lerp(darkness, 1.0f, Shadow);

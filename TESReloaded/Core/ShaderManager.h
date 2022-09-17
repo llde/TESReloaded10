@@ -130,6 +130,7 @@ struct ShaderConstants {
 	D3DXVECTOR4				sunColor;
 	D3DXVECTOR4				oldsunColor;
 	D3DXVECTOR4				fogData;
+	D3DXVECTOR4				fogDistance;
 	float					currentfogStart;
 	float					oldfogStart;
 	float					currentfogEnd;
