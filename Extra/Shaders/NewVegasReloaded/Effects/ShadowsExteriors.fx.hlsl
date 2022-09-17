@@ -12,8 +12,6 @@ float4 TESR_ShadowData;
 float4 TESR_SunAmount;
 float4 TESR_SunDirection;;
 float4 TESR_ReciprocalResolution;
-float4 TESR_ShadowBiasDeferred;
-float4 TESR_FogData;
 float4 TESR_FogDistance;
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
@@ -28,13 +26,6 @@ static const float Zmul = nearZ * farZ;
 static const float Zdiff = farZ - nearZ;
 
 static const float darkness = TESR_ShadowData.y;
-static const float deferredNormBias = -0.035f;
-static const float deferredFarNormBias = -0.035f;
-//static const float deferredSlopeConstBias = 0.0004f;
-static const float deferredConstBias = 0.0005f;
-static const float deferredFarConstBias = 0.001f;
-static const float2 OffsetMaskH = float2(1.0f, 0.0f);
-static const float2 OffsetMaskV = float2(0.0f, 1.0f);
 
 
 struct VSOUT
@@ -73,95 +64,6 @@ float3 toWorld(float2 tex)
 	return v;
 }
 
-float3 getPosition(in float2 tex, in float depth)
-{
-	return (TESR_CameraPosition.xyz + toWorld(tex) * depth);
-}
-
-float4 getNormals(float2 UVCoord)
-{
-	float depth = readDepth(UVCoord);
-	float3 pos = getPosition(UVCoord, depth);
-
-	float3 left = pos - getPosition(UVCoord + TESR_ReciprocalResolution.xy * float2(-1, 0), readDepth(UVCoord + TESR_ReciprocalResolution.xy * float2(-1, 0)));
-	float3 right = getPosition(UVCoord + TESR_ReciprocalResolution.xy * float2(1, 0), readDepth(UVCoord + TESR_ReciprocalResolution.xy * float2(1, 0))) - pos;
-	float3 up = pos - getPosition(UVCoord + TESR_ReciprocalResolution.xy * float2(0, -1), readDepth(UVCoord + TESR_ReciprocalResolution.xy * float2(0, -1)));
-	float3 down = getPosition(UVCoord + TESR_ReciprocalResolution.xy * float2(0, 1), readDepth(UVCoord + TESR_ReciprocalResolution.xy * float2(0, 1))) - pos;
-	float3 dx = length(left) < length(right) ? left : right;
-	float3 dy = length(up) < length(down) ? up : down;
-	float3 norm = normalize(cross(dx, dy));
-
-	norm.z *= -1;
-
-	return float4((norm + 1) / 2, 1);
-}
-
-float Lookup(sampler2D ShadowBuffer, float3 ShadowPos, float bias) {
-	// returns a binary lookup 0 = in shadow, 1 = in light.
-	float ShadowDepth = tex2D(ShadowBuffer, ShadowPos.xy).r;
-	return (ShadowDepth > ShadowPos.z - bias);
-}
-
-float4 PCFSampling(sampler2D ShadowBuffer, float4 coordinates, float bias, float areaSize, float step)
-{
-	// samples values around the position to soften shadows
-	float x, y;
-	float4 value = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float halfSize = (areaSize * step)/2;
-
-	for (x = -halfSize; x <= halfSize; x += step){
-		for (y = -halfSize; y<= halfSize; y += step){
-			value += Lookup(ShadowBuffer, float3 (coordinates.xy + float2(x, y) * TESR_ShadowData.w, coordinates.z), bias);
-		}
-	}
-
-	return value /= areaSize * areaSize;
-}
-
-
-float GetLightAmountFar(float4 ShadowPos) {
-	// check distance where shadows are still displayed
-	ShadowPos.xyz /= ShadowPos.w;
-	if (ShadowPos.x < -1.0f || ShadowPos.x > 1.0f ||
-		ShadowPos.y < -1.0f || ShadowPos.y > 1.0f ||
-		ShadowPos.z < 0.0f || ShadowPos.z > 1.0f)
-		return 1.0f;
-
-	ShadowPos.x = ShadowPos.x * 0.5f + 0.5f ;//+ TESR_ShadowData.w;
-	ShadowPos.y = ShadowPos.y * -0.5f + 0.5f;// + TESR_ShadowData.w;
-
-	float Shadow = PCFSampling(TESR_ShadowMapBufferFar, ShadowPos, deferredFarConstBias, 3, 1.0).r;
-
-	return Shadow;
-}
-
-float GetLightAmount(float4 ShadowPos, float4 ShadowPosFar) {
-	// apply perspective
-	ShadowPos.xyz /= ShadowPos.w;
-
-	// check distance to detect far or near shadows
-	if (ShadowPos.x < -1.0f || ShadowPos.x > 1.0f ||
-		ShadowPos.y < -1.0f || ShadowPos.y > 1.0f ||
-		ShadowPos.z < 0.0f || ShadowPos.z > 1.0f)
-		return GetLightAmountFar(ShadowPosFar);
-
-	//convert from -1/1 (perspective division) to range to 0/1 (shadowMap range);
-	ShadowPos.x = ShadowPos.x * 0.5f + 0.5f ;//+ TESR_ShadowData.z;
-	ShadowPos.y = ShadowPos.y * -0.5f + 0.5f;// + TESR_ShadowData.z;
-
-	float Shadow = PCFSampling(TESR_ShadowMapBufferNear, ShadowPos, deferredConstBias, 5, 0.2).r;
-	
-	return Shadow;
-}
-
-// float AddProximityLight(float4 WorldPos, float4 ExternalLightPos) {
-
-// 	if (ExternalLightPos.w) {
-// 		float distToExternalLight = distance(WorldPos.xyz, ExternalLightPos.xyz);
-// 		return (saturate(1.000f - (distToExternalLight / (ExternalLightPos.w))));
-// 	}
-// 	return 0.0f;
-// }
 
 float linstep(float low, float high, float t)
 {
@@ -267,87 +169,6 @@ float4 VarianceShadow(VSOUT IN) : COLOR0
 	}
 	return float4(color, 1.0f);
 }
-
-
-float4 Shadow(VSOUT IN) : COLOR0
-{
-	float3 color = float3(1.0f, 1.0f, 1.0f);
-
-	float depth = readDepth(IN.UVCoord);
-	float3 camera_vector = toWorld(IN.UVCoord) * depth;
-	float4 world_pos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
-
-	if (world_pos.z > TESR_WaterSettings.x) {
-		float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
-		float4 farPos = pos;
-		float4 normal = getNormals(IN.UVCoord);
-		
-		//Slope Scale
-		/*
-		float4 lightDir = abs(TESR_SunDirection);
-		float3 n = normalize(normal);
-		float3 l = normalize(lightDir);
-		float cosTheta = clamp(dot(n, l), 0, 1);
-		float bias = deferredSlopeConstBias * tan(acos(cosTheta));
-		*/
-
-		float bias = deferredConstBias;
-		pos.xyz = pos.xyz + (normal.xyz * deferredNormBias);
-		farPos.xyz = farPos.xyz + (normal.xyz * deferredFarNormBias);
-
-		float4 ShadowNear = mul(pos, TESR_ShadowCameraToLightTransformNear);
-		float4 ShadowFar = mul(farPos, TESR_ShadowCameraToLightTransformFar);
-		float Shadow = GetLightAmount(ShadowNear, ShadowFar);
-
-		// apply fog attenuation
-		Shadow = saturate(Shadow + fogCoeff(depth));
-
-		// brighten shadow value from 0 to darkness from config value
-		Shadow = lerp(darkness, 1.0f, Shadow);
-		color *= Shadow;
-	}
-	return float4(color, 1.0f);
-}
-
-
-static const int cKernelSize = 7;
-
-static const float BlurWeights[cKernelSize] = 
-{
-    0.064759,
-    0.120985,
-    0.176033,
-    0.199471,
-    0.176033,
-    0.120985,
-    0.064759,
-};
- 
-static const float2 BlurOffsets[cKernelSize] = 
-{
-	float2(-3.0f * TESR_ReciprocalResolution.x, -3.0f * TESR_ReciprocalResolution.y),
-	float2(-2.0f * TESR_ReciprocalResolution.x, -2.0f * TESR_ReciprocalResolution.y),
-	float2(-1.0f * TESR_ReciprocalResolution.x, -1.0f * TESR_ReciprocalResolution.y),
-	float2( 0.0f * TESR_ReciprocalResolution.x,  0.0f * TESR_ReciprocalResolution.y),
-	float2( 1.0f * TESR_ReciprocalResolution.x,  1.0f * TESR_ReciprocalResolution.y),
-	float2( 2.0f * TESR_ReciprocalResolution.x,  2.0f * TESR_ReciprocalResolution.y),
-	float2( 3.0f * TESR_ReciprocalResolution.x,  3.0f * TESR_ReciprocalResolution.y),
-};
-
-float4 BlurPass(VSOUT IN, uniform float2 OffsetMask) : COLOR0
-{
-	float3 Color = 0.0f;
-	float w = 0.0f;
-
-    for (int i = 0; i < cKernelSize; i++) {
-		float2 uvOff = (BlurOffsets[i] * OffsetMask);
-		Color += tex2D(TESR_RenderedBuffer, IN.UVCoord + uvOff).rgb * BlurWeights[i];
-		w += BlurWeights[i];
-    }
-	Color /= w;
-    return float4(Color, 1.0f);
-}
-
 
 float4 alphaBlend(float4 base, float4 blend)
 {
