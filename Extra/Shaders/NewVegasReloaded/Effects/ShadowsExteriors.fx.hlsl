@@ -232,10 +232,11 @@ float fogCoeff(float3 world_pos){
 float4 VarianceShadow(VSOUT IN) : COLOR0
 {
 	// returns a shadow value from darkness setting value (full shadow) 
-    // to 1 (full light) using variance maps algorithm
-	
-    // bypass during nighttime
+	// to 1 (full light) using variance maps algorithm
+
+	// bypass during nighttime
 	if (TESR_SunDirection.z < 0) return 1.0f;
+
 	float3 color = float3(1.0f, 1.0f, 1.0f);
 	float depth = readDepth(IN.UVCoord);
 	float3 camera_vector = toWorld(IN.UVCoord) * depth;
