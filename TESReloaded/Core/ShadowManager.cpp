@@ -521,14 +521,9 @@ void ShadowManager::RenderShadowMaps() {
 		NiNode* PlayerNode = Player->GetNode();
 		D3DXVECTOR3 At;
 
-		At.x = LookAtPosition.x - TheRenderManager->CameraPosition.x;
-		At.y = LookAtPosition.y - TheRenderManager->CameraPosition.y;
-		At.z = LookAtPosition.z - TheRenderManager->CameraPosition.z;
-		D3DXVECTOR3 newPos(PlayerNode->m_worldTransform.pos.x, PlayerNode->m_worldTransform.pos.y, PlayerNode->m_worldTransform.pos.z);
-
-		if (D3DXVec3Length(&(newPos - LookAtPosition)) > ShadowsExteriors->ShadowMapRadius[MapNear] / 2.0f) {
-			LookAtPosition = newPos;
-		}
+		At.x = PlayerNode->m_worldTransform.pos.x - TheRenderManager->CameraPosition.x;
+		At.y = PlayerNode->m_worldTransform.pos.y - TheRenderManager->CameraPosition.y;
+		At.z = PlayerNode->m_worldTransform.pos.z - TheRenderManager->CameraPosition.z;
 
 		CurrentVertex = ShadowMapVertex;
 		CurrentPixel = ShadowMapPixel;

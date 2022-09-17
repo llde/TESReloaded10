@@ -45,6 +45,5 @@ public:
 	NiPointLight*			ShadowCubeMapLights[4];
 	ShaderRecordVertex*		CurrentVertex;
 	ShaderRecordPixel*		CurrentPixel;
-	D3DXVECTOR3				LookAtPosition;
 	bool					AlphaEnabled;
 };
