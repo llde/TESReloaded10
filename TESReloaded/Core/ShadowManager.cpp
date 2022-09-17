@@ -20,20 +20,18 @@ void ShadowManager::Initialize() {
     ShadowMapSize = ShadowsExteriors->ShadowMapSize[1];
     TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[1]);
 
-    char Filename[MAX_PATH];
-    strcpy(Filename, ShadersPath);
-    strcat(Filename, "\\Shadows\\");
-    strcat(Filename, "BlurShadowMap.fx"); //TODO move to Shader/Shadows
-    Logger::Log(Filename);
-    TheShadowManager->ShadowMapBlur = EffectRecord::LoadEffect(Filename);
-    if (TheShadowManager->ShadowMapVertex == nullptr || TheShadowManager->ShadowMapPixel == nullptr 
-        || TheShadowManager->ShadowCubeMapVertex == nullptr || TheShadowManager->ShadowCubeMapPixel == nullptr || TheShadowManager->ShadowMapBlur  == nullptr ){
+    TheShadowManager->ShadowMapBlurVertex = (ShaderRecordVertex*) ShaderRecord::LoadShader("ShadowMapBlur.vso", NULL);
+    TheShadowManager->ShadowMapBlurPixel = (ShaderRecordPixel*) ShaderRecord::LoadShader("ShadowMapBlur.pso", NULL);
+
+    if (TheShadowManager->ShadowMapVertex == nullptr || TheShadowManager->ShadowMapPixel == nullptr  || TheShadowManager->ShadowMapBlurVertex  == nullptr
+        || TheShadowManager->ShadowCubeMapVertex == nullptr || TheShadowManager->ShadowCubeMapPixel == nullptr || TheShadowManager->ShadowMapBlurPixel  == nullptr ){
         Logger::Log("[ERROR]: Could not load one or more of the ShadowMap generation shaders. Reinstall the mod.");
         
     }
 	for (int i = 0; i < 3; i++) {
 		ShadowMapSize = ShadowsExteriors->ShadowMapSize[i];
 		TheShadowManager->ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
+        TheShadowManager->ShadowMapInverseResolution[i] = 1.0f / (float) ShadowMapSize;
 	}
 	TheShadowManager->ShadowCubeMapViewPort = { 0, 0, ShadowCubeMapSize, ShadowCubeMapSize, 0.0f, 1.0f };
 	memset(TheShadowManager->ShadowCubeMapLights, NULL, sizeof(ShadowCubeMapLights));
@@ -537,6 +535,9 @@ void ShadowManager::RenderShadowMaps() {
 		RenderShadowMap(MapNear, ShadowsExteriors, &At, SunDir);
 		RenderShadowMap(MapFar, ShadowsExteriors, &At, SunDir);
 		RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir);
+		ShadowData->z = ShadowMapInverseResolution[MapNear];
+		ShadowData->w = ShadowMapInverseResolution[MapFar];
+		OrthoData->z = ShadowMapInverseResolution[MapOrtho];
         BlurShadowMap(MapNear);
         BlurShadowMap(MapFar);
         
@@ -548,10 +549,6 @@ void ShadowManager::RenderShadowMaps() {
 			ShadowData->y += log(SunDir->z) / -10.0f;
 			if (ShadowData->y > 1.0f) ShadowData->y = 1.0f;
 		}
-		ShadowData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapNear];
-		ShadowData->w = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapFar];
-		
-		OrthoData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapOrtho];
 	}
 	else if(ShadowsInteriors->Enabled){
 		std::map<int, NiPointLight*> SceneLights;
@@ -660,26 +657,25 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
     IDirect3DTexture9* SourceShadowMap = TheTextureManager->ShadowMapTexture[ShadowMapType];
     IDirect3DSurface9* TargetShadowMap = TheTextureManager->ShadowMapSurfaceBlurred[ShadowMapType];
     
+    Device->SetDepthStencilSurface(NULL);
+    RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE, RenderStateArgs);
+    RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE, RenderStateArgs);
+    RenderState->SetVertexShader(ShadowMapBlurVertex->ShaderHandle, false);
+    RenderState->SetPixelShader(ShadowMapBlurPixel->ShaderHandle, false);
+
 	Device->SetFVF(FrameFVF);
 	Device->SetStreamSource(0, BlurShadowVertex[ShadowMapType], 0, sizeof(FrameVS));
     Device->SetRenderTarget(0, TargetShadowMap);
  //   Device->Clear(0L, NULL, D3DCLEAR_TARGET, D3DXCOLOR(0, 0, 0, 0), 1.0f, 0L);
     Device->SetTexture(0, SourceShadowMap);
-    ShadowMapBlur->SetCT();
-    RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE, RenderStateArgs);
-    RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE, RenderStateArgs);
-	Device->SetDepthStencilSurface(NULL);
-    
-	UINT Passes;
-
-	ShadowMapBlur->Effect->Begin(&Passes, NULL);
+    //ShadowMapBlurVertex->SetCT(); Just screenspace. No constants
+    ShadowMapBlurPixel->SetCT();
+    D3DXVECTOR4 inverseRes = { ShadowMapInverseResolution[ShadowMapType] ,ShadowMapInverseResolution[ShadowMapType], 0.0f, 0.0f}; 
+    ShadowMapBlurPixel->SetShaderConstantF(0, &inverseRes, 1);
+   // ShadowMapBlur->Effect->SetVector(0, &TheShaderManager->ShaderConst.ReciprocalResolution);
+    Device->BeginScene();
 //	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
-
-	for (UINT p = 0; p < Passes; p++) {
-		ShadowMapBlur->Effect->BeginPass(p);
-		Device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
-		ShadowMapBlur->Effect->EndPass();
-	}
-	ShadowMapBlur->Effect->End();
+	Device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
+    Device->EndScene();
 }
 

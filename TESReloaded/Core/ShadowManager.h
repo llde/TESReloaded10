@@ -36,8 +36,10 @@ public:
 	ShaderRecordVertex*		ShadowCubeMapVertex;
 	ShaderRecordPixel*		ShadowCubeMapPixel;
     
-    EffectRecord*           ShadowMapBlur;
+    ShaderRecordVertex*		ShadowMapBlurVertex;
+	ShaderRecordPixel*		ShadowMapBlurPixel;
     IDirect3DVertexBuffer9* BlurShadowVertex[2];
+    float                   ShadowMapInverseResolution[3];
     
 	D3DVIEWPORT9			ShadowCubeMapViewPort;
 	NiPointLight*			ShadowCubeMapLights[4];

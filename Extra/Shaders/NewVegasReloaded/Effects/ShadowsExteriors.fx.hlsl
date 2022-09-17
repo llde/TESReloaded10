@@ -179,7 +179,7 @@ float4 ChebyshevUpperBound(float2 moments, float distance)
 
 	// Compute the Chebyshev upper bound.
 	float d = distance - moments.x;
-	float p_max = linstep(0.5, 1.0, Variance / (Variance + d*d));
+	float p_max = linstep(0.2, 1.0, Variance / (Variance + d*d));
 	return max(p, p_max);
 }
 
@@ -232,7 +232,10 @@ float fogCoeff(float3 world_pos){
 float4 VarianceShadow(VSOUT IN) : COLOR0
 {
 	// returns a shadow value from darkness setting value (full shadow) 
-	// to 1 (full light) using variance maps algorithm
+    // to 1 (full light) using variance maps algorithm
+	
+    // bypass during nighttime
+	if (TESR_SunDirection.z < 0) return 1.0f;
 	float3 color = float3(1.0f, 1.0f, 1.0f);
 	float depth = readDepth(IN.UVCoord);
 	float3 camera_vector = toWorld(IN.UVCoord) * depth;
@@ -396,7 +399,7 @@ technique {
 	// 	VertexShader = compile vs_3_0 FrameVS();
 	// 	PixelShader = compile ps_3_0 Shadow();
 	// }
-
+/*
 	pass {
 		VertexShader = compile vs_3_0 FrameVS();
 		PixelShader = compile ps_3_0 BlurPass(OffsetMaskH);
@@ -406,15 +409,14 @@ technique {
 		VertexShader = compile vs_3_0 FrameVS();
 		PixelShader = compile ps_3_0 BlurPass(OffsetMaskV);
 	}
-
+*/
+//	pass {
+//		VertexShader = compile vs_3_0 FrameVS();
+//		PixelShader = compile ps_3_0 CombineShadow();
+//	}
 	pass {
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 CombineShadow();
+	 	PixelShader = compile ps_3_0 SimpleCombineShadow();
 	}
-
-	// pass {
-	// 	VertexShader = compile vs_3_0 FrameVS();
-	// 	PixelShader = compile ps_3_0 SimpleCombineShadow();
-	// }
 
 }
