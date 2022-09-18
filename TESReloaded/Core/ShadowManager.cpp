@@ -25,25 +25,16 @@ void ShadowManager::Initialize() {
 	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.z = ShadowsExteriors->ShadowMapRadius[2];
 	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.w = ShadowsExteriors->ShadowMapRadius[3];
 
-	ShadowMapSize = ShadowsExteriors->ShadowMapSize[0];
-    TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[0]);
-	ShadowMapSize = ShadowsExteriors->ShadowMapSize[1];
-	TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[1]);
-	ShadowMapSize = ShadowsExteriors->ShadowMapSize[2];
-	TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[2]);
-	ShadowMapSize = ShadowsExteriors->ShadowMapSize[3];
-	TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[3]);
-
     TheShadowManager->ShadowMapBlurVertex = (ShaderRecordVertex*) ShaderRecord::LoadShader("ShadowMapBlur.vso", NULL);
     TheShadowManager->ShadowMapBlurPixel = (ShaderRecordPixel*) ShaderRecord::LoadShader("ShadowMapBlur.pso", NULL);
 
     if (TheShadowManager->ShadowMapVertex == nullptr || TheShadowManager->ShadowMapPixel == nullptr  || TheShadowManager->ShadowMapBlurVertex  == nullptr
         || TheShadowManager->ShadowCubeMapVertex == nullptr || TheShadowManager->ShadowCubeMapPixel == nullptr || TheShadowManager->ShadowMapBlurPixel  == nullptr ){
         Logger::Log("[ERROR]: Could not load one or more of the ShadowMap generation shaders. Reinstall the mod.");
-        
     }
 	for (int i = 0; i < 5; i++) {
 		ShadowMapSize = ShadowsExteriors->ShadowMapSize[i];
+		if (i<4) TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[i]);
 		TheShadowManager->ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
         TheShadowManager->ShadowMapInverseResolution[i] = 1.0f / (float) ShadowMapSize;
 	}
@@ -506,6 +497,23 @@ void ShadowManager::RenderShadowMaps() {
 	IDirect3DSurface9* DepthSurface = NULL;
 	IDirect3DSurface9* RenderSurface = NULL;
 	D3DVIEWPORT9 viewport;
+	/*	if(RenderStateSettings == nullptr){
+		RenderStateSettings = (NiDX9RenderState::NiRenderStateSetting*)malloc(sizeof(NiDX9RenderState::NiRenderStateSetting) * 256);
+		memcpy(RenderStateSettings, RenderState->RenderStateSettings, sizeof(NiDX9RenderState::NiRenderStateSetting) * 256);
+	}
+	else{
+		bool print = false;
+		for(size_t i = 0; i < 256; i++){
+			if(RenderStateSettings[i].CurrentValue != RenderState->RenderStateSettings[i].CurrentValue){
+				Logger::Log("Different state between iterations: State %0X was %u is %0X",i, RenderStateSettings[i].CurrentValue, RenderState->RenderStateSettings[i].CurrentValue);
+				RenderStateSettings[i].CurrentValue = RenderState->RenderStateSettings[i].CurrentValue;
+				print = true;
+
+			}
+		}
+		if(print) Logger::Log("End");
+	} */
+
 	D3DXVECTOR4* ShadowData = &TheShaderManager->ShaderConst.Shadow.Data;
 	D3DXVECTOR4* OrthoData = &TheShaderManager->ShaderConst.Shadow.OrthoData;
 	Device->GetDepthStencilSurface(&DepthSurface);
