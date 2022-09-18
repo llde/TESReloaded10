@@ -58,10 +58,14 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCameraToLight;
 	else if (!strcmp(Name, "TESR_ShadowCameraToLightTransformNear"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCameraToLight[0];
-	else if (!strcmp(Name, "TESR_ShadowCameraToLightTransformFar"))
+	else if (!strcmp(Name, "TESR_ShadowCameraToLightTransformMiddle"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCameraToLight[1];
-	else if (!strcmp(Name, "TESR_ShadowCameraToLightTransformOrtho"))
+	else if (!strcmp(Name, "TESR_ShadowCameraToLightTransformFar"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCameraToLight[2];
+	else if (!strcmp(Name, "TESR_ShadowCameraToLightTransformLod"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCameraToLight[3];
+	else if (!strcmp(Name, "TESR_ShadowCameraToLightTransformOrtho"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCameraToLight[4];
 	else if (!strcmp(Name, "TESR_ShadowCubeMapLightPosition"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapLightPosition;
 	else if (!strcmp(Name, "TESR_ShadowLightPosition"))

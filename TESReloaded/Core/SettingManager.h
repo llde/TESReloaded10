@@ -266,12 +266,12 @@ struct SettingsShadowStruct {
 
 	struct ExteriorsStruct {
 		bool				Enabled;
-		FormsStruct			Forms[3];
-		bool				AlphaEnabled[3];
+		FormsStruct			Forms[5];
+		bool				AlphaEnabled[5];
 		int					Quality;
-		int					ShadowMapSize[3];
+		int					ShadowMapSize[5];
 		float				Darkness;
-		float				ShadowMapRadius[3];
+		float				ShadowMapRadius[5];
 		float				ShadowMapFarPlane;
 		ExcludedFormsList	ExcludedForms;
 	};

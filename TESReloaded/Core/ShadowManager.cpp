@@ -15,10 +15,14 @@ void ShadowManager::Initialize() {
 	TheShadowManager->ShadowCubeMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowCubeMap.vso", NULL);
 	TheShadowManager->ShadowCubeMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowCubeMap.pso", NULL);
     
-    ShadowMapSize = ShadowsExteriors->ShadowMapSize[0];
+	ShadowMapSize = ShadowsExteriors->ShadowMapSize[0];
     TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[0]);
-    ShadowMapSize = ShadowsExteriors->ShadowMapSize[1];
-    TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[1]);
+	ShadowMapSize = ShadowsExteriors->ShadowMapSize[1];
+	TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[1]);
+	ShadowMapSize = ShadowsExteriors->ShadowMapSize[2];
+	TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[2]);
+	ShadowMapSize = ShadowsExteriors->ShadowMapSize[3];
+	TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[3]);
 
     TheShadowManager->ShadowMapBlurVertex = (ShaderRecordVertex*) ShaderRecord::LoadShader("ShadowMapBlur.vso", NULL);
     TheShadowManager->ShadowMapBlurPixel = (ShaderRecordPixel*) ShaderRecord::LoadShader("ShadowMapBlur.pso", NULL);
@@ -28,7 +32,7 @@ void ShadowManager::Initialize() {
         Logger::Log("[ERROR]: Could not load one or more of the ShadowMap generation shaders. Reinstall the mod.");
         
     }
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 5; i++) {
 		ShadowMapSize = ShadowsExteriors->ShadowMapSize[i];
 		TheShadowManager->ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
         TheShadowManager->ShadowMapInverseResolution[i] = 1.0f / (float) ShadowMapSize;
@@ -528,14 +532,18 @@ void ShadowManager::RenderShadowMaps() {
 		CurrentVertex = ShadowMapVertex;
 		CurrentPixel = ShadowMapPixel;
 		RenderShadowMap(MapNear, ShadowsExteriors, &At, SunDir);
+		RenderShadowMap(MapMiddle, ShadowsExteriors, &At, SunDir);
 		RenderShadowMap(MapFar, ShadowsExteriors, &At, SunDir);
+		RenderShadowMap(MapLod, ShadowsExteriors, &At, SunDir);
 		RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir);
 		ShadowData->z = ShadowMapInverseResolution[MapNear];
 		ShadowData->w = ShadowMapInverseResolution[MapFar];
 		OrthoData->z = ShadowMapInverseResolution[MapOrtho];
         BlurShadowMap(MapNear);
+        BlurShadowMap(MapMiddle);
         BlurShadowMap(MapFar);
-        
+		BlurShadowMap(MapLod);
+
 		ShadowData->x = ShadowsExteriors->Quality;
 		if (TheSettingManager->SettingsMain.Effects.ShadowsExteriors) ShadowData->x = -1; // Disable the forward shadowing
 		ShadowData->y = ShadowsExteriors->Darkness;
@@ -599,11 +607,15 @@ void ShadowManager::RenderShadowMaps() {
 		GetCurrentDirectoryA(MAX_PATH, Filename);
         strcat(Filename, "\\Test");
 		if (GetFileAttributesA(Filename) == INVALID_FILE_ATTRIBUTES) CreateDirectoryA(Filename, NULL);
-		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap0.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[0], NULL, NULL);
-		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap1.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[1], NULL, NULL);
-		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap2.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[2], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap0.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapNear], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap1.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapMiddle], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap2.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapFar], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap3.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapLod], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap4.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapOrtho], NULL, NULL);
 		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap0B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[0], NULL, NULL);
 		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap1B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[1], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap2B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[2], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap3B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[3], NULL, NULL);
 
 		InterfaceManager->ShowMessage("Textures taken!");
 	}

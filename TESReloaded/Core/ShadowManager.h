@@ -29,8 +29,8 @@ public:
 	
     ShaderRecordVertex*		ShadowMapVertex;
 	ShaderRecordPixel*		ShadowMapPixel;
-	D3DVIEWPORT9			ShadowMapViewPort[3];
-	D3DXPLANE				ShadowMapFrustum[3][6];
+	D3DVIEWPORT9			ShadowMapViewPort[5];
+	D3DXPLANE				ShadowMapFrustum[5][6];
 	NiVector4				BillboardRight;
 	NiVector4				BillboardUp;
 	ShaderRecordVertex*		ShadowCubeMapVertex;
@@ -38,8 +38,8 @@ public:
     
     ShaderRecordVertex*		ShadowMapBlurVertex;
 	ShaderRecordPixel*		ShadowMapBlurPixel;
-    IDirect3DVertexBuffer9* BlurShadowVertex[2];
-    float                   ShadowMapInverseResolution[3];
+    IDirect3DVertexBuffer9* BlurShadowVertex[4];
+    float                   ShadowMapInverseResolution[5];
     
 	D3DVIEWPORT9			ShadowCubeMapViewPort;
 	NiPointLight*			ShadowCubeMapLights[4];

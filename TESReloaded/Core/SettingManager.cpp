@@ -769,6 +769,22 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.ShadowMapSize[ShadowManagerBase::ShadowMapTypeEnum::MapNear] = GetSettingI("Shaders.ShadowsExteriors.Near", "ShadowMapSize");
 	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManagerBase::ShadowMapTypeEnum::MapNear] = GetSettingF("Shaders.ShadowsExteriors.Near", "ShadowMapRadius");
 
+	SettingsShadows.Exteriors.AlphaEnabled[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle] = GetSettingI("Shaders.ShadowsExteriors.Middle", "AlphaEnabled");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle].Activators = GetSettingI("Shaders.ShadowsExteriors.Middle", "Activators");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle].Actors = GetSettingI("Shaders.ShadowsExteriors.Middle", "Actors");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle].Apparatus = GetSettingI("Shaders.ShadowsExteriors.Middle", "Apparatus");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle].Books = GetSettingI("Shaders.ShadowsExteriors.Middle", "Books");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle].Containers = GetSettingI("Shaders.ShadowsExteriors.Middle", "Containers");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle].Doors = GetSettingI("Shaders.ShadowsExteriors.Middle", "Doors");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle].Furniture = GetSettingI("Shaders.ShadowsExteriors.Middle", "Furniture");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle].Misc = GetSettingI("Shaders.ShadowsExteriors.Middle", "Misc");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle].Statics = GetSettingI("Shaders.ShadowsExteriors.Middle", "Statics");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle].Terrain = GetSettingI("Shaders.ShadowsExteriors.Middle", "Terrain");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle].Trees = GetSettingI("Shaders.ShadowsExteriors.Middle", "Trees");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle].MinRadius = GetSettingF("Shaders.ShadowsExteriors.Middle", "MinRadius");
+	SettingsShadows.Exteriors.ShadowMapSize[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle] = GetSettingI("Shaders.ShadowsExteriors.Middle", "ShadowMapSize");
+	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManagerBase::ShadowMapTypeEnum::MapMiddle] = GetSettingF("Shaders.ShadowsExteriors.Middle", "ShadowMapRadius");
+
 	SettingsShadows.Exteriors.AlphaEnabled[ShadowManagerBase::ShadowMapTypeEnum::MapFar] = GetSettingI("Shaders.ShadowsExteriors.Far", "AlphaEnabled");
 	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapFar].Activators = GetSettingI("Shaders.ShadowsExteriors.Far", "Activators");
 	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapFar].Actors = GetSettingI("Shaders.ShadowsExteriors.Far", "Actors");
@@ -784,6 +800,22 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapFar].MinRadius = GetSettingF("Shaders.ShadowsExteriors.Far", "MinRadius");
 	SettingsShadows.Exteriors.ShadowMapSize[ShadowManagerBase::ShadowMapTypeEnum::MapFar] = GetSettingI("Shaders.ShadowsExteriors.Far", "ShadowMapSize");
 	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManagerBase::ShadowMapTypeEnum::MapFar] = GetSettingF("Shaders.ShadowsExteriors.Far", "ShadowMapRadius");
+
+	SettingsShadows.Exteriors.AlphaEnabled[ShadowManagerBase::ShadowMapTypeEnum::MapLod] = GetSettingI("Shaders.ShadowsExteriors.Lod", "AlphaEnabled");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapLod].Activators = GetSettingI("Shaders.ShadowsExteriors.Lod", "Activators");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapLod].Actors = GetSettingI("Shaders.ShadowsExteriors.Lod", "Actors");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapLod].Apparatus = GetSettingI("Shaders.ShadowsExteriors.Lod", "Apparatus");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapLod].Books = GetSettingI("Shaders.ShadowsExteriors.Lod", "Books");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapLod].Containers = GetSettingI("Shaders.ShadowsExteriors.Lod", "Containers");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapLod].Doors = GetSettingI("Shaders.ShadowsExteriors.Lod", "Doors");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapLod].Furniture = GetSettingI("Shaders.ShadowsExteriors.Lod", "Furniture");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapLod].Misc = GetSettingI("Shaders.ShadowsExteriors.Lod", "Misc");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapLod].Statics = GetSettingI("Shaders.ShadowsExteriors.Lod", "Statics");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapLod].Terrain = GetSettingI("Shaders.ShadowsExteriors.Lod", "Terrain");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapLod].Trees = GetSettingI("Shaders.ShadowsExteriors.Lod", "Trees");
+	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapLod].MinRadius = GetSettingF("Shaders.ShadowsExteriors.Lod", "MinRadius");
+	SettingsShadows.Exteriors.ShadowMapSize[ShadowManagerBase::ShadowMapTypeEnum::MapLod] = GetSettingI("Shaders.ShadowsExteriors.Lod", "ShadowMapSize");
+	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManagerBase::ShadowMapTypeEnum::MapLod] = GetSettingF("Shaders.ShadowsExteriors.Lod", "ShadowMapRadius");
 
 	SettingsShadows.Exteriors.AlphaEnabled[ShadowManagerBase::ShadowMapTypeEnum::MapOrtho] = GetSettingI("Shaders.ShadowsExteriors.Ortho", "AlphaEnabled");
 	SettingsShadows.Exteriors.Forms[ShadowManagerBase::ShadowMapTypeEnum::MapOrtho].Activators = GetSettingI("Shaders.ShadowsExteriors.Ortho", "Activators");
