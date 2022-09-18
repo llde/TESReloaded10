@@ -1,5 +1,8 @@
 #define DEBUGSH 1
 
+/*
+* Initializes the Shadow Manager by grabbing the relevant settings and shaders, and setting up map sizes.
+*/
 void ShadowManager::Initialize() {
 	
 	Logger::Log("Starting the shadows manager...");
@@ -14,11 +17,13 @@ void ShadowManager::Initialize() {
 	TheShadowManager->ShadowMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowMap.pso", NULL);
 	TheShadowManager->ShadowCubeMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowCubeMap.vso", NULL);
 	TheShadowManager->ShadowCubeMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowCubeMap.pso", NULL);
-    
-    ShadowMapSize = ShadowsExteriors->ShadowMapSize[0];
-    TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[0]);
-    ShadowMapSize = ShadowsExteriors->ShadowMapSize[1];
-    TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[1]);
+
+	// Store Shadow map sizes in Constants to pass to the Shaders
+
+	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.x = ShadowsExteriors->ShadowMapRadius[0];
+	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.y = ShadowsExteriors->ShadowMapRadius[1];
+	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.z = ShadowsExteriors->ShadowMapRadius[2];
+	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.w = ShadowsExteriors->ShadowMapRadius[3];
 
     TheShadowManager->ShadowMapBlurVertex = (ShaderRecordVertex*) ShaderRecord::LoadShader("ShadowMapBlur.vso", NULL);
     TheShadowManager->ShadowMapBlurPixel = (ShaderRecordPixel*) ShaderRecord::LoadShader("ShadowMapBlur.pso", NULL);
@@ -26,10 +31,10 @@ void ShadowManager::Initialize() {
     if (TheShadowManager->ShadowMapVertex == nullptr || TheShadowManager->ShadowMapPixel == nullptr  || TheShadowManager->ShadowMapBlurVertex  == nullptr
         || TheShadowManager->ShadowCubeMapVertex == nullptr || TheShadowManager->ShadowCubeMapPixel == nullptr || TheShadowManager->ShadowMapBlurPixel  == nullptr ){
         Logger::Log("[ERROR]: Could not load one or more of the ShadowMap generation shaders. Reinstall the mod.");
-        
     }
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 5; i++) {
 		ShadowMapSize = ShadowsExteriors->ShadowMapSize[i];
+		if (i<4) TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[i]);
 		TheShadowManager->ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
         TheShadowManager->ShadowMapInverseResolution[i] = 1.0f / (float) ShadowMapSize;
 	}
@@ -71,8 +76,10 @@ void ShadowManager::SetFrustum(ShadowMapTypeEnum ShadowMapType, D3DMATRIX* Matri
 
 }
 
+/*
+* Checks wether the given node is in the frustrum for the current type of Shadow map.
+*/
 bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiNode* Node) {
-	
 	float Distance = 0.0f;
 	bool R = false;
 	NiBound* Bound = Node->GetWorldBound();
@@ -474,6 +481,9 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, S
 
 //static 	NiDX9RenderState::NiRenderStateSetting* RenderStateSettings = nullptr;
 
+/*
+* Renders the different shadow maps: Near, Far, Ortho.
+*/
 void ShadowManager::RenderShadowMaps() {
 	
 	SettingsMainStruct::EquipmentModeStruct* EquipmentModeSettings = &TheSettingManager->SettingsMain.EquipmentMode;
@@ -487,7 +497,7 @@ void ShadowManager::RenderShadowMaps() {
 	IDirect3DSurface9* DepthSurface = NULL;
 	IDirect3DSurface9* RenderSurface = NULL;
 	D3DVIEWPORT9 viewport;
-/*	if(RenderStateSettings == nullptr){
+	/*	if(RenderStateSettings == nullptr){
 		RenderStateSettings = (NiDX9RenderState::NiRenderStateSetting*)malloc(sizeof(NiDX9RenderState::NiRenderStateSetting) * 256);
 		memcpy(RenderStateSettings, RenderState->RenderStateSettings, sizeof(NiDX9RenderState::NiRenderStateSetting) * 256);
 	}
@@ -503,6 +513,7 @@ void ShadowManager::RenderShadowMaps() {
 		}
 		if(print) Logger::Log("End");
 	} */
+
 	D3DXVECTOR4* ShadowData = &TheShaderManager->ShaderConst.Shadow.Data;
 	D3DXVECTOR4* OrthoData = &TheShaderManager->ShaderConst.Shadow.OrthoData;
 	Device->GetDepthStencilSurface(&DepthSurface);
@@ -511,8 +522,6 @@ void ShadowManager::RenderShadowMaps() {
 	RenderState->SetRenderState(D3DRS_STENCILENABLE , 0 ,RenderStateArgs);
 	RenderState->SetRenderState(D3DRS_STENCILREF , 0 ,RenderStateArgs);
  	RenderState->SetRenderState(D3DRS_STENCILFUNC , 8 ,RenderStateArgs);
-  //  Logger::Log("Depth Bias %f",   RenderState->GetRenderState(D3DRS_DEPTHBIAS));
-  //  Logger::Log("Depth Slope Scale Bias %f",   RenderState->GetRenderState(D3DRS_SLOPESCALEDEPTHBIAS));
     
 	TheRenderManager->SetupSceneCamera();
 	if (Player->GetWorldSpace() && ShadowsExteriors->Enabled) {
@@ -521,26 +530,25 @@ void ShadowManager::RenderShadowMaps() {
 		NiNode* PlayerNode = Player->GetNode();
 		D3DXVECTOR3 At;
 
-		At.x = LookAtPosition.x - TheRenderManager->CameraPosition.x;
-		At.y = LookAtPosition.y - TheRenderManager->CameraPosition.y;
-		At.z = LookAtPosition.z - TheRenderManager->CameraPosition.z;
-		D3DXVECTOR3 newPos(PlayerNode->m_worldTransform.pos.x, PlayerNode->m_worldTransform.pos.y, PlayerNode->m_worldTransform.pos.z);
-
-		if (D3DXVec3Length(&(newPos - LookAtPosition)) > ShadowsExteriors->ShadowMapRadius[MapNear] / 2.0f) {
-			LookAtPosition = newPos;
-		}
+		At.x = PlayerNode->m_worldTransform.pos.x - TheRenderManager->CameraPosition.x;
+		At.y = PlayerNode->m_worldTransform.pos.y - TheRenderManager->CameraPosition.y;
+		At.z = PlayerNode->m_worldTransform.pos.z - TheRenderManager->CameraPosition.z;
 
 		CurrentVertex = ShadowMapVertex;
 		CurrentPixel = ShadowMapPixel;
 		RenderShadowMap(MapNear, ShadowsExteriors, &At, SunDir);
+		RenderShadowMap(MapMiddle, ShadowsExteriors, &At, SunDir);
 		RenderShadowMap(MapFar, ShadowsExteriors, &At, SunDir);
+		RenderShadowMap(MapLod, ShadowsExteriors, &At, SunDir);
 		RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir);
 		ShadowData->z = ShadowMapInverseResolution[MapNear];
 		ShadowData->w = ShadowMapInverseResolution[MapFar];
 		OrthoData->z = ShadowMapInverseResolution[MapOrtho];
         BlurShadowMap(MapNear);
+        BlurShadowMap(MapMiddle);
         BlurShadowMap(MapFar);
-        
+		BlurShadowMap(MapLod);
+
 		ShadowData->x = ShadowsExteriors->Quality;
 		if (TheSettingManager->SettingsMain.Effects.ShadowsExteriors) ShadowData->x = -1; // Disable the forward shadowing
 		ShadowData->y = ShadowsExteriors->Darkness;
@@ -604,11 +612,15 @@ void ShadowManager::RenderShadowMaps() {
 		GetCurrentDirectoryA(MAX_PATH, Filename);
         strcat(Filename, "\\Test");
 		if (GetFileAttributesA(Filename) == INVALID_FILE_ATTRIBUTES) CreateDirectoryA(Filename, NULL);
-		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap0.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[0], NULL, NULL);
-		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap1.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[1], NULL, NULL);
-		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap2.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[2], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap0.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapNear], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap1.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapMiddle], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap2.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapFar], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap3.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapLod], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap4.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapOrtho], NULL, NULL);
 		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap0B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[0], NULL, NULL);
 		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap1B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[1], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap2B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[2], NULL, NULL);
+		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap3B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[3], NULL, NULL);
 
 		InterfaceManager->ShowMessage("Textures taken!");
 	}

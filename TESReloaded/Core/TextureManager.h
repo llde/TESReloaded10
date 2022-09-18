@@ -15,7 +15,9 @@ public:
 		RenderedBuffer,
 		DepthBuffer,
 		ShadowMapBufferNear,
+		ShadowMapBufferMiddle,
 		ShadowMapBufferFar,
+		ShadowMapBufferLod,
 		OrthoMapBuffer,
 		ShadowCubeMapBuffer0,
 		ShadowCubeMapBuffer1,
@@ -52,11 +54,11 @@ public:
 	IDirect3DTexture9*		DepthTexture;
 	IDirect3DTexture9*		DepthTextureINTZ;
 	IDirect3DSurface9*		DepthSurface;
-	IDirect3DTexture9*		ShadowMapTexture[3];
-	IDirect3DSurface9*		ShadowMapSurface[3];
-	IDirect3DTexture9*		ShadowMapTextureBlurred[2];
-	IDirect3DSurface9*		ShadowMapSurfaceBlurred[2];
-	IDirect3DSurface9*		ShadowMapDepthSurface[3];
+	IDirect3DTexture9*		ShadowMapTexture[5];
+	IDirect3DSurface9*		ShadowMapSurface[5];
+	IDirect3DTexture9*		ShadowMapTextureBlurred[4];
+	IDirect3DSurface9*		ShadowMapSurfaceBlurred[4];
+	IDirect3DSurface9*		ShadowMapDepthSurface[5];
 	IDirect3DCubeTexture9*	ShadowCubeMapTexture[ShadowCubeMapsMax];
 	IDirect3DSurface9*		ShadowCubeMapSurface[ShadowCubeMapsMax][6];
 	IDirect3DSurface9*		ShadowCubeMapDepthSurface;

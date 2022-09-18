@@ -6,10 +6,11 @@ struct ShaderConstants {
 	struct ShadowMapStruct {
 		D3DXMATRIXA16	ShadowWorld;
 		D3DXMATRIX		ShadowViewProj;
-		D3DXMATRIX		ShadowCameraToLight[3];
+		D3DXMATRIX		ShadowCameraToLight[5];
 		D3DXVECTOR4		ShadowCubeMapLightPosition;
 		D3DXVECTOR4		ShadowLightPosition[4];
 		D3DXVECTOR4		ShadowCubeMapBlend;
+		D3DXVECTOR4		ShadowMapRadius;
 	};
 	struct OcclusionMapStruct {
 		D3DXMATRIX		OcclusionWorldViewProj;
@@ -130,6 +131,7 @@ struct ShaderConstants {
 	D3DXVECTOR4				sunColor;
 	D3DXVECTOR4				oldsunColor;
 	D3DXVECTOR4				fogData;
+	D3DXVECTOR4				fogDistance;
 	float					currentfogStart;
 	float					oldfogStart;
 	float					currentfogEnd;
