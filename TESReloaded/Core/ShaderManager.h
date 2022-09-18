@@ -10,6 +10,7 @@ struct ShaderConstants {
 		D3DXVECTOR4		ShadowCubeMapLightPosition;
 		D3DXVECTOR4		ShadowLightPosition[4];
 		D3DXVECTOR4		ShadowCubeMapBlend;
+		D3DXVECTOR4		ShadowMapRadius;
 	};
 	struct OcclusionMapStruct {
 		D3DXMATRIX		OcclusionWorldViewProj;

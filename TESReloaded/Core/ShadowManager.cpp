@@ -1,5 +1,8 @@
 #define DEBUGSH 1
 
+/*
+* Initializes the Shadow Manager by grabbing the relevant settings and shaders, and setting up map sizes.
+*/
 void ShadowManager::Initialize() {
 	
 	Logger::Log("Starting the shadows manager...");
@@ -14,7 +17,14 @@ void ShadowManager::Initialize() {
 	TheShadowManager->ShadowMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowMap.pso", NULL);
 	TheShadowManager->ShadowCubeMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowCubeMap.vso", NULL);
 	TheShadowManager->ShadowCubeMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowCubeMap.pso", NULL);
-    
+
+	// Store Shadow map sizes in Constants to pass to the Shaders
+
+	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.x = ShadowsExteriors->ShadowMapRadius[0];
+	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.y = ShadowsExteriors->ShadowMapRadius[1];
+	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.z = ShadowsExteriors->ShadowMapRadius[2];
+	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.w = ShadowsExteriors->ShadowMapRadius[3];
+
 	ShadowMapSize = ShadowsExteriors->ShadowMapSize[0];
     TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[0]);
 	ShadowMapSize = ShadowsExteriors->ShadowMapSize[1];
@@ -75,8 +85,10 @@ void ShadowManager::SetFrustum(ShadowMapTypeEnum ShadowMapType, D3DMATRIX* Matri
 
 }
 
+/*
+* Checks wether the given node is in the frustrum for the current type of Shadow map.
+*/
 bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiNode* Node) {
-	
 	float Distance = 0.0f;
 	bool R = false;
 	NiBound* Bound = Node->GetWorldBound();
@@ -478,6 +490,9 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, S
 
 //static 	NiDX9RenderState::NiRenderStateSetting* RenderStateSettings = nullptr;
 
+/*
+* Renders the different shadow maps: Near, Far, Ortho.
+*/
 void ShadowManager::RenderShadowMaps() {
 	
 	SettingsMainStruct::EquipmentModeStruct* EquipmentModeSettings = &TheSettingManager->SettingsMain.EquipmentMode;
@@ -491,22 +506,6 @@ void ShadowManager::RenderShadowMaps() {
 	IDirect3DSurface9* DepthSurface = NULL;
 	IDirect3DSurface9* RenderSurface = NULL;
 	D3DVIEWPORT9 viewport;
-/*	if(RenderStateSettings == nullptr){
-		RenderStateSettings = (NiDX9RenderState::NiRenderStateSetting*)malloc(sizeof(NiDX9RenderState::NiRenderStateSetting) * 256);
-		memcpy(RenderStateSettings, RenderState->RenderStateSettings, sizeof(NiDX9RenderState::NiRenderStateSetting) * 256);
-	}
-	else{
-		bool print = false;
-		for(size_t i = 0; i < 256; i++){
-			if(RenderStateSettings[i].CurrentValue != RenderState->RenderStateSettings[i].CurrentValue){
-				Logger::Log("Different state between iterations: State %0X was %u is %0X",i, RenderStateSettings[i].CurrentValue, RenderState->RenderStateSettings[i].CurrentValue);
-				RenderStateSettings[i].CurrentValue = RenderState->RenderStateSettings[i].CurrentValue;
-				print = true;
-
-			}
-		}
-		if(print) Logger::Log("End");
-	} */
 	D3DXVECTOR4* ShadowData = &TheShaderManager->ShaderConst.Shadow.Data;
 	D3DXVECTOR4* OrthoData = &TheShaderManager->ShaderConst.Shadow.OrthoData;
 	Device->GetDepthStencilSurface(&DepthSurface);
@@ -515,8 +514,6 @@ void ShadowManager::RenderShadowMaps() {
 	RenderState->SetRenderState(D3DRS_STENCILENABLE , 0 ,RenderStateArgs);
 	RenderState->SetRenderState(D3DRS_STENCILREF , 0 ,RenderStateArgs);
  	RenderState->SetRenderState(D3DRS_STENCILFUNC , 8 ,RenderStateArgs);
-  //  Logger::Log("Depth Bias %f",   RenderState->GetRenderState(D3DRS_DEPTHBIAS));
-  //  Logger::Log("Depth Slope Scale Bias %f",   RenderState->GetRenderState(D3DRS_SLOPESCALEDEPTHBIAS));
     
 	TheRenderManager->SetupSceneCamera();
 	if (Player->GetWorldSpace() && ShadowsExteriors->Enabled) {
