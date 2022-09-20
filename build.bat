@@ -13,7 +13,13 @@ if "%PROJECT%" NEQ "NewVegasReloaded" (
 )
 
 @REM build project
-"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild" -target:%PROJECT% /property:Configuration=Release /property:Platform=x86 -m
+"%programfiles(x86)%\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild" -target:%PROJECT% /property:Configuration=Release /property:Platform=x86 -m
+
+if %ERRORLEVEL% NEQ 0 (
+    echo Build has failed. Deploy aborted.
+    exit /b
+)
+
 
 @REM Copy dll & pdb
 xcopy "%PROJECT%\Release\%PROJECT%.dll" "build\%PROJECT%\nvse\Plugins\" /y /d
