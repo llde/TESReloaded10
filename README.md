@@ -94,7 +94,7 @@ The configuration is stored in the `.dll.config` file and can be edited directly
 
 ----
 ## Building from source
-To build, with Visual Studio 2019 and DirectX9 SDK installed, run the `build.bat` file in command line, with the following command:
+To build, with Visual Studio 2019 (Community Edition) with Desktop Development librairies, Windows SDK and DirectX9 SDK installed, run the `build.bat` file in command line, with the following command:
 
 ```bat
 build.bat "ProjectName" "C:/DeployFolder/"
