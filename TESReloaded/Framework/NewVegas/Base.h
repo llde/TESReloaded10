@@ -199,16 +199,3 @@ public:
 	}
 
 };
-
-class ShadowManagerBase {
-public:
-
-	enum ShadowMapTypeEnum {
-		MapNear = 0,
-		MapMiddle = 1,
-		MapFar = 2,
-		MapLod = 3,
-		MapOrtho = 4,
-	};
-
-};

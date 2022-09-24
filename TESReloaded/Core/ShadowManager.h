@@ -1,8 +1,16 @@
 #pragma once
 
-class ShadowManager : public ShadowManagerBase { // Never disposed
+class ShadowManager { // Never disposed
 public:
 	static void Initialize();
+    
+	enum ShadowMapTypeEnum {
+		MapNear = 0,
+		MapMiddle = 1,
+		MapFar = 2,
+		MapLod = 3,
+		MapOrtho = 4,
+	};
 
 	enum PlaneEnum {
 		PlaneNear	= 0,
