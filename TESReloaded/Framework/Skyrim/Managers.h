@@ -28,5 +28,6 @@ class ShadowSceneNode;		extern ShadowSceneNode*			SceneNode;
 #include "GameEventManager.h"
 #include "GameMenuManager.h"
 #include "CameraManager.h"
+#include "ShadowManager.h"
 
 void InitializeManagers();
