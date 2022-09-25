@@ -78,17 +78,7 @@ class NiPoint3 {
 public:
 	float NiPoint3::operator * (const NiPoint3 pt) const { return x * pt.x + y * pt.y + z * pt.z; }
 
-	void GetLookAt(NiPoint3* LookAt, NiPoint3* Rotation) {
-		float x, y, z, r;
-		
-		x = this->x - LookAt->x;
-		y = this->y - LookAt->y;
-		z = this->z - LookAt->z;
-		r = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
-		Rotation->x = D3DXToDegree(atan2(y, x)) + 90.0f;
-		Rotation->y = D3DXToDegree(acos(z / r)) - 90.0f;
-		Rotation->z = 0;
-	}
+	void GetLookAt(NiPoint3* LookAt, NiPoint3* Rotation);
 
 	float x;
 	float y;
@@ -98,19 +88,7 @@ assert(sizeof(NiPoint3) == 0x00C);
 
 class NiVector4 {
 public:
-	void Normalize() {
-		float len = sqrt((x * x) + (y * y) + (z * z));
-		if (len > 0.000001f) {
-			x = x / len;
-			y = y / len;
-			z = z / len;
-		}
-		else {
-			x = 0.0f;
-			y = 0.0f;
-			z = 1.0f;
-		}
-	}
+	void Normalize();
 
 	float x;
 	float y;
@@ -169,22 +147,7 @@ public:
 			data[2][2] * mat.data[2][2];
 		return prd;
 	}
-	void GenerateRotationMatrixZXY(NiPoint3* v, bool degrees) {
-		float a = v->x;
-		float b = v->y;
-		float c = v->z;
-
-		if (degrees) { a = D3DXToRadian(a); b = D3DXToRadian(b); c = D3DXToRadian(c); }
-		data[0][0] = cos(a) * cos(c) - sin(a) * sin(b) * sin(c);
-		data[0][1] = -cos(b) * sin(a);
-		data[0][2] = cos(a) * sin(c) + cos(c) * sin(a) * sin(b);
-		data[1][0] = cos(c) * sin(a) + cos(a) * sin(b) * sin(c);
-		data[1][1] = cos(a) * cos(b);
-		data[1][2] = sin(a) * sin(c) - cos(a) * cos(c) * sin(b);
-		data[2][0] = -cos(b) * sin(c);
-		data[2][1] = sin(b);
-		data[2][2] = cos(b) * cos(c);
-	}
+	void GenerateRotationMatrixZXY(NiPoint3* v, bool degrees);
 
 	float data[3][3];
 };
@@ -213,13 +176,7 @@ assert(sizeof(NiPlane) == 0x010);
 
 class NiBound {
 public:
-	UInt32 WhichSide(NiPlane* Plane) {
-		float Distance = Plane->Normal * Center - Plane->Constant;
-		UInt32 Result = NiPlane::NoSide;
-
-		if (Distance <= -Radius) Result = NiPlane::NegativeSide; else if (Distance >= Radius) Result = NiPlane::PositiveSide;
-		return Result;
-	}
+	UInt32 WhichSide(NiPlane* Plane);
 
 	NiPoint3	Center;
 	float		Radius;
@@ -281,8 +238,8 @@ public:
 	float	a;
 };
 assert(sizeof(NiColorAlpha) == 0x010);
-template <typename T>
 
+template <typename T>
 class NiTList {
 public:
 	struct Entry {
@@ -296,8 +253,8 @@ public:
 	UInt32	numItems;	// 008
 };
 assert(sizeof(NiTList<void>) == 0x00C);
-template <typename TKey, typename TData>
 
+template <typename TKey, typename TData>
 class NiTMap {
 public:
 	struct Entry {
@@ -322,7 +279,7 @@ assert(sizeof(NiTMap<void, void>) == 0x010);
 template <typename T>
 class NiTArray {
 public:
-	UInt16			Add(T* Item) { return (UInt16)ThisCall(0x00A5EB20, this, Item); }
+	UInt16			Add(T* Item);
 
 	void**	_vtbl;			// 00
 	T*		data;			// 04
@@ -518,19 +475,10 @@ public:
 		kFlag_SelUpdateRigid			= 1 << 4,
 	};
 
-	float GetDistance(NiPoint3* Point) {
-
-		NiPoint3 v;
-
-		v.x = this->m_worldTransform.pos.x - Point->x;
-		v.y = this->m_worldTransform.pos.y - Point->y;
-		v.z = this->m_worldTransform.pos.z - Point->z;
-		return sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
-
-	}
-	NiBound*	GetWorldBound() { return m_kWorldBound; }
-	float		GetWorldBoundRadius() { return (m_kWorldBound ? m_kWorldBound->Radius : 0.0f); }
-
+	float GetDistance(NiPoint3* Point);
+	NiBound*	GetWorldBound();
+	float		GetWorldBoundRadius();
+    
 	NiNode*					m_parent;				// 018
 	UInt32					unk001C;				// 01C
 	NiBound*				m_kWorldBound;			// 020
@@ -554,7 +502,7 @@ public:
 	virtual bool		Unk_3E();
 	virtual bool		Unk_3F();
 	
-	void				New(UInt16 Children) { ThisCall(0x00A5ECB0, this, Children); };
+	void				New(UInt16 Children);
 
 	NiTArray<NiAVObject*>	m_children;	// 09C
 };
@@ -581,9 +529,9 @@ assert(sizeof(NiCamera) == 0x114);
 
 class SceneGraph : public NiNode {
 public:
-	void				UpdateParticleShaderFoV(float FoV) { void (__cdecl* UpdateParticleShaderFoVData)(float) = (void (__cdecl*)(float))0x00B54000; ThisCall(0x00C52020, this, FoV, 0, NULL, 0); UpdateParticleShaderFoVData(FoV); }
-	void				SetNearDistance(float Distance) { float* SettingNearDistance = (float*)0x01203148; *SettingNearDistance = Distance; }
-
+	void				UpdateParticleShaderFoV(float FoV);
+	void				SetNearDistance(float Distance);
+    
 	NiCamera*			camera;					// AC
 	UInt32				unkB0;					// B0
 	NiCullingProcess*	cullingProcess;			// B4
@@ -822,7 +770,7 @@ public:
 	virtual void	Unk_3A();
 	virtual void	Unk_3B();
 
-	NiProperty*			GetProperty(NiProperty::PropertyType Type) { return propertyState.prop[Type]; }
+	NiProperty*			GetProperty(NiProperty::PropertyType Type);
 
 	NiPropertyState		propertyState;	// 9C
 	UInt32				unkB4;			// B4
@@ -1494,10 +1442,10 @@ public:
 		REFRESHRATE_DEFAULT = 0
 	};
 
-	void							SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE State, DWORD Value) { renderState->SetSamplerState(Sampler, State, Value, false); }
-	void							PackGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiD3DShaderDeclaration* ShaderDeclaration) {}
-	void							PackSkinnedGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiSkinPartition::Partition* Partition, NiD3DShaderDeclaration* ShaderDeclaration) {}
-	void							CalculateBoneMatrixes(NiSkinInstance* SkinInstance, NiTransform* WorldTrasform) { ThisCall(0x00E6FE30, this, SkinInstance, WorldTrasform, false, 3, true); }
+	void							SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE State, DWORD Value);
+	void							PackGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiD3DShaderDeclaration* ShaderDeclaration);
+	void							PackSkinnedGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiSkinPartition::Partition* Partition, NiD3DShaderDeclaration* ShaderDeclaration);
+	void							CalculateBoneMatrixes(NiSkinInstance* SkinInstance, NiTransform* WorldTrasform);
 
 	UInt32							pad210[(0x288 - 0x210) >> 2];	// 210
 	IDirect3DDevice9*				device;							// 288
@@ -1673,12 +1621,7 @@ public:
 		kFlags_ZBufferTest			= 0x80000000,
 	};
 	
-	bool				IsLightingProperty() {
-							bool r = false;
-
-							if (type == BSShaderType::kType_Default || type == BSShaderType::kType_Lighting3) r = true;
-							return r;
-						}	
+	bool	IsLightingProperty();
 	
 	UInt32	Unk020;		// 020
 	UInt32	Unk024;		// 024
