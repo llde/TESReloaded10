@@ -3925,10 +3925,10 @@ assert(sizeof(TESAnimGroup) == 0x03C);
 
 class SkyObject {
 public:
-	virtual void*	Destroy(bool doFree);
-	virtual void	Fn_01(void);
-	virtual void	Fn_02(NiNode* niNode);
-	virtual void	Update(void* sky, float value);
+	virtual SkyObject*	Destroy(bool doFree);
+	virtual void	    GetNiNode(void);
+	virtual void	    InitNiNode(NiNode* niNode);
+    virtual void	    Update(void* sky, float value);
 
 	NiNode*				RootNode;	// 04
 };
@@ -3936,67 +3936,57 @@ assert(sizeof(SkyObject) == 0x08);
 
 class Sun : public SkyObject {
 public:
-	NiBillboardNode*	SunBillboard;		// 08
-	NiBillboardNode*	SunGlareBillboard;	// 0C
-	NiTriShape*			SunGeometry;		// 10
-	NiTriShape*			SunGlareGeometry;	// 14
-	NiTArray<NiPick*>*	SunPickList;		// 18
-	NiDirectionalLight* SunDirLight;		// 1C
-	float				flt20;				// 20
-	UInt8				byte24;				// 24
-	UInt8				byte25;				// 25
-	UInt8				byte26;				// 26
-	UInt8				byte27;				// 27
-	void*				shaderAccum;		// 28 BSShaderAccumulator*
+	NiBillboardNode*	 SunBillboard;		// 08
+	NiBillboardNode*	 SunGlareBillboard;	// 0C
+	NiTriShape*			 SunGeometry;		// 10
+	NiTriShape*			 SunGlareGeometry;	// 14
+	NiTArray<NiPick*>*	 SunPickList;		// 18
+	NiDirectionalLight*  SunDirLight;		// 1C Same as g_TES->directionalLight
+	float				 flt20;				// 20
+	UInt8				 byte24;			// 24
+	UInt8				 byte25;			// 25
+	UInt8			     byte26;			// 26
+	UInt8				 byte27;			// 27
+	BSShaderAccumulator* shaderAccum;		// 28 BSShaderAccumulator*
 };
 assert(sizeof(Sun) == 0x2C);
 
-class Atmosphere : public SkyObject {		// From Oblivion
+class Atmosphere : public SkyObject {
 public:
-	NiAVObject*		Mesh;					// 08
-	BSFogProperty*	fogProperty;			// 0C
-	UInt32			unk10;					// 10
-	NiNode*			Quad;					// 14
-	UInt8			unk18;					// 18
-	UInt8			pad18[3];
+	virtual void		Init(NiNode* niNode, BSFogProperty* _fogProp);
+    
+	NiNode*		    Mesh;			// 08
+	BSFogProperty*	fogProperty;	// 0C Same as *0x11DEB00
+	NiRefObject*	object10;		// 10
+	NiRefObject*	Quad;			// 14
+	UInt8			unk18;			// 18
+	UInt8			pad19[3];
 
 };
 assert(sizeof(Atmosphere) == 0x01C);
 
-class Stars : public SkyObject {			// From Oblivion
+class Stars : public SkyObject {	
 public:
-	UInt32			unk08;					// 08
-	float			unk0C;					// 0C
+	NiNode*			node08;			// 08
+	float			flt0C;			// 0C
 };
 assert(sizeof(Stars) == 0x010);
 
 class Clouds : public SkyObject {
 public:
 
-	NiTriStrips*		layer0;	// 08	(NiTriStrips)
-	NiTriStrips*		layer1;	// 0C		"
-	NiTriStrips*		layer2;	// 10		"
-	NiTriStrips*		layer3;	// 14		"
-	UInt32			unk18[4];	// 18
-	float			flt28;		// 28
-	float			flt2C;		// 2C
-	float			flt30;		// 30
-	float			flt34;		// 34
-	float			flt38;		// 38
-	float			flt3C;		// 3C
-	float			flt40;		// 40
-	float			flt44;		// 44
-	float			flt48;		// 48
-	float			flt4C;		// 4C
-	float			flt50;		// 50
-	float			flt54;		// 54
-	UInt32			numLayers;	// 58
+	NiTriStrips*		layers[4];		// 08 (NiTriStrips)
+	NiSourceTexture*	textures[4];	// 18
+	NiPoint3			layerPos[4];	// 28
+	UInt16				numLayers;		// 58
+	UInt8				byte5A;			// 5A
+	UInt8				byte5B;			// 5B
 };
 assert(sizeof(Clouds) == 0x05C);
 
 class Precipitation {
 public:
-	virtual void*	Destroy(bool doFree);
+	virtual Precipitation*	Destroy(bool doFree);
 
 	NiNode*		node04;		// 04
 	NiNode*		node08;		// 08
@@ -4008,49 +3998,74 @@ assert(sizeof(Precipitation) == 0x018);
 
 class Moon : public SkyObject {
 public:
-	NiNode*			MoonNode;				// 08
-	NiNode*			ShadowNode;				// 0C
-	NiTriShape*		MoonMesh;				// 10
-	NiTriShape*		ShadowMesh;				// 14
-	char*			texture_full;			// 18
-	UInt32			unk1C;					// 1C
-	char*			texture_three_wan;		// 20
-	UInt32			unk24;					// 24
-	char*			texture_half_wan;		// 28
-	UInt32			unk2C;					// 2C
-	char*			texture_one_wan;		// 30
-	UInt32			unk34;					// 34
-	UInt32			unk38;					// 38
-	UInt32			unk3C;					// 3C
-	char*			texture_one_wax;		// 40
-	UInt32			unk44;					// 44
-	char*			texture_half_wax;		// 48
-	UInt32			unk4C;					// 4C
-	char*			texture_three_wax;		// 50
-	UInt32			unk54;					// 54
-	float			unk58;					// 58
-	float			unk5C;					// 5C
-	float			unk60;					// 60
-	float			unk64;					// 64
-	float			unk68;					// 68
-	UInt32			unk6C;					// 6C
-	UInt32			unk70;					// 70
-	float			unk74;					// 74
-	float			unk78;					// 78
+	virtual void	Refresh(NiNode* niNode, const char* moonStr);
+    
+	NiNode*			MoonNode;			// 08
+	NiNode*			ShadowNode;			// 0C
+	NiTriShape*		MoonMesh;			// 10
+	NiTriShape*		ShadowMesh;			// 14
+	char*			texture_full;		// 18
+	UInt32			unk1C;				// 1C
+	char*			texture_three_wan;	// 20
+	UInt32			unk24;				// 24
+	char*			texture_half_wan;	// 28
+	UInt32			unk2C;				// 2C
+	char*			texture_one_wan;	// 30
+	UInt32			unk34;				// 34
+	UInt32			unk38;				// 38
+	UInt32			unk3C;				// 3C
+	char*			texture_one_wax;	// 40
+	UInt32			unk44;				// 44
+	char*			texture_half_wax;	// 48
+	UInt32			unk4C;				// 4C
+	char*			texture_three_wax;	// 50
+	UInt32			unk54;				// 54
+	float			AngleFadeStart;		// 58  (masser = 55, sec = 55)
+	float			AngleFadeEnd;		// 5C  (masser = 45 sec = 40)
+	float			unk60;				// 60
+	float			unk64;				// 64
+	float			ZOffset;			// 68
+	UInt32			unk6C;				// 6C
+	UInt32			unk70;				// 70
+	float			degree;				// 74
+	float			unk78;				// 78
+	
+	float			fadeValue() {
+		float result;
+		if ((this->degree) <= 180.0) {
+
+			if ((this->degree) > 90) {
+				result = (180.0f - this->degree) / 15.0f;
+				return result > 1.0f ? 1.0f : result;
+			}
+			else {
+				result = this->degree / 15.0f;
+				return result > 1.0f ? 1.0f : result;
+			}
+		}
+        return 0;
+    }
 };
 assert(sizeof(Moon) == 0x07C);
 
 class Sky {
 public:
 	void ForceWeather(TESWeather* Weather) { ThisCall(0x0063D0E0, this, Weather, 0); }
+	static Sky* Get() { return *(Sky**)0x11DEA20; }
 
+//	void RefreshMoon();
+	void RefreshClimate(TESClimate* climate, bool immediate = true)
+	{
+		ThisCall(0x0063C8F0, this, climate, immediate);
+	}
+//	bool GetIsRaining();
 	void**			_vtbl;				// 000
 	NiNode*			nodeSkyRoot;		// 004
 	NiNode*			nodeMoonsRoot;		// 008
 	TESClimate*		firstClimate;		// 00C
 	TESWeather*		firstWeather;		// 010
-	TESWeather*		secondWeather;		// 014
-	TESWeather*		weather018;			// 018
+	TESWeather*		secondWeather;		// 014	Previous weather, gradually fading, on weather transition
+	TESWeather*		defaultWeather;		// 018	Picked from currClimate weathers list. currClimate is set to this unless there's a regional weather
 	TESWeather*		weatherOverride;	// 01C
 	Atmosphere*		atmosphere;			// 020
 	Stars*			stars;				// 024
@@ -4067,32 +4082,34 @@ public:
 	NiPoint3		vector078;			// 078
 	NiPoint3		vector084;			// 084
 	NiPoint3		vector090;			// 090
-	NiPoint3		vector09C;			// 09C
+	NiPoint3		vector09C;			// 09C	virtual void	Refresh(NiNode* niNode, const char* moonStr);
 	NiPoint3		vector0A8;			// 0A8
 	NiPoint3		vector0B4;			// 0B4
 	NiColor			sunFog;				// 0C0
 	float			windSpeed;			// 0CC
 	float			windDirection;		// 0D0
-	UInt32			unk0D4[6];			// 0D4
+	UInt32			unk0D4[5];			// 0D4
+	float			fogPower;			// 0E8
 	float			gameHour;			// 0EC
 	float			lastUpdateHour;		// 0F0
 	float			weatherPercent;		// 0F4
 	UInt32			unk0F8;				// 0F8
-	UInt32			unk0FC;				// 0FC
-	float			lightningFxPerc;	// 100
-	UInt32			unk104;				// 104
+	TList<void*>*	skySounds;			// 0FC   TList<SkySound>*
+	float			lightningFxPerc;	// 100 // DONE
+    UInt32			unk104;				// 104
 	float			flt108;				// 108
 	float			flt10C;				// 10C
 	float			flt110;				// 110
 	UInt32			unk114;				// 114
 	UInt32			flags;				// 118
-	void*			ismif11C;			// 11C ImageSpaceModifierInstanceForm*
-	void*			ismif120;			// 120
-	void*			ismif124;			// 124
-	void*			ismif128;			// 128
-	float			flt12C;				// 12C
-	float			flt130;				// 130
-	float			flt134;				// 134
+	void*			currFadeInIMOD;		// 11C ImageSpaceModifierInstanceForm*
+	void*			currFadeOutIMOD;	// 120
+	void*			transFadeInIMOD;	// 124  On weather transition, set to the previuos weather fadeIn/OutIMODs
+	void*			transFadeOutIMOD;	// 128
+	float			flt12C;				// 12C	Always 12.0
+	float			flt130;				// 130	Always 23.99
+	float			flt134;				// 134	Always 0
+
 };
 assert(sizeof(Sky) == 0x138);
 
