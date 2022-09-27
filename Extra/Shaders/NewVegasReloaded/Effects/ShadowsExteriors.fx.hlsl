@@ -30,6 +30,8 @@ static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_Project
 static const float Zmul = nearZ * farZ;
 static const float Zdiff = farZ - nearZ;
 static const float darkness = TESR_ShadowData.y;
+static const float MIN_VARIANCE = 0.000001;
+static const float BLEED_CORRECTION = 0.6;
 
 struct VSOUT
 {
@@ -81,14 +83,24 @@ float4 ChebyshevUpperBound(float2 moments, float distance)
 
 	// Compute variance.    
 	float Variance = moments.y - moments.x * moments.x;
-	Variance = max(Variance, 0.00001);
+	Variance = max(Variance, MIN_VARIANCE);
 
 	// Compute the Chebyshev upper bound.
 	float d = distance - moments.x;
-	float p_max = linstep(0.2, 1.0, Variance / (Variance + d*d));
+	float p_max = linstep(BLEED_CORRECTION, 1.0, Variance / (Variance + d*d));
 	return max(p, p_max);
 }
 
+// Exponential Shadow Maps
+float GetLightAmountValueESM(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord){
+	float4 LightSpaceCoord = mul(coord, lightTransform);
+	LightSpaceCoord.xyz /= LightSpaceCoord.w;
+	LightSpaceCoord.x = LightSpaceCoord.x * 0.5f + 0.5f;
+	LightSpaceCoord.y = LightSpaceCoord.y * -0.5f + 0.5f;
+
+	float4 depth = tex2D(shadowBuffer, LightSpaceCoord.xy).x;
+	return exp(-500 * (LightSpaceCoord.z - depth));
+}
 
 float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord)
 {
@@ -105,44 +117,43 @@ float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float
 	return ChebyshevUpperBound(Moments, LightSpaceCoord.z);
 }
 
-float GetLightAmount(float4 coord, float3 camera_vector)
-{
-	// check distance to detect far or near shadows
-	if (length(camera_vector) < TESR_ShadowRadius.x){
-		return GetLightAmountValue(TESR_ShadowMapBufferNear, TESR_ShadowCameraToLightTransformNear, coord);
-	}
-
-	if (length(camera_vector) < TESR_ShadowRadius.y){
-		return GetLightAmountValue(TESR_ShadowMapBufferMiddle, TESR_ShadowCameraToLightTransformMiddle, coord);
-	}
-
-	if (length(camera_vector) < TESR_ShadowRadius.z){
-		return GetLightAmountValue(TESR_ShadowMapBufferFar, TESR_ShadowCameraToLightTransformFar, coord);
-	}
-
-	if (length(camera_vector) < TESR_ShadowRadius.w){
-		return GetLightAmountValue(TESR_ShadowMapBufferLod, TESR_ShadowCameraToLightTransformLod, coord);
-	}
-	return 1.0;
-}
-
-
 // returns a value from 0 to 1 based on the positions of a value between a min/max 
 float invLerp(float from, float to, float value){
   return (value - from) / (to - from);
 }
 
 float fogCoeff(float depth){
-	return clamp(invLerp(TESR_FogDistance.x, TESR_FogDistance.y, depth), 0.0, 1.0);
+	return 2.0 - clamp(invLerp(TESR_FogDistance.x, TESR_FogDistance.y, depth), 0.0, 1.0) / TESR_FogDistance.z;
+}
+
+float GetLightAmount(float4 coord, float3 camera_vector)
+{
+	float depth = length(camera_vector);
+	float fog = fogCoeff(depth);
+
+	// check distance to detect far or near shadows, only apply fog to far map
+	if (depth < TESR_ShadowRadius.x * 0.99){
+		return GetLightAmountValueESM(TESR_ShadowMapBufferNear, TESR_ShadowCameraToLightTransformNear, coord);
+	}
+
+	if (depth < TESR_ShadowRadius.y * 0.99){
+		return GetLightAmountValueESM(TESR_ShadowMapBufferMiddle, TESR_ShadowCameraToLightTransformMiddle, coord);
+	}
+
+	if (depth < TESR_ShadowRadius.z * 0.99){
+		return GetLightAmountValueESM(TESR_ShadowMapBufferFar, TESR_ShadowCameraToLightTransformFar, coord);// * fog;
+	}
+
+	if (depth < TESR_ShadowRadius.w * 0.99){
+		return GetLightAmountValueESM(TESR_ShadowMapBufferLod, TESR_ShadowCameraToLightTransformLod, coord);// * fog;
+	}
+	return 1.0;
 }
 
 float4 Shadow(VSOUT IN) : COLOR0
 {
 	// returns a shadow value from darkness setting value (full shadow) 
 	// to 1 (full light) using variance maps algorithm
-
-	// bypass during nighttime
-	if (TESR_SunDirection.z < 0) return 1.0f;
 
 	float Shadow = 1.0f;
 	float depth = readDepth(IN.UVCoord);
@@ -154,9 +165,6 @@ float4 Shadow(VSOUT IN) : COLOR0
 		float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 
 		Shadow = GetLightAmount(pos, camera_vector);
-
-		// apply fog attenuation
-		Shadow = saturate(Shadow + fogCoeff(depth) * 4);
 
 		// brighten shadow value from 0 to darkness from config value
 		Shadow = lerp(darkness, 1.0f, Shadow);
