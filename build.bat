@@ -8,7 +8,7 @@ SET "DEPLOY_LOCATION=%~2"
 if "%PROJECT%" NEQ "NewVegasReloaded" (
     if "%PROJECT%" NEQ "OblivionReloaded" (
         echo "Project %PROJECT% invalid. Use 'NewVegasReloaded' or 'OblivionReloaded'."
-        exit /b
+        exit %ERRORLEVEL%
     )
 )
 
@@ -17,7 +17,7 @@ if "%PROJECT%" NEQ "NewVegasReloaded" (
 
 if %ERRORLEVEL% NEQ 0 (
     echo Build has failed. Deploy aborted.
-    exit /b
+    exit %ERRORLEVEL%
 )
 
 
