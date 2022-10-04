@@ -95,16 +95,17 @@ bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiNode* Node) {
 				break;
 			}
 		}
-		if (ShadowMapType == MapFar && R) { // Ensures to not be fully in the near frustum
-			for (int i = 0; i < 6; ++i) {
-				Distance = D3DXPlaneDotCoord(&ShadowMapFrustum[MapNear][i], &Position);
-				if (Distance <= -Bound->Radius || std::fabs(Distance) < Bound->Radius) {
-					R = false;
-					break;
-				}
-			}
-			R = !R;
-		}
+
+		//if (ShadowMapType > MapNear && ShadowMapType < MapOrtho && R) { // Ensures to not be fully in the near frustum
+		//	for (int i = 0; i < 6; ++i) {
+		//		Distance = D3DXPlaneDotCoord(&ShadowMapFrustum[ShadowMapType - 1][i], &Position);
+		//		if (Distance <= -Bound->Radius || std::fabs(Distance) < Bound->Radius) {
+		//			R = false;
+		//			break;
+		//		}
+		//	}
+		//	R = !R;
+		//}
 	}
 	return R;
 
