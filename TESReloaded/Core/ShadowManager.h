@@ -34,7 +34,8 @@ public:
 	void					RenderShadowMaps();
 	void					CalculateBlend(NiPointLight** Lights, int LightIndex);
     void                    BlurShadowMap(ShadowMapTypeEnum ShadowMapType);    
-	
+	D3DXMATRIX				GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXMATRIX View);
+
     ShaderRecordVertex*		ShadowMapVertex;
 	ShaderRecordPixel*		ShadowMapPixel;
 	D3DVIEWPORT9			ShadowMapViewPort[5];
