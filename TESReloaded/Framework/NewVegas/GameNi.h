@@ -518,7 +518,7 @@ assert(sizeof(NiBillboardNode) == 0xB4);
 
 class NiCamera : public NiAVObject {
 public:
-	float			WorldToCam[4][4];	// 94
+	D3DMATRIX 	    WorldToCam;	        // 94
 	NiFrustum		Frustum;			// D4
 	float			MinNearPlaneDist;	// F8
 	float			MaxFarNearRatio;	// FC
