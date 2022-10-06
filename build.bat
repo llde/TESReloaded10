@@ -8,12 +8,18 @@ SET "DEPLOY_LOCATION=%~2"
 if "%PROJECT%" NEQ "NewVegasReloaded" (
     if "%PROJECT%" NEQ "OblivionReloaded" (
         echo "Project %PROJECT% invalid. Use 'NewVegasReloaded' or 'OblivionReloaded'."
-        exit /b
+        exit %ERRORLEVEL%
     )
 )
 
 @REM build project
-"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild" -target:%PROJECT% /property:Configuration=Release /property:Platform=x86 -m
+"%programfiles(x86)%\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild" -target:%PROJECT% /property:Configuration=Release /property:Platform=x86 -m
+
+if %ERRORLEVEL% NEQ 0 (
+    echo Build has failed. Deploy aborted.
+    exit %ERRORLEVEL%
+)
+
 
 @REM Copy dll & pdb
 xcopy "%PROJECT%\Release\%PROJECT%.dll" "build\%PROJECT%\nvse\Plugins\" /y /d
