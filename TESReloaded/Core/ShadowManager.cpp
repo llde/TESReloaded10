@@ -95,16 +95,17 @@ bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiNode* Node) {
 				break;
 			}
 		}
-		if (ShadowMapType == MapFar && R) { // Ensures to not be fully in the near frustum
-			for (int i = 0; i < 6; ++i) {
-				Distance = D3DXPlaneDotCoord(&ShadowMapFrustum[MapNear][i], &Position);
-				if (Distance <= -Bound->Radius || std::fabs(Distance) < Bound->Radius) {
-					R = false;
-					break;
-				}
-			}
-			R = !R;
-		}
+
+		//if (ShadowMapType > MapNear && ShadowMapType < MapOrtho && R) { // Ensures to not be fully in the near frustum
+		//	for (int i = 0; i < 6; ++i) {
+		//		Distance = D3DXPlaneDotCoord(&ShadowMapFrustum[ShadowMapType - 1][i], &Position);
+		//		if (Distance <= -Bound->Radius || std::fabs(Distance) < Bound->Radius) {
+		//			R = false;
+		//			break;
+		//		}
+		//	}
+		//	R = !R;
+		//}
 	}
 	return R;
 
@@ -329,7 +330,94 @@ void ShadowManager::Render(NiGeometry* Geo) {
 			}
 		}
 	}
+}
 
+D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXMATRIX View) {
+	D3DXMATRIX Proj;
+	float FarPlane = ShadowsExteriors->ShadowMapFarPlane;
+	float Radius = ShadowsExteriors->ShadowMapRadius[ShadowMapType];
+
+	// calculating the size of the shadow cascade
+	float znear;
+	float zfar;
+	switch (ShadowMapType) {
+	case ShadowMapTypeEnum::MapNear:
+		znear = 0.0f;
+		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapNear];
+		break;
+	case ShadowMapTypeEnum::MapMiddle:
+		znear = 0.0f;
+		//znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapNear] * 0.8;
+		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapMiddle];
+		break;
+	case ShadowMapTypeEnum::MapFar:
+		znear = 0.0f;
+		//znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapMiddle] * 0.8;
+		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapFar];
+		break;
+	case ShadowMapTypeEnum::MapLod:
+		znear = 0.0f;
+		//znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapFar]* 0.8;
+		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapLod];
+		break;
+	default:
+		D3DXMatrixOrthoOffCenterRH(&Proj, -Radius, Radius, -Radius, Radius, 0.0f, 2.0f * FarPlane);
+		return View * Proj;
+	}
+
+	NiCamera* Camera = WorldSceneGraph->camera;
+	float w = Camera->Frustum.Right - Camera->Frustum.Left;
+	float h = Camera->Frustum.Top - Camera->Frustum.Bottom;
+
+	float ar = h / w;
+	float fov = 90; // find out how to get the actual camera fov
+	// SceneGraph* scene = new SceneGraph();
+	// scene->cameraFOV; 
+	// Logger::Log("fov %f", fov);
+
+	float tanHalfHFOV = tanf(D3DXToRadian(fov / 2.0f));
+	float tanHalfVFOV = tanf(D3DXToRadian((fov * ar) / 2.0f));
+
+	float xn = znear * tanHalfHFOV;
+	float xf = zfar * tanHalfHFOV;
+	float yn = znear * tanHalfVFOV;
+	float yf = zfar * tanHalfVFOV;
+
+	D3DXVECTOR4 frustrumPoints[8];
+
+	// near face
+	frustrumPoints[0] = D3DXVECTOR4(xn, yn, znear, 1.0);
+	frustrumPoints[1] = D3DXVECTOR4(-xn, yn, znear, 1.0);
+	frustrumPoints[2] = D3DXVECTOR4(xn, -yn, znear, 1.0);
+	frustrumPoints[3] = D3DXVECTOR4(-xn, -yn, znear, 1.0);
+
+	// far face
+	frustrumPoints[4] = D3DXVECTOR4(xf, yf, zfar, 1.0);
+	frustrumPoints[5] = D3DXVECTOR4(-xf, yf, zfar, 1.0);
+	frustrumPoints[6] = D3DXVECTOR4(xf, -yf, zfar, 1.0);
+	frustrumPoints[7] = D3DXVECTOR4(-xf, -yf, zfar, 1.0);
+
+	// values of the final light frustrum
+	float left = 0.0f;
+	float right = 0.0f;
+	float bottom = 0.0f;
+	float top = 0.0f;
+
+	// transform from camera to world then to light space
+	D3DXMATRIX m = TheRenderManager->InvViewMatrix * View;
+	D3DXVECTOR4 p;
+	for (int i = 0; i < 8; i++) {
+		D3DXVec4Transform(&p, &frustrumPoints[i], &m);
+
+		// extend frustrum to include all corners
+		if (p.x < left || left == 0.0f) left = p.x;
+		if (p.x > right || right == 0.0f) right = p.x;
+		if (p.y > top || top == 0.0f) top = p.y;
+		if (p.y < bottom || bottom == 0.0f) bottom = p.y;
+	}
+
+	D3DXMatrixOrthoOffCenterRH(&Proj, left, right, bottom, top, 0.0f, 2.0f * FarPlane);
+	return View * Proj;
 }
 
 void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir) {
@@ -340,10 +428,9 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 	GridCellArray* CellArray = Tes->gridCellArray;
 	UInt32 CellArraySize = CellArray->size * CellArray->size;
 	float FarPlane = ShadowsExteriors->ShadowMapFarPlane;
-	float Radius = ShadowsExteriors->ShadowMapRadius[ShadowMapType];
 	float MinRadius = ShadowsExteriors->Forms[ShadowMapType].MinRadius;
 	D3DXVECTOR3 Up = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-	D3DXMATRIX View, Proj;
+	D3DXMATRIX View;
 	D3DXVECTOR3 Eye;
 
 	AlphaEnabled = ShadowsExteriors->AlphaEnabled[ShadowMapType];
@@ -351,10 +438,12 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 	Eye.x = At->x - FarPlane * SunDir->x * -1;
 	Eye.y = At->y - FarPlane * SunDir->y * -1;
 	Eye.z = At->z - FarPlane * SunDir->z * -1;
+
+	// calculating the projection matrix for point of view of the light
 	D3DXMatrixLookAtRH(&View, &Eye, At, &Up);
-	D3DXMatrixOrthoRH(&Proj, 2.0f * Radius, (1 + SunDir->z) * Radius, 0.0f, 2.0f * FarPlane);
-	ShadowMap->ShadowViewProj = View * Proj;
+	ShadowMap->ShadowViewProj = GetCascadeViewProj(ShadowMapType, ShadowsExteriors, View); // calculating the size of the shadow cascade
 	ShadowMap->ShadowCameraToLight[ShadowMapType] = TheRenderManager->InvViewProjMatrix * ShadowMap->ShadowViewProj;
+
 	BillboardRight = { View._11, View._21, View._31, 0.0f };
 	BillboardUp = { View._12, View._22, View._32, 0.0f };
 	SetFrustum(ShadowMapType, &ShadowMap->ShadowViewProj);

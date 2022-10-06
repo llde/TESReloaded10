@@ -149,6 +149,8 @@ void RenderManager::SetupSceneCamera() {
 		invViewMatrix._43 = Loc.z;
 		invViewMatrix._44 = 1.0f;
 
+		InvViewMatrix = invViewMatrix;
+
 		projMatrix._11 = 2.0f / RmL;
 		projMatrix._12 = 0.0f;
 		projMatrix._13 = 0.0f;
