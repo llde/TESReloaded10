@@ -753,17 +753,11 @@ void ShaderManager::UpdateConstants() {
 		ShaderConst.SunTiming.w = currentClimate->sunsetEnd / 6.0f + 1.0f;
 
 		if (lastGameTime != ShaderConst.GameTime.y) {
+			// update Sun position
 			float deltaz = ShaderConst.SunDir.z;
-			ShaderConst.SunDir.x = SunRoot->m_localTransform.pos.x;
-			ShaderConst.SunDir.y = SunRoot->m_localTransform.pos.y;
-			ShaderConst.SunDir.z = SunRoot->m_localTransform.pos.z;
-			((NiVector4*)&ShaderConst.SunDir)->Normalize();
-			if (ShaderConst.GameTime.y > ShaderConst.SunTiming.w || ShaderConst.GameTime.y < ShaderConst.SunTiming.x)
-				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
-			else if (ShaderConst.GameTime.y > ShaderConst.SunTiming.z && fabs(deltaz) - ShaderConst.SunDir.z <= 0.0f)
-				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
-			else if (ShaderConst.GameTime.y < ShaderConst.SunTiming.y && fabs(deltaz) - ShaderConst.SunDir.z >= 0.0f)
-				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
+			ShaderConst.SunDir.x = Tes->directionalLight->direction.x * -1;
+			ShaderConst.SunDir.y = Tes->directionalLight->direction.y * -1;
+			ShaderConst.SunDir.z = Tes->directionalLight->direction.z * -1;
 		}
 
 		if (currentWorldSpace) {
