@@ -91,26 +91,29 @@ float4 ChebyshevUpperBound(float2 moments, float distance)
 	return max(p, p_max);
 }
 
+
+float4 ScreenCoordToTexCoord(float4 coord) {
+	// apply perspective and convert from -1/1 (perspective division) to range to 0/1 (shadowMap range);
+	coord.xyz /= coord.w;
+	coord.x = coord.x * 0.5f + 0.5f;
+	coord.y = coord.y * -0.5f + 0.5f;
+	return coord;
+}
+
 // Exponential Shadow Maps
 float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord){
 	float4 LightSpaceCoord = mul(coord, lightTransform);
-	LightSpaceCoord.xyz /= LightSpaceCoord.w;
-	LightSpaceCoord.x = LightSpaceCoord.x * 0.5f + 0.5f;
-	LightSpaceCoord.y = LightSpaceCoord.y * -0.5f + 0.5f;
+	LightSpaceCoord = ScreenCoordToTexCoord(LightSpaceCoord);
 
-	float4 depth = tex2D(shadowBuffer, LightSpaceCoord.xy).x;
-	return exp(-500 * (LightSpaceCoord.z - depth));
+	float4 esm = tex2D(shadowBuffer, LightSpaceCoord.xy).x;
+	return clamp(esm * exp(-80 * (LightSpaceCoord.z)), 0.0f, 1.0f);
 }
 
 float GetLightAmountValueWSM(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord)
 {
 	//returns wether the coordinates are in shadow (0), light (1) or penumbra.
 	float4 LightSpaceCoord = mul(coord, lightTransform);
-
-	// apply perspective and convert from -1/1 (perspective division) to range to 0/1 (shadowMap range);
-	LightSpaceCoord.xyz /= LightSpaceCoord.w;
-	LightSpaceCoord.x = LightSpaceCoord.x * 0.5f + 0.5f;
-	LightSpaceCoord.y = LightSpaceCoord.y * -0.5f + 0.5f;
+	LightSpaceCoord = ScreenCoordToTexCoord(LightSpaceCoord);
 
 	float2 Moments = tex2D(shadowBuffer, LightSpaceCoord.xy).xy;
 

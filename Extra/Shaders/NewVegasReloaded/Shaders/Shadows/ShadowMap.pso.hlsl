@@ -30,11 +30,10 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     	depth = IN.texcoord_0.z / IN.texcoord_0.w;
 	}
 
-	//	cheat to reduce shadow acne in variance maps
-	float dx = ddx(depth);
-	float dy = ddy(depth);
-	float moment2 = depth * depth + 0.25 * (dx * dx + dy * dy);
 
-	OUT.color_0 = float4(depth, moment2, 0.0f, 1.0f);
+	float k = 80;
+	float esm = exp( 80 * depth);
+
+	OUT.color_0 = float4(esm, esm - depth, 0.0f, 1.0f);
     return OUT;	
 };
