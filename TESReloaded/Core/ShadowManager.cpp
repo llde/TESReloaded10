@@ -625,18 +625,15 @@ void ShadowManager::RenderShadowMaps() {
 
 		CurrentVertex = ShadowMapVertex;
 		CurrentPixel = ShadowMapPixel;
-		RenderShadowMap(MapNear, ShadowsExteriors, &At, SunDir);
-		RenderShadowMap(MapMiddle, ShadowsExteriors, &At, SunDir);
-		RenderShadowMap(MapFar, ShadowsExteriors, &At, SunDir);
-		RenderShadowMap(MapLod, ShadowsExteriors, &At, SunDir);
-		RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir);
-		ShadowData->z = ShadowMapInverseResolution[MapNear];
-		ShadowData->w = ShadowMapInverseResolution[MapFar];
-		OrthoData->z = ShadowMapInverseResolution[MapOrtho];
-        BlurShadowMap(MapNear);
-        BlurShadowMap(MapMiddle);
-        BlurShadowMap(MapFar);
-		BlurShadowMap(MapLod);
+
+		// Render all shadow maps
+		for (int i = MapNear; i <= MapOrtho; i++) {
+			ShadowMapTypeEnum ShadowMapType = static_cast<ShadowMapTypeEnum>(i);
+			RenderShadowMap(ShadowMapType, ShadowsExteriors, &At, SunDir);
+			if (ShadowMapType != MapOrtho) {
+				BlurShadowMap(ShadowMapType);
+			}
+		}
 
 		ShadowData->x = ShadowsExteriors->Quality;
 		if (TheSettingManager->SettingsMain.Effects.ShadowsExteriors) ShadowData->x = -1; // Disable the forward shadowing
@@ -766,17 +763,33 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
 
 	Device->SetFVF(FrameFVF);
 	Device->SetStreamSource(0, BlurShadowVertex[ShadowMapType], 0, sizeof(FrameVS));
-    Device->SetRenderTarget(0, TargetShadowMap);
- //   Device->Clear(0L, NULL, D3DCLEAR_TARGET, D3DXCOLOR(0, 0, 0, 0), 1.0f, 0L);
-    Device->SetTexture(0, SourceShadowMap);
-    //ShadowMapBlurVertex->SetCT(); Just screenspace. No constants
-    ShadowMapBlurPixel->SetCT();
-    D3DXVECTOR4 inverseRes = { ShadowMapInverseResolution[ShadowMapType] ,ShadowMapInverseResolution[ShadowMapType], 0.0f, 0.0f}; 
-    ShadowMapBlurPixel->SetShaderConstantF(0, &inverseRes, 1);
-   // ShadowMapBlur->Effect->SetVector(0, &TheShaderManager->ShaderConst.ReciprocalResolution);
-    Device->BeginScene();
-//	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
-	Device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
-    Device->EndScene();
+
+	// TODO: Figure out why 3 passes are necessary for blur to show up in final map
+	D3DXVECTOR4 Blur[3] = {
+		D3DXVECTOR4(1.0f, 0.0f, 0.0f, 0.0f),
+		D3DXVECTOR4(0.0f, 1.0f, 0.0f, 0.0f),
+		D3DXVECTOR4(1.0f, 0.0f, 0.0f, 0.0f),
+	}; 
+
+	// TODO: fix need for 3 passes
+	for (int i = 0; i < 3; i++) {
+		Device->SetTexture(0, SourceShadowMap);
+		Device->SetRenderTarget(0, TargetShadowMap);
+
+		// set resolution and blur direction shader constants
+		ShadowMapBlurPixel->SetCT();
+		D3DXVECTOR4 inverseRes = { ShadowMapInverseResolution[ShadowMapType], ShadowMapInverseResolution[ShadowMapType], 0.0f, 0.0f };
+		ShadowMapBlurPixel->SetShaderConstantF(0, &inverseRes, 1);
+		ShadowMapBlurPixel->SetShaderConstantF(1, &Blur[i], 1);
+
+		// draw call to execute the shader
+		Device->BeginScene();
+		Device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
+		Device->EndScene();
+
+		// transfer Render target to texture
+		SourceShadowMap->GetSurfaceLevel(0, &TargetShadowMap);
+		Device->StretchRect(TargetShadowMap, NULL, TargetShadowMap, NULL, D3DTEXF_LINEAR);
+	}
 }
 
