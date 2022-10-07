@@ -754,7 +754,8 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
     NiDX9RenderState* RenderState = TheRenderManager->renderState;
     IDirect3DTexture9* SourceShadowMap = TheTextureManager->ShadowMapTexture[ShadowMapType];
     IDirect3DSurface9* TargetShadowMap = TheTextureManager->ShadowMapSurfaceBlurred[ShadowMapType];
-    
+	IDirect3DTexture9* BlurredShadowTexture = TheTextureManager->ShadowMapTextureBlurred[ShadowMapType];
+
     Device->SetDepthStencilSurface(NULL);
     RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE, RenderStateArgs);
     RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE, RenderStateArgs);
@@ -764,22 +765,21 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
 	Device->SetFVF(FrameFVF);
 	Device->SetStreamSource(0, BlurShadowVertex[ShadowMapType], 0, sizeof(FrameVS));
 
-	// TODO: Figure out why 3 passes are necessary for blur to show up in final map
-	D3DXVECTOR4 Blur[3] = {
+	D3DXVECTOR4 Blur[2] = {
 		D3DXVECTOR4(1.0f, 0.0f, 0.0f, 0.0f),
 		D3DXVECTOR4(0.0f, 1.0f, 0.0f, 0.0f),
-		D3DXVECTOR4(1.0f, 0.0f, 0.0f, 0.0f),
 	}; 
 
-	// TODO: fix need for 3 passes
-	for (int i = 0; i < 3; i++) {
-		Device->SetTexture(0, SourceShadowMap);
-		Device->SetRenderTarget(0, TargetShadowMap);
+	Device->SetTexture(0, SourceShadowMap);
+	Device->SetRenderTarget(0, TargetShadowMap);
 
+	ShadowMapBlurPixel->SetCT();
+	D3DXVECTOR4 inverseRes = { ShadowMapInverseResolution[ShadowMapType], ShadowMapInverseResolution[ShadowMapType], 0.0f, 0.0f };
+	ShadowMapBlurPixel->SetShaderConstantF(0, &inverseRes, 1);
+
+	// blur in two passes, vertically and horizontally
+	for (int i = 0; i < 2; i++) {
 		// set resolution and blur direction shader constants
-		ShadowMapBlurPixel->SetCT();
-		D3DXVECTOR4 inverseRes = { ShadowMapInverseResolution[ShadowMapType], ShadowMapInverseResolution[ShadowMapType], 0.0f, 0.0f };
-		ShadowMapBlurPixel->SetShaderConstantF(0, &inverseRes, 1);
 		ShadowMapBlurPixel->SetShaderConstantF(1, &Blur[i], 1);
 
 		// draw call to execute the shader
@@ -788,8 +788,7 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
 		Device->EndScene();
 
 		// transfer Render target to texture
-		SourceShadowMap->GetSurfaceLevel(0, &TargetShadowMap);
-		Device->StretchRect(TargetShadowMap, NULL, TargetShadowMap, NULL, D3DTEXF_LINEAR);
+		Device->SetTexture(0, BlurredShadowTexture);
 	}
 }
 
