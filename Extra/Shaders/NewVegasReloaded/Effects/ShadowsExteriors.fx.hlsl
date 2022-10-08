@@ -92,7 +92,7 @@ float4 ChebyshevUpperBound(float2 moments, float distance)
 }
 
 // Exponential Shadow Maps
-float GetLightAmountValueESM(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord){
+float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord){
 	float4 LightSpaceCoord = mul(coord, lightTransform);
 	LightSpaceCoord.xyz /= LightSpaceCoord.w;
 	LightSpaceCoord.x = LightSpaceCoord.x * 0.5f + 0.5f;
@@ -102,7 +102,7 @@ float GetLightAmountValueESM(sampler2D shadowBuffer, float4x4 lightTransform, fl
 	return exp(-500 * (LightSpaceCoord.z - depth));
 }
 
-float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord)
+float GetLightAmountValueWSM(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord)
 {
 	//returns wether the coordinates are in shadow (0), light (1) or penumbra.
 	float4 LightSpaceCoord = mul(coord, lightTransform);
@@ -126,27 +126,56 @@ float fogCoeff(float depth){
 	return 2.0 - clamp(invLerp(TESR_FogDistance.x, TESR_FogDistance.y, depth), 0.0, 1.0) / TESR_FogDistance.z;
 }
 
-float GetLightAmount(float4 coord, float3 camera_vector)
+float GetLightAmount(float4 coord, float depth)
 {
-	float depth = length(camera_vector);
 	float fog = fogCoeff(depth);
+	float shadow;
+	float blendArea = 0.8;
+	float blend;
 
 	// check distance to detect far or near shadows, only apply fog to far map
-	if (depth < TESR_ShadowRadius.x * 0.99){
-		return GetLightAmountValueESM(TESR_ShadowMapBufferNear, TESR_ShadowCameraToLightTransformNear, coord);
+	if (depth < TESR_ShadowRadius.x * blendArea){
+		return GetLightAmountValue(TESR_ShadowMapBufferNear, TESR_ShadowCameraToLightTransformNear, coord);
 	}
 
-	if (depth < TESR_ShadowRadius.y * 0.99){
-		return GetLightAmountValueESM(TESR_ShadowMapBufferMiddle, TESR_ShadowCameraToLightTransformMiddle, coord);
+	// blend cascade seam
+	if (depth < TESR_ShadowRadius.x){
+		blend = invLerp(blendArea * TESR_ShadowRadius.x, TESR_ShadowRadius.x, depth);
+		shadow = (1-blend) * GetLightAmountValue(TESR_ShadowMapBufferNear, TESR_ShadowCameraToLightTransformNear, coord);
+		shadow += blend * GetLightAmountValue(TESR_ShadowMapBufferMiddle, TESR_ShadowCameraToLightTransformMiddle, coord);
+		return shadow;
 	}
 
-	if (depth < TESR_ShadowRadius.z * 0.99){
-		return GetLightAmountValueESM(TESR_ShadowMapBufferFar, TESR_ShadowCameraToLightTransformFar, coord);// * fog;
+	if (depth < TESR_ShadowRadius.y * blendArea){
+		return GetLightAmountValue(TESR_ShadowMapBufferMiddle, TESR_ShadowCameraToLightTransformMiddle, coord);
 	}
 
-	if (depth < TESR_ShadowRadius.w * 0.99){
-		return GetLightAmountValueESM(TESR_ShadowMapBufferLod, TESR_ShadowCameraToLightTransformLod, coord);// * fog;
+	// blend cascade seam
+	if (depth < TESR_ShadowRadius.y){
+		blend = invLerp(blendArea * TESR_ShadowRadius.y, TESR_ShadowRadius.y, depth);
+		shadow = (1- blend) * GetLightAmountValue(TESR_ShadowMapBufferMiddle, TESR_ShadowCameraToLightTransformMiddle, coord);
+		shadow += blend * GetLightAmountValue(TESR_ShadowMapBufferFar, TESR_ShadowCameraToLightTransformFar, coord);
+		return shadow;
 	}
+
+
+	if (depth < TESR_ShadowRadius.z * blendArea){
+		return GetLightAmountValue(TESR_ShadowMapBufferFar, TESR_ShadowCameraToLightTransformFar, coord);// * fog;
+	}
+
+	// blend cascade seam
+	if (depth < TESR_ShadowRadius.z){
+		blend = invLerp(blendArea * TESR_ShadowRadius.z, TESR_ShadowRadius.z, depth);
+		shadow = (1-blend) * GetLightAmountValue(TESR_ShadowMapBufferFar, TESR_ShadowCameraToLightTransformFar, coord);
+		shadow += blend * GetLightAmountValue(TESR_ShadowMapBufferLod, TESR_ShadowCameraToLightTransformLod, coord);
+		return shadow;
+	}
+
+	if (depth < TESR_ShadowRadius.w){
+		blend = invLerp(TESR_ShadowRadius.z, TESR_ShadowRadius.w, depth);
+		return lerp(GetLightAmountValue(TESR_ShadowMapBufferLod, TESR_ShadowCameraToLightTransformLod, coord), 1.0f, blend);// * fog;
+	}
+
 	return 1.0;
 }
 
@@ -164,7 +193,7 @@ float4 Shadow(VSOUT IN) : COLOR0
 	if (world_pos.z > TESR_WaterSettings.x) {
 		float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 
-		Shadow = GetLightAmount(pos, camera_vector);
+		Shadow = GetLightAmount(pos, depth);
 
 		// brighten shadow value from 0 to darkness from config value
 		Shadow = lerp(darkness, 1.0f, Shadow);

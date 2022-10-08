@@ -346,18 +346,15 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapNear];
 		break;
 	case ShadowMapTypeEnum::MapMiddle:
-		znear = 0.0f;
-		//znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapNear] * 0.8;
+		znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapNear] * 0.8;
 		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapMiddle];
 		break;
 	case ShadowMapTypeEnum::MapFar:
-		znear = 0.0f;
-		//znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapMiddle] * 0.8;
+		znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapMiddle] * 0.8;
 		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapFar];
 		break;
 	case ShadowMapTypeEnum::MapLod:
-		znear = 0.0f;
-		//znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapFar]* 0.8;
+		znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapFar]* 0.8;
 		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapLod];
 		break;
 	default:
@@ -370,6 +367,8 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 	float h = Camera->Frustum.Top - Camera->Frustum.Bottom;
 
 	float ar = h / w;
+	ar += 0.2f; //fix missing shadows at the top of the screen
+
 	float fov = 90; // find out how to get the actual camera fov
 	// SceneGraph* scene = new SceneGraph();
 	// scene->cameraFOV; 
@@ -416,7 +415,7 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 		if (p.y < bottom || bottom == 0.0f) bottom = p.y;
 	}
 
-	D3DXMatrixOrthoOffCenterRH(&Proj, left, right, bottom, top, 0.0f, 2.0f * FarPlane);
+	D3DXMatrixOrthoOffCenterRH(&Proj, left, right, bottom, top, FarPlane * 0.6, 1.5f * FarPlane);
 	return View * Proj;
 }
 
@@ -629,6 +628,9 @@ void ShadowManager::RenderShadowMaps() {
 		// Render all shadow maps
 		for (int i = MapNear; i <= MapOrtho; i++) {
 			ShadowMapTypeEnum ShadowMapType = static_cast<ShadowMapTypeEnum>(i);
+
+			if (ShadowMapType == MapOrtho) SunDir = &OrthoDir; // replace sun position with vertical position for ortho map
+
 			RenderShadowMap(ShadowMapType, ShadowsExteriors, &At, SunDir);
 			if (ShadowMapType != MapOrtho) {
 				BlurShadowMap(ShadowMapType);
@@ -754,7 +756,8 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
     NiDX9RenderState* RenderState = TheRenderManager->renderState;
     IDirect3DTexture9* SourceShadowMap = TheTextureManager->ShadowMapTexture[ShadowMapType];
     IDirect3DSurface9* TargetShadowMap = TheTextureManager->ShadowMapSurfaceBlurred[ShadowMapType];
-    
+	IDirect3DTexture9* BlurredShadowTexture = TheTextureManager->ShadowMapTextureBlurred[ShadowMapType];
+
     Device->SetDepthStencilSurface(NULL);
     RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE, RenderStateArgs);
     RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE, RenderStateArgs);
@@ -764,22 +767,21 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
 	Device->SetFVF(FrameFVF);
 	Device->SetStreamSource(0, BlurShadowVertex[ShadowMapType], 0, sizeof(FrameVS));
 
-	// TODO: Figure out why 3 passes are necessary for blur to show up in final map
-	D3DXVECTOR4 Blur[3] = {
+	D3DXVECTOR4 Blur[2] = {
 		D3DXVECTOR4(1.0f, 0.0f, 0.0f, 0.0f),
 		D3DXVECTOR4(0.0f, 1.0f, 0.0f, 0.0f),
-		D3DXVECTOR4(1.0f, 0.0f, 0.0f, 0.0f),
 	}; 
 
-	// TODO: fix need for 3 passes
-	for (int i = 0; i < 3; i++) {
-		Device->SetTexture(0, SourceShadowMap);
-		Device->SetRenderTarget(0, TargetShadowMap);
+	Device->SetTexture(0, SourceShadowMap);
+	Device->SetRenderTarget(0, TargetShadowMap);
 
+	ShadowMapBlurPixel->SetCT();
+	D3DXVECTOR4 inverseRes = { ShadowMapInverseResolution[ShadowMapType], ShadowMapInverseResolution[ShadowMapType], 0.0f, 0.0f };
+	ShadowMapBlurPixel->SetShaderConstantF(0, &inverseRes, 1);
+
+	// blur in two passes, vertically and horizontally
+	for (int i = 0; i < 2; i++) {
 		// set resolution and blur direction shader constants
-		ShadowMapBlurPixel->SetCT();
-		D3DXVECTOR4 inverseRes = { ShadowMapInverseResolution[ShadowMapType], ShadowMapInverseResolution[ShadowMapType], 0.0f, 0.0f };
-		ShadowMapBlurPixel->SetShaderConstantF(0, &inverseRes, 1);
 		ShadowMapBlurPixel->SetShaderConstantF(1, &Blur[i], 1);
 
 		// draw call to execute the shader
@@ -788,8 +790,7 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
 		Device->EndScene();
 
 		// transfer Render target to texture
-		SourceShadowMap->GetSurfaceLevel(0, &TargetShadowMap);
-		Device->StretchRect(TargetShadowMap, NULL, TargetShadowMap, NULL, D3DTEXF_LINEAR);
+		Device->SetTexture(0, BlurredShadowTexture);
 	}
 }
 
