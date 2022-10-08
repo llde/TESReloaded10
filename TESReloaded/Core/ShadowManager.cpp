@@ -626,6 +626,9 @@ void ShadowManager::RenderShadowMaps() {
 		// Render all shadow maps
 		for (int i = MapNear; i <= MapOrtho; i++) {
 			ShadowMapTypeEnum ShadowMapType = static_cast<ShadowMapTypeEnum>(i);
+
+			if (ShadowMapType == MapOrtho) SunDir = &OrthoDir; // replace sun position with vertical position for ortho map
+
 			RenderShadowMap(ShadowMapType, ShadowsExteriors, &At, SunDir);
 			if (ShadowMapType != MapOrtho) {
 				BlurShadowMap(ShadowMapType);
