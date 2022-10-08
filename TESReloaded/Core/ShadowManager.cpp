@@ -367,6 +367,8 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 	float h = Camera->Frustum.Top - Camera->Frustum.Bottom;
 
 	float ar = h / w;
+	ar += 0.2f; //fix missing shadows at the top of the screen
+
 	float fov = 90; // find out how to get the actual camera fov
 	// SceneGraph* scene = new SceneGraph();
 	// scene->cameraFOV; 
