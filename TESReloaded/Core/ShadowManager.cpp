@@ -346,18 +346,15 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapNear];
 		break;
 	case ShadowMapTypeEnum::MapMiddle:
-		znear = 0.0f;
-		//znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapNear] * 0.8;
+		znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapNear] * 0.8;
 		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapMiddle];
 		break;
 	case ShadowMapTypeEnum::MapFar:
-		znear = 0.0f;
-		//znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapMiddle] * 0.8;
+		znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapMiddle] * 0.8;
 		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapFar];
 		break;
 	case ShadowMapTypeEnum::MapLod:
-		znear = 0.0f;
-		//znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapFar]* 0.8;
+		znear = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapFar]* 0.8;
 		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapLod];
 		break;
 	default:
