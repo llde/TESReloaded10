@@ -13,19 +13,15 @@ void ShadowManager::Initialize() {
 	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
 	UINT ShadowMapSize = 0;
 	UINT ShadowCubeMapSize = ShadowsInteriors->ShadowCubeMapSize;
+	ShadowMapSize = ShadowsExteriors->ShadowMapResolution;
+	GetCascadeDepths();
+	ShadowsExteriors->ShadowMapRadius[MapOrtho] = ShadowMapSize;
 
 	// load the shaders
 	TheShadowManager->ShadowMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowMap.vso", NULL);
 	TheShadowManager->ShadowMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowMap.pso", NULL);
 	TheShadowManager->ShadowCubeMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowCubeMap.vso", NULL);
 	TheShadowManager->ShadowCubeMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowCubeMap.pso", NULL);
-
-	// Store Shadow map sizes in Constants to pass to the Shaders
-
-	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.x = ShadowsExteriors->ShadowMapRadius[0];
-	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.y = ShadowsExteriors->ShadowMapRadius[1];
-	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.z = ShadowsExteriors->ShadowMapRadius[2];
-	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.w = ShadowsExteriors->ShadowMapRadius[3];
 
     TheShadowManager->ShadowMapBlurVertex = (ShaderRecordVertex*) ShaderRecord::LoadShader("ShadowMapBlur.vso", NULL);
     TheShadowManager->ShadowMapBlurPixel = (ShaderRecordPixel*) ShaderRecord::LoadShader("ShadowMapBlur.pso", NULL);
@@ -43,7 +39,37 @@ void ShadowManager::Initialize() {
 	}
 	TheShadowManager->ShadowCubeMapViewPort = { 0, 0, ShadowCubeMapSize, ShadowCubeMapSize, 0.0f, 1.0f };
 	memset(TheShadowManager->ShadowCubeMapLights, NULL, sizeof(ShadowCubeMapLights));
+}
 
+/*
+* Calculates the radius for each shadow map
+*/
+void ShadowManager::GetCascadeDepths() {
+	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
+	float camFar = ShadowsExteriors->ShadowRadius;
+	float logFactor = 0.9f;
+	float camNear = 10.0f;
+	int cascadeCount = 4;
+	float cascadeNum = 0.0f;
+
+	for (int i = 0; i < cascadeCount; i++) {
+		// formula for cascade ratios adapted from https://www.asawicki.info/news_1283_cascaded_shadow_mapping
+		cascadeNum += 1.0f;
+		ShadowsExteriors->ShadowMapRadius[i] = lerp(
+			camNear + (cascadeNum / cascadeCount) * (camFar - camNear),
+			camNear * powf(camFar / camNear, cascadeNum / cascadeCount),
+			logFactor);
+
+		// filtering objects occupying less than 10 pixels in the shadow map
+		ShadowsExteriors->Forms[i].MinRadius = 10.0f * ShadowsExteriors->ShadowMapRadius[i] / ShadowsExteriors->ShadowMapResolution;
+	}
+	ShadowsExteriors->ShadowMapRadius[cascadeCount] = camFar;
+
+	// Store Shadow map sizes in Constants to pass to the Shaders
+	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.x = ShadowsExteriors->ShadowMapRadius[MapNear];
+	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.y = ShadowsExteriors->ShadowMapRadius[MapMiddle];
+	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.z = ShadowsExteriors->ShadowMapRadius[MapFar];
+	TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius.w = ShadowsExteriors->ShadowMapRadius[MapLod];
 }
 
 /**
@@ -622,8 +648,6 @@ void ShadowManager::RenderShadowMaps() {
     
 	TheRenderManager->SetupSceneCamera();
 	if (Player->GetWorldSpace() && ShadowsExteriors->Enabled) {
-		D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
-		D3DXVECTOR4 OrthoDir = D3DXVECTOR3(0.05f, 0.05f, 1.0f);
 		NiNode* PlayerNode = Player->GetNode();
 		D3DXVECTOR3 At;
 
@@ -634,18 +658,19 @@ void ShadowManager::RenderShadowMaps() {
 		CurrentVertex = ShadowMapVertex;
 		CurrentPixel = ShadowMapPixel;
 
-		// Render all shadow maps
-		for (int i = MapNear; i <= MapOrtho; i++) {
+		// render ortho map
+		D3DXVECTOR4 OrthoDir = D3DXVECTOR3(0.05f, 0.05f, 1.0f);
+		RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir);
+
+		// Render all other shadow maps
+		D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
+		for (int i = MapNear; i < MapOrtho; i++) {
 			ShadowMapTypeEnum ShadowMapType = static_cast<ShadowMapTypeEnum>(i);
-
-			if (ShadowMapType == MapOrtho) SunDir = &OrthoDir; // replace sun position with vertical position for ortho map
-
 			RenderShadowMap(ShadowMapType, ShadowsExteriors, &At, SunDir);
-			if (ShadowMapType != MapOrtho) {
-				BlurShadowMap(ShadowMapType);
-			}
+			BlurShadowMap(ShadowMapType);
 		}
 
+		// Update constants used by shadow shaders: x=quality, y=darkness
 		ShadowData->x = ShadowsExteriors->Quality;
 		if (TheSettingManager->SettingsMain.Effects.ShadowsExteriors) ShadowData->x = -1; // Disable the forward shadowing
 		ShadowData->y = ShadowsExteriors->Darkness;
@@ -759,6 +784,11 @@ void ShadowManager::CalculateBlend(NiPointLight** Lights, int LightIndex) {
 		if (ShadowCubeMapBlend->w < 1.0f) ShadowCubeMapBlend->w += 0.1f;
 	}
 	
+}
+
+
+float ShadowManager::lerp(float a, float b, float t) {
+	return (1 - t) * a + t * b;
 }
 
 

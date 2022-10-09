@@ -269,7 +269,8 @@ struct SettingsShadowStruct {
 		FormsStruct			Forms[5];
 		bool				AlphaEnabled[5];
 		int					Quality;
-		int					ShadowMapSize[5];
+		int					ShadowMapResolution;
+		float				ShadowRadius;
 		float				Darkness;
 		float				ShadowMapRadius[5];
 		float				ShadowMapFarPlane;
