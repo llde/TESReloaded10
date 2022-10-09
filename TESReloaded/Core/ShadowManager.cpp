@@ -8,11 +8,13 @@ void ShadowManager::Initialize() {
 	Logger::Log("Starting the shadows manager...");
 	TheShadowManager = new ShadowManager();
 
+	// initializes the settings
 	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
 	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
 	UINT ShadowMapSize = 0;
 	UINT ShadowCubeMapSize = ShadowsInteriors->ShadowCubeMapSize;
 
+	// load the shaders
 	TheShadowManager->ShadowMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowMap.vso", NULL);
 	TheShadowManager->ShadowMapPixel = (ShaderRecordPixel*)ShaderRecord::LoadShader("ShadowMap.pso", NULL);
 	TheShadowManager->ShadowCubeMapVertex = (ShaderRecordVertex*)ShaderRecord::LoadShader("ShadowCubeMap.vso", NULL);
@@ -32,9 +34,10 @@ void ShadowManager::Initialize() {
         || TheShadowManager->ShadowCubeMapVertex == nullptr || TheShadowManager->ShadowCubeMapPixel == nullptr || TheShadowManager->ShadowMapBlurPixel  == nullptr ){
         Logger::Log("[ERROR]: Could not load one or more of the ShadowMap generation shaders. Reinstall the mod.");
     }
-	for (int i = 0; i < 5; i++) {
-		ShadowMapSize = ShadowsExteriors->ShadowMapSize[i];
-		if (i<4) TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[i]);
+
+	// initialize the frame vertices for future shadow blurring
+	for (int i = 0; i < MapOrtho; i++) {
+		if (i != MapOrtho) TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[i]);
 		TheShadowManager->ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
         TheShadowManager->ShadowMapInverseResolution[i] = 1.0f / (float) ShadowMapSize;
 	}
@@ -43,6 +46,9 @@ void ShadowManager::Initialize() {
 
 }
 
+/**
+* Generates the Frustrum planes from a matrix
+*/
 void ShadowManager::SetFrustum(ShadowMapTypeEnum ShadowMapType, D3DMATRIX* Matrix) {
 
 	ShadowMapFrustum[ShadowMapType][PlaneNear].a = Matrix->_13;
@@ -77,7 +83,7 @@ void ShadowManager::SetFrustum(ShadowMapTypeEnum ShadowMapType, D3DMATRIX* Matri
 }
 
 /*
-* Checks wether the given node is in the frustrum for the current type of Shadow map.
+* Checks wether the given node is in the frustrum using its radius for the current type of Shadow map.
 */
 bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiNode* Node) {
 	float Distance = 0.0f;
@@ -111,6 +117,9 @@ bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiNode* Node) {
 
 }
 
+/*
+* Returns the given object ref if it passes the test for excluded form types, otherwise returns NULL.
+*/
 TESObjectREFR* ShadowManager::GetRef(TESObjectREFR* Ref, SettingsShadowStruct::FormsStruct* Forms, SettingsShadowStruct::ExcludedFormsList* ExcludedForms) {
 	
 	TESObjectREFR* R = NULL;
