@@ -760,6 +760,11 @@ void ShadowManager::CalculateBlend(NiPointLight** Lights, int LightIndex) {
 	}
 	
 }
+
+
+/*
+* Filters the Shadow Map of given index using a 2 pass gaussian blur
+*/
 void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
     IDirect3DDevice9* Device = TheRenderManager->device;
     NiDX9RenderState* RenderState = TheRenderManager->renderState;
@@ -772,25 +777,24 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
     RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE, RenderStateArgs);
     RenderState->SetVertexShader(ShadowMapBlurVertex->ShaderHandle, false);
     RenderState->SetPixelShader(ShadowMapBlurPixel->ShaderHandle, false);
-
 	Device->SetFVF(FrameFVF);
 	Device->SetStreamSource(0, BlurShadowVertex[ShadowMapType], 0, sizeof(FrameVS));
-
-	D3DXVECTOR4 Blur[2] = {
-		D3DXVECTOR4(1.0f, 0.0f, 0.0f, 0.0f),
-		D3DXVECTOR4(0.0f, 1.0f, 0.0f, 0.0f),
-	}; 
-
 	Device->SetTexture(0, SourceShadowMap);
 	Device->SetRenderTarget(0, TargetShadowMap);
-
+	
+	// Pass map resolution to shader as a constant
 	ShadowMapBlurPixel->SetCT();
 	D3DXVECTOR4 inverseRes = { ShadowMapInverseResolution[ShadowMapType], ShadowMapInverseResolution[ShadowMapType], 0.0f, 0.0f };
 	ShadowMapBlurPixel->SetShaderConstantF(0, &inverseRes, 1);
 
 	// blur in two passes, vertically and horizontally
+	D3DXVECTOR4 Blur[2] = {
+		D3DXVECTOR4(1.0f, 0.0f, 0.0f, 0.0f),
+		D3DXVECTOR4(0.0f, 1.0f, 0.0f, 0.0f),
+	};
+
 	for (int i = 0; i < 2; i++) {
-		// set resolution and blur direction shader constants
+		// set blur direction shader constants
 		ShadowMapBlurPixel->SetShaderConstantF(1, &Blur[i], 1);
 
 		// draw call to execute the shader
@@ -798,7 +802,7 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
 		Device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
 		Device->EndScene();
 
-		// transfer Render target to texture
+		// move texture to render device for next pass
 		Device->SetTexture(0, BlurredShadowTexture);
 	}
 }
