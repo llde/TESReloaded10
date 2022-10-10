@@ -35,6 +35,8 @@ public:
 	void					CalculateBlend(NiPointLight** Lights, int LightIndex);
     void                    BlurShadowMap(ShadowMapTypeEnum ShadowMapType);    
 	D3DXMATRIX				GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXMATRIX View);
+	static void				GetCascadeDepths();
+	static float			lerp(float a, float b, float t);
 
     ShaderRecordVertex*		ShadowMapVertex;
 	ShaderRecordPixel*		ShadowMapPixel;
@@ -45,6 +47,8 @@ public:
 	ShaderRecordVertex*		ShadowCubeMapVertex;
 	ShaderRecordPixel*		ShadowCubeMapPixel;
     
+	float					ShadowCascadesDepth[3];
+
     ShaderRecordVertex*		ShadowMapBlurVertex;
 	ShaderRecordPixel*		ShadowMapBlurPixel;
     IDirect3DVertexBuffer9* BlurShadowVertex[4];

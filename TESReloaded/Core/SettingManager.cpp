@@ -751,8 +751,14 @@ void SettingManager::LoadSettings() {
 	SettingsPrecipitations.SnowAccumulation.BlurNormDropThreshhold = GetSettingF("Shaders.Precipitations.SnowAccumulation", "BlurNormDropThreshhold");
 	SettingsPrecipitations.SnowAccumulation.BlurRadiusMultiplier = GetSettingF("Shaders.Precipitations.SnowAccumulation", "BlurRadiusMultiplier");
 
+	// Generic exterior shadows settings
+	SettingsShadows.Exteriors.Enabled = GetSettingI("Shaders.ShadowsExteriors.Main", "Enabled");
+	SettingsShadows.Exteriors.Quality = GetSettingI("Shaders.ShadowsExteriors.Main", "Quality");
+	SettingsShadows.Exteriors.Darkness = GetSettingF("Shaders.ShadowsExteriors.Main", "Darkness");
+	SettingsShadows.Exteriors.ShadowRadius = GetSettingF("Shaders.ShadowsExteriors.Main", "ShadowsRadius");
+	SettingsShadows.Exteriors.ShadowMapResolution = GetSettingI("Shaders.ShadowsExteriors.Main", "ShadowMapResolution");
+	SettingsShadows.Exteriors.ShadowMapFarPlane = GetSettingF("Shaders.ShadowsExteriors.Main", "ShadowMapFarPlane");
 
-	SettingsShadows.Exteriors.Enabled = GetSettingI("Shaders.ShadowsExteriors.Near", "Enabled");
 	SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear] = GetSettingI("Shaders.ShadowsExteriors.Near", "AlphaEnabled");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapNear].Activators = GetSettingI("Shaders.ShadowsExteriors.Near", "Activators");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapNear].Actors = GetSettingI("Shaders.ShadowsExteriors.Near", "Actors");
@@ -765,10 +771,7 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapNear].Statics = GetSettingI("Shaders.ShadowsExteriors.Near", "Statics");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapNear].Terrain = GetSettingI("Shaders.ShadowsExteriors.Near", "Terrain");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapNear].Trees = GetSettingI("Shaders.ShadowsExteriors.Near", "Trees");
-	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapNear].MinRadius = GetSettingF("Shaders.ShadowsExteriors.Near", "MinRadius");
-	SettingsShadows.Exteriors.ShadowMapSize[ShadowManager::ShadowMapTypeEnum::MapNear] = GetSettingI("Shaders.ShadowsExteriors.Near", "ShadowMapSize");
-	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapNear] = GetSettingF("Shaders.ShadowsExteriors.Near", "ShadowMapRadius");
-
+	
 	SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapMiddle] = GetSettingI("Shaders.ShadowsExteriors.Middle", "AlphaEnabled");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapMiddle].Activators = GetSettingI("Shaders.ShadowsExteriors.Middle", "Activators");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapMiddle].Actors = GetSettingI("Shaders.ShadowsExteriors.Middle", "Actors");
@@ -781,10 +784,7 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapMiddle].Statics = GetSettingI("Shaders.ShadowsExteriors.Middle", "Statics");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapMiddle].Terrain = GetSettingI("Shaders.ShadowsExteriors.Middle", "Terrain");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapMiddle].Trees = GetSettingI("Shaders.ShadowsExteriors.Middle", "Trees");
-	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapMiddle].MinRadius = GetSettingF("Shaders.ShadowsExteriors.Middle", "MinRadius");
-	SettingsShadows.Exteriors.ShadowMapSize[ShadowManager::ShadowMapTypeEnum::MapMiddle] = GetSettingI("Shaders.ShadowsExteriors.Middle", "ShadowMapSize");
-	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapMiddle] = GetSettingF("Shaders.ShadowsExteriors.Middle", "ShadowMapRadius");
-
+	
 	SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapFar] = GetSettingI("Shaders.ShadowsExteriors.Far", "AlphaEnabled");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapFar].Activators = GetSettingI("Shaders.ShadowsExteriors.Far", "Activators");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapFar].Actors = GetSettingI("Shaders.ShadowsExteriors.Far", "Actors");
@@ -797,10 +797,7 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapFar].Statics = GetSettingI("Shaders.ShadowsExteriors.Far", "Statics");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapFar].Terrain = GetSettingI("Shaders.ShadowsExteriors.Far", "Terrain");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapFar].Trees = GetSettingI("Shaders.ShadowsExteriors.Far", "Trees");
-	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapFar].MinRadius = GetSettingF("Shaders.ShadowsExteriors.Far", "MinRadius");
-	SettingsShadows.Exteriors.ShadowMapSize[ShadowManager::ShadowMapTypeEnum::MapFar] = GetSettingI("Shaders.ShadowsExteriors.Far", "ShadowMapSize");
-	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapFar] = GetSettingF("Shaders.ShadowsExteriors.Far", "ShadowMapRadius");
-
+	
 	SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapLod] = GetSettingI("Shaders.ShadowsExteriors.Lod", "AlphaEnabled");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapLod].Activators = GetSettingI("Shaders.ShadowsExteriors.Lod", "Activators");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapLod].Actors = GetSettingI("Shaders.ShadowsExteriors.Lod", "Actors");
@@ -813,10 +810,7 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapLod].Statics = GetSettingI("Shaders.ShadowsExteriors.Lod", "Statics");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapLod].Terrain = GetSettingI("Shaders.ShadowsExteriors.Lod", "Terrain");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapLod].Trees = GetSettingI("Shaders.ShadowsExteriors.Lod", "Trees");
-	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapLod].MinRadius = GetSettingF("Shaders.ShadowsExteriors.Lod", "MinRadius");
-	SettingsShadows.Exteriors.ShadowMapSize[ShadowManager::ShadowMapTypeEnum::MapLod] = GetSettingI("Shaders.ShadowsExteriors.Lod", "ShadowMapSize");
-	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapLod] = GetSettingF("Shaders.ShadowsExteriors.Lod", "ShadowMapRadius");
-
+	
 	SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapOrtho] = GetSettingI("Shaders.ShadowsExteriors.Ortho", "AlphaEnabled");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapOrtho].Activators = GetSettingI("Shaders.ShadowsExteriors.Ortho", "Activators");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapOrtho].Actors = GetSettingI("Shaders.ShadowsExteriors.Ortho", "Actors");
@@ -829,13 +823,7 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapOrtho].Statics = GetSettingI("Shaders.ShadowsExteriors.Ortho", "Statics");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapOrtho].Terrain = GetSettingI("Shaders.ShadowsExteriors.Ortho", "Terrain");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapOrtho].Trees = GetSettingI("Shaders.ShadowsExteriors.Ortho", "Trees");
-	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapOrtho].MinRadius = GetSettingF("Shaders.ShadowsExteriors.Ortho", "MinRadius");
-	SettingsShadows.Exteriors.ShadowMapSize[ShadowManager::ShadowMapTypeEnum::MapOrtho] = GetSettingI("Shaders.ShadowsExteriors.Ortho", "ShadowMapSize");
-	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapOrtho] = GetSettingF("Shaders.ShadowsExteriors.Ortho", "ShadowMapRadius");
-	SettingsShadows.Exteriors.Quality = GetSettingI("Shaders.ShadowsExteriors.Main", "Quality");
-	SettingsShadows.Exteriors.Darkness = GetSettingF("Shaders.ShadowsExteriors.Main", "Darkness");
-	SettingsShadows.Exteriors.ShadowMapFarPlane = GetSettingF("Shaders.ShadowsExteriors.Main", "ShadowMapFarPlane");
-
+	
 	Config.FillSections(&List, "Shaders.ShadowsExteriors.ExcludedFormID");
 	if (List.size()) SettingsShadows.Exteriors.ExcludedForms.reserve(List.size());
 	for (StringList::iterator Iter = List.begin(); Iter != List.end(); ++Iter) {
