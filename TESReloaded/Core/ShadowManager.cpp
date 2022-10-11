@@ -31,9 +31,12 @@ void ShadowManager::Initialize() {
         Logger::Log("[ERROR]: Could not load one or more of the ShadowMap generation shaders. Reinstall the mod.");
     }
 
-	// initialize the frame vertices for future shadow blurring
-	for (int i = 0; i < MapOrtho; i++) {
+	for (int i = 0; i <= MapOrtho; i++) {
+
+		// initialize the frame vertices for future shadow blurring
 		if (i != MapOrtho) TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[i]);
+
+		// creating viewport for each shadow cascade
 		TheShadowManager->ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
         TheShadowManager->ShadowMapInverseResolution[i] = 1.0f / (float) ShadowMapSize;
 	}
