@@ -169,6 +169,7 @@ TESObjectREFR* ShadowManager::GetRef(TESObjectREFR* Ref, SettingsShadowStruct::F
 				(TypeID >= TESForm::FormType::kFormType_Stat && TypeID <= TESForm::FormType::kFormType_MoveableStatic && Forms->Statics) ||
 				(TypeID == TESForm::FormType::kFormType_Tree && Forms->Trees) ||
 				(TypeID == TESForm::FormType::kFormType_Furniture && Forms->Furniture) ||
+				(TypeID == TESForm::FormType::kFormType_Land && Forms->Terrain) ||
 				(TypeID >= TESForm::FormType::kFormType_NPC && TypeID <= TESForm::FormType::kFormType_LeveledCreature && Forms->Actors))
 				R = Ref;
 			if (R && ExcludedForms->size() > 0 && std::binary_search(ExcludedForms->begin(), ExcludedForms->end(), Form->refID)) R = NULL;
