@@ -4113,6 +4113,7 @@ namespace Pointers {
 		static const void* NiTriShape			= (void*)0x00A7ED5C;
 		static const void* NiTriStrips			= (void*)0x00A7F27C;
 		static const void* bhkCollisionObject	= (void*)0x00A55FCC;
+		static const void* BSMultiBoundNode     = (void*)0x010C1D14;
 	}
 	namespace Settings {
 		static UInt32* GridsToLoad				= (UInt32*)0x00B06A2C;

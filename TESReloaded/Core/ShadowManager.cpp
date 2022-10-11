@@ -223,7 +223,7 @@ void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMa
 
 	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
 		void* VFT = *(void**)Object;
-		if (VFT == Pointers::VirtualTables::NiNode) {
+		if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSMultiBoundNode) {
 			NiNode* Node = (NiNode*)Object;
 			if (InFrustum(ShadowMapType, Node)) {
 				for (int i = 0; i < Node->m_children.end; i++) {
