@@ -664,7 +664,7 @@ assert(sizeof(NiPointLight) == 0x114);
 
 class NiDirectionalLight : public NiLight {
 public:
-	NiPoint3	m_direction;	// 108
+	NiPoint3	direction;	// 108
 };
 assert(sizeof(NiDirectionalLight) == 0x114);
 

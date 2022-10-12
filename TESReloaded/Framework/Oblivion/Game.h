@@ -3349,7 +3349,7 @@ public:
 	NiNode*				ObjectLODRoot;			// 0C
 	NiNode*				LandLOD;				// 10
 	BSTempNodeManager*	tempNodeManager;		// 14
-	NiDirectionalLight* niDirectionalLight;		// 18
+	NiDirectionalLight* directionalLight;		// 18
 	BSFogProperty*		fogProperty;			// 1C
 	int					extXCoord;				// 20
 	int					extYCoord;				// 24
@@ -4113,6 +4113,7 @@ namespace Pointers {
 		static const void* NiTriShape			= (void*)0x00A7ED5C;
 		static const void* NiTriStrips			= (void*)0x00A7F27C;
 		static const void* bhkCollisionObject	= (void*)0x00A55FCC;
+		static const void* BSMultiBoundNode     = (void*)0x00000000;  //Not present
 	}
 	namespace Settings {
 		static UInt32* GridsToLoad				= (UInt32*)0x00B06A2C;

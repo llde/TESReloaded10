@@ -32,7 +32,7 @@ void ShadowManager::Initialize() {
     }
 
 	// initialize the frame vertices for future shadow blurring
-	for (int i = 0; i < MapOrtho; i++) {
+	for (int i = 0; i <= MapOrtho; i++) {
 		if (i != MapOrtho) TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[i]);
 		TheShadowManager->ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
         TheShadowManager->ShadowMapInverseResolution[i] = 1.0f / (float) ShadowMapSize;
@@ -62,7 +62,7 @@ void ShadowManager::GetCascadeDepths() {
 
 		// filtering objects occupying less than 10 pixels in the shadow map
 		ShadowsExteriors->Forms[i].MinRadius = 10.0f * ShadowsExteriors->ShadowMapRadius[i] / ShadowsExteriors->ShadowMapResolution;
-	}
+	}TypeID == TESForm::FormType::kFormType_Land && Forms->Terrain
 	ShadowsExteriors->ShadowMapRadius[cascadeCount] = camFar;
 
 	// Store Shadow map sizes in Constants to pass to the Shaders
@@ -166,6 +166,7 @@ TESObjectREFR* ShadowManager::GetRef(TESObjectREFR* Ref, SettingsShadowStruct::F
 				(TypeID >= TESForm::FormType::kFormType_Stat && TypeID <= TESForm::FormType::kFormType_MoveableStatic && Forms->Statics) ||
 				(TypeID == TESForm::FormType::kFormType_Tree && Forms->Trees) ||
 				(TypeID == TESForm::FormType::kFormType_Furniture && Forms->Furniture) ||
+                (TypeID == TESForm::FormType::kFormType_Land && Forms->Terrain) ||
 				(TypeID >= TESForm::FormType::kFormType_NPC && TypeID <= TESForm::FormType::kFormType_LeveledCreature && Forms->Actors))
 				R = Ref;
 			if (R && ExcludedForms->size() > 0 && std::binary_search(ExcludedForms->begin(), ExcludedForms->end(), Form->refID)) R = NULL;
@@ -220,7 +221,7 @@ void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMa
 
 	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
 		void* VFT = *(void**)Object;
-		if (VFT == Pointers::VirtualTables::NiNode) {
+		if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode ||  VFT == Pointers::VirtualTables::BSMultiBoundNode ) {
 			NiNode* Node = (NiNode*)Object;
 			if (InFrustum(ShadowMapType, Node)) {
 				for (int i = 0; i < Node->m_children.end; i++) {
