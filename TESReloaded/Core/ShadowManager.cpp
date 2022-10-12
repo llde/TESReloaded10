@@ -232,9 +232,9 @@ void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMa
 		else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
 			RenderGeometry((NiGeometry*)Object);
 		}
-        else {
-            Logger::Log("Unknow %0X", VFT);                
-        }
+        //else {
+        //   Logger::Log("Unknown %0X", VFT);                
+        //}
 	}
 
 }
