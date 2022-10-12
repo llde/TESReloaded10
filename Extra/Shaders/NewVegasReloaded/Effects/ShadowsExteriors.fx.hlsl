@@ -30,8 +30,8 @@ static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_Project
 static const float Zmul = nearZ * farZ;
 static const float Zdiff = farZ - nearZ;
 static const float darkness = TESR_ShadowData.y;
-static const float MIN_VARIANCE = 0.000001;
-static const float BLEED_CORRECTION = 0.6;
+static const float MIN_VARIANCE = 0.000005;
+static const float BLEED_CORRECTION = 0.4;
 
 struct VSOUT
 {
@@ -92,7 +92,7 @@ float4 ChebyshevUpperBound(float2 moments, float distance)
 }
 
 // Exponential Shadow Maps
-float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord){
+float GetLightAmountValueESM(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord){
 	float4 LightSpaceCoord = mul(coord, lightTransform);
 	LightSpaceCoord.xyz /= LightSpaceCoord.w;
 	LightSpaceCoord.x = LightSpaceCoord.x * 0.5f + 0.5f;
@@ -102,7 +102,7 @@ float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float
 	return exp(-500 * (LightSpaceCoord.z - depth));
 }
 
-float GetLightAmountValueWSM(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord)
+float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord)
 {
 	//returns wether the coordinates are in shadow (0), light (1) or penumbra.
 	float4 LightSpaceCoord = mul(coord, lightTransform);
