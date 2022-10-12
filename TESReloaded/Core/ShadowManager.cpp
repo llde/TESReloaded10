@@ -62,7 +62,7 @@ void ShadowManager::GetCascadeDepths() {
 
 		// filtering objects occupying less than 10 pixels in the shadow map
 		ShadowsExteriors->Forms[i].MinRadius = 10.0f * ShadowsExteriors->ShadowMapRadius[i] / ShadowsExteriors->ShadowMapResolution;
-	}TypeID == TESForm::FormType::kFormType_Land && Forms->Terrain
+	}
 	ShadowsExteriors->ShadowMapRadius[cascadeCount] = camFar;
 
 	// Store Shadow map sizes in Constants to pass to the Shaders
