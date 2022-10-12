@@ -36,5 +36,11 @@ PS_OUTPUT main(VS_OUTPUT IN) {
 	float moment2 = depth * depth + 0.25 * (dx * dx + dy * dy);
 
 	OUT.color_0 = float4(depth, moment2, 0.0f, 1.0f);
+
+	// ESM
+	// float k = 80;
+	// float esm = exp( 80 * depth);
+
+	// OUT.color_0 = float4(esm, esm - depth, 0.0f, 1.0f);
     return OUT;	
 };

@@ -117,12 +117,12 @@ void TextureManager::Initialize() {
 		// create one texture per ShadowMap type
 		ShadowMapSize = ShadowsExteriors->ShadowMapResolution;
 
-		Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &TheTextureManager->ShadowMapTexture[i], NULL);
+		Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_G32R32F, D3DPOOL_DEFAULT, &TheTextureManager->ShadowMapTexture[i], NULL);
 		TheTextureManager->ShadowMapTexture[i]->GetSurfaceLevel(0, &TheTextureManager->ShadowMapSurface[i]);
 		Device->CreateDepthStencilSurface(ShadowMapSize, ShadowMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &TheTextureManager->ShadowMapDepthSurface[i], NULL);
         if (i != TheShadowManager->ShadowMapTypeEnum::MapOrtho){ //Don't blur orthomap
             // create a texture to receive the surface contents
-			Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &TheTextureManager->ShadowMapTextureBlurred[i], NULL);
+			Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_G32R32F, D3DPOOL_DEFAULT, &TheTextureManager->ShadowMapTextureBlurred[i], NULL);
             // set the surface level to the texture.
 			TheTextureManager->ShadowMapTextureBlurred[i]->GetSurfaceLevel(0, &TheTextureManager->ShadowMapSurfaceBlurred[i]);
         }
