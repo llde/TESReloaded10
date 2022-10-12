@@ -673,7 +673,7 @@ void ShadowManager::RenderShadowMaps() {
 		for (int i = MapNear; i < MapOrtho; i++) {
 			ShadowMapTypeEnum ShadowMapType = static_cast<ShadowMapTypeEnum>(i);
 			RenderShadowMap(ShadowMapType, ShadowsExteriors, &At, SunDir);
-	//		BlurShadowMap(ShadowMapType);
+			BlurShadowMap(ShadowMapType);
 		}
 
 		// Update constants used by shadow shaders: x=quality, y=darkness
