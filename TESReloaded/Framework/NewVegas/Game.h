@@ -5196,6 +5196,8 @@ namespace Pointers {
 		static const void* NiTriStrips		= (void*)0x0109CD44;
         static const void* BSDismemberSkinInstance = (void*) 0x01069A84;
 		static const void* BSMultiBoundNode   = (void*)0x010C1D14;
+		static const void* NiParticleNode     = (void*)0x010BD44C;
+
 	}
 	namespace Settings {
 		static UInt32* MinGrassSize				= (UInt32*)0x00000000;

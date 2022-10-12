@@ -185,7 +185,7 @@ void ShadowManager::RenderExterior(NiAVObject* Object, float MinRadius) {
 			if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode || VFT == Pointers::VirtualTables::BSTreeNode) {
 				if (VFT == Pointers::VirtualTables::BSFadeNode && ((BSFadeNode*)Object)->FadeAlpha < 0.75f) return;
 				NiNode* Node = (NiNode*)Object;
-				for (int i = 0; i < Node->m_children.end; i++) {
+				for (int i = 0; i < Node->m_children.numObjs; i++) {
 					RenderExterior(Node->m_children.data[i], MinRadius);
 				}
 			}
@@ -205,7 +205,7 @@ void ShadowManager::RenderInterior(NiAVObject* Object, float MinRadius) {
 			void* VFT = *(void**)Object;
 			if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode) {
 				NiNode* Node = (NiNode*)Object;
-				for (int i = 0; i < Node->m_children.end; i++) {
+				for (int i = 0; i < Node->m_children.numObjs; i++) {
 					RenderInterior(Node->m_children.data[i], MinRadius);
 				}
 			}
@@ -224,7 +224,7 @@ void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMa
 		if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode ||  VFT == Pointers::VirtualTables::BSMultiBoundNode ) {
 			NiNode* Node = (NiNode*)Object;
 			if (InFrustum(ShadowMapType, Node)) {
-				for (int i = 0; i < Node->m_children.end; i++) {
+				for (int i = 0; i < Node->m_children.numObjs; i++) {
 					RenderTerrain(Node->m_children.data[i], ShadowMapType);
 				}
 			}
@@ -232,6 +232,9 @@ void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMa
 		else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
 			RenderGeometry((NiGeometry*)Object);
 		}
+        else {
+            Logger::Log("Unknow %0X", VFT);                
+        }
 	}
 
 }
@@ -406,7 +409,7 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 	ar += 0.2f; //fix missing shadows at the top of the screen
 
 	float fov = 90; // find out how to get the actual camera fov
-	// SceneGraph* scene = new SceneGraph();
+	// SceneGraph* scene = new SceneGraph();0
 	// scene->cameraFOV; 
 	// Logger::Log("fov %f", fov);
 
@@ -500,7 +503,9 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 					NiNode* CellNode = Cell->GetNode();
 					for (int i = 2; i < 6; i++) {
 						NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[i];
-						if (TerrainNode->m_children.end) RenderTerrain(TerrainNode->m_children.data[0], ShadowMapType);
+                        for (int i = 0; i < TerrainNode->m_children.numObjs; i++){
+                            RenderTerrain(TerrainNode->m_children.data[i], ShadowMapType);                            
+                        }
 					}
 				}
 				TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
@@ -668,7 +673,7 @@ void ShadowManager::RenderShadowMaps() {
 		for (int i = MapNear; i < MapOrtho; i++) {
 			ShadowMapTypeEnum ShadowMapType = static_cast<ShadowMapTypeEnum>(i);
 			RenderShadowMap(ShadowMapType, ShadowsExteriors, &At, SunDir);
-			BlurShadowMap(ShadowMapType);
+	//		BlurShadowMap(ShadowMapType);
 		}
 
 		// Update constants used by shadow shaders: x=quality, y=darkness
