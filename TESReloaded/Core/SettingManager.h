@@ -272,6 +272,7 @@ struct SettingsShadowStruct {
 		int					ShadowMapResolution;
 		float				ShadowRadius;
 		float				Darkness;
+        UInt8               ShadowMode;
 		float				ShadowMapRadius[5];
 		float				ShadowMapFarPlane;
 		ExcludedFormsList	ExcludedForms;

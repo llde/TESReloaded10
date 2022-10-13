@@ -758,6 +758,7 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.ShadowRadius = GetSettingF("Shaders.ShadowsExteriors.Main", "ShadowsRadius");
 	SettingsShadows.Exteriors.ShadowMapResolution = GetSettingI("Shaders.ShadowsExteriors.Main", "ShadowMapResolution");
 	SettingsShadows.Exteriors.ShadowMapFarPlane = GetSettingF("Shaders.ShadowsExteriors.Main", "ShadowMapFarPlane");
+	SettingsShadows.Exteriors.ShadowMode = GetSettingI("Shaders.ShadowsExteriors.Main", "ShadowMode");
 
 	SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear] = GetSettingI("Shaders.ShadowsExteriors.Near", "AlphaEnabled");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapNear].Activators = GetSettingI("Shaders.ShadowsExteriors.Near", "Activators");
