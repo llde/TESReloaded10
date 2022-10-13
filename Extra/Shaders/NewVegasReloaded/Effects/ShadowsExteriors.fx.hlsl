@@ -91,29 +91,37 @@ float4 ChebyshevUpperBound(float2 moments, float distance)
 	return max(p, p_max);
 }
 
+float4 ScreenCoordToTexCoord(float4 coord){
+	// apply perspective and convert from -1/1 (perspective division) to range to 0/1 (shadowMap range);
+	coord.xyz /= coord.w;
+	coord.x = coord.x * 0.5f + 0.5f;
+	coord.y = coord.y * -0.5f + 0.5f;
+
+	return coord;
+}
+
+// Exponential Soft Shadow Maps
+float GetLightAmountValueESSM(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord){
+	float4 LightSpaceCoord = ScreenCoordToTexCoord(mul(coord, lightTransform));
+
+	float4 depth = tex2D(shadowBuffer, LightSpaceCoord.xy).x;
+	return exp(-80 * LightSpaceCoord.z) * depth;
+}
+
 // Exponential Shadow Maps
 float GetLightAmountValueESM(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord){
-	float4 LightSpaceCoord = mul(coord, lightTransform);
-	LightSpaceCoord.xyz /= LightSpaceCoord.w;
-	LightSpaceCoord.x = LightSpaceCoord.x * 0.5f + 0.5f;
-	LightSpaceCoord.y = LightSpaceCoord.y * -0.5f + 0.5f;
+	float4 LightSpaceCoord = ScreenCoordToTexCoord(mul(coord, lightTransform));
 
 	float4 depth = tex2D(shadowBuffer, LightSpaceCoord.xy).x;
 	return exp(-500 * (LightSpaceCoord.z - depth));
 }
 
-float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord)
+float GetLightAmountValueVSM(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord)
 {
 	//returns wether the coordinates are in shadow (0), light (1) or penumbra.
-	float4 LightSpaceCoord = mul(coord, lightTransform);
-
-	// apply perspective and convert from -1/1 (perspective division) to range to 0/1 (shadowMap range);
-	LightSpaceCoord.xyz /= LightSpaceCoord.w;
-	LightSpaceCoord.x = LightSpaceCoord.x * 0.5f + 0.5f;
-	LightSpaceCoord.y = LightSpaceCoord.y * -0.5f + 0.5f;
+	float4 LightSpaceCoord = ScreenCoordToTexCoord(mul(coord, lightTransform));
 
 	float2 Moments = tex2D(shadowBuffer, LightSpaceCoord.xy).xy;
-
 	return ChebyshevUpperBound(Moments, LightSpaceCoord.z);
 }
 
@@ -124,6 +132,24 @@ float invLerp(float from, float to, float value){
 
 float fogCoeff(float depth){
 	return 2.0 - clamp(invLerp(TESR_FogDistance.x, TESR_FogDistance.y, depth), 0.0, 1.0) / TESR_FogDistance.z;
+}
+
+float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord){
+	// Quality : shadow technique
+	// 0: disabled
+	// 1: VSM
+	// 2: simple ESM
+	// 3: filtered ESM
+
+	if (TESR_ShadowData.w == 1.0f){
+		return GetLightAmountValueVSM(shadowBuffer, lightTransform, coord);
+	} else if (TESR_ShadowData.w == 2.0f){
+		return GetLightAmountValueESM(shadowBuffer, lightTransform, coord);
+	} else if (TESR_ShadowData.w == 3.0f){
+		return GetLightAmountValueESSM(shadowBuffer, lightTransform, coord);
+	}else {
+		return 1.0f;
+	}
 }
 
 float GetLightAmount(float4 coord, float depth)
