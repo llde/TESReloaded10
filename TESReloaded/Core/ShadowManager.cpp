@@ -683,6 +683,7 @@ void ShadowManager::RenderShadowMaps() {
 			ShadowData->y += log(SunDir->z) / -10.0f;
 			if (ShadowData->y > 1.0f) ShadowData->y = 1.0f;
 		}
+		ShadowData->w = ShadowsExteriors->ShadowMode;
 	}
 	else if(ShadowsInteriors->Enabled){
 		std::map<int, NiPointLight*> SceneLights;
