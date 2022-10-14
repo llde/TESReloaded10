@@ -403,15 +403,15 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 		return View * Proj;
 	}
 
+	float safety = 1.2f;
 	NiCamera* Camera = WorldSceneGraph->camera;
 	float w = Camera->Frustum.Right - Camera->Frustum.Left;
 	float h = Camera->Frustum.Top - Camera->Frustum.Bottom;
 
 	float ar = h / w;
-	ar += 0.2f; //fix missing shadows at the top of the screen
 
-//	Logger::Log("fov %f   %f   %f", WorldSceneGraph->cameraFOV, Player->GetFoV(false), Player->GetFoV(true));
-    float fov = WorldSceneGraph->cameraFOV;
+	//Logger::Log("fov %f   %f   %f", WorldSceneGraph->cameraFOV, Player->GetFoV(false), Player->GetFoV(true));
+	float fov = WorldSceneGraph->cameraFOV * safety;
 	float tanHalfHFOV = tanf(D3DXToRadian(fov / 2.0f));
 	float tanHalfVFOV = tanf(D3DXToRadian((fov * ar) / 2.0f));
 
