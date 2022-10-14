@@ -11,9 +11,8 @@ void ShadowManager::Initialize() {
 	// initializes the settings
 	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
 	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
-	UINT ShadowMapSize = 0;
+	UINT ShadowMapSize = ShadowsExteriors->ShadowMapResolution;
 	UINT ShadowCubeMapSize = ShadowsInteriors->ShadowCubeMapSize;
-	ShadowMapSize = ShadowsExteriors->ShadowMapResolution;
 	GetCascadeDepths();
 	ShadowsExteriors->ShadowMapRadius[MapOrtho] = ShadowMapSize;
 
@@ -33,6 +32,9 @@ void ShadowManager::Initialize() {
 
 	// initialize the frame vertices for future shadow blurring
 	for (int i = 0; i <= MapOrtho; i++) {
+		float multiple = i == MapLod ? 2.0f : 1.0f; // double the size of lod map only
+		ShadowMapSize = ShadowsExteriors->ShadowMapResolution * multiple;
+
 		if (i != MapOrtho) TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[i]);
 		TheShadowManager->ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
         TheShadowManager->ShadowMapInverseResolution[i] = 1.0f / (float) ShadowMapSize;
