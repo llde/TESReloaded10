@@ -270,7 +270,6 @@ void ShadowManager::Render(NiGeometry* Geo) {
 
 	if (Geo->m_pcName && !memcmp(Geo->m_pcName, "Torch", 5)) return; // No torch geo, it is too near the light and a bad square is rendered.
 	
-	TheShaderManager->ShaderConst.Shadow.Data.w = TheSettingManager->SettingsShadows.Exteriors.ShadowMode; // Mode (0:off, 1:VSM, 2:ESM, 3: ESSM);
 	TheShaderManager->ShaderConst.Shadow.Data.x = 0.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
 	TheShaderManager->ShaderConst.Shadow.Data.y = 0.0f; // Alpha control
 	if (GeoData) {
@@ -651,6 +650,7 @@ void ShadowManager::RenderShadowMaps() {
     
 	TheRenderManager->SetupSceneCamera();
 	if (Player->GetWorldSpace() && ShadowsExteriors->Enabled) {
+		ShadowData->w = ShadowsExteriors->ShadowMode;	// Mode (0:off, 1:VSM, 2:ESM, 3: ESSM);
 		NiNode* PlayerNode = Player->GetNode();
 		D3DXVECTOR3 At;
 
@@ -684,7 +684,6 @@ void ShadowManager::RenderShadowMaps() {
 			ShadowData->y += log(SunDir->z) / -10.0f;
 			if (ShadowData->y > 1.0f) ShadowData->y = 1.0f;
 		}
-		ShadowData->w = ShadowsExteriors->ShadowMode;
 	}
 	else if(ShadowsInteriors->Enabled){
 		std::map<int, NiPointLight*> SceneLights;
