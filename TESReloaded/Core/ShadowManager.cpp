@@ -270,6 +270,7 @@ void ShadowManager::Render(NiGeometry* Geo) {
 
 	if (Geo->m_pcName && !memcmp(Geo->m_pcName, "Torch", 5)) return; // No torch geo, it is too near the light and a bad square is rendered.
 	
+	TheShaderManager->ShaderConst.Shadow.Data.w = TheSettingManager->SettingsShadows.Exteriors.ShadowMode; // Mode (0:off, 1:VSM, 2:ESM, 3: ESSM);
 	TheShaderManager->ShaderConst.Shadow.Data.x = 0.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
 	TheShaderManager->ShaderConst.Shadow.Data.y = 0.0f; // Alpha control
 	if (GeoData) {
@@ -300,7 +301,7 @@ void ShadowManager::Render(NiGeometry* Geo) {
 				NiAlphaProperty* AProp = (NiAlphaProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Alpha);
 				if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) {
 					if (NiTexture* Texture = *((BSShaderPPLightingProperty*)ShaderProperty)->textures[0]) {
-						TheShaderManager->ShaderConst.Shadow.Data.y = 1.0f;
+						TheShaderManager->ShaderConst.Shadow.Data.y = 1.0f; // Alpha Control
 						RenderState->SetTexture(0, Texture->rendererData->dTexture);
 						RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
 						RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
@@ -451,7 +452,7 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 		if (p.y < bottom || bottom == 0.0f) bottom = p.y;
 	}
 
-	D3DXMatrixOrthoOffCenterRH(&Proj, left, right, bottom, top, FarPlane * 0.6, 1.5f * FarPlane);
+	D3DXMatrixOrthoOffCenterRH(&Proj, left, right, bottom, top, 0.0f, 2.0f * FarPlane);
 	return View * Proj;
 }
 
@@ -498,13 +499,11 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 			if (TESObjectCELL* Cell = CellArray->GetCell(i)) {
 				if (ShadowsExteriors->Forms[ShadowMapType].Terrain) {
 					NiNode* CellNode = Cell->GetNode();
-			//		for (int i = 2; i < 6; i++) { //0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker
-						NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[2];
-                        for (int i = 0; i < TerrainNode->m_children.numObjs; i++){
-                            RenderTerrain(TerrainNode->m_children.data[i], ShadowMapType);                            
-                        }
-			//		}
                 if(ShadowMapType == MapLod || ShadowMapType == MapFar) RenderTerrain(Tes->landLOD, ShadowMapType);  //Only when we are at Far or Lod cascade
+					NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[2]; //0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker
+                    for (int i = 0; i < TerrainNode->m_children.numObjs; i++){
+                        RenderTerrain(TerrainNode->m_children.data[i], ShadowMapType);                            
+                    }
 				}
 				TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
 				while (Entry) {
@@ -678,6 +677,8 @@ void ShadowManager::RenderShadowMaps() {
 		ShadowData->x = ShadowsExteriors->Quality;
 		if (TheSettingManager->SettingsMain.Effects.ShadowsExteriors) ShadowData->x = -1; // Disable the forward shadowing
 		ShadowData->y = ShadowsExteriors->Darkness;
+
+		// fade shadows when sun is nearing the horizon
 		if (SunDir->z < 0.1f) {
 			if (ShadowData->y == 0.0f) ShadowData->y = 0.1f;
 			ShadowData->y += log(SunDir->z) / -10.0f;

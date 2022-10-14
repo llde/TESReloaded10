@@ -30,17 +30,36 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     	depth = IN.texcoord_0.z / IN.texcoord_0.w;
 	}
 
-	//	cheat to reduce shadow acne in variance maps
-	float dx = ddx(depth);
-	float dy = ddy(depth);
-	float moment2 = depth * depth + 0.25 * (dx * dx + dy * dy);
+	// Quality : shadow technique
+	// 0: disabled
+	// 1: VSM
+	// 2: simple ESM
+	// 3: filtered ESM
+	
+	if (TESR_ShadowData.w == 1.0f){
+		// VSM
+		//cheat to reduce shadow acne in variance maps
+		float dx = ddx(depth);
+		float dy = ddy(depth);
+		float moment2 = depth * depth + 0.25 * (dx * dx + dy * dy);
 
-	OUT.color_0 = float4(depth, moment2, 0.0f, 1.0f);
+		OUT.color_0 = float4(depth, moment2, 0.0f, 1.0f);
 
-	// ESM
-	// float k = 80;
-	// float esm = exp( 80 * depth);
+	} else if (TESR_ShadowData.w == 2.0f){
+		// PCF/simple ESM
+		OUT.color_0 = float4(depth, 0.0f, 0.0f, 1.0f);
 
-	// OUT.color_0 = float4(esm, esm - depth, 0.0f, 1.0f);
-    return OUT;	
+	} else if (TESR_ShadowData.w == 3.0f){
+		// ESSM
+		float k = 80;
+		float esm = exp( 80 * depth);
+
+		OUT.color_0 = float4(esm, esm - depth, 0.0f, 1.0f);
+	}else {
+		// disabled
+		OUT.color_0 = float4 (0.0f, 0.0f, 0.0f, 0.0f);
+	}
+
+	return OUT;	
+
 };
