@@ -23,3 +23,5 @@ template <typename T1> inline UInt32 ThisCall(UInt32 Method, void* Instance, T1 
 inline UInt32 ThisCall(UInt32 Method, void* Instance) { class T {}; union { UInt32 x; UInt32(T::* m)(); } u = { Method }; return ((T*)Instance->*u.m)(); }
 
 inline float ThisCallF(UInt32 Method, void* Instance) { class T {}; union { UInt32 x; float(T::* m)(); } u = { Method }; return ((T*)Instance->*u.m)(); }
+
+inline double ThisCallD(UInt32 Method, void* Instance) { class T {}; union { UInt32 x; float(T::* m)(); } u = { Method }; return ((T*)Instance->*u.m)(); }
