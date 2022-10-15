@@ -261,6 +261,7 @@ struct SettingsShadowStruct {
 		bool				Statics;
 		bool				Terrain;
 		bool				Trees;
+		bool				Lod;
 		float				MinRadius;
 	};
 

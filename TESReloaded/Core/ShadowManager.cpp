@@ -11,9 +11,8 @@ void ShadowManager::Initialize() {
 	// initializes the settings
 	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
 	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
-	UINT ShadowMapSize = 0;
+	UINT ShadowMapSize = ShadowsExteriors->ShadowMapResolution;
 	UINT ShadowCubeMapSize = ShadowsInteriors->ShadowCubeMapSize;
-	ShadowMapSize = ShadowsExteriors->ShadowMapResolution;
 	GetCascadeDepths();
 	ShadowsExteriors->ShadowMapRadius[MapOrtho] = ShadowMapSize;
 
@@ -33,6 +32,9 @@ void ShadowManager::Initialize() {
 
 	// initialize the frame vertices for future shadow blurring
 	for (int i = 0; i <= MapOrtho; i++) {
+		float multiple = i == MapLod ? 2.0f : 1.0f; // double the size of lod map only
+		ShadowMapSize = ShadowsExteriors->ShadowMapResolution * multiple;
+
 		if (i != MapOrtho) TheShaderManager->CreateFrameVertex(ShadowMapSize, ShadowMapSize, &TheShadowManager->BlurShadowVertex[i]);
 		TheShadowManager->ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
         TheShadowManager->ShadowMapInverseResolution[i] = 1.0f / (float) ShadowMapSize;
@@ -401,15 +403,15 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 		return View * Proj;
 	}
 
+	float safety = 1.2f;
 	NiCamera* Camera = WorldSceneGraph->camera;
 	float w = Camera->Frustum.Right - Camera->Frustum.Left;
 	float h = Camera->Frustum.Top - Camera->Frustum.Bottom;
 
 	float ar = h / w;
-	ar += 0.2f; //fix missing shadows at the top of the screen
 
-//	Logger::Log("fov %f   %f   %f", WorldSceneGraph->cameraFOV, Player->GetFoV(false), Player->GetFoV(true));
-    float fov = WorldSceneGraph->cameraFOV;
+	//Logger::Log("fov %f   %f   %f", WorldSceneGraph->cameraFOV, Player->GetFoV(false), Player->GetFoV(true));
+	float fov = WorldSceneGraph->cameraFOV * safety;
 	float tanHalfHFOV = tanf(D3DXToRadian(fov / 2.0f));
 	float tanHalfVFOV = tanf(D3DXToRadian((fov * ar) / 2.0f));
 
@@ -451,7 +453,7 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 		if (p.y < bottom || bottom == 0.0f) bottom = p.y;
 	}
 
-	D3DXMatrixOrthoOffCenterRH(&Proj, left, right, bottom, top, 0.0f, 2.0f * FarPlane);
+	D3DXMatrixOrthoOffCenterRH(&Proj, left, right, bottom, top, FarPlane * 0.6f, 1.4f * FarPlane);
 	return View * Proj;
 }
 
@@ -498,7 +500,7 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 			if (TESObjectCELL* Cell = CellArray->GetCell(i)) {
 				if (ShadowsExteriors->Forms[ShadowMapType].Terrain) {
 					NiNode* CellNode = Cell->GetNode();
-                if(ShadowMapType == MapLod || ShadowMapType == MapFar) RenderTerrain(Tes->landLOD, ShadowMapType);  //Only when we are at Far or Lod cascade
+					if (ShadowsExteriors->Forms[ShadowMapType].Lod) RenderTerrain(Tes->landLOD, ShadowMapType); //Render terrain LOD
 					NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[2]; //0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker
                     for (int i = 0; i < TerrainNode->m_children.numObjs; i++){
                         RenderTerrain(TerrainNode->m_children.data[i], ShadowMapType);                            
