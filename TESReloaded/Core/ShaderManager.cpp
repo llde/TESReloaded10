@@ -97,6 +97,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.SunTiming;
 	else if (!strcmp(Name, "TESR_SunAmount"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.SunAmount;
+	else if (!strcmp(Name, "TESR_ShadowFade"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowFade;
 	else if (!strcmp(Name, "TESR_GameTime"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.GameTime;
 	else if (!strcmp(Name, "TESR_WaterCoefficients"))
@@ -742,8 +744,8 @@ void ShaderManager::UpdateConstants() {
 
 	TheRenderManager->UpdateSceneCameraData();
 	
-	ShaderConst.GameTime.x = TimeGlobals::GetGameTime();
-	ShaderConst.GameTime.y = ShaderConst.GameTime.x / 3600.0f;
+	ShaderConst.GameTime.x = TimeGlobals::GetGameTime(); //time in milliseconds
+	ShaderConst.GameTime.y = ShaderConst.GameTime.x / 3600.0f; //time in hours
 	ShaderConst.GameTime.z = (float)TheFrameRateManager->Time;
 
 	if (currentCell) {
@@ -764,43 +766,70 @@ void ShaderManager::UpdateConstants() {
 			if (currentWeather) {
 				ShaderConst.SunDir.w = 1.0f;
 				if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.y && ShaderConst.GameTime.y <= ShaderConst.SunTiming.z) {
+					// Day time
 					ShaderConst.SunAmount.x = 0.0f;
 					ShaderConst.SunAmount.y = 1.0f;
 					ShaderConst.SunAmount.z = 0.0f;
 					ShaderConst.SunAmount.w = 0.0f;
+
+					ShaderConst.ShadowFade.x = 0;
 				}
 				else if ((ShaderConst.GameTime.y >= ShaderConst.SunTiming.w && ShaderConst.GameTime.y <= 23.59) || (ShaderConst.GameTime.y >= 0 && ShaderConst.GameTime.y <= ShaderConst.SunTiming.x)) {
+					// Night time
 					ShaderConst.SunAmount.x = 0.0f;
 					ShaderConst.SunAmount.y = 0.0f;
 					ShaderConst.SunAmount.z = 0.0f;
 					ShaderConst.SunAmount.w = 1.0f;
+
+					ShaderConst.ShadowFade.x = 0;
 				}
 				else if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.x && ShaderConst.GameTime.y <= ShaderConst.SunTiming.y) {
-					if ((ShaderConst.GameTime.y - ShaderConst.SunTiming.x) * 2 <= ShaderConst.SunTiming.y - ShaderConst.SunTiming.x) { 
-						ShaderConst.SunAmount.x = (ShaderConst.GameTime.y - ShaderConst.SunTiming.x ) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x);
+					// Sunrise
+					float delta = 2.0f * invLerp(ShaderConst.SunTiming.x, ShaderConst.SunTiming.y, ShaderConst.GameTime.y); // from 0 (transition start) to 2 (transition end)
+
+					if (delta <= 1.0f) {
+						// first half: night is more prevalent than sun
+						ShaderConst.SunAmount.x = delta;
 						ShaderConst.SunAmount.y = 0.0f;
 						ShaderConst.SunAmount.z = 0.0f;
-						ShaderConst.SunAmount.w = 1.0f - (ShaderConst.GameTime.y - ShaderConst.SunTiming.x) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x);
+						ShaderConst.SunAmount.w = 1.0f - delta;
+
+						// fade out for an hour at the start of sunrise
+						ShaderConst.ShadowFade.x = clamp(0.0, 1.0, ShaderConst.GameTime.y - ShaderConst.SunTiming.x);
 					}
 					else {
-						ShaderConst.SunAmount.x = 2.0f - (ShaderConst.GameTime.y - ShaderConst.SunTiming.x) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x);
-						ShaderConst.SunAmount.y = (ShaderConst.GameTime.y - ShaderConst.SunTiming.x) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x) - 1.0f;
+						// sun is more prevalent than night
+						ShaderConst.SunAmount.x = 2.0f - delta;
+						ShaderConst.SunAmount.y = delta - 1.0f;
 						ShaderConst.SunAmount.z = 0.0f;
 						ShaderConst.SunAmount.w = 0.0f;
+
+						// smoothstep into full shadows
+						ShaderConst.ShadowFade.x = 2.0f - delta;
 					}
 				}
 				else if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.z && ShaderConst.GameTime.y <= ShaderConst.SunTiming.w) {
-					if ((ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 <= ShaderConst.SunTiming.w - ShaderConst.SunTiming.z) {
+					// Sunset
+					float delta = 2.0f * invLerp(ShaderConst.SunTiming.w, ShaderConst.SunTiming.z, ShaderConst.GameTime.y); // from 0 (transition start) to 2 (transition end)
+
+					if (delta <= 1.0f) {
+						// first half, sun is more prevalent than night
 						ShaderConst.SunAmount.x = 0.0f;
-						ShaderConst.SunAmount.y = 1.0f - (ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 / (ShaderConst.SunTiming.w - ShaderConst.SunTiming.z);
-						ShaderConst.SunAmount.z = (ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 / (ShaderConst.SunTiming.w - ShaderConst.SunTiming.z);
+						ShaderConst.SunAmount.y = 1.0f - delta;
+						ShaderConst.SunAmount.z = delta;
 						ShaderConst.SunAmount.w = 0.0f;
+
+						ShaderConst.ShadowFade.x = delta;
 					}
 					else {
+						// night is more prevalent than sun
 						ShaderConst.SunAmount.x = 0.0f;
 						ShaderConst.SunAmount.y = 0.0f;
-						ShaderConst.SunAmount.z = 2.0f - (ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 / (ShaderConst.SunTiming.w - ShaderConst.SunTiming.z);
-						ShaderConst.SunAmount.w = (ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 / (ShaderConst.SunTiming.w - ShaderConst.SunTiming.z) - 1.0f;
+						ShaderConst.SunAmount.z = 2.0f - delta;
+						ShaderConst.SunAmount.w = delta - 1.0f;
+
+						// fade in for an hour from the end of sunset
+						ShaderConst.ShadowFade.x = clamp(0.0, 1.0, ShaderConst.SunTiming.w - ShaderConst.GameTime.y);
 					}
 				}
 
