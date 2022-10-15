@@ -453,7 +453,7 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 		if (p.y < bottom || bottom == 0.0f) bottom = p.y;
 	}
 
-	D3DXMatrixOrthoOffCenterRH(&Proj, left, right, bottom, top, 0.0f, 2.0f * FarPlane);
+	D3DXMatrixOrthoOffCenterRH(&Proj, left, right, bottom, top, FarPlane * 0.6f, 1.4f * FarPlane);
 	return View * Proj;
 }
 
