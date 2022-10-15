@@ -120,6 +120,7 @@ struct ShaderConstants {
 	D3DXVECTOR4				SunDir;
 	D3DXVECTOR4				SunTiming;
 	D3DXVECTOR4				SunAmount;
+	D3DXVECTOR4				ShadowFade;
 	D3DXVECTOR4				GameTime;
 	TESWeather*				pWeather;
 	float					currentsunGlare;
@@ -311,6 +312,9 @@ public:
 	void					SwitchShaderStatus(const char* Name);
 	void					SetCustomConstant(const char* Name, D3DXVECTOR4 Value);
 	void					SetExtraEffectEnabled(const char* Name, bool Value);
+	static float			lerp(float a, float b, float t);
+	static float			invLerp(float a, float b, float t);
+	static float			clamp(float a, float b, float t);
 		
 	ShaderConstants			ShaderConst;
 	CustomConstants			CustomConst;

@@ -2007,3 +2007,15 @@ void ShaderManager::SetExtraEffectEnabled(const char* Name, bool Value) {
 	if (v != ExtraEffects.end()) v->second->Enabled = Value;
 
 }
+
+float ShaderManager::lerp(float a, float b, float t) {
+	return (1 - t) * a + t * b;
+}
+
+float ShaderManager::invLerp(float a, float b, float t) {
+	return clamp(0.0, 1.0, (t - a) / (b - a));
+}
+
+float ShaderManager::clamp(float a, float b, float t) {
+	return min(max(a, t), b);
+}
