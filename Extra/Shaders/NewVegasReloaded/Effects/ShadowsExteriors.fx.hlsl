@@ -12,6 +12,7 @@ float4 TESR_CameraPosition;
 float4 TESR_WaterSettings;
 float4 TESR_ShadowData; // x: quality, y: darkness, z: nearmap resolution, w: farmap resolution
 float4 TESR_SunAmount;
+float4 TESR_FogColor;
 float4 TESR_ShadowFade;
 float4 TESR_ReciprocalResolution; //inverse of shadow map resolution
 float4 TESR_ShadowRadius; // radius of the 4 cascades
@@ -131,7 +132,7 @@ float invLerp(float from, float to, float value){
 }
 
 float fogCoeff(float depth){
-	return 2.0 - clamp(invLerp(TESR_FogDistance.x, TESR_FogDistance.y, depth), 0.0, 1.0) / TESR_FogDistance.z;
+	return clamp(invLerp(TESR_FogDistance.x, TESR_FogDistance.y, depth), 0.0, 1.0) / TESR_FogDistance.z;
 }
 
 float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord){
@@ -205,6 +206,14 @@ float GetLightAmount(float4 coord, float depth)
 	return 1.0;
 }
 
+
+float4 Desaturate(float4 input)
+{
+	float greyscale = input.r * 0.3f + input.g * 0.59f +input.b * 0.11f;
+	return float4(greyscale, greyscale, greyscale, input.a);
+}
+
+
 float4 Shadow(VSOUT IN) : COLOR0
 {
 	// returns a shadow value from darkness setting value (full shadow) 
@@ -225,8 +234,13 @@ float4 Shadow(VSOUT IN) : COLOR0
 		if (TESR_ShadowFade.x > 0.0f) 
 			Shadow = lerp(Shadow, 1.0f, TESR_ShadowFade.x);
 
+		// calculate fog impact
+		float fog = fogCoeff(depth);
+		float fogColor = Desaturate(TESR_FogColor).x;
+		float darkness = clamp(lerp(DARKNESS, TESR_FogColor.x, fog), DARKNESS, 1.0);
+
 		// brighten shadow value from 0 to darkness from config value
-		Shadow = lerp(DARKNESS, 1.0f, Shadow);
+		Shadow = lerp(darkness, 1.0f, Shadow);
 	}
 	return float4(Shadow, Shadow, Shadow, 1.0f);
 }
@@ -234,12 +248,6 @@ float4 Shadow(VSOUT IN) : COLOR0
 float4 alphaBlend(float4 base, float4 blend)
 {
 	return base*base.a +(1-base.a)*blend;
-}
-
-float4 Desaturate(float4 input)
-{
-	float greyscale = input.r * 0.3f + input.g * 0.59f +input.b * 0.11f;
-	return float4(greyscale, greyscale, greyscale, input.a);
 }
 
 // photoshop overlay blend mode code from https://www.ryanjuckett.com/photoshop-blend-modes-in-hlsl/
