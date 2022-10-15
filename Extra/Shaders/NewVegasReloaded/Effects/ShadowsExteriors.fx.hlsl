@@ -12,9 +12,9 @@ float4 TESR_CameraPosition;
 float4 TESR_WaterSettings;
 float4 TESR_ShadowData; // x: quality, y: darkness, z: nearmap resolution, w: farmap resolution
 float4 TESR_SunAmount;
-float4 TESR_SunDirection;
-float4 TESR_ReciprocalResolution;
-float4 TESR_ShadowRadius;
+float4 TESR_ShadowFade;
+float4 TESR_ReciprocalResolution; //inverse of shadow map resolution
+float4 TESR_ShadowRadius; // radius of the 4 cascades
 float4 TESR_FogDistance; // x: fog start, y: fog end, z: weather percentage, w: sun glare
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
@@ -29,7 +29,7 @@ static const float nearZ = TESR_ProjectionTransform._43 / TESR_ProjectionTransfo
 static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
 static const float Zmul = nearZ * farZ;
 static const float Zdiff = farZ - nearZ;
-static const float darkness = TESR_ShadowData.y;
+static const float DARKNESS = TESR_ShadowData.y;
 static const float MIN_VARIANCE = 0.000005;
 static const float BLEED_CORRECTION = 0.4;
 
@@ -219,10 +219,14 @@ float4 Shadow(VSOUT IN) : COLOR0
 	if (world_pos.z > TESR_WaterSettings.x) {
 		float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 
-		Shadow = GetLightAmount(pos, depth);
+		Shadow = saturate(GetLightAmount(pos, depth));
+
+		// fade shadows to light when sun is low
+		if (TESR_ShadowFade.x > 0.0f) 
+			Shadow = lerp(Shadow, 1.0f, TESR_ShadowFade.x);
 
 		// brighten shadow value from 0 to darkness from config value
-		Shadow = lerp(darkness, 1.0f, Shadow);
+		Shadow = lerp(DARKNESS, 1.0f, Shadow);
 	}
 	return float4(Shadow, Shadow, Shadow, 1.0f);
 }
@@ -270,6 +274,7 @@ float4 SimpleCombineShadow (VSOUT IN) : COLOR0
 {
 	// old style multiply blending (for testing)
 	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
+
 	return tex2D(TESR_RenderedBuffer, IN.UVCoord).r * color; 
 }
 
