@@ -231,7 +231,7 @@ void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMa
 				}
 			}
 		}
-		else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
+		else if ((VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
 			RenderGeometry((NiGeometry*)Object);
 		}
         //else {
@@ -672,7 +672,7 @@ void ShadowManager::RenderShadowMaps() {
 		for (int i = MapNear; i < MapOrtho; i++) {
 			ShadowMapTypeEnum ShadowMapType = static_cast<ShadowMapTypeEnum>(i);
 			RenderShadowMap(ShadowMapType, ShadowsExteriors, &At, SunDir);
-	//		BlurShadowMap(ShadowMapType);
+			BlurShadowMap(ShadowMapType);
 		}
 
 		// Update constants used by shadow shaders: x=quality, y=darkness
@@ -816,7 +816,7 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
     RenderState->SetPixelShader(ShadowMapBlurPixel->ShaderHandle, false);
 	Device->SetFVF(FrameFVF);
 	Device->SetStreamSource(0, BlurShadowVertex[ShadowMapType], 0, sizeof(FrameVS));
-	Device->SetTexture(0, SourceShadowMap);
+	RenderState->SetTexture(0, SourceShadowMap);
 	Device->SetRenderTarget(0, TargetShadowMap);
 	
 	// Pass map resolution to shader as a constant
@@ -840,7 +840,7 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
 		Device->EndScene();
 
 		// move texture to render device for next pass
-		Device->SetTexture(0, BlurredShadowTexture);
+		RenderState->SetTexture(0, BlurredShadowTexture);
 	}
 }
 
