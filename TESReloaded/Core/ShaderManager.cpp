@@ -795,7 +795,7 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SunAmount.w = 1.0f - delta;
 
 						// fade out for an hour at the start of sunrise
-						ShaderConst.ShadowFade.x = clamp(0.0, 1.0, ShaderConst.GameTime.y - ShaderConst.SunTiming.x);
+						ShaderConst.ShadowFade.x = invLerp(0.0, 1.0, ShaderConst.GameTime.y - ShaderConst.SunTiming.x);
 					}
 					else {
 						// sun is more prevalent than night
@@ -829,7 +829,7 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SunAmount.w = delta - 1.0f;
 
 						// fade in for an hour from the end of sunset
-						ShaderConst.ShadowFade.x = clamp(0.0, 1.0, ShaderConst.SunTiming.w - ShaderConst.GameTime.y);
+						ShaderConst.ShadowFade.x = invLerp(1.0, 0.0, ShaderConst.SunTiming.w - ShaderConst.GameTime.y);
 					}
 				}
 
@@ -2042,7 +2042,8 @@ float ShaderManager::lerp(float a, float b, float t) {
 }
 
 float ShaderManager::invLerp(float a, float b, float t) {
-	return clamp(0.0, 1.0, (t - a) / (b - a));
+	t = clamp(0.0, 1.0, (t - a) / (b - a));
+	return t * t * (3.0 - 2.0 * t);
 }
 
 float ShaderManager::clamp(float a, float b, float t) {
