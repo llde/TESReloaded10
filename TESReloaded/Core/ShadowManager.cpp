@@ -500,7 +500,7 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 			if (TESObjectCELL* Cell = CellArray->GetCell(i)) {
 				if (ShadowsExteriors->Forms[ShadowMapType].Terrain) {
 					NiNode* CellNode = Cell->GetNode();
-                if(ShadowMapType == MapLod || ShadowMapType == MapFar) RenderTerrain(Tes->landLOD, ShadowMapType);  //Only when we are at Far or Lod cascade
+					if (ShadowsExteriors->Forms[ShadowMapType].Lod) RenderTerrain(Tes->landLOD, ShadowMapType); //Render terrain LOD
 					NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[2]; //0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker
                     for (int i = 0; i < TerrainNode->m_children.numObjs; i++){
                         RenderTerrain(TerrainNode->m_children.data[i], ShadowMapType);                            
