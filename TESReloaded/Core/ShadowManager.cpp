@@ -687,14 +687,14 @@ void ShadowManager::RenderShadowMaps() {
 			if (ShadowData->y > 1.0f) ShadowData->y = 1.0f;
 		}*/
 
-		Sky* g_sky = Sky::Get();
-		TimeGlobals* GameTimeGlobals = (TimeGlobals*)0x11DE7B8;
+		Sky* Sky = Sky::Get();
+		TESClimate* Climate = Sky->firstClimate;
+		TimeGlobals* GameTimeGlobals = TimeGlobals::Get();
 		float GameHour = GameTimeGlobals->GameHour->data;
-
-		float SunriseStart = ThisCallD(0x595EA0, g_sky);
-		float SunriseEnd = ThisCallD(0x595F50, g_sky);
-		float SunsetStart = ThisCallD(0x595FC0, g_sky);
-		float SunsetEnd = ThisCallD(0x596030, g_sky);
+		float SunriseStart = Sky->GetSunriseBegin();
+		float SunriseEnd = Sky->GetSunriseEnd();
+		float SunsetStart = Sky->GetSunsetBegin();
+		float SunsetEnd = Sky->GetSunsetEnd();
 
 		float DarknessModifier = ShadowsExteriors->Darkness;
 		float MoonVisibility = 1;
@@ -709,7 +709,7 @@ void ShadowManager::RenderShadowMaps() {
 			DaysPassed = 1;
 		}
 
-		float MoonPhase = (fmod(DaysPassed, 24)) / 3;
+		float MoonPhase = (fmod(DaysPassed, 24)) / (Climate->phaseLength & 0x3F);
 
 		if ((MoonPhase > 4.25) && (MoonPhase < 5.25)) {
 			MoonVisibility = 1;
