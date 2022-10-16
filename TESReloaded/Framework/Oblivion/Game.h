@@ -3200,7 +3200,11 @@ assert(sizeof(Precipitation) == 0x018);
 class Sky {
 public:
 	void ForceWeather(TESWeather* Weather) { ThisCall(0x00542260, this, Weather, 0); }
-
+	static Sky* Get() { return *(Sky**)0xB333B0; }
+	float GetSunriseBegin() { return ThisCallD(0x499140, this); }
+	float GetSunriseEnd() { return ThisCallD(0x499180, this); }
+	float GetSunsetBegin() { return ThisCallD(0x4991C0, this); }
+	float GetSunsetEnd() { return ThisCallD(0x499200, this); }
 	void**			_vtbl;							// 000
 	NiNode*			nodeSkyRoot;					// 004
 	NiNode*			nodeMoonsRoot;					// 008
@@ -4063,7 +4067,7 @@ public:
 	TESGlobal* TimeScale;		// 14
 
 	static float GetGameTime() { TimeGlobals* Globals = (TimeGlobals*)0x00B332E0; return Globals->GameHour->data * 60.0f * 60.0f; }
-
+	static TimeGlobals* Get() { return (TimeGlobals*)0xB332E0; }
 };
 assert(sizeof(TimeGlobals) == 0x018); // Static class, size could be larger
 

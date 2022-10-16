@@ -4053,6 +4053,11 @@ public:
 	void ForceWeather(TESWeather* Weather) { ThisCall(0x0063D0E0, this, Weather, 0); }
 	static Sky* Get() { return *(Sky**)0x11DEA20; }
 
+	float GetSunriseBegin() { return ThisCallD(0x595EA0, this); }
+	float GetSunriseEnd()   { return ThisCallD(0x595F50, this); }
+	float GetSunsetBegin()  { return ThisCallD(0x595FC0, this); }
+	float GetSunsetEnd()    { return ThisCallD(0x596030, this); }
+
 //	void RefreshMoon();
 	void RefreshClimate(TESClimate* climate, bool immediate = true)
 	{
@@ -5148,7 +5153,7 @@ public:
 	TESGlobal* TimeScale;		// 14
 
 	static float GetGameTime() { TimeGlobals* Globals = (TimeGlobals*)0x011DE7B8; return Globals->GameHour->data * 60.0f * 60.0f; }
-
+	static TimeGlobals* Get() { return (TimeGlobals*)0x11DE7B8; }
 };
 assert(sizeof(TimeGlobals) == 0x018); // Static class, size could be larger
 
