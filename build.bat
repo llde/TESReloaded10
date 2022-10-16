@@ -14,7 +14,7 @@ if "%PROJECT%" NEQ "NewVegasReloaded" (
 )
 
 @REM build project
-"%programfiles(x86)%\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild" -target:%PROJECT% /property:Configuration=Release /property:Platform=x86 -m
+msbuild -target:%PROJECT% /property:Configuration=Release /property:Platform=x86 -m
 
 if %ERRORLEVEL% NEQ 0 (
     echo Build has failed. Deploy aborted.
