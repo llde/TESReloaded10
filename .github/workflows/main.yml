@@ -1,0 +1,22 @@
+name: deploy
+
+on:
+  push:
+    branches: [master]
+    tags:
+     - '*'
+
+jobs:
+  NVRdeploy:
+    name: NVRdeploy
+    if: github.ref_type == 'tag' && contains(github.ref_name, 'NVR')
+    uses: ./.github/workflows/deploy.yml
+    with:
+      projectname: "NewVegasReloaded"
+
+  ORdeploy:
+    name: ORdeploy
+    if: github.ref_type == 'tag' && contains(github.ref_name, 'OR')
+    uses: ./.github/workflows/deploy.yml
+    with:
+      projectname: "OblivionReloaded"

@@ -1,0 +1,67 @@
+name: deployTemplate
+
+on:
+  workflow_call:
+    inputs:
+      projectname:
+        required: true
+        type: string
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: .
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  BUILD_CONFIGURATION: Release
+  VERSION: ${{github.ref_name}}
+  ARTEFACT_NAME: ${{inputs.projectname}}-${{github.ref_name}}
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: cmd /c build.bat ${{inputs.projectname}}
+
+    - name: zip files
+      uses: vimtor/action-zip@v1
+      with:
+        files: build/${{inputs.projectname}}/
+        dest: ${{env.ARTEFACT_NAME}}.zip
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      id: create_release
+      with:
+        draft: false
+        prerelease: false
+        release_name: ${{env.ARTEFACT_NAME}}
+        tag_name: release-${{env.VERSION}}
+        # body_path: CHANGELOG.md #TODO: add changelog
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Upload Release Artifact
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{env.ARTEFACT_NAME}}.zip
+        asset_name: ${{env.ARTEFACT_NAME}}.zip
+        asset_content_type: application/zip
