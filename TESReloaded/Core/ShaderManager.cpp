@@ -772,7 +772,7 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.SunAmount.z = 0.0f;
 					ShaderConst.SunAmount.w = 0.0f;
 
-					ShaderConst.ShadowFade.x = 0;
+					//ShaderConst.ShadowFade.x = 0;
 				}
 				else if ((ShaderConst.GameTime.y >= ShaderConst.SunTiming.w && ShaderConst.GameTime.y <= 23.59) || (ShaderConst.GameTime.y >= 0 && ShaderConst.GameTime.y <= ShaderConst.SunTiming.x)) {
 					// Night time
@@ -781,7 +781,7 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.SunAmount.z = 0.0f;
 					ShaderConst.SunAmount.w = 1.0f;
 
-					ShaderConst.ShadowFade.x = 0;
+					//ShaderConst.ShadowFade.x = 0;
 				}
 				else if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.x && ShaderConst.GameTime.y <= ShaderConst.SunTiming.y) {
 					// Sunrise
@@ -795,7 +795,7 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SunAmount.w = 1.0f - delta;
 
 						// fade out for an hour at the start of sunrise
-						ShaderConst.ShadowFade.x = invLerp(0.0, 1.0, ShaderConst.GameTime.y - ShaderConst.SunTiming.x);
+						//ShaderConst.ShadowFade.x = invLerp(0.0, 1.0, ShaderConst.GameTime.y - ShaderConst.SunTiming.x);
 					}
 					else {
 						// sun is more prevalent than night
@@ -805,7 +805,7 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SunAmount.w = 0.0f;
 
 						// smoothstep into full shadows
-						ShaderConst.ShadowFade.x = 2.0f - delta;
+						//ShaderConst.ShadowFade.x = 2.0f - delta;
 					}
 				}
 				else if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.z && ShaderConst.GameTime.y <= ShaderConst.SunTiming.w) {
@@ -819,7 +819,7 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SunAmount.z = delta;
 						ShaderConst.SunAmount.w = 0.0f;
 
-						ShaderConst.ShadowFade.x = delta;
+						//ShaderConst.ShadowFade.x = delta;
 					}
 					else {
 						// night is more prevalent than sun
@@ -829,9 +829,10 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SunAmount.w = delta - 1.0f;
 
 						// fade in for an hour from the end of sunset
-						ShaderConst.ShadowFade.x = invLerp(1.0, 0.0, ShaderConst.SunTiming.w - ShaderConst.GameTime.y);
+						//ShaderConst.ShadowFade.x = invLerp(1.0, 0.0, ShaderConst.SunTiming.w - ShaderConst.GameTime.y);
 					}
 				}
+				ShaderConst.ShadowFade.x = 0;
 
 				if (ShaderConst.pWeather == NULL) ShaderConst.pWeather = currentWeather;
 
