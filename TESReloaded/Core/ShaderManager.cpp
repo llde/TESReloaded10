@@ -758,10 +758,10 @@ void ShaderManager::UpdateConstants() {
 	ShaderConst.GameTime.z = (float)TheFrameRateManager->Time;
 
 	if (currentCell) {
-		ShaderConst.SunTiming.x = currentClimate->sunriseBegin / 6.0f -1.0f;
-		ShaderConst.SunTiming.y = currentClimate->sunriseEnd / 6.0f;
-		ShaderConst.SunTiming.z = currentClimate->sunsetBegin / 6.0f;
-		ShaderConst.SunTiming.w = currentClimate->sunsetEnd / 6.0f + 1.0f;
+		ShaderConst.SunTiming.x = WorldSky->GetSunriseColorBegin();
+		ShaderConst.SunTiming.y = SunriseEnd;
+		ShaderConst.SunTiming.z = SunsetStart;
+		ShaderConst.SunTiming.w = WorldSky->GetSunsetColorEnd();
 
 		if (lastGameTime != ShaderConst.GameTime.y) {
 			// update Sun position
@@ -774,32 +774,28 @@ void ShaderManager::UpdateConstants() {
 		// fade shadows at sunrise/sunset
 		float shadowFadeTime = 1.0f;
 		ShaderConst.ShadowFade.x = 0;
-		if ((GameHour >= SunsetEnd - shadowFadeTime) && GameHour < SunsetEnd) {
-			//sunset
-			ShaderConst.ShadowFade.x = invLerp(SunsetEnd - shadowFadeTime, SunsetEnd, GameHour);
+		if ((GameHour >= SunsetEnd - shadowFadeTime) && GameHour < SunsetEnd) { //sunset
+			ShaderConst.ShadowFade.x = smoothStep(SunsetEnd - shadowFadeTime, SunsetEnd, GameHour);
 		}
-		else if (GameHour >= SunsetEnd && GameHour < SunsetEnd + shadowFadeTime) {
-			//moonrise
-			ShaderConst.ShadowFade.x = 1.0f - invLerp(SunsetEnd, SunsetEnd + shadowFadeTime, GameHour);
+		else if (GameHour >= SunsetEnd && GameHour < SunsetEnd + shadowFadeTime) { //moonrise
+			ShaderConst.ShadowFade.x = 1.0f - smoothStep(SunsetEnd, SunsetEnd + shadowFadeTime, GameHour);
 		}
-		else if(GameHour >= SunriseStart - shadowFadeTime && GameHour < SunriseStart){
-			//moonset
-			ShaderConst.ShadowFade.x = invLerp(SunriseStart - shadowFadeTime, SunriseStart, GameHour);
+		else if(GameHour >= SunriseStart - shadowFadeTime && GameHour < SunriseStart){ //moonset
+			ShaderConst.ShadowFade.x = smoothStep(SunriseStart - shadowFadeTime, SunriseStart, GameHour);
 		}
-		else if(GameHour >= SunriseStart && GameHour < SunriseStart + shadowFadeTime){
-			//sunrise
-			ShaderConst.ShadowFade.x = 1.0f - invLerp(SunriseStart, SunriseStart + shadowFadeTime, GameHour);
+		else if(GameHour >= SunriseStart && GameHour < SunriseStart + shadowFadeTime){ //sunrise
+			ShaderConst.ShadowFade.x = 1.0f - smoothStep(SunriseStart, SunriseStart + shadowFadeTime, GameHour);
 		}
 
 		// at night time, fade based on moonphase
-		if (GameHour > SunsetEnd && GameHour < SunriseStart) {
-			// moonphase goes from 0 to 8.25?
-			float MoonPhase = (fmod(DaysPassed, 24)) / (currentClimate->phaseLength & 0x3F);
+		if (GameHour > SunsetEnd || GameHour < SunriseStart) {
+			// moonphase goes from 0 to 8
+			float MoonPhase = (fmod(DaysPassed, 8 * currentClimate->phaseLength & 0x3F)) / (currentClimate->phaseLength & 0x3F);
 
 			float PI = 3.1416; // use cos curve to fade moon light shadows strength
-			MoonPhase = lerp(-PI, PI, invLerp(0, 8.25, MoonPhase)); // map moonphase to -PI/PI
-			float MoonVisibility = cos(MoonPhase) * 0.5 + 0.5; // map MoonVisibility to 0/1 range
+			MoonPhase = lerp(-PI, PI, MoonPhase / 8) - PI/4; // map moonphase to 1/2PI/2PI + 1/2
 
+			float MoonVisibility = cos(MoonPhase) * 0.5 + 0.5; // map MoonVisibility to 0/1 range
 			ShaderConst.ShadowFade.x = lerp(MoonVisibility, 1, ShaderConst.ShadowFade.x);
 		}
 
@@ -2069,10 +2065,14 @@ float ShaderManager::lerp(float a, float b, float t) {
 }
 
 float ShaderManager::invLerp(float a, float b, float t) {
-	t = clamp(0.0, 1.0, (t - a) / (b - a));
-	return t * t * (3.0 - 2.0 * t);
+	return(t - a) / (b - a);
 }
 
 float ShaderManager::clamp(float a, float b, float t) {
 	return min(max(a, t), b);
+}
+
+float ShaderManager::smoothStep(float a, float b, float t) {
+	t = clamp(0.0, 1.0, invLerp(a, b, t));
+	return t * t * (3.0 - 2.0 * t);
 }
