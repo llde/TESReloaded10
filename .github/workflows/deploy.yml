@@ -51,7 +51,7 @@ jobs:
         draft: false
         prerelease: false
         release_name: ${{env.ARTEFACT_NAME}}
-        tag_name: release-${{env.VERSION}}
+        tag_name: ${{env.VERSION}}
         # body_path: CHANGELOG.md #TODO: add changelog
       env:
         GITHUB_TOKEN: ${{ github.token }}
