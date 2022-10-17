@@ -12,13 +12,13 @@ float4 TESR_ShadowLightPosition3;
 float4 TESR_ShadowCubeMapBlend;
 float4 TESR_ReciprocalResolution;
 
-sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-sampler2D TESR_SourceBuffer : register(s2) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer0 : register(s3) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer1 : register(s4) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer2 : register(s5) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer3 : register(s6) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+sampler2D TESR_RenderedBuffer : register(s0);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+sampler2D TESR_DepthBuffer : register(s1);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+sampler2D TESR_SourceBuffer : register(s2);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer0 : register(s3);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer1 : register(s4);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer2 : register(s5);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer3 : register(s6);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 static const float nearZ = TESR_ProjectionTransform._43 / TESR_ProjectionTransform._33;
 static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
@@ -88,11 +88,20 @@ float3 toWorld(float2 tex)
 }
 
 float Lookup(samplerCUBE ShadowCubeMapBuffer, float3 LightDir, float Distance, float Blend) {
-	 
-	float Shadow = texCUBE(ShadowCubeMapBuffer, LightDir).r;
-	if (Shadow > 0.0f && Shadow < 1.0f && Shadow < Distance - BIAS) return Blend;
-	return 1.0f;
-	
+	// decides if the point is in shadow or not, and returns a value based on the blend 
+	// (strength of the shadow from the shadow strength buffer)
+	float Shadow = texCUBE(ShadowCubeMapBuffer, LightDir).r; // get an average here of the texture?
+	float BaseBrightness = 0.2;
+	float FalloffSpeed = 0.6;
+
+	// display the shadow if the depth from the shadow map is smaller than the distance to the light 
+	// (means our point is behind the occlusion zone around the light)
+	// BIAS is used as an offset to the distance in order to solve Z fighting and shadow acne
+	if (Shadow > 0.0f && Shadow < 1.0f && Shadow < Distance - BIAS){
+		//multiply by distance to fade out shadows with distance (higher value means less shadow)
+		return Blend * BaseBrightness + Blend * (Distance * FalloffSpeed);
+	} 
+	return 1.0f; // no shadow (1=white)	
 }
 
 float GetLightAmount(samplerCUBE ShadowCubeMapBuffer, float4 WorldPos, float4 LightPos, float Blend) {
