@@ -11,7 +11,7 @@ float4 TESR_ShadowLightPosition2;
 float4 TESR_ShadowLightPosition3;
 float4 TESR_ShadowCubeMapBlend;
 float4 TESR_ReciprocalResolution;
-
+//sampler_state removed to avoid a artifact. TODO investigate
 sampler2D TESR_RenderedBuffer : register(s0);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_SourceBuffer : register(s2);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
