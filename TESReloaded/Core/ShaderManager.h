@@ -314,6 +314,7 @@ public:
 	void					SetExtraEffectEnabled(const char* Name, bool Value);
 	static float			lerp(float a, float b, float t);
 	static float			invLerp(float a, float b, float t);
+	static float			smoothStep(float a, float b, float t);
 	static float			clamp(float a, float b, float t);
 		
 	ShaderConstants			ShaderConst;

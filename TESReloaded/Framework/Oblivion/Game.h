@@ -3205,6 +3205,9 @@ public:
 	float GetSunriseEnd() { return ThisCallD(0x499180, this); }
 	float GetSunsetBegin() { return ThisCallD(0x4991C0, this); }
 	float GetSunsetEnd() { return ThisCallD(0x499200, this); }
+	float GetSunriseColorBegin() { return ThisCallD(0x53FC10, this); }
+	float GetSunsetColorEnd() { return ThisCallD(0x499200, this); }
+
 	void**			_vtbl;							// 000
 	NiNode*			nodeSkyRoot;					// 004
 	NiNode*			nodeMoonsRoot;					// 008

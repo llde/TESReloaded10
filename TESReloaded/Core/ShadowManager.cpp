@@ -686,68 +686,6 @@ void ShadowManager::RenderShadowMaps() {
 			ShadowData->y += log(SunDir->z) / -10.0f;
 			if (ShadowData->y > 1.0f) ShadowData->y = 1.0f;
 		}*/
-
-		Sky* Sky = Sky::Get();
-		TESClimate* Climate = Sky->firstClimate;
-		TimeGlobals* GameTimeGlobals = TimeGlobals::Get();
-		float GameHour = GameTimeGlobals->GameHour->data;
-		float SunriseStart = Sky->GetSunriseBegin();
-		float SunriseEnd = Sky->GetSunriseEnd();
-		float SunsetStart = Sky->GetSunsetBegin();
-		float SunsetEnd = Sky->GetSunsetEnd();
-
-		float DarknessModifier = ShadowsExteriors->Darkness;
-		float MoonVisibility = 1;
-		float DaysPassed = 0;
-
-		
-		if (GameTimeGlobals->GameDaysPassed)
-		{
-			DaysPassed = GameTimeGlobals->GameDaysPassed->data;
-		}
-		else {
-			DaysPassed = 1;
-		}
-
-		float MoonPhase = (fmod(DaysPassed, 24)) / (Climate->phaseLength & 0x3F);
-
-		if ((MoonPhase > 4.25) && (MoonPhase < 5.25)) {
-			MoonVisibility = 1;
-		}
-		else if ((MoonPhase > 3.25) && (MoonPhase < 4.25) || (MoonPhase > 5.25) && (MoonPhase < 6.25)) {
-			MoonVisibility = 0.85;
-		}
-		else if ((MoonPhase > 2.25) && (MoonPhase < 3.25) || (MoonPhase > 6.25) && (MoonPhase < 7.25)) {
-			MoonVisibility = 0.75;
-		}
-		else if ((MoonPhase > 1.25) && (MoonPhase < 2.25) || (MoonPhase > 7.25) && (MoonPhase < 8.25) || MoonPhase < 0.25) {
-			MoonVisibility = 0.65;
-		}
-		else if ((MoonPhase > 0.25) && (MoonPhase < 1.25)) {
-			MoonVisibility = 0.45;
-		}
-		// Offsets are needed to prevent shadows jumping into position
-		if ((GameHour >= SunsetEnd+0.25) || (GameHour < SunriseStart+0.75)) {
-			// Night
-			if (GameHour > SunsetEnd+0.25) {
-				DarknessModifier = -(GameHour - SunsetEnd-1.25);
-			}
-			else {
-				DarknessModifier = (GameHour - SunriseStart+1.75);
-			}
-			ShadowData->y = min(max(DarknessModifier, MoonVisibility), 1);
-		}
-		else {
-			//Sunsety
-			if ((GameHour >= SunsetStart+0.25) && (GameHour <= SunsetEnd+0.25)) {
-				DarknessModifier = GameHour - SunsetEnd + 1.25;
-			}
-			// Sunrise
-			else if ((GameHour >= SunriseStart+0.75) && (GameHour <= SunriseEnd+0.75)) {
-				DarknessModifier = -(GameHour - SunriseStart - 1.75);
-			}
-			ShadowData->y = min(max(DarknessModifier, ShadowsExteriors->Darkness), 1);
-		}
 	}
 	else if(ShadowsInteriors->Enabled){
 		std::map<int, NiPointLight*> SceneLights;

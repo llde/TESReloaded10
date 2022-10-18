@@ -4057,6 +4057,8 @@ public:
 	float GetSunriseEnd()   { return ThisCallD(0x595F50, this); }
 	float GetSunsetBegin()  { return ThisCallD(0x595FC0, this); }
 	float GetSunsetEnd()    { return ThisCallD(0x596030, this); }
+	float GetSunriseColorBegin() { return ThisCallD(0x63B9B0, this); }
+	float GetSunsetColorEnd() { return ThisCallD(0x63BA30, this); }
 
 //	void RefreshMoon();
 	void RefreshClimate(TESClimate* climate, bool immediate = true)
