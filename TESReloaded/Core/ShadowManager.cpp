@@ -342,9 +342,9 @@ void ShadowManager::Render(NiGeometry* Geo) {
 		}
 		Device->SetIndices(GeoData->IB);
 		if (GeoData->FVF)
-			Device->SetFVF(GeoData->FVF);
+			RenderState->SetFVF(GeoData->FVF, false);
 		else
-			Device->SetVertexDeclaration(GeoData->VertexDeclaration);
+			RenderState->SetVertexDeclaration(GeoData->VertexDeclaration, false);
 		CurrentVertex->SetCT();
 		CurrentPixel->SetCT();
 		for (UInt32 i = 0; i < GeoData->NumArrays; i++) {
@@ -379,9 +379,9 @@ void ShadowManager::Render(NiGeometry* Geo) {
 			}
 			Device->SetIndices(GeoData->IB);
 			if (GeoData->FVF)
-				Device->SetFVF(GeoData->FVF);
+				RenderState->SetFVF(GeoData->FVF, false);
 			else
-				Device->SetVertexDeclaration(GeoData->VertexDeclaration);
+				RenderState->SetVertexDeclaration(GeoData->VertexDeclaration, false);
 			CurrentVertex->SetCT();
 			CurrentPixel->SetCT();
 			for (UInt32 i = 0; i < GeoData->NumArrays; i++) {
@@ -838,7 +838,7 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
     RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE, RenderStateArgs);
     RenderState->SetVertexShader(ShadowMapBlurVertex->ShaderHandle, false);
     RenderState->SetPixelShader(ShadowMapBlurPixel->ShaderHandle, false);
-	Device->SetFVF(FrameFVF);
+	RenderState->SetFVF(FrameFVF, false);
 	Device->SetStreamSource(0, BlurShadowVertex[ShadowMapType], 0, sizeof(FrameVS));
 	RenderState->SetTexture(0, SourceShadowMap);
 	Device->SetRenderTarget(0, TargetShadowMap);
