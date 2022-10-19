@@ -241,6 +241,29 @@ void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMa
 
 }
 
+void ShadowManager::RenderLod(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType){
+    NiPoint2 BoundSize;
+	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
+		void* VFT = *(void**)Object;
+		if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode ||  VFT == Pointers::VirtualTables::BSMultiBoundNode ) {
+			NiNode* Node = (NiNode*)Object;
+			NiBound* Bound = Node->GetWorldBound();
+            if (TheRenderManager->GetObjectDistance(Bound) > 16000.0f)
+			TheRenderManager->GetScreenSpaceBoundSize(&BoundSize, Bound);
+			float BoundBox = (BoundSize.x * 100.f) * (BoundSize.y * 100.0f);
+            
+			if (InFrustum(ShadowMapType, Node) && BoundBox >= 1000.0f) {
+				for (int i = 0; i < Node->m_children.numObjs; i++) {
+					RenderLod(Node->m_children.data[i], ShadowMapType);
+				}
+			}
+		}
+		else if ((VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
+			RenderGeometry((NiGeometry*)Object);
+		}
+    }    
+}
+
 void ShadowManager::RenderGeometry(NiGeometry* Geo) {
 
 	NiGeometryBufferData* GeoData = NULL;
@@ -453,6 +476,7 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 		if (p.y < bottom || bottom == 0.0f) bottom = p.y;
 	}
 
+
 	D3DXMatrixOrthoOffCenterRH(&Proj, left, right, bottom, top, FarPlane * 0.6f, 1.4f * FarPlane);
 	return View * Proj;
 }
@@ -500,7 +524,7 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 			if (TESObjectCELL* Cell = CellArray->GetCell(i)) {
 				if (ShadowsExteriors->Forms[ShadowMapType].Terrain) {
 					NiNode* CellNode = Cell->GetNode();
-					if (ShadowsExteriors->Forms[ShadowMapType].Lod) RenderTerrain(Tes->landLOD, ShadowMapType); //Render terrain LOD
+		//			if (ShadowsExteriors->Forms[ShadowMapType].Lod) RenderLod(Tes->landLOD, ShadowMapType); //Render terrain LOD
 					NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[2]; //0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker
                     for (int i = 0; i < TerrainNode->m_children.numObjs; i++){
                         RenderTerrain(TerrainNode->m_children.data[i], ShadowMapType);                            

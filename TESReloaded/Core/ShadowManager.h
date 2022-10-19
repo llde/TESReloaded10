@@ -27,6 +27,7 @@ public:
 	void					RenderExterior(NiAVObject* Object, float MinRadius);
 	void					RenderInterior(NiAVObject* Object, float MinRadius);
 	void					RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType);
+	void					RenderLod(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType);
 	void					RenderGeometry(NiGeometry* Geo);
 	void					Render(NiGeometry* Geo);
 	void					RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir);
