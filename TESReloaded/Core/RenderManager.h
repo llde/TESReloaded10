@@ -9,7 +9,7 @@ public:
 	void				UpdateSceneCameraData();
 	void				SetupSceneCamera();
 	void				CheckAndTakeScreenShot(IDirect3DSurface9* RenderTarget);
-
+    float               GetObjectDistance(NiBound* Bound);
 	D3DXMATRIX			WorldViewProjMatrix;
 	D3DXMATRIX			ViewProjMatrix;
 	D3DXMATRIX			InvViewProjMatrix;

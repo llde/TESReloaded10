@@ -29,9 +29,8 @@ void RenderManager::GetScreenSpaceBoundSize(NiPoint2* BoundSize, NiBound* Bound,
 		
 	NiCamera* Camera = WorldSceneGraph->camera;
 	NiMatrix33* WorldRotate = &Camera->m_worldTransform.rot;
-	NiPoint3 BoundPos = { Bound->Center.x - Camera->m_worldTransform.pos.x, Bound->Center.y - Camera->m_worldTransform.pos.y, Bound->Center.y - Camera->m_worldTransform.pos.y };
-	NiPoint3 CameraDirection = { WorldRotate->data[0][0], WorldRotate->data[1][0], WorldRotate->data[2][0] };
-	float BoundViewDist = BoundPos * CameraDirection;
+	NiPoint3 BoundPos = { Bound->Center.x - Camera->m_worldTransform.pos.x, Bound->Center.y - Camera->m_worldTransform.pos.y, Bound->Center.z - Camera->m_worldTransform.pos.z};
+	float BoundViewDist = BoundPos * BoundPos;
 	float Ratio = Bound->Radius;
 
 	if (BoundViewDist < ZeroTolerance) {
@@ -47,6 +46,13 @@ void RenderManager::GetScreenSpaceBoundSize(NiPoint2* BoundSize, NiBound* Bound,
 	BoundSize->x = Ratio * 2.0f / (Camera->Frustum.Right - Camera->Frustum.Left);
 	BoundSize->y = Ratio * 2.0f / (Camera->Frustum.Top - Camera->Frustum.Bottom);
 
+}
+
+float RenderManager::GetObjectDistance(NiBound* Bound){
+	NiCamera* Camera = WorldSceneGraph->camera;
+	NiMatrix33* WorldRotate = &Camera->m_worldTransform.rot;
+	NiPoint3 BoundPos = { Bound->Center.x - Camera->m_worldTransform.pos.x, Bound->Center.y - Camera->m_worldTransform.pos.y, Bound->Center.z - Camera->m_worldTransform.pos.z };
+    return sqrt(BoundPos * BoundPos);
 }
 
 void RenderManager::UpdateSceneCameraData() {
