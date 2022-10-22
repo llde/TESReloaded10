@@ -508,10 +508,17 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 	BillboardRight = { View._11, View._21, View._31, 0.0f };
 	BillboardUp = { View._12, View._22, View._32, 0.0f };
 	SetFrustum(ShadowMapType, &ShadowMap->ShadowViewProj);
-	Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurface[ShadowMapType]);
+    /*for (int i = 1; i < 4; i++){
+        IDirect3DSurface9* targ= nullptr;
+        Device->GetRenderTarget(i , &targ);
+        Logger::Log("%u  : %08X", i, targ );
+    }*/
+    Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurface[ShadowMapType]);
 	Device->SetDepthStencilSurface(TheTextureManager->ShadowMapDepthSurface[ShadowMapType]);
 	Device->SetViewport(&ShadowMapViewPort[ShadowMapType]);
+
 	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
+
 	if (SunDir->z > 0.0f) {
 		RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE, RenderStateArgs);
 		RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE, RenderStateArgs);
@@ -542,7 +549,6 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 		}
 		Device->EndScene();
 	}
-
 }
 
 void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors) {
@@ -605,13 +611,13 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, S
 				D3DXMatrixLookAtRH(&View, &Eye, &At, &Up);
 				ShadowMap->ShadowViewProj = View * Proj;
 				Device->SetRenderTarget(0, TheTextureManager->ShadowCubeMapSurface[L][Face]);
+				Device->SetViewport(&ShadowCubeMapViewPort);
 				Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
 				Device->BeginScene();
 				RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE, RenderStateArgs);
 				RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE, RenderStateArgs);
 				RenderState->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE, RenderStateArgs);
 				RenderState->SetRenderState(D3DRS_ALPHABLENDENABLE, 0, RenderStateArgs);
-				Device->SetViewport(&ShadowCubeMapViewPort);
 				RenderState->SetVertexShader(ShadowCubeMapVertex->ShaderHandle, false);
 				RenderState->SetPixelShader(ShadowCubeMapPixel->ShaderHandle, false);
 				TList<TESObjectREFR>::Entry* Entry = &Player->parentCell->objectList.First;
@@ -844,7 +850,7 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
 	Device->SetRenderTarget(0, TargetShadowMap);
 	
 	// Pass map resolution to shader as a constant
-	ShadowMapBlurPixel->SetCT();
+//	ShadowMapBlurPixel->SetCT();
 	D3DXVECTOR4 inverseRes = { ShadowMapInverseResolution[ShadowMapType], ShadowMapInverseResolution[ShadowMapType], 0.0f, 0.0f };
 	ShadowMapBlurPixel->SetShaderConstantF(0, &inverseRes, 1);
 

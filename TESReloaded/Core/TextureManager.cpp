@@ -113,7 +113,7 @@ void TextureManager::Initialize() {
 	TheTextureManager->RenderedTexture->GetSurfaceLevel(0, &TheTextureManager->RenderedSurface);
 	Device->CreateTexture(Width, Height, 1, D3DUSAGE_DEPTHSTENCIL, (D3DFORMAT)MAKEFOURCC('I', 'N', 'T', 'Z'), D3DPOOL_DEFAULT, &TheTextureManager->DepthTexture, NULL);
 
-	for (int i = 0; i < ShadowManager::ShadowMapTypeEnum::MapOrtho; i++) {
+	for (int i = 0; i <= ShadowManager::ShadowMapTypeEnum::MapOrtho; i++) {
 		// create one texture per Exterior ShadowMap type
 		float multiple = i == ShadowManager::ShadowMapTypeEnum::MapLod ? 2.0f : 1.0f; // double the size of lod map only
 		ShadowMapSize = ShadowsExteriors->ShadowMapResolution * multiple;
