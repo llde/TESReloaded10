@@ -795,7 +795,8 @@ void ShaderManager::UpdateConstants() {
 			float PI = 3.1416; // use cos curve to fade moon light shadows strength
 			MoonPhase = lerp(-PI, PI, MoonPhase / 8) - PI/4; // map moonphase to 1/2PI/2PI + 1/2
 
-			float MoonVisibility = cos(MoonPhase) * 0.5 + 0.5; // map MoonVisibility to 0/1 range
+			// map MoonVisibility to MinNightDarkness/1 range
+			float MoonVisibility = lerp(0.0, TheSettingManager->SettingsShadows.Exteriors.NightMinDarkness, cos(MoonPhase) * 0.5 + 0.5);
 			ShaderConst.ShadowFade.x = lerp(MoonVisibility, 1, ShaderConst.ShadowFade.x);
 		}
 

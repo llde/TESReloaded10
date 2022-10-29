@@ -755,6 +755,7 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.Enabled = GetSettingI("Shaders.ShadowsExteriors.Main", "Enabled");
 	SettingsShadows.Exteriors.Quality = GetSettingI("Shaders.ShadowsExteriors.Main", "Quality");
 	SettingsShadows.Exteriors.Darkness = GetSettingF("Shaders.ShadowsExteriors.Main", "Darkness");
+	SettingsShadows.Exteriors.NightMinDarkness = GetSettingF("Shaders.ShadowsExteriors.Main", "NightMinDarkness");
 	SettingsShadows.Exteriors.ShadowRadius = GetSettingF("Shaders.ShadowsExteriors.Main", "ShadowsRadius");
 	SettingsShadows.Exteriors.ShadowMapResolution = GetSettingI("Shaders.ShadowsExteriors.Main", "ShadowMapResolution");
 	SettingsShadows.Exteriors.ShadowMapFarPlane = GetSettingF("Shaders.ShadowsExteriors.Main", "ShadowMapFarPlane");
