@@ -267,6 +267,7 @@ struct SettingsShadowStruct {
 
 	struct ExteriorsStruct {
 		bool				Enabled;
+        bool                BlurShadowMaps;
 		FormsStruct			Forms[5];
 		bool				AlphaEnabled[5];
 		int					Quality;
