@@ -516,6 +516,7 @@ void SettingManager::LoadSettings() {
 
 	SettingsMain.Develop.CompileShaders = GetSettingI("Main.Develop.Main", "CompileShaders");
 	SettingsMain.Develop.CompileEffects = GetSettingI("Main.Develop.Main", "CompileEffects");
+	SettingsMain.Develop.DebugMode = GetSettingI("Main.Develop.Misc", "DebugMode");
 	SettingsMain.Develop.TraceShaders = GetSettingI("Main.Develop.Main", "TraceShaders");
 
 
