@@ -280,7 +280,11 @@ void ShadowManager::RenderGeometry(NiGeometry* Geo) {
 	}
 
 }
-
+/*
+void ShadowManager::SelectGeometry(NiGeometry* Geo){
+    
+}
+*/
 void ShadowManager::Render(NiGeometry* Geo) {
 	
 	IDirect3DDevice9* Device = TheRenderManager->device;
@@ -493,7 +497,6 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 	D3DXVECTOR3 Up = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
 	D3DXMATRIX View;
 	D3DXVECTOR3 Eye;
-
 	AlphaEnabled = ShadowsExteriors->AlphaEnabled[ShadowMapType];
 
 	Eye.x = At->x - FarPlane * SunDir->x * -1;
@@ -513,7 +516,12 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
         Device->GetRenderTarget(i , &targ);
         Logger::Log("%u  : %08X", i, targ );
     }*/
-    Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurface[ShadowMapType]);
+    if(ShadowsExteriors->BlurShadowMaps || ShadowMapType == MapOrtho){
+        Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurface[ShadowMapType]);
+    }
+    else{
+        Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurfaceBlurred[ShadowMapType]);        
+    }
 	Device->SetDepthStencilSurface(TheTextureManager->ShadowMapDepthSurface[ShadowMapType]);
 	Device->SetViewport(&ShadowMapViewPort[ShadowMapType]);
 
@@ -675,7 +683,8 @@ void ShadowManager::RenderShadowMaps() {
 	D3DXVECTOR4* OrthoData = &TheShaderManager->ShaderConst.Shadow.OrthoData;
 	Device->GetDepthStencilSurface(&DepthSurface);
 	Device->GetRenderTarget(0, &RenderSurface);
-	Device->GetViewport(&viewport);
+	Device->GetViewport(&viewport);	
+
 	RenderState->SetRenderState(D3DRS_STENCILENABLE , 0 ,RenderStateArgs);
 	RenderState->SetRenderState(D3DRS_STENCILREF , 0 ,RenderStateArgs);
  	RenderState->SetRenderState(D3DRS_STENCILFUNC , 8 ,RenderStateArgs);
@@ -702,7 +711,7 @@ void ShadowManager::RenderShadowMaps() {
 		for (int i = MapNear; i < MapOrtho; i++) {
 			ShadowMapTypeEnum ShadowMapType = static_cast<ShadowMapTypeEnum>(i);
 			RenderShadowMap(ShadowMapType, ShadowsExteriors, &At, SunDir);
-			BlurShadowMap(ShadowMapType);
+			if(ShadowsExteriors->BlurShadowMaps) BlurShadowMap(ShadowMapType);
 		}
 
 		// Update constants used by shadow shaders: x=quality, y=darkness
@@ -872,5 +881,7 @@ void ShadowManager::BlurShadowMap(ShadowMapTypeEnum ShadowMapType) {
 		// move texture to render device for next pass
 		RenderState->SetTexture(0, BlurredShadowTexture);
 	}
+    RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE, RenderStateArgs);
+    RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE, RenderStateArgs);
 }
 
