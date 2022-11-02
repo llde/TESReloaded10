@@ -209,12 +209,22 @@ void OcclusionManager::Render(NiGeometry* Geo) {
 
 	TheRenderManager->CreateD3DMatrix(&WorldMatrix, &Geo->m_worldTransform);
 	D3DXMatrixMultiplyTranspose(&TheShaderManager->ShaderConst.OcclusionMap.OcclusionWorldViewProj, &WorldMatrix, &TheRenderManager->ViewProjMatrix);
-#if DEBUGOC
-	BSShaderProperty* ShaderProperty = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
-	if (ShaderProperty) {
-		if (ShaderProperty->IsLightingProperty()) {
-			if (NiTexture* Texture = *((BSShaderPPLightingProperty*)ShaderProperty)->textures[0]) {
-				RenderState->SetTexture(0, Texture->rendererData->dTexture);
+	if (TheSettingManager->SettingsMain.Develop.DebugMode) {
+		BSShaderProperty* ShaderProperty = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
+		if (ShaderProperty) {
+			if (ShaderProperty->IsLightingProperty()) {
+				if (NiTexture* Texture = *((BSShaderPPLightingProperty*)ShaderProperty)->textures[0]) {
+					RenderState->SetTexture(0, Texture->rendererData->dTexture);
+					RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
+					RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
+					RenderState->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT, false);
+					RenderState->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT, false);
+					RenderState->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT, false);
+				}
+			}
+			else if (ShaderProperty->IsWaterProperty()) {
+				if (!WaterTexture) D3DXCreateTextureFromFileA(TheRenderManager->device, ".\\Data\\Textures\\Water\\water00.dds", &WaterTexture);
+				RenderState->SetTexture(0, WaterTexture);
 				RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
 				RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
 				RenderState->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT, false);
@@ -222,17 +232,7 @@ void OcclusionManager::Render(NiGeometry* Geo) {
 				RenderState->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT, false);
 			}
 		}
-		else if (ShaderProperty->IsWaterProperty()) {
-			if (!WaterTexture) D3DXCreateTextureFromFileA(TheRenderManager->device, "C:\\Bethesda Softworks\\Oblivion\\Data\\Textures\\Water\\water00.dds", &WaterTexture);
-			RenderState->SetTexture(0, WaterTexture);
-			RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
-			RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
-			RenderState->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT, false);
-			RenderState->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT, false);
-			RenderState->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT, false);
-		}
 	}
-#endif
 	TheRenderManager->PackGeometryBuffer(GeoData, ModelData, NULL, ShaderDeclaration);
 	for (UInt32 i = 0; i < GeoData->StreamCount; i++) {
 		Device->SetStreamSource(i, GeoData->VBChip[i]->VB, 0, GeoData->VertexStride[i]);
@@ -359,13 +359,13 @@ void OcclusionManager::RenderOcclusionMap(SettingsMainStruct::OcclusionCullingSt
 		}
 	}
 
-#if DEBUGOC
-	NiNode* DistantRefLOD = *(NiNode**)0x00B34424;
-	for (int i = 1; i < DistantRefLOD->m_children.end; i++) {
-		NiNode* ChildNode = (NiNode*)DistantRefLOD->m_children.data[i];
-		RenderDistantStatic(ChildNode);
+	if (TheSettingManager->SettingsMain.Develop.DebugMode) {
+		NiNode* DistantRefLOD = *(NiNode**)0x00B34424;
+		for (int i = 1; i < DistantRefLOD->m_children.end; i++) {
+			NiNode* ChildNode = (NiNode*)DistantRefLOD->m_children.data[i];
+			RenderDistantStatic(ChildNode);
+		}
 	}
-#endif
 
 	RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE, RenderStateArgs);
 	WaterOccluded = true;
@@ -387,9 +387,10 @@ void OcclusionManager::RenderOcclusionMap(SettingsMainStruct::OcclusionCullingSt
 			}
 		}
 	}
-#if !DEBUGOC
-	RenderState->SetRenderState(D3DRS_COLORWRITEENABLE, D3DZB_TRUE, RenderStateArgs);
-#endif
+
+	if (TheSettingManager->SettingsMain.Develop.DebugMode) {
+		RenderState->SetRenderState(D3DRS_COLORWRITEENABLE, D3DZB_TRUE, RenderStateArgs);
+	}
 	Device->EndScene();
 
 }
@@ -407,7 +408,7 @@ void OcclusionManager::PerformOcclusionCulling() {
 		Device->SetDepthStencilSurface(DepthSurface);
 	}
 
-#if DEBUGOC
-	if (TheKeyboardManager->OnKeyDown(26)) D3DXSaveSurfaceToFileA("C:\\Archivio\\Downloads\\occlusionmap.jpg", D3DXIFF_JPG, OcclusionMapSurface, NULL, NULL);
-#endif
+	if (TheSettingManager->SettingsMain.Develop.DebugMode) {
+		if (Global->OnKeyDown(26)) D3DXSaveSurfaceToFileA(".\\Test\\occlusionmap.jpg", D3DXIFF_JPG, OcclusionMapSurface, NULL, NULL);
+	}
 }
