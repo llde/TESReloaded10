@@ -90,6 +90,22 @@ void RenderManager::SetupSceneCamera() {
 		float TmB = Frustum->Top - Frustum->Bottom;
 		float TpB = Frustum->Top + Frustum->Bottom;
 		float InvFmN = 1.0f / (Frustum->Far - Frustum->Near);
+		float Far = Frustum->Far * InvFmN;
+
+		float FrustumWidth = Frustum->Right - Frustum->Left;
+		float FrustumHeight = Frustum->Top - Frustum->Bottom;
+
+		//Logger::Log("Frustrum Right %f", Frustum->Right);
+		//Logger::Log("Frustrum Left %f", Frustum->Left);
+		//Logger::Log("Frustrum Top %f", Frustum->Top);
+		//Logger::Log("Frustrum Bottom %f", Frustum->Bottom);
+		//Logger::Log("Frustrum Near %f", Frustum->Near);
+		//Logger::Log("Frustrum Far %f", Frustum->Far);
+		//Logger::Log("RmL %f", RmL);
+		//Logger::Log("RpL %f", RpL);
+		//Logger::Log("TmB %f", TmB);
+		//Logger::Log("TpB %f", TpB);
+		//Logger::Log("Far %f", Far);
 
 		memcpy(Pointers::Generic::CameraWorldTranslate, WorldTranslate, 0x0C);
 
@@ -103,7 +119,7 @@ void RenderManager::SetupSceneCamera() {
 		Right.y = WorldRotate->data[1][2];
 		Right.z = WorldRotate->data[2][2];
 
-		// We set up the world matrix always to default (image space) because we use it only in image space shaders
+		// world translation
 		worldMatrix._11 = 1.0f;
 		worldMatrix._12 = 0.0f;
 		worldMatrix._13 = 0.0f;
@@ -167,16 +183,43 @@ void RenderManager::SetupSceneCamera() {
 		projMatrix._24 = 0.0f;
 		projMatrix._31 = -RpL / RmL;
 		projMatrix._32 = -TpB / TmB;
-		projMatrix._33 = Frustum->Far * InvFmN;
+		projMatrix._33 = Far;
 		projMatrix._34 = 1.0f;
 		projMatrix._41 = 0.0f;
 		projMatrix._42 = 0.0f;
-		projMatrix._43 = -(Frustum->Near * Frustum->Far * InvFmN);
+		projMatrix._43 = -(Frustum->Near * Far);
 		projMatrix._44 = 0.0f;
+
+		float aspectRatio = FrustumWidth / FrustumHeight;
+		
+		float N = Frustum->Near;
+		float F = Frustum->Far;
+		float Q = F / (F - N);
+
+		realProjMatrix._11 = FrustumWidth;//1 / tan(WorldSceneGraph->cameraFOV * 0.5);
+		realProjMatrix._12 = 0.0f;
+		realProjMatrix._13 = 0.0f;
+		realProjMatrix._14 = 0.0f;
+		realProjMatrix._21 = 0.0f;
+		realProjMatrix._22 = FrustumHeight;// 1 / tan(WorldSceneGraph->cameraFOV * aspectRatio * 0.5);
+		realProjMatrix._23 = 0.0f;
+		realProjMatrix._24 = 0.0f;
+		realProjMatrix._31 = 0.0f;
+		realProjMatrix._32 = 0.0f;
+		realProjMatrix._33 = Q;
+		realProjMatrix._34 = 1.0f;
+		realProjMatrix._41 = 0.0f;
+		realProjMatrix._42 = 0.0f;
+		realProjMatrix._43 = -Q*N;
+		realProjMatrix._44 = 0.0f;
+
+		//D3DXMatrixPerspectiveRH(&realProjMatrix, FrustumWidth, FrustumHeight, Frustum->Near, Frustum->Far);
+
 
 		WorldViewProjMatrix = worldMatrix * viewMatrix * projMatrix;
 		ViewProjMatrix = viewMatrix * projMatrix;
 		D3DXMatrixInverse(&InvProjMatrix, NULL, &projMatrix);
+		D3DXMatrixInverse(&InvRealProjMatrix, NULL, &realProjMatrix);
 		InvViewProjMatrix = InvProjMatrix * invViewMatrix;
 
 		CameraForward.x = Forward.x;
@@ -185,6 +228,22 @@ void RenderManager::SetupSceneCamera() {
 		CameraPosition.x = WorldTranslate->x;
 		CameraPosition.y = WorldTranslate->y;
 		CameraPosition.z = WorldTranslate->z;
+
+		// depth reconstruction constants
+		DepthConstants.x = -(Frustum->Near * Far) / Far; //NearZ: TESR_ProjectionTransform._43 / TESR_ProjectionTransform._33
+		DepthConstants.y = (Far * DepthConstants.x) / (Far - 1.0f); // FarZ: (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
+		DepthConstants.z = DepthConstants.x * DepthConstants.y; // Zmult
+		DepthConstants.w = DepthConstants.y - DepthConstants.x; // Zdiff
+
+		CameraData.x = Frustum->Near;
+		CameraData.y = Frustum->Far;
+		CameraData.z = FrustumWidth / FrustumHeight;
+		CameraData.w = WorldSceneGraph->cameraFOV;
+
+		//Logger::Log("DepthConstants NearZ %f", DepthConstants.x);
+		//Logger::Log("DepthConstants FarZ %f", DepthConstants.y);
+		//Logger::Log("DepthConstants Zmult %f", DepthConstants.z);
+		//Logger::Log("DepthConstants ZDiff %f", DepthConstants.w);
 	}
 
 }
