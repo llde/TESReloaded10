@@ -24,13 +24,13 @@ void __fastcall SetShadersHook(BSShader* This, UInt32 edx, UInt32 PassIndex) {
 	if (VertexShader && PixelShader) {
 		VertexShader->SetupShader(TheRenderManager->renderState->GetVertexShader());
 		PixelShader->SetupShader(TheRenderManager->renderState->GetPixelShader());
-		if (DWNode::Get()) {
+		if (TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)) {
 			char Name[256];
 			sprintf(Name, "Pass %i %s, %s (%s %s)", PassIndex, Pointers::Functions::GetPassDescription(PassIndex), Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
 			if (VertexShader->ShaderHandle == VertexShader->ShaderHandleBackup) strcat(Name, " - Vertex: vanilla");
 			if (PixelShader->ShaderHandle == PixelShader->ShaderHandleBackup) strcat(Name, " - Pixel: vanilla");
 			Logger::Log("%s", Name);
-			DWNode::AddNode(Name, Geometry->m_parent, Geometry);
+			//DWNode::AddNode(Name, Geometry->m_parent, Geometry);
 		}
 	}
 	(*SetShaders)(This, PassIndex);
