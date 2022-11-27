@@ -85,28 +85,20 @@ void RenderManager::SetupSceneCamera() {
 		NiMatrix33* WorldRotate = &Camera->m_worldTransform.rot;
 		NiPoint3* WorldTranslate = &Camera->m_worldTransform.pos;
 		NiFrustum* Frustum = &Camera->Frustum;
-		float RmL = Frustum->Right - Frustum->Left;
-		float RpL = Frustum->Right + Frustum->Left;
-		float TmB = Frustum->Top - Frustum->Bottom;
-		float TpB = Frustum->Top + Frustum->Bottom;
-		float InvFmN = 1.0f / (Frustum->Far - Frustum->Near);
-		float Far = Frustum->Far * InvFmN;
-
 		float FrustumWidth = Frustum->Right - Frustum->Left;
 		float FrustumHeight = Frustum->Top - Frustum->Bottom;
+		
+		// projection transform built according to this:
+		// https://learn.microsoft.com/en-us/windows/win32/direct3d9/projection-transform
+		float aspectRatio = FrustumWidth / FrustumHeight;
+		float nearZ = Frustum->Near;
+		float farZ = Frustum->Far;
+		float Q = farZ / (farZ - nearZ);
 
-		//Logger::Log("Frustrum Right %f", Frustum->Right);
-		//Logger::Log("Frustrum Left %f", Frustum->Left);
-		//Logger::Log("Frustrum Top %f", Frustum->Top);
-		//Logger::Log("Frustrum Bottom %f", Frustum->Bottom);
-		//Logger::Log("Frustrum Near %f", Frustum->Near);
-		//Logger::Log("Frustrum Far %f", Frustum->Far);
-		//Logger::Log("RmL %f", RmL);
-		//Logger::Log("RpL %f", RpL);
-		//Logger::Log("TmB %f", TmB);
-		//Logger::Log("TpB %f", TpB);
-		//Logger::Log("Far %f", Far);
+		float RpL = Frustum->Right + Frustum->Left; // always 0 for a viewport centered on 0 ?
+		float TpB = Frustum->Top + Frustum->Bottom; // always 0 for a viewport centered on 0 ?
 
+		
 		memcpy(Pointers::Generic::CameraWorldTranslate, WorldTranslate, 0x0C);
 
 		Forward.x = WorldRotate->data[0][0];
@@ -173,35 +165,31 @@ void RenderManager::SetupSceneCamera() {
 
 		InvViewMatrix = invViewMatrix;
 
-		projMatrix._11 = 2.0f / RmL;
+		projMatrix._11 = 2.0f / FrustumWidth;
 		projMatrix._12 = 0.0f;
 		projMatrix._13 = 0.0f;
 		projMatrix._14 = 0.0f;
 		projMatrix._21 = 0.0f;
-		projMatrix._22 = 2.0f / TmB;
+		projMatrix._22 = 2.0f / FrustumHeight;
 		projMatrix._23 = 0.0f;
 		projMatrix._24 = 0.0f;
-		projMatrix._31 = -RpL / RmL;
-		projMatrix._32 = -TpB / TmB;
-		projMatrix._33 = Far;
+		projMatrix._31 = -RpL / FrustumWidth;
+		projMatrix._32 = -TpB / FrustumHeight;
+		projMatrix._33 = Q;
 		projMatrix._34 = 1.0f;
 		projMatrix._41 = 0.0f;
 		projMatrix._42 = 0.0f;
-		projMatrix._43 = -(Frustum->Near * Far);
+		projMatrix._43 = -Q * nearZ;
 		projMatrix._44 = 0.0f;
 
-		float aspectRatio = FrustumWidth / FrustumHeight;
-		
-		float N = Frustum->Near;
-		float F = Frustum->Far;
-		float Q = F / (F - N);
-
-		realProjMatrix._11 = FrustumWidth;//1 / tan(WorldSceneGraph->cameraFOV * 0.5);
+		realProjMatrix._11 = 1 / tan(WorldSceneGraph->cameraFOV * 0.5);
+		//realProjMatrix._11 = 2 * nearZ / FrustumWidth; //1 / tan(WorldSceneGraph->cameraFOV * 0.5);
+		//realProjMatrix._11 = FrustumWidth; //1 / tan(WorldSceneGraph->cameraFOV * 0.5);
 		realProjMatrix._12 = 0.0f;
 		realProjMatrix._13 = 0.0f;
 		realProjMatrix._14 = 0.0f;
 		realProjMatrix._21 = 0.0f;
-		realProjMatrix._22 = FrustumHeight;// 1 / tan(WorldSceneGraph->cameraFOV * aspectRatio * 0.5);
+		realProjMatrix._22 = 1 / tan(WorldSceneGraph->cameraFOV * aspectRatio * 0.5);
 		realProjMatrix._23 = 0.0f;
 		realProjMatrix._24 = 0.0f;
 		realProjMatrix._31 = 0.0f;
@@ -210,11 +198,8 @@ void RenderManager::SetupSceneCamera() {
 		realProjMatrix._34 = 1.0f;
 		realProjMatrix._41 = 0.0f;
 		realProjMatrix._42 = 0.0f;
-		realProjMatrix._43 = -Q*N;
+		realProjMatrix._43 = -Q*nearZ;
 		realProjMatrix._44 = 0.0f;
-
-		//D3DXMatrixPerspectiveRH(&realProjMatrix, FrustumWidth, FrustumHeight, Frustum->Near, Frustum->Far);
-
 
 		WorldViewProjMatrix = worldMatrix * viewMatrix * projMatrix;
 		ViewProjMatrix = viewMatrix * projMatrix;
@@ -230,13 +215,13 @@ void RenderManager::SetupSceneCamera() {
 		CameraPosition.z = WorldTranslate->z;
 
 		// depth reconstruction constants
-		DepthConstants.x = -(Frustum->Near * Far) / Far; //NearZ: TESR_ProjectionTransform._43 / TESR_ProjectionTransform._33
-		DepthConstants.y = (Far * DepthConstants.x) / (Far - 1.0f); // FarZ: (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
+		DepthConstants.x = - nearZ; //NearZ: TESR_ProjectionTransform._43 / TESR_ProjectionTransform._33
+		DepthConstants.y = (-farZ * Q) / (Q - 1.0f); // FarZ: (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
 		DepthConstants.z = DepthConstants.x * DepthConstants.y; // Zmult
 		DepthConstants.w = DepthConstants.y - DepthConstants.x; // Zdiff
 
-		CameraData.x = Frustum->Near;
-		CameraData.y = Frustum->Far;
+		CameraData.x = nearZ;
+		CameraData.y = farZ;
 		CameraData.z = FrustumWidth / FrustumHeight;
 		CameraData.w = WorldSceneGraph->cameraFOV;
 

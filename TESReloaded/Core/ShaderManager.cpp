@@ -1265,7 +1265,7 @@ void ShaderManager::UpdateConstants() {
 			if (!currentWorldSpace) sas = &TheSettingManager->SettingsAmbientOcclusionInteriors;
 			ShaderConst.AmbientOcclusion.Enabled = sas->Enabled;
 			if (ShaderConst.AmbientOcclusion.Enabled) {
-				ShaderConst.AmbientOcclusion.AOData.x = sas->RadiusMultiplier;
+				ShaderConst.AmbientOcclusion.AOData.x = sas->Samples;
 				ShaderConst.AmbientOcclusion.AOData.y = sas->StrengthMultiplier;
 				ShaderConst.AmbientOcclusion.AOData.z = sas->ClampStrength;
 				ShaderConst.AmbientOcclusion.AOData.w = sas->Range;
