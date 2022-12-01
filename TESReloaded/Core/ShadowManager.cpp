@@ -428,7 +428,7 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 		return View * Proj;
 	}
 
-	float safety = 1.2f;
+	float safety = 1.0f;
 	NiCamera* Camera = WorldSceneGraph->camera;
 	float w = Camera->Frustum.Right - Camera->Frustum.Left;
 	float h = Camera->Frustum.Top - Camera->Frustum.Bottom;
@@ -436,9 +436,11 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 	float ar = h / w;
 
 	//Logger::Log("fov %f   %f   %f", WorldSceneGraph->cameraFOV, Player->GetFoV(false), Player->GetFoV(true));
-	float fov = WorldSceneGraph->cameraFOV * safety;
-	float tanHalfHFOV = tanf(D3DXToRadian(fov / 2.0f));
-	float tanHalfVFOV = tanf(D3DXToRadian((fov * ar) / 2.0f));
+	float fov = TheRenderManager->FOVData.z;
+	float fovY = TheRenderManager->FOVData.w;
+
+	float tanHalfHFOV = tanf(fov * 0.5f) * safety;
+	float tanHalfVFOV = tanf(fovY * 0.5f) * safety;
 
 	float xn = znear * tanHalfHFOV;
 	float xf = zfar * tanHalfHFOV;

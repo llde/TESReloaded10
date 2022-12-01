@@ -18,6 +18,7 @@ public:
 	D3DXMATRIX			InvRealProjMatrix;
 	D3DXMATRIX			InvViewMatrix;
 	D3DXVECTOR4			CameraData;
+	D3DXVECTOR4			FOVData;
 	D3DXVECTOR4			CameraForward;
 	D3DXVECTOR4			CameraPosition;
 	IDirect3DSurface9*	BackBuffer;

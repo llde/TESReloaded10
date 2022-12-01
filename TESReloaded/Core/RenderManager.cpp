@@ -99,6 +99,13 @@ void RenderManager::SetupSceneCamera() {
 		float TpB = Frustum->Top + Frustum->Bottom; // always 0 for a viewport centered on 0 ?
 
 		
+
+		// FOVData will contain x/y fov in degrees (x and y) and in radians (z and w);
+		FOVData.y = (WorldSceneGraph->cameraFOV); // cameraFOV seems to be the vertical FOV?
+		FOVData.w = D3DXToRadian(WorldSceneGraph->cameraFOV);
+		FOVData.z = 2 * atan(tan(FOVData.w * 0.5) * aspectRatio);
+		FOVData.x = D3DXToDegree(FOVData.z);
+
 		memcpy(Pointers::Generic::CameraWorldTranslate, WorldTranslate, 0x0C);
 
 		Forward.x = WorldRotate->data[0][0];
@@ -182,14 +189,12 @@ void RenderManager::SetupSceneCamera() {
 		projMatrix._43 = -Q * nearZ;
 		projMatrix._44 = 0.0f;
 
-		realProjMatrix._11 = 1 / tan(WorldSceneGraph->cameraFOV * 0.5);
-		//realProjMatrix._11 = 2 * nearZ / FrustumWidth; //1 / tan(WorldSceneGraph->cameraFOV * 0.5);
-		//realProjMatrix._11 = FrustumWidth; //1 / tan(WorldSceneGraph->cameraFOV * 0.5);
+		realProjMatrix._11 = 1 / tan(FOVData.z * 0.5);
 		realProjMatrix._12 = 0.0f;
 		realProjMatrix._13 = 0.0f;
 		realProjMatrix._14 = 0.0f;
 		realProjMatrix._21 = 0.0f;
-		realProjMatrix._22 = 1 / tan(WorldSceneGraph->cameraFOV * aspectRatio * 0.5);
+		realProjMatrix._22 = 1 / tan(FOVData.w * 0.5);
 		realProjMatrix._23 = 0.0f;
 		realProjMatrix._24 = 0.0f;
 		realProjMatrix._31 = 0.0f;
@@ -201,9 +206,9 @@ void RenderManager::SetupSceneCamera() {
 		realProjMatrix._43 = -Q*nearZ;
 		realProjMatrix._44 = 0.0f;
 
-		WorldViewProjMatrix = worldMatrix * viewMatrix * projMatrix;
-		ViewProjMatrix = viewMatrix * projMatrix;
-		D3DXMatrixInverse(&InvProjMatrix, NULL, &projMatrix);
+		WorldViewProjMatrix = worldMatrix * viewMatrix * realProjMatrix;
+		ViewProjMatrix = viewMatrix * realProjMatrix;
+		D3DXMatrixInverse(&InvProjMatrix, NULL, &realProjMatrix);
 		D3DXMatrixInverse(&InvRealProjMatrix, NULL, &realProjMatrix);
 		InvViewProjMatrix = InvProjMatrix * invViewMatrix;
 
@@ -223,7 +228,7 @@ void RenderManager::SetupSceneCamera() {
 		CameraData.x = nearZ;
 		CameraData.y = farZ;
 		CameraData.z = FrustumWidth / FrustumHeight;
-		CameraData.w = WorldSceneGraph->cameraFOV;
+		CameraData.w = FOVData.x;
 
 		//Logger::Log("DepthConstants NearZ %f", DepthConstants.x);
 		//Logger::Log("DepthConstants FarZ %f", DepthConstants.y);
