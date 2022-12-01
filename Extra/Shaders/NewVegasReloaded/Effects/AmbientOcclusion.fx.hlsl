@@ -176,8 +176,8 @@ float3 GetNormal( float2 uv)
 	half3 vDeriv = ve.x < ve.y ? down : up;
 
 	// get view space normal from the cross product of the best derivatives
-	half3 viewNormal = normalize(cross(hDeriv, vDeriv));
-	// half3 viewNormal = normalize(cross(vDeriv, hDeriv));
+	// half3 viewNormal = normalize(cross(hDeriv, vDeriv));
+	half3 viewNormal = normalize(cross(vDeriv, hDeriv));
 
 	return viewNormal;
 }
@@ -208,10 +208,14 @@ float4 SSAO(VSOUT IN) : COLOR0
 	float2 coord = IN.UVCoord;
 
 	// generate the sampling kernel with random points in a hemisphere
-	int kernelSize = clamp(int(AOsamples), 0, 32);
-	float3 kernel[32]; // max supported kernel size is 32 samples
+	// int kernelSize = clamp(int(AOsamples), 0, 8);
+	int kernelSize = 20;
+	float3 kernel[20]; // max supported kernel size is 32 samples
 	float uRadius = abs(AOrange);
 	float bias = saturate(AOangleBias);
+
+	float3 origin = reconstructPosition(coord);
+	if (origin.z > endFade) return 1.0;
 
 	for (int i = 0; i < kernelSize; ++i) {
 		// generate random samples in a unit sphere (random vector coordinates from -1 to 1);
@@ -230,8 +234,6 @@ float4 SSAO(VSOUT IN) : COLOR0
 	float3 normal = GetNormal(coord);
 
 	// calculate occlusion by sampling depth of each point from the kernel
-	float3 origin = reconstructPosition(coord);
-
 	float occlusion = 0.0;
 	for (i = 0; i < kernelSize; ++i) {
 		// get sample positions around origin:
