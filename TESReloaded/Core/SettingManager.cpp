@@ -1336,6 +1336,8 @@ bool SettingManager::GetMenuShaderEnabled(const char* Name) {
 		Value = SettingsMain.Effects.ShadowsInteriors;
 	else if (!strcmp(Name, "Sharpening"))
 		Value = SettingsMain.Effects.Sharpening;
+	else if (!strcmp(Name, "Specular"))
+		Value = SettingsMain.Effects.Specular;
 	else if (!strcmp(Name, "Skin"))
 		Value = SettingsMain.Shaders.Skin;
 	else if (!strcmp(Name, "SnowAccumulation"))

@@ -116,6 +116,10 @@ struct ShaderConstants {
 		D3DXVECTOR4		Data;
 	};
 
+	struct SpecularStruct {
+		D3DXVECTOR4		Data;
+	};
+
 	D3DXVECTOR4				ReciprocalResolution;
 	D3DXVECTOR4				SunDir;
 	D3DXVECTOR4				SunTiming;
@@ -161,6 +165,7 @@ struct ShaderConstants {
 	LowHFStruct				LowHF;
 	WetWorldStruct			WetWorld;
 	SharpeningStruct		Sharpening;
+	SpecularStruct			Specular;
 	VolumetricFogStruct		VolumetricFog;
 };
 
