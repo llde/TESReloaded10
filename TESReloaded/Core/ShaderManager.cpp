@@ -1467,15 +1467,42 @@ void ShaderManager::UpdateConstants() {
 		}
 
 		if (TheSettingManager->SettingsMain.Effects.Specular) {
-			ShaderConst.Specular.Data.x = TheSettingManager->SettingsSpecular.Strength;
-			ShaderConst.Specular.Data.y = TheSettingManager->SettingsSpecular.BlurMultiplier;
-			ShaderConst.Specular.Data.z = TheSettingManager->SettingsSpecular.Glossiness;
-			ShaderConst.Specular.Data.w = TheSettingManager->SettingsSpecular.DistanceFade;
+			D3DXVECTOR4 exteriorData;
+			D3DXVECTOR4 rainData;
+			D3DXVECTOR4* previousData;
+			D3DXVECTOR4* currentData;
 
-			Logger::Log("SpecularData x %f", ShaderConst.Specular.Data.x);
-			Logger::Log("SpecularData y %f", ShaderConst.Specular.Data.y);
-			Logger::Log("SpecularData z %f", ShaderConst.Specular.Data.z);
-			Logger::Log("SpecularData w %f", ShaderConst.Specular.Data.w);
+			exteriorData.x = TheSettingManager->SettingsSpecular.Exterior.Strength;
+			exteriorData.y = TheSettingManager->SettingsSpecular.Exterior.BlurMultiplier;
+			exteriorData.z = TheSettingManager->SettingsSpecular.Exterior.Glossiness;
+			exteriorData.w = TheSettingManager->SettingsSpecular.Exterior.DistanceFade;
+			rainData.x = TheSettingManager->SettingsSpecular.Rain.Strength;
+			rainData.y = TheSettingManager->SettingsSpecular.Rain.BlurMultiplier;
+			rainData.z = TheSettingManager->SettingsSpecular.Rain.Glossiness;
+			rainData.w = TheSettingManager->SettingsSpecular.Rain.DistanceFade;
+
+			bool currentIsRainy = false;
+			if (currentWeather) currentIsRainy = currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy;
+
+			bool previousIsRainy = false;
+			if (previousWeather) previousIsRainy = (previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy);
+
+			if (currentIsRainy) currentData = &rainData;
+			else currentData = &exteriorData;
+
+			if (weatherPercent > 0 && weatherPercent < 1 && (currentIsRainy != previousIsRainy)) {
+				// handle transition by interpolating previous and current weather settings
+				if (previousIsRainy) previousData = &rainData;
+				else previousData = &exteriorData;
+				
+				ShaderConst.Specular.Data.x = smoothStep(previousData->x, currentData->x, weatherPercent);
+				ShaderConst.Specular.Data.y = smoothStep(previousData->y, currentData->y, weatherPercent);
+				ShaderConst.Specular.Data.z = smoothStep(previousData->z, currentData->z, weatherPercent);
+				ShaderConst.Specular.Data.w = smoothStep(previousData->w, currentData->w, weatherPercent);
+			}
+			else {
+				ShaderConst.Specular.Data = *currentData;
+			}
 		}
 
 		if (TheSettingManager->SettingsMain.Effects.VolumetricFog) {

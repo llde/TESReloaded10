@@ -397,10 +397,24 @@ struct SettingsDepthOfFieldStruct {
 
 struct SettingsSpecularStruct {
 	bool Enabled;
-	float Strength;
-	float BlurMultiplier;
-	float Glossiness;
-	float DistanceFade;
+	
+	struct ExteriorStruct {
+		float Strength;
+		float BlurMultiplier;
+		float Glossiness;
+		float DistanceFade;
+	};
+
+	struct RainStruct {
+		float Strength;
+		float BlurMultiplier;
+		float Glossiness;
+		float DistanceFade;
+	};
+
+	ExteriorStruct Exterior;
+	RainStruct Rain;
+
 };
 
 struct SettingsAmbientOcclusionStruct {
