@@ -173,6 +173,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.MotionBlur.Data;
 	else if (!strcmp(Name, "TESR_SharpeningData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Sharpening.Data;
+	else if (!strcmp(Name, "TESR_SpecularData"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Specular.Data;
 	else if (!strcmp(Name, "TESR_SnowAccumulationParams"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.SnowAccumulation.Params;
 	else if (!strcmp(Name, "TESR_VolumetricFogData"))
@@ -780,6 +782,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.SunDir.x = Tes->directionalLight->direction.x * -1;
 			ShaderConst.SunDir.y = Tes->directionalLight->direction.y * -1;
 			ShaderConst.SunDir.z = Tes->directionalLight->direction.z * -1;
+
 			// expose the light vector in view space for screen space lighting
 			D3DXVec4Transform(&ShaderConst.ScreenSpaceLightDir, &ShaderConst.SunDir, &TheRenderManager->ViewMatrix);
 			D3DXVec4Normalize(&ShaderConst.ScreenSpaceLightDir, &ShaderConst.ScreenSpaceLightDir);
@@ -1463,6 +1466,18 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Sharpening.Data.z = TheSettingManager->SettingsSharpening.Offset;
 		}
 
+		if (TheSettingManager->SettingsMain.Effects.Specular) {
+			ShaderConst.Specular.Data.x = TheSettingManager->SettingsSpecular.Strength;
+			ShaderConst.Specular.Data.y = TheSettingManager->SettingsSpecular.BlurMultiplier;
+			ShaderConst.Specular.Data.z = TheSettingManager->SettingsSpecular.Glossiness;
+			ShaderConst.Specular.Data.w = TheSettingManager->SettingsSpecular.DistanceFade;
+
+			Logger::Log("SpecularData x %f", ShaderConst.Specular.Data.x);
+			Logger::Log("SpecularData y %f", ShaderConst.Specular.Data.y);
+			Logger::Log("SpecularData z %f", ShaderConst.Specular.Data.z);
+			Logger::Log("SpecularData w %f", ShaderConst.Specular.Data.w);
+		}
+
 		if (TheSettingManager->SettingsMain.Effects.VolumetricFog) {
 			ShaderConst.VolumetricFog.Data.x = TheSettingManager->SettingsVolumetricFog.Exponent;
 			ShaderConst.VolumetricFog.Data.y = TheSettingManager->SettingsVolumetricFog.ColorCoeff;
@@ -1813,11 +1828,6 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
 
 
-	if (Effects->Specular && currentWorldSpace) {
-		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-		SpecularEffect->SetCT();
-		SpecularEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
 	if (Effects->WetWorld && currentWorldSpace && ShaderConst.WetWorld.Data.x > 0.0f) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		WetWorldEffect->SetCT();
@@ -1827,6 +1837,11 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		SnowAccumulationEffect->SetCT();
 		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
+	}
+	if (Effects->AmbientOcclusion && ShaderConst.AmbientOcclusion.Enabled) {
+		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+		AmbientOcclusionEffect->SetCT();
+		AmbientOcclusionEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 	if (Effects->ShadowsExteriors && currentWorldSpace) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
@@ -1841,6 +1856,11 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	if (Effects->Coloring) {
 		ColoringEffect->SetCT();
 		ColoringEffect->Render(Device, RenderTarget, RenderedSurface, false);
+	}
+	if (Effects->Specular && currentWorldSpace) {
+		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+		SpecularEffect->SetCT();
+		SpecularEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 	if (Effects->Bloom) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
@@ -1867,11 +1887,6 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 				SnowEffect->SetCT();
 				SnowEffect->Render(Device, RenderTarget, RenderedSurface, false);
 			}
-		}
-		if (Effects->AmbientOcclusion && ShaderConst.AmbientOcclusion.Enabled) {
-			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-			AmbientOcclusionEffect->SetCT();
-			AmbientOcclusionEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
 		if (Effects->GodRays && currentWorldSpace) {
 			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
@@ -1937,7 +1952,7 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 	if (!strcmp(Name, "Specular")) {
 		Effects->Specular = !Effects->Specular;
 		DisposeEffect(EffectRecord::EffectRecordType::Specular);
-		CreateEffect(EffectRecord::EffectRecordType::Specular);
+		if (Effects->Specular) CreateEffect(EffectRecord::EffectRecordType::Specular);
 	}
 	if (!strcmp(Name, "AmbientOcclusion")) {
 		Effects->AmbientOcclusion = !Effects->AmbientOcclusion;

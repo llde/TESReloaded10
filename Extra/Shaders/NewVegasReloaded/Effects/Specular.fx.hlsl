@@ -1,15 +1,10 @@
-// Ambient Occlusion fullscreen shader for Oblivion/Skyrim Reloaded
-
-#define viewao 0
+// Specular multiplier fullscreen shader for Oblivion/Skyrim Reloaded
 
 float4x4 TESR_ProjectionTransform;
 float4x4 TESR_InvProjectionTransform;
 float4 TESR_ReciprocalResolution;
-float4 TESR_AmbientOcclusionData;
-float4 TESR_DepthConstants;
-float4 TESR_CameraData;
-float4 TESR_FogDistance; // x: fog start, y: fog end, z: weather percentage, w: sun glare
-float4 TESR_FogColor;
+float4 TESR_SpecularData;					// x: strength, y:blurMultiplier, z:glossiness, w:drawDistance
+float4 TESR_CameraData;  					// x: nearZ, y: farZ, z: aspect ratio, w: fov
 float4 TESR_ScreenSpaceLightDir;
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
@@ -18,19 +13,14 @@ sampler2D TESR_SourceBuffer : register(s2) = sampler_state { ADDRESSU = CLAMP; A
 
 static const float nearZ = TESR_CameraData.x;
 static const float farZ = TESR_CameraData.y;
-static const float aspectRatio = TESR_CameraData.z;
-static const float fov = TESR_CameraData.w;
-static const float depthRange = farZ - nearZ;
-static const float halfFOV = radians(fov*0.5);
 static const float Q = farZ/(farZ - nearZ);
 
-static const float AOlumThreshold = TESR_AmbientOcclusionData.y;
-static const float AOblurDrop = TESR_AmbientOcclusionData.z;
-static const float AOblurRadius = TESR_AmbientOcclusionData.w;
+static const float Strength = TESR_SpecularData.x;
+static const float BlurRadius = TESR_SpecularData.y;
+static const float Glossiness = TESR_SpecularData.z;
+static const float DrawDistance = TESR_SpecularData.w;
 static const float2 texelSize = float2(TESR_ReciprocalResolution.x, TESR_ReciprocalResolution.y);
 static const int cKernelSize = 12;
-static const int startFade = 2000;
-static const int endFade = 8000;
 
 static const float BlurWeights[cKernelSize] = 
 {
@@ -83,7 +73,6 @@ VSOUT FrameVS(VSIN IN)
 	OUT.UVCoord = IN.UVCoord;
 	return OUT;
 }
- 
 
 
 // returns a value from 0 to 1 based on the positions of a value between a min/max 
@@ -97,7 +86,6 @@ float readDepth(in float2 coord : TEXCOORD0)
     float ViewZ = (-nearZ *Q) / (Depth - Q);
 	return ViewZ;
 }
-
 
 float3 reconstructPosition(float2 uv)
 {
@@ -177,28 +165,23 @@ float4 Desaturate(float4 input)
 	return float4(greyscale, greyscale, greyscale, input.a);
 }
 
-float fogCoeff(float depth){
-	return clamp(invLerp(TESR_FogDistance.x, TESR_FogDistance.y, depth), 0.0, 1.0) / TESR_FogDistance.z;
-}
 
 float4 specularHighlight( VSOUT IN) : COLOR0
 {
 	float2 coord = IN.UVCoord;
 	float3 origin = reconstructPosition(coord);
-	// if (origin.z > endFade) return 1.0;
-
-	float strength = 25;
+	if (origin.z > DrawDistance) return 0.0;
 
 	//reorient our sample kernel along the origin's normal
 	float3 normal = GetNormal(IN.UVCoord);
-	// float3 normal = tex2D(TESR_RenderedBuffer, IN.UVCoord);
 	float3 viewRay = normalize(origin);
-	float3 reflection = reflect(TESR_ScreenSpaceLightDir, normal);
+	float3 reflection = reflect(TESR_ScreenSpaceLightDir.xyz, normal);
 
-	float lighting = dot(normal, TESR_ScreenSpaceLightDir);
-	float specular = pow(dot(viewRay, reflection), strength) * strength * strength;
+	float lighting = dot(normal, TESR_ScreenSpaceLightDir.xyz);
+	// float specular = pow(dot(viewRay, reflection), 1);
+	float specular = pow(dot(viewRay, reflection), Glossiness) * Glossiness * Glossiness;
 	
-	specular = lerp(specular, 0.0, origin.z/endFade);
+	specular = lerp(specular, 0.0, origin.z/DrawDistance);
 
 	// return lighting;
 	return specular.xxxx;
@@ -210,49 +193,46 @@ float4 specularHighlight( VSOUT IN) : COLOR0
 float4 BlurPS(VSOUT IN, uniform float2 OffsetMask) : COLOR0
 {
 	float WeightSum = 0.114725602f;
-	float4 ao = tex2D(TESR_RenderedBuffer, IN.UVCoord);
-	ao.r = ao.r * WeightSum;
+	float4 color1 = tex2D(TESR_RenderedBuffer, IN.UVCoord);
+	color1.r = color1.r * WeightSum;
 
-	// float Depth1 = unpackDepth(ao.gb);
-	float Depth1 = readDepth(IN.UVCoord);
-	clip(endFade - Depth1);
+	float depth1 = readDepth(IN.UVCoord);
+	clip(DrawDistance - depth1); //don't process pixels further away than effect fade distance
 
 	int i = 0;
     for (i = 0; i < cKernelSize; i++)
     {
-		float2 uvOff = (BlurOffsets[i] * OffsetMask) * AOblurRadius;
-		float4 Color = tex2D(TESR_RenderedBuffer, IN.UVCoord + uvOff);
-		float Depth2 = readDepth(IN.UVCoord + uvOff);
-		// float Depth2 = unpackDepth(Color.gb);
-		float diff = abs(float(Depth1 - Depth2));
+		float2 uvOff = (BlurOffsets[i] * OffsetMask) * BlurRadius;
+		float4 color2 = tex2D(TESR_RenderedBuffer, IN.UVCoord + uvOff);
+		float depth2 = readDepth(IN.UVCoord + uvOff);
+		float diff = abs(float(depth1 - depth2));
  
-		if(diff <= AOblurDrop)
+		// only factor it pixels that are close in terms of depth
+		if(diff <= 1)
 		{
-			ao.r += BlurWeights[i] * Color.r;
+			color1.r += BlurWeights[i] * color2.r;
 			WeightSum += BlurWeights[i];
 		}
     }
-	ao.r /= WeightSum;
-    return ao;
+	color1.r /= WeightSum;
+    return color1.rrrr;
 }
-
 
 
 float4 CombineSpecular(VSOUT IN) :COLOR0
 {
-	float3 color = tex2D(TESR_SourceBuffer, IN.UVCoord).rgb;
+	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
 	float specular = tex2D(TESR_RenderedBuffer, IN.UVCoord).r;
-	float luminance = color.r * 0.3 + color.g * 0.59 + color.b * 0.11;
-	float white = 1.0;
-	float black = 0.0;
-	float lt = luminance - AOlumThreshold;
-	specular = lerp(black, specular, luminance) * 5;
+	float luminance = Desaturate(color).r;
+	float lt = luminance;
+	specular = lerp(0.0, specular, luminance) * TESR_SpecularData.x;
 
-	// return specular.xxxx * color.xyzx * 5;
+	// return specular.xxxx;
+	// return specular.xxxx * color.xyzx * TESR_SpecularData.x;
 
-	color += specular*color * 5;
+	color += specular*color * TESR_SpecularData.x;
 
-	return float4 (color, 1.0f);
+	return float4 (color.rgb, 1.0f);
 }
  
 technique
