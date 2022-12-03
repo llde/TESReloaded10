@@ -121,6 +121,7 @@ struct ShaderConstants {
 	D3DXVECTOR4				SunTiming;
 	D3DXVECTOR4				SunAmount;
 	D3DXVECTOR4				ShadowFade;
+	D3DXVECTOR4				ScreenSpaceLightDir;
 	D3DXVECTOR4				GameTime;
 	TESWeather*				pWeather;
 	float					currentsunGlare;
@@ -268,6 +269,7 @@ public:
 		LowHF,
 		WetWorld,
 		Sharpening,
+		Specular,
 		VolumetricFog,
 		Precipitations,
 		ShadowsExteriors,
@@ -334,6 +336,7 @@ public:
 	EffectRecord*			LowHFEffect;
 	EffectRecord*			WetWorldEffect;
 	EffectRecord*			SharpeningEffect;
+	EffectRecord*			SpecularEffect;
 	EffectRecord*			VolumetricFogEffect;
 	EffectRecord*			RainEffect;
 	EffectRecord*			SnowEffect;

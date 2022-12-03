@@ -57,6 +57,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheRenderManager->InvViewProjMatrix;
 	else if (!strcmp(Name, "TESR_ViewProjectionTransform"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheRenderManager->ViewProjMatrix;
+	else if (!strcmp(Name, "TESR_ScreenSpaceLightDir"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ScreenSpaceLightDir;
 	else if (!strcmp(Name, "TESR_ShadowWorldTransform"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowWorld;
 	else if (!strcmp(Name, "TESR_ShadowViewProjTransform"))
@@ -655,6 +657,7 @@ void ShaderManager::Initialize() {
 	TheShaderManager->LowHFEffect = NULL;
 	TheShaderManager->WetWorldEffect = NULL;
 	TheShaderManager->SharpeningEffect = NULL;
+	TheShaderManager->SpecularEffect = NULL;
 	TheShaderManager->VolumetricFogEffect = NULL;
 	TheShaderManager->RainEffect = NULL;
 	TheShaderManager->SnowEffect = NULL;
@@ -719,7 +722,7 @@ void ShaderManager::CreateEffects() {
 	if (Effects->Extra) CreateEffect(EffectRecord::EffectRecordType::Extra);
 	if (Effects->ShadowsExteriors) CreateEffect(EffectRecord::EffectRecordType::ShadowsExteriors);
 	if (Effects->ShadowsInteriors) CreateEffect(EffectRecord::EffectRecordType::ShadowsInteriors);
-
+	if (Effects->Specular) CreateEffect(EffectRecord::EffectRecordType::Specular);
 }
 
 void ShaderManager::InitializeConstants() {
@@ -777,6 +780,9 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.SunDir.x = Tes->directionalLight->direction.x * -1;
 			ShaderConst.SunDir.y = Tes->directionalLight->direction.y * -1;
 			ShaderConst.SunDir.z = Tes->directionalLight->direction.z * -1;
+			// expose the light vector in view space for screen space lighting
+			D3DXVec4Transform(&ShaderConst.ScreenSpaceLightDir, &ShaderConst.SunDir, &TheRenderManager->ViewMatrix);
+			D3DXVec4Normalize(&ShaderConst.ScreenSpaceLightDir, &ShaderConst.ScreenSpaceLightDir);
 		}
 
 		// fade shadows at sunrise/sunset
@@ -1646,6 +1652,11 @@ void ShaderManager::CreateEffect(EffectRecord::EffectRecordType EffectType) {
 			SharpeningEffect = EffectRecord::LoadEffect(Filename);
 			SettingsMain->Effects.Sharpening = (SharpeningEffect != NULL);
 			break;
+		case EffectRecord::EffectRecordType::Specular:
+			strcat(Filename, "Specular.fx");
+			SpecularEffect = EffectRecord::LoadEffect(Filename);
+			SettingsMain->Effects.Specular = (SpecularEffect != NULL);
+			break;
 		case EffectRecord::EffectRecordType::VolumetricFog:
 			strcat(Filename, "VolumetricFog.fx");
 			VolumetricFogEffect = EffectRecord::LoadEffect(Filename);
@@ -1756,6 +1767,9 @@ void ShaderManager::DisposeEffect(EffectRecord::EffectRecordType EffectType) {
 		case EffectRecord::EffectRecordType::Sharpening:
 			delete SharpeningEffect; SharpeningEffect = NULL;
 			break;
+		case EffectRecord::EffectRecordType::Specular:
+			delete SharpeningEffect; SharpeningEffect = NULL;
+			break;
 		case EffectRecord::EffectRecordType::VolumetricFog:
 			delete VolumetricFogEffect; VolumetricFogEffect = NULL;
 			break;
@@ -1797,6 +1811,13 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	Device->SetStreamSource(0, FrameVertex, 0, sizeof(FrameVS));
 	Device->SetFVF(FrameFVF);
 	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
+
+
+	if (Effects->Specular && currentWorldSpace) {
+		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+		SpecularEffect->SetCT();
+		SpecularEffect->Render(Device, RenderTarget, RenderedSurface, false);
+	}
 	if (Effects->WetWorld && currentWorldSpace && ShaderConst.WetWorld.Data.x > 0.0f) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		WetWorldEffect->SetCT();
@@ -1912,6 +1933,12 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
 	SettingsMainStruct::ShadersStruct* Shaders = &TheSettingManager->SettingsMain.Shaders;
 	IsMenuSwitch = true;
+
+	if (!strcmp(Name, "Specular")) {
+		Effects->Specular = !Effects->Specular;
+		DisposeEffect(EffectRecord::EffectRecordType::Specular);
+		CreateEffect(EffectRecord::EffectRecordType::Specular);
+	}
 	if (!strcmp(Name, "AmbientOcclusion")) {
 		Effects->AmbientOcclusion = !Effects->AmbientOcclusion;
 		DisposeEffect(EffectRecord::EffectRecordType::AmbientOcclusion);

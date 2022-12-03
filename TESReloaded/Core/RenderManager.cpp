@@ -171,6 +171,7 @@ void RenderManager::SetupSceneCamera() {
 		invViewMatrix._44 = 1.0f;
 
 		InvViewMatrix = invViewMatrix;
+		ViewMatrix = viewMatrix;
 
 		projMatrix._11 = 2.0f / FrustumWidth;
 		projMatrix._12 = 0.0f;
