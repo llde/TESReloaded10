@@ -146,6 +146,7 @@ struct SettingsMainStruct {
 		bool VolumetricFog;
 		bool ShadowsExteriors;
 		bool ShadowsInteriors;
+		bool Specular;
 		bool Extra;
 	};
 
@@ -394,6 +395,10 @@ struct SettingsDepthOfFieldStruct {
 	float NearBlurCutOff;
 };
 
+struct SettingsSpecularStruct {
+	bool Enabled;
+};
+
 struct SettingsAmbientOcclusionStruct {
 	bool Enabled;
 	float Samples;
@@ -639,5 +644,5 @@ public:
 	SettingsWaterMap				SettingsWater;
 	SettingsColoringMap				SettingsColoring;
 	SettingsWeatherMap				SettingsWeather;
-
+	SettingsSpecularStruct			SettingsSpecular;
 };

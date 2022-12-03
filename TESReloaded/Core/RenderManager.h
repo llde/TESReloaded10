@@ -15,6 +15,7 @@ public:
 	D3DXMATRIX			InvViewProjMatrix;
 	D3DXMATRIX			InvProjMatrix;
 	D3DXMATRIX			InvViewMatrix;
+	D3DXMATRIX			ViewMatrix;
 	D3DXVECTOR4			CameraData;
 	D3DXVECTOR4			FOVData;
 	D3DXVECTOR4			CameraForward;
