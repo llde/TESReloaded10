@@ -73,12 +73,6 @@ VSOUT FrameVS(VSIN IN)
 	OUT.UVCoord = IN.UVCoord;
 	return OUT;
 }
-
-
-// returns a value from 0 to 1 based on the positions of a value between a min/max 
-float invLerp(float from, float to, float value){
-  return (value - from) / (to - from);
-}
  
 float readDepth(in float2 coord : TEXCOORD0)
 {
@@ -94,15 +88,6 @@ float3 reconstructPosition(float2 uv)
 	float4 viewpos = mul(screenpos, TESR_InvProjectionTransform);
 	viewpos.xyz /= viewpos.w;
 	return viewpos.xyz;
-}
-
-float3 projectPosition(float3 position){
-	float4 projection = mul(float4 (position, 1.0), TESR_RealProjectionTransform);
-	projection.xyz /= projection.w;
-	projection.x = projection.x * 0.5 + 0.5;
-	projection.y = 0.5 - 0.5 * projection.y;
-
-	return projection.xyz;
 }
 
 float3 GetNormal( float2 uv)
@@ -177,15 +162,14 @@ float4 specularHighlight( VSOUT IN) : COLOR0
 	float3 viewRay = normalize(origin);
 	float3 reflection = reflect(TESR_ScreenSpaceLightDir.xyz, normal);
 
-	float lighting = dot(normal, TESR_ScreenSpaceLightDir.xyz);
-	// float specular = pow(dot(viewRay, reflection), 1);
+	// float diffuse = dot(normal, TESR_ScreenSpaceLightDir.xyz);
 	float specular = pow(dot(viewRay, reflection), Glossiness) * Glossiness * Glossiness;
 	
 	specular = lerp(specular, 0.0, origin.z/DrawDistance);
 
-	// return lighting;
+	// return diffuse;
 	return specular.xxxx;
-	// return specular + lighting;
+	// return specular + diffuse;
 }
 
 
@@ -225,12 +209,10 @@ float4 CombineSpecular(VSOUT IN) :COLOR0
 	float specular = tex2D(TESR_RenderedBuffer, IN.UVCoord).r;
 	float luminance = Desaturate(color).r;
 	float lt = luminance;
+
+	// scale effect with scene luminance
 	specular = lerp(0.0, specular, luminance) * TESR_SpecularData.x;
-
-	// return specular.xxxx;
-	// return specular.xxxx * color.xyzx * TESR_SpecularData.x;
-
-	color += specular*color * TESR_SpecularData.x;
+	color += specular * color * TESR_SpecularData.x;
 
 	return float4 (color.rgb, 1.0f);
 }
