@@ -2,17 +2,22 @@
 
 class PluginVersion {
 public:
-	
 	static void CreateVersionString() {
 
-		LPSTR FileName = new char[MAX_PATH];
+		char FileName[MAX_PATH];
 		HMODULE ModuleHandle = NULL;
 
-		if (GetModuleFileNameA(ModuleHandle, FileName, MAX_PATH)) AddVersion(FileName);
-		strcat(VersionString, " ");
-		if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCSTR)&CreateVersionString, &ModuleHandle) && GetModuleFileNameA(ModuleHandle, FileName, MAX_PATH)) AddVersion(FileName);
-		delete FileName;
+		// Get game filename
+		if (GetModuleFileNameA(NULL, FileName, MAX_PATH)) {
+			AddVersion(FileName);
+		}
 
+		strncat(VersionString, " ", sizeof(VersionString));
+
+		// Get DLL filename
+		if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCSTR)&CreateVersionString, &ModuleHandle) && GetModuleFileNameA(ModuleHandle, FileName, MAX_PATH)) {
+			AddVersion(FileName);
+		}
 	}
 	
 	static void AddVersion(char* FileName) {
@@ -27,17 +32,11 @@ public:
 
 			if (GetFileVersionInfoA(FileName, VersionHandle, VersionSize, VersionData)) {
 				if (VerQueryValueA(VersionData, "\\StringFileInfo\\040904b0\\ProductName", &BufferData, &BufferSize)) {
-                    if(!VersionString) VersionString = (char*) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize +1);
-                    else VersionString = (char*) HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY , VersionString ,VersionLen + BufferSize + 1);
-                    VersionLen += BufferSize;
-					strcat(VersionString, (char*)BufferData);
-					strcat(VersionString, " v");
+					strncat(VersionString, (char*)BufferData, sizeof(VersionString));
+					strncat(VersionString, " v", sizeof(VersionString));
 				}
-				if (VerQueryValueA(VersionData, "\\StringFileInfo\\040904b0\\ProductVersion", &BufferData, &BufferSize)){
-                    if(!VersionString) VersionString = (char*) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, BufferSize +1);
-                    else VersionString = (char*) HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY , VersionString , VersionLen + BufferSize + 1);
-                    VersionLen += BufferSize;
-                    strcat(VersionString, (char*)BufferData);
+				if (VerQueryValueA(VersionData, "\\StringFileInfo\\040904b0\\ProductVersion", &BufferData, &BufferSize)) {
+					strncat(VersionString, (char*)BufferData, sizeof(VersionString));
                 }
 			}
 			delete VersionData;
@@ -45,7 +44,5 @@ public:
 
 	}
 
-
-	static UInt32 VersionLen;
-	static char* VersionString;
+	static char VersionString[0x80];
 };
