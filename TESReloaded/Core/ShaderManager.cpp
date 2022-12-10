@@ -51,10 +51,6 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheRenderManager->projMatrix;
 	else if (!strcmp(Name, "TESR_InvProjectionTransform"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheRenderManager->InvProjMatrix;
-	else if (!strcmp(Name, "TESR_RealProjectionTransform"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheRenderManager->realProjMatrix;
-	else if (!strcmp(Name, "TESR_RealInvProjectionTransform"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheRenderManager->InvRealProjMatrix;
 	else if (!strcmp(Name, "TESR_WorldViewProjectionTransform"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheRenderManager->WorldViewProjMatrix;
 	else if (!strcmp(Name, "TESR_InvViewProjectionTransform"))

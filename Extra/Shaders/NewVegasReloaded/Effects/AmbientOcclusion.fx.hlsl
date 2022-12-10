@@ -2,8 +2,8 @@
 
 #define viewao 0
 
-float4x4 TESR_RealProjectionTransform;
-float4x4 TESR_RealInvProjectionTransform;
+float4x4 TESR_ProjectionTransform;
+float4x4 TESR_InvProjectionTransform;
 float4 TESR_ReciprocalResolution;
 float4 TESR_AmbientOcclusionAOData;
 float4 TESR_AmbientOcclusionData;
@@ -115,13 +115,13 @@ float3 reconstructPosition(float2 uv)
 {
 	float4 screenpos = float4(uv * 2.0 - 1.0f, tex2D(TESR_DepthBuffer, uv).x, 1.0f);
 	screenpos.y = -screenpos.y;
-	float4 viewpos = mul(screenpos, TESR_RealInvProjectionTransform);
+	float4 viewpos = mul(screenpos, TESR_InvProjectionTransform);
 	viewpos.xyz /= viewpos.w;
 	return viewpos.xyz;
 }
 
 float3 projectPosition(float3 position){
-	float4 projection = mul(float4 (position, 1.0), TESR_RealProjectionTransform);
+	float4 projection = mul(float4 (position, 1.0), TESR_ProjectionTransform);
 	projection.xyz /= projection.w;
 	projection.x = projection.x * 0.5 + 0.5;
 	projection.y = 0.5 - 0.5 * projection.y;

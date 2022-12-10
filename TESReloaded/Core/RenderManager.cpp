@@ -189,27 +189,9 @@ void RenderManager::SetupSceneCamera() {
 		projMatrix._43 = -Q * nearZ;
 		projMatrix._44 = 0.0f;
 
-		realProjMatrix._11 = 1 / tan(FOVData.z * 0.5);
-		realProjMatrix._12 = 0.0f;
-		realProjMatrix._13 = 0.0f;
-		realProjMatrix._14 = 0.0f;
-		realProjMatrix._21 = 0.0f;
-		realProjMatrix._22 = 1 / tan(FOVData.w * 0.5);
-		realProjMatrix._23 = 0.0f;
-		realProjMatrix._24 = 0.0f;
-		realProjMatrix._31 = 0.0f;
-		realProjMatrix._32 = 0.0f;
-		realProjMatrix._33 = Q;
-		realProjMatrix._34 = 1.0f;
-		realProjMatrix._41 = 0.0f;
-		realProjMatrix._42 = 0.0f;
-		realProjMatrix._43 = -Q*nearZ;
-		realProjMatrix._44 = 0.0f;
-
-		WorldViewProjMatrix = worldMatrix * viewMatrix * realProjMatrix;
-		ViewProjMatrix = viewMatrix * realProjMatrix;
-		D3DXMatrixInverse(&InvProjMatrix, NULL, &realProjMatrix);
-		D3DXMatrixInverse(&InvRealProjMatrix, NULL, &realProjMatrix);
+		WorldViewProjMatrix = worldMatrix * viewMatrix * projMatrix;
+		ViewProjMatrix = viewMatrix * projMatrix;
+		D3DXMatrixInverse(&InvProjMatrix, NULL, &projMatrix);
 		InvViewProjMatrix = InvProjMatrix * invViewMatrix;
 
 		CameraForward.x = Forward.x;
