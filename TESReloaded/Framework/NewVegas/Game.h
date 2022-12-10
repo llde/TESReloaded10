@@ -4060,6 +4060,23 @@ public:
 	float GetSunriseColorBegin() { return ThisCallD(0x63B9B0, this); }
 	float GetSunsetColorEnd() { return ThisCallD(0x63BA30, this); }
 
+	enum Flags : unsigned __int32
+	{
+		kSkyFlag_IsInitWeather = 0x1,
+		kSkyFlag_IsUpdateWeather = 0x3,
+		kSkyFlag_IsUnderwater = 0x4,
+		kSkyFlag_SetAcceleration = 0x8,
+		kSkyFlag_FastTravel = 0x10,
+		kSkyFlag_UpdateMoonPhase = 0x20,
+		kSkyFlag_IsClimateChange = 0x40,
+		kSkyFlag_NoCachedSunriseBegin = 0x100,
+		kSkyFlag_NoCachedSunriseEnd = 0x200,
+		kSkyFlag_NoCachedSunsetBegin = 0x400,
+		kSkyFlag_NoCachedSunsetEnd = 0x800,
+		kSkyFlag_NoCachedBeginSunriseColors = 0x1000,
+		kSkyFlag_NoCachedEndSunsetColors = 0x2000,
+	};
+
 //	void RefreshMoon();
 	void RefreshClimate(TESClimate* climate, bool immediate = true)
 	{
@@ -4116,6 +4133,8 @@ public:
 	float			flt12C;				// 12C	Always 12.0
 	float			flt130;				// 130	Always 23.99
 	float			flt134;				// 134	Always 0
+	
+	bool GetIsUnderWater() { return this->flags & Sky::kSkyFlag_IsUnderwater; }
 
 };
 assert(sizeof(Sky) == 0x138);
