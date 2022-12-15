@@ -1819,7 +1819,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		BloomEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
  	bool isCellTransition = currentCell != PreviousCell;
-	if (Effects->Underwater  && TheRenderManager->CameraPosition.z < ShaderConst.Water.waterSettings.x + 20.0f) {
+	if (Effects->Underwater && Tes->sky->GetIsUnderWater()) {
 		if (!isCellTransition && TheRenderManager->CameraPosition.z < ShaderConst.Water.waterSettings.x) {
 			ShaderConst.BloodLens.Percent = 0.0f;
 			ShaderConst.WaterLens.Percent = -1.0f;
