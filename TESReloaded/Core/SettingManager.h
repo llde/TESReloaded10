@@ -396,7 +396,7 @@ struct SettingsDepthOfFieldStruct {
 
 struct SettingsAmbientOcclusionStruct {
 	bool Enabled;
-	float RadiusMultiplier;
+	float Samples;
 	float StrengthMultiplier;
 	float ClampStrength;
 	float AngleBias;
