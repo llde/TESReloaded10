@@ -4060,7 +4060,7 @@ public:
 	float GetSunriseColorBegin() { return ThisCallD(0x63B9B0, this); }
 	float GetSunsetColorEnd() { return ThisCallD(0x63BA30, this); }
 
-	enum Flags : unsigned __int32
+	enum Flags : UInt32
 	{
 		kSkyFlag_IsInitWeather = 0x1,
 		kSkyFlag_IsUpdateWeather = 0x3,
