@@ -563,7 +563,7 @@ void SettingManager::LoadSettings() {
 
 
 	SettingsAmbientOcclusionExteriors.Enabled = GetSettingI("Shaders.AmbientOcclusion.Exteriors", "Enabled");
-	SettingsAmbientOcclusionExteriors.RadiusMultiplier = GetSettingF("Shaders.AmbientOcclusion.Exteriors", "RadiusMultiplier");
+	SettingsAmbientOcclusionExteriors.Samples = GetSettingF("Shaders.AmbientOcclusion.Exteriors", "Samples");
 	SettingsAmbientOcclusionExteriors.StrengthMultiplier = GetSettingF("Shaders.AmbientOcclusion.Exteriors", "StrengthMultiplier");
 	SettingsAmbientOcclusionExteriors.ClampStrength = GetSettingF("Shaders.AmbientOcclusion.Exteriors", "ClampStrength");
 	SettingsAmbientOcclusionExteriors.AngleBias = GetSettingF("Shaders.AmbientOcclusion.Exteriors", "AngleBias");
@@ -573,7 +573,7 @@ void SettingManager::LoadSettings() {
 	SettingsAmbientOcclusionExteriors.BlurRadiusMultiplier = GetSettingF("Shaders.AmbientOcclusion.Exteriors", "BlurRadiusMultiplier");
 
 	SettingsAmbientOcclusionInteriors.Enabled = GetSettingI("Shaders.AmbientOcclusion.Interiors", "Enabled");
-	SettingsAmbientOcclusionInteriors.RadiusMultiplier = GetSettingF("Shaders.AmbientOcclusion.Interiors", "RadiusMultiplier");
+	SettingsAmbientOcclusionInteriors.Samples = GetSettingF("Shaders.AmbientOcclusion.Interiors", "Samples");
 	SettingsAmbientOcclusionInteriors.StrengthMultiplier = GetSettingF("Shaders.AmbientOcclusion.Interiors", "StrengthMultiplier");
 	SettingsAmbientOcclusionInteriors.ClampStrength = GetSettingF("Shaders.AmbientOcclusion.Interiors", "ClampStrength");
 	SettingsAmbientOcclusionInteriors.AngleBias = GetSettingF("Shaders.AmbientOcclusion.Interiors", "AngleBias");
