@@ -456,6 +456,7 @@ void SettingManager::LoadSettings() {
 	SettingsMain.Effects.Precipitations = GetSettingI("Shaders.Precipitations.Status", "Enabled");
 	SettingsMain.Effects.ShadowsExteriors = GetSettingI("Shaders.ShadowsExteriors.Status", "PostProcess");
 	SettingsMain.Effects.ShadowsInteriors = GetSettingI("Shaders.ShadowsInteriors.Status", "PostProcess");
+	SettingsMain.Effects.Specular = GetSettingI("Shaders.Specular.Status", "Enabled");
 	SettingsMain.Effects.Extra = GetSettingI("Shaders.ExtraEffects.Status", "Enabled");
 
 	strcpy(SettingsMain.Menu.TextFont, GetSettingS("Main.Menu.Style", "TextFont", Value));
@@ -751,6 +752,17 @@ void SettingManager::LoadSettings() {
 	SettingsPrecipitations.SnowAccumulation.SunPower = GetSettingF("Shaders.Precipitations.SnowAccumulation", "SunPower");
 	SettingsPrecipitations.SnowAccumulation.BlurNormDropThreshhold = GetSettingF("Shaders.Precipitations.SnowAccumulation", "BlurNormDropThreshhold");
 	SettingsPrecipitations.SnowAccumulation.BlurRadiusMultiplier = GetSettingF("Shaders.Precipitations.SnowAccumulation", "BlurRadiusMultiplier");
+
+	// Specular effect settings
+	SettingsSpecular.Exterior.Strength = GetSettingF("Shaders.Specular.Exterior", "Strength");
+	SettingsSpecular.Exterior.BlurMultiplier = GetSettingF("Shaders.Specular.Exterior", "BlurMultiplier");
+	SettingsSpecular.Exterior.Glossiness = GetSettingF("Shaders.Specular.Exterior", "Glossiness");
+	SettingsSpecular.Exterior.DistanceFade = GetSettingF("Shaders.Specular.Exterior", "DistanceFade");
+
+	SettingsSpecular.Rain.Strength = GetSettingF("Shaders.Specular.Rain", "Strength");
+	SettingsSpecular.Rain.BlurMultiplier = GetSettingF("Shaders.Specular.Rain", "BlurMultiplier");
+	SettingsSpecular.Rain.Glossiness = GetSettingF("Shaders.Specular.Rain", "Glossiness");
+	SettingsSpecular.Rain.DistanceFade = GetSettingF("Shaders.Specular.Rain", "DistanceFade");
 
 	// Generic exterior shadows settings
 	SettingsShadows.Exteriors.Enabled = GetSettingI("Shaders.ShadowsExteriors.Main", "Enabled");
@@ -1324,6 +1336,8 @@ bool SettingManager::GetMenuShaderEnabled(const char* Name) {
 		Value = SettingsMain.Effects.ShadowsInteriors;
 	else if (!strcmp(Name, "Sharpening"))
 		Value = SettingsMain.Effects.Sharpening;
+	else if (!strcmp(Name, "Specular"))
+		Value = SettingsMain.Effects.Specular;
 	else if (!strcmp(Name, "Skin"))
 		Value = SettingsMain.Shaders.Skin;
 	else if (!strcmp(Name, "SnowAccumulation"))
