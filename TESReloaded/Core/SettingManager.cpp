@@ -778,6 +778,10 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.ShadowMode = GetSettingI("Shaders.ShadowsExteriors.Main", "ShadowMode");
 	SettingsShadows.Exteriors.BlurShadowMaps = GetSettingI("Shaders.ShadowsExteriors.Main", "BlurShadowMaps");
 
+	SettingsShadows.ScreenSpace.Enabled = GetSettingI("Shaders.ShadowsExteriors.ScreenSpace", "Enabled");
+	SettingsShadows.ScreenSpace.BlurRadius = GetSettingI("Shaders.ShadowsExteriors.ScreenSpace", "BlurRadius");
+	SettingsShadows.ScreenSpace.RenderDistance = GetSettingI("Shaders.ShadowsExteriors.ScreenSpace", "RenderDistance");
+
 	SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear] = GetSettingI("Shaders.ShadowsExteriors.Near", "AlphaEnabled");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapNear].Activators = GetSettingI("Shaders.ShadowsExteriors.Near", "Activators");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapNear].Actors = GetSettingI("Shaders.ShadowsExteriors.Near", "Actors");
@@ -819,7 +823,6 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapFar].Terrain = GetSettingI("Shaders.ShadowsExteriors.Far", "Terrain");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapFar].Trees = GetSettingI("Shaders.ShadowsExteriors.Far", "Trees");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapFar].Lod = GetSettingI("Shaders.ShadowsExteriors.Far", "Lod");
-
 
 	SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapLod] = GetSettingI("Shaders.ShadowsExteriors.Lod", "AlphaEnabled");
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapLod].Activators = GetSettingI("Shaders.ShadowsExteriors.Lod", "Activators");
