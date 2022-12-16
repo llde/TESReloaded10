@@ -28,6 +28,8 @@ static const float BIAS = 0.0015f;
 static const float2 OffsetMaskH = float2(1.0f, 0.0f);
 static const float2 OffsetMaskV = float2(0.0f, 1.0f);
 
+#include "Includes/Blending.hlsl"
+
 struct VSOUT
 {
 	float4 vertPos : POSITION;
@@ -152,11 +154,13 @@ float4 BlurPass(VSOUT IN, uniform float2 OffsetMask) : COLOR0
 
 float4 CombineShadow( VSOUT IN ) : COLOR0 {
 
-	float3 color = tex2D(TESR_SourceBuffer, IN.UVCoord).rgb;
-	float Shadow = tex2D(TESR_RenderedBuffer, IN.UVCoord).r;
-	
-	color.rgb *= Shadow;
-    return float4(color, 1.0f);
+	// combine Shadow pass and source using an overlay mode + alpha blending
+	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
+	color.a = 1.0f;
+	float shadow = 1.0f - tex2D(TESR_RenderedBuffer, IN.UVCoord).r;
+	float4 shadowColor = float4(color.rgb, shadow);
+
+	return BlendMode_Overlay(color, Desaturate(shadowColor));
 	
 }
 
