@@ -13,6 +13,7 @@ float4 TESR_ScreenSpaceLightDir;
 float4 TESR_CameraPosition;
 float4 TESR_WaterSettings;
 float4 TESR_ShadowData; // x: quality, y: darkness, z: nearmap resolution, w: farmap resolution
+float4 TESR_ShadowScreenSpaceData; // x: Enabled, y: blurRadius, z: renderDistance
 float4 TESR_SunAmount;
 float4 TESR_FogColor;
 float4 TESR_ShadowFade;
@@ -35,7 +36,7 @@ static const float BLEED_CORRECTION = 0.4;
 static const float SSS_DIST = 20;
 static const float SSS_STEPNUM = 10;
 static const float SSS_THICKNESS = 20;
-static const float SSS_MAXDEPTH = 5000;
+static const float SSS_MAXDEPTH = TESR_ShadowScreenSpaceData.z * TESR_ShadowScreenSpaceData.x;
 
 struct VSOUT
 {
@@ -218,22 +219,21 @@ float3 random(float2 seed)
 	return tex2D(TESR_NoiseSampler, (seed/255 + 0.5) / TESR_ReciprocalResolution.xy).xyz;
 }
 
-
 float4 ScreenSpaceShadow(VSOUT IN) : COLOR0
 {	
 	// calculates wether a point is in shadow based on screen depth
 	float2 uv = IN.UVCoord;
 	float rand = lerp(0.2, 1, random(uv).r); // some noise to vary the ray length
-	float3 pos = reconstructPosition(uv) ;//+ GetNormal(uv) * rand; 
+	float3 pos = reconstructPosition(uv) ; 
 
 	float bias = 0.0;
-	if (pos.z > SSS_MAXDEPTH) return float4 (1.0f, 1.0, 1.0, 1.0) ;
+	
+	[branch]
+	if (pos.z > SSS_MAXDEPTH) return float4 (1.0f, 1.0, 1.0, 1.0);
 	
 	float occlusion = 0.0;
 	for (float i = 1; i < SSS_STEPNUM/2; i++){
-
-		// float4 step = SSS_DIST / SSS_STEPNUM * i * i * TESR_ScreenSpaceLightDir * rand;
-		float4 step = SSS_DIST / SSS_STEPNUM * i* TESR_ViewSpaceLightDir * rand;
+		float4 step = SSS_DIST / SSS_STEPNUM * i * TESR_ViewSpaceLightDir * rand;
 
 		float3 pos1 = pos + step.xyz; // we move to the light
 		float3 pos2 = pos1 + step.xyz; // we move to the light
@@ -260,16 +260,12 @@ float4 ScreenSpaceShadow(VSOUT IN) : COLOR0
 
 float4 Shadow(VSOUT IN) : COLOR0
 {
-	// returns a shadow value from darkness setting value (full shadow) 
-	// to 1 (full light) using variance maps algorithm
-
+	// returns a shadow value from darkness setting value (full shadow) to 1 (full light)
 	float Shadow = 1.0f;
 	float depth = readDepth(IN.UVCoord);
 	float3 camera_vector = toWorld(IN.UVCoord) * depth;
 	float4 world_pos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
-
 	float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
-	// return GetLightAmount(pos, depth);
 
 	Shadow = saturate(GetLightAmount(pos, depth));
 	Shadow = min(tex2D(TESR_RenderedBuffer, IN.UVCoord).r, Shadow);
@@ -319,13 +315,13 @@ technique {
 	pass
 	{ 
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 BlurRChannel(float2(1.0f, 0.0f), 1, 5, SSS_MAXDEPTH);
+		PixelShader = compile ps_3_0 BlurRChannel(float2(1.0f, 0.0f), TESR_ShadowScreenSpaceData.y, 5, SSS_MAXDEPTH);
 	}
 	
 	pass
 	{ 
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 BlurRChannel(float2(0.0f, 1.0f), 1, 5, SSS_MAXDEPTH);
+		PixelShader = compile ps_3_0 BlurRChannel(float2(0.0f, 1.0f), TESR_ShadowScreenSpaceData.y, 5, SSS_MAXDEPTH);
 	}
 
 	pass {
@@ -333,12 +329,6 @@ technique {
 		PixelShader = compile ps_3_0 Shadow();
 	}
 
-
-
-//	pass {
-//		VertexShader = compile vs_3_0 FrameVS();
-//		PixelShader = compile ps_3_0 CombineShadow();
-//	}
 
 	pass {
 		VertexShader = compile vs_3_0 FrameVS();
