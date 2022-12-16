@@ -820,6 +820,9 @@ void ShaderManager::UpdateConstants() {
 	float weatherPercent = WorldSky->weatherPercent;
 	float lastGameTime = ShaderConst.GameTime.y;
 
+	TheRenderManager->UpdateSceneCameraData();
+	TheRenderManager->SetupSceneCamera();
+
 	TimeGlobals* GameTimeGlobals = TimeGlobals::Get();
 	float GameHour = GameTimeGlobals->GameHour->data;
 	float DaysPassed = GameTimeGlobals->GameDaysPassed ? GameTimeGlobals->GameDaysPassed->data : 1.0f;
@@ -828,8 +831,6 @@ void ShaderManager::UpdateConstants() {
 	float SunriseEnd = WorldSky->GetSunriseEnd();
 	float SunsetStart = WorldSky->GetSunsetBegin();
 	float SunsetEnd = WorldSky->GetSunsetEnd();
-
-	TheRenderManager->UpdateSceneCameraData();
 
 	ShaderConst.GameTime.x = TimeGlobals::GetGameTime(); //time in milliseconds
 	ShaderConst.GameTime.y = GameHour; //time in hours
@@ -1913,7 +1914,8 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	TESWorldSpace* currentWorldSpace = Player->GetWorldSpace();
 	TESObjectCELL* currentCell = Player->parentCell;
 
-	TheRenderManager->SetupSceneCamera();
+	TheShaderManager->UpdateConstants();
+
 	Device->SetStreamSource(0, FrameVertex, 0, sizeof(FrameVS));
 	Device->SetFVF(FrameFVF);
 	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
