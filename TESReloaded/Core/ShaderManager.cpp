@@ -34,9 +34,10 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Skin.SkinColor;
 	else if (!strcmp(Name, "TESR_ShadowData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Shadow.Data;
-	else if (!strcmp(Name, "TESR_ShadowRadius")) {
+	else if (!strcmp(Name, "TESR_ShadowScreenSpaceData"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Shadow.ScreenSpaceData;
+	else if (!strcmp(Name, "TESR_ShadowRadius"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowMapRadius;
-	}
 	else if (!strcmp(Name, "TESR_OrthoData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Shadow.OrthoData;
 	else if (!strcmp(Name, "TESR_RainData"))
@@ -1536,6 +1537,10 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Sharpening.Data.y = TheSettingManager->SettingsSharpening.Clamp;
 			ShaderConst.Sharpening.Data.z = TheSettingManager->SettingsSharpening.Offset;
 		}
+
+		ShaderConst.Shadow.ScreenSpaceData.x = TheSettingManager->SettingsShadows.ScreenSpace.Enabled;
+		ShaderConst.Shadow.ScreenSpaceData.y = TheSettingManager->SettingsShadows.ScreenSpace.BlurRadius;
+		ShaderConst.Shadow.ScreenSpaceData.z = TheSettingManager->SettingsShadows.ScreenSpace.RenderDistance;
 
 		if (TheSettingManager->SettingsMain.Effects.Specular) {
 			D3DXVECTOR4 exteriorData;

@@ -297,6 +297,13 @@ struct SettingsShadowStruct {
 		ExcludedFormsList	ExcludedForms;
 	};
 
+	struct ScreenSpaceStruct {
+		bool				Enabled;
+		float				BlurRadius;
+		float				RenderDistance;
+	};
+
+	ScreenSpaceStruct	ScreenSpace;
 	ExteriorsStruct		Exteriors;
 	InteriorsStruct		Interiors;
 };

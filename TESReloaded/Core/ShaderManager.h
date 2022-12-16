@@ -50,6 +50,7 @@ struct ShaderConstants {
 	};
 	struct ShadowStruct {
 		D3DXVECTOR4		Data;
+		D3DXVECTOR4		ScreenSpaceData;
 		D3DXVECTOR4		OrthoData;
 	};
 	struct RainStruct{
