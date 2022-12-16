@@ -135,6 +135,7 @@ struct ShaderConstants {
 	D3DXVECTOR4				SunTiming;
 	D3DXVECTOR4				SunAmount;
 	D3DXVECTOR4				ShadowFade;
+	D3DXVECTOR4				ViewSpaceLightDir;
 	D3DXVECTOR4				ScreenSpaceLightDir;
 	D3DXVECTOR4				GameTime;
 	TESWeather*				pWeather;
