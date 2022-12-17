@@ -1,6 +1,14 @@
 #pragma once
 #define FrameFVF D3DFVF_XYZ | D3DFVF_TEX1
 
+enum ShaderCompileType{
+	AlwaysOff,
+	AlwaysOn,
+	RecompileChanged,
+	RecompileInMenu,
+	RecompileAbsent,
+};
+
 struct ShaderConstants {
 	
 	struct ShadowMapStruct {
@@ -187,7 +195,7 @@ public:
 	virtual void			CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* ConstantTable) = 0;
 
 	void					SetConstantTableValue(LPCSTR Name, UInt32 Index);
-	static bool ShouldCompileShader(const char* fileBin, const char* fileHlsl, UInt8 CompileStatus);
+	static bool ShouldCompileShader(const char* fileBin, const char* fileHlsl, ShaderCompileType CompileStatus);
 
 	ShaderValue*			FloatShaderValues;
 	UInt32					FloatShaderValuesCount;
@@ -284,13 +292,19 @@ public:
 
 	virtual void			SetCT();
 	virtual void			CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* ConstantTable);
-
+	void					SwitchEffect();
+	void					Render(IDirect3DDevice9* Device, IDirect3DSurface9* RenderTarget, IDirect3DSurface9* RenderedSurface, bool ClearRenderTarget);
+	void					DisposeEffect();
+	bool					LoadEffect(bool alwaysCompile = false); 
+	bool 					IsLoaded();
+	
 	static EffectRecord*	LoadEffect(const char* Name);
 
-	void					Render(IDirect3DDevice9* Device, IDirect3DSurface9* RenderTarget, IDirect3DSurface9* RenderedSurface, bool ClearRenderTarget);
-	
 	bool					Enabled;
 	ID3DXEffect*			Effect;
+	EffectRecordType		Type;
+	std::string*			Path;
+	std::string*			SourcePath;
 };
 
 typedef std::map<std::string, EffectRecord*> ExtraEffectsList;
@@ -352,4 +366,6 @@ public:
 	NiD3DPixelShader*		WaterPixelShaders[51];
     TESObjectCELL*          PreviousCell;
     bool                    IsMenuSwitch;
+	
 };
+

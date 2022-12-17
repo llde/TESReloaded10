@@ -207,13 +207,13 @@ ShaderRecord::~ShaderRecord() { }
 * @param CompileStatus an integer for the status of the compilation. If set to 2, will compare file dates to return status. 
 * @returns wether the shader should be compiled, from a given binary shader and corresponding hlsl.
 */
-bool ShaderProgram::ShouldCompileShader(const char* fileBin, const char* fileHlsl, UInt8 CompileStatus){
-	if(CompileStatus == 1) return  true;
-	if(CompileStatus == 0) return  false;
+bool ShaderProgram::ShouldCompileShader(const char* fileBin, const char* fileHlsl, ShaderCompileType CompileStatus){
+	if(CompileStatus == ShaderCompileType::AlwaysOn) return  true;
+	if(CompileStatus == ShaderCompileType::AlwaysOff) return  false;
 
-	if(CompileStatus == 3) return TheShaderManager->IsMenuSwitch ? true : false;
+	if(CompileStatus == ShaderCompileType::RecompileInMenu) return TheShaderManager->IsMenuSwitch ? true : false;
 
-	if(CompileStatus == 2) {
+	if(CompileStatus == ShaderCompileType::RecompileChanged) {
 		WIN32_FILE_ATTRIBUTE_DATA attributesBin = {0};
 		WIN32_FILE_ATTRIBUTE_DATA attributesSource = {0};
 		BOOL hr = GetFileAttributesExA(fileBin, GetFileExInfoStandard, &attributesBin); // from winbase.h
@@ -302,7 +302,7 @@ ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 	strcat(FileName, ".hlsl");
 
     HRESULT prepass = D3DXPreprocessShaderFromFileA(FileName, NULL, NULL, &ShaderSource , &Errors);
-	bool Compile = ShouldCompileShader(FileNameBinary, FileName, TheSettingManager->SettingsMain.Develop.CompileShaders);
+	bool Compile = ShouldCompileShader(FileNameBinary, FileName, (ShaderCompileType) TheSettingManager->SettingsMain.Develop.CompileShaders);
 	if (prepass == D3D_OK) {
 		if (strstr(Name, ".vso"))
 			strcpy(ShaderProfile, "vs_3_0");
@@ -473,14 +473,84 @@ EffectRecord::EffectRecord() {
 	Effect = NULL;
 
 }
-
+/*Shader Values arrays are freed in the superclass Destructor*/
 EffectRecord::~EffectRecord() {
-
 	if (Effect) Effect->Release();
-
+	delete Path;
+	delete SourcePath;
 }
 
+/*
+ * Unload effects, allowing it to be reloaded from  a blank state.
+ */
+void EffectRecord::DisposeEffect(){
+	if (Effect) Effect->Release();
+	Effect = nullptr;
+	if (FloatShaderValues) free(FloatShaderValues);
+	FloatShaderValues = nullptr;
+	if (TextureShaderValues) free(TextureShaderValues);
+	TextureShaderValues = nullptr;
+	Enabled = false;
+}
 
+/*
+ * Compile and Load the Effect shader
+ */
+bool EffectRecord::LoadEffect(bool alwaysCompile){
+	ID3DXBuffer* ShaderSource = NULL;
+	ID3DXBuffer* Errors = NULL;
+	ID3DXEffect* Effect = NULL;
+	bool success = false;
+    HRESULT prepass = D3DXPreprocessShaderFromFileA(SourcePath->data(), NULL, NULL, &ShaderSource , &Errors);
+	ID3DXEffectCompiler* Compiler = NULL;
+	ID3DXBuffer* EffectBuffer = NULL;
+	if(alwaysCompile || ShouldCompileShader(Path->data(), SourcePath->data(), (ShaderCompileType)TheSettingManager->SettingsMain.Develop.CompileEffects) ){
+		HRESULT comp  = D3DXCreateEffectCompilerFromFileA(SourcePath->data(), NULL, NULL, NULL, &Compiler, &Errors);
+		if(FAILED(comp)) goto cleanup;
+		if (Errors){
+			Logger::Log((char*)Errors->GetBufferPointer());
+			Errors->Release();
+			Errors = nullptr;
+		}
+
+		HRESULT compiled = Compiler->CompileEffect(NULL, &EffectBuffer, &Errors);
+		if(FAILED(compiled)) goto cleanup;
+		if (Errors){
+			Logger::Log((char*)Errors->GetBufferPointer());
+			Errors->Release();
+			Errors = nullptr;
+		}
+
+		if (EffectBuffer) {
+			std::ofstream FileBinary(Path->data(), std::ios::out | std::ios::binary);
+			FileBinary.write((char*)EffectBuffer->GetBufferPointer(), EffectBuffer->GetBufferSize());
+			FileBinary.flush();
+			FileBinary.close();
+			Logger::Log("Effect compiled: %s", SourcePath->data());
+		}
+	}
+	HRESULT load = D3DXCreateEffectFromFileA(TheRenderManager->device, Path->data(), NULL, NULL, NULL, NULL, &Effect, &Errors);
+	if(FAILED(load)) goto cleanup;
+	
+	if (Errors) Logger::Log((char*)Errors->GetBufferPointer()); // LAst can be cleaned in the cleanup section
+	if (Effect) {
+		this->Effect = Effect;
+		CreateCT(ShaderSource, NULL); //Recreate CT;
+		Logger::Log("Effect loaded: %s", Path->data());
+	}
+
+	success = true;
+cleanup:
+	if (EffectBuffer) EffectBuffer->Release();
+	if (Compiler) Compiler->Release();
+
+	if (ShaderSource) ShaderSource->Release();
+	if (Errors){
+		Logger::Log((char*)Errors->GetBufferPointer());
+		Errors->Release();
+	}
+	return success;
+}
 /**
 * Loads an effect shader by name (The post process effects stored in the Effects folder)
 * @param Name the name for the effect
@@ -488,60 +558,19 @@ EffectRecord::~EffectRecord() {
 */
 EffectRecord* EffectRecord::LoadEffect(const char* Name) {
 	
-	EffectRecord* EffectProg = NULL;
-	ID3DXBuffer* ShaderSource = NULL;
-	ID3DXBuffer* Errors = NULL;
-	ID3DXEffect* Effect = NULL;
-	UInt32 SourceSize = 0;
 	char FileName[MAX_PATH];
-	bool Compiled = true;
 
 	strcpy(FileName, Name);
 	strcat(FileName, ".hlsl");
-    HRESULT prepass = D3DXPreprocessShaderFromFileA(FileName, NULL, NULL, &ShaderSource , &Errors);
-	bool Compile = ShouldCompileShader(Name, FileName, TheSettingManager->SettingsMain.Develop.CompileEffects);
-
-	if (prepass == D3D_OK) {
-		if (Compile) {
-			Compiled = false;
-			ID3DXEffectCompiler* Compiler = NULL;
-			ID3DXBuffer* EffectBuffer = NULL;
-			D3DXCreateEffectCompilerFromFileA(FileName, NULL, NULL, NULL, &Compiler, &Errors);
-			if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
-			if (Compiler) {
-				Compiler->CompileEffect(NULL, &EffectBuffer, &Errors);
-				if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
-			}
-			if (EffectBuffer) {
-				std::ofstream FileBinary(Name, std::ios::out | std::ios::binary);
-				FileBinary.write((char*)EffectBuffer->GetBufferPointer(), EffectBuffer->GetBufferSize());
-				FileBinary.flush();
-				FileBinary.close();
-				Compiled = true;
-				Logger::Log("Effect compiled: %s", FileName);
-			}
-			if (EffectBuffer) EffectBuffer->Release();
-			if (Compiler) Compiler->Release();
-		}
-		if (Compiled) {
-			D3DXCreateEffectFromFileA(TheRenderManager->device, Name, NULL, NULL, NULL, NULL, &Effect, &Errors);
-			if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
-			if (Effect) {
-				EffectProg = new EffectRecord();
-				EffectProg->Effect = Effect;
-				EffectProg->CreateCT(ShaderSource, NULL);
-				Logger::Log("Effect loaded: %s", Name);
-			}
-		}
-	}
-
-	else {
-		if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
-	}
-	if (ShaderSource) ShaderSource->Release();
-	if (Errors) Errors->Release();
+	EffectRecord* EffectProg = new EffectRecord();
+	EffectProg->Path = new std::string(Name); //TODO pass them to constructor for clean code 
+	EffectProg->SourcePath = new std::string(FileName);
+	EffectProg->LoadEffect();
 	return EffectProg;
+}
 
+bool EffectRecord::IsLoaded(){
+	return Effect != nullptr; 
 }
 
 /**
@@ -597,7 +626,7 @@ void EffectRecord::CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* Const
 void EffectRecord::SetCT() {
 
 	ShaderValue* Value;
-
+	if (!Enabled || Effect == nullptr) return;
 	for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
 		Value = &TextureShaderValues[c];
 		if (Value->Texture->Texture) TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
@@ -615,6 +644,17 @@ void EffectRecord::SetCT() {
 
 }
 
+/*
+ * Enable or Disable Effect, with reloading it if it's changed on disk
+ */
+void EffectRecord::SwitchEffect(){
+	bool change = true;
+	if (!IsLoaded() || (!Enabled && ShouldCompileShader(Path->data(), SourcePath->data(), ShaderCompileType::RecompileChanged)) ) {
+		DisposeEffect();
+		change = LoadEffect(true);
+	}
+	if(change) Enabled = !Enabled;
+}
 
 /**
 * Renders the given effect shader.
@@ -622,7 +662,7 @@ void EffectRecord::SetCT() {
 void EffectRecord::Render(IDirect3DDevice9* Device, IDirect3DSurface9* RenderTarget, IDirect3DSurface9* RenderedSurface, bool ClearRenderTarget) {
 
 	UINT Passes;
-
+	if (!Enabled || Effect == nullptr) return;
 	Effect->Begin(&Passes, NULL);
 	for (UINT p = 0; p < Passes; p++) {
 		if (ClearRenderTarget) Device->Clear(0L, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0L);
@@ -704,27 +744,54 @@ void ShaderManager::CreateFrameVertex(UInt32 Width, UInt32 Height, IDirect3DVert
 void ShaderManager::CreateEffects() {
 	
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
+	CreateEffect(EffectRecord::EffectRecordType::AmbientOcclusion);
+	CreateEffect(EffectRecord::EffectRecordType::BloodLens);
+	CreateEffect(EffectRecord::EffectRecordType::Bloom);
+	CreateEffect(EffectRecord::EffectRecordType::Cinema);
+	CreateEffect(EffectRecord::EffectRecordType::Coloring);
+	CreateEffect(EffectRecord::EffectRecordType::DepthOfField);
+	CreateEffect(EffectRecord::EffectRecordType::GodRays);
+	CreateEffect(EffectRecord::EffectRecordType::LowHF);
+	CreateEffect(EffectRecord::EffectRecordType::MotionBlur);
+	CreateEffect(EffectRecord::EffectRecordType::Sharpening);
+	CreateEffect(EffectRecord::EffectRecordType::SnowAccumulation);
+	CreateEffect(EffectRecord::EffectRecordType::Underwater);
+	CreateEffect(EffectRecord::EffectRecordType::VolumetricFog);
+	CreateEffect(EffectRecord::EffectRecordType::WaterLens);
+	CreateEffect(EffectRecord::EffectRecordType::WetWorld);
+	CreateEffect(EffectRecord::EffectRecordType::Precipitations);
+	CreateEffect(EffectRecord::EffectRecordType::ShadowsExteriors);
+	CreateEffect(EffectRecord::EffectRecordType::ShadowsInteriors);
+	CreateEffect(EffectRecord::EffectRecordType::Specular);
+//	CreateEffect(EffectRecord::EffectRecordType::Extra);
 
-	if (Effects->AmbientOcclusion) CreateEffect(EffectRecord::EffectRecordType::AmbientOcclusion);
-	if (Effects->BloodLens) CreateEffect(EffectRecord::EffectRecordType::BloodLens);
-	if (Effects->Bloom) CreateEffect(EffectRecord::EffectRecordType::Bloom);
-	if (Effects->Cinema) CreateEffect(EffectRecord::EffectRecordType::Cinema);
-	if (Effects->Coloring) CreateEffect(EffectRecord::EffectRecordType::Coloring);
-	if (Effects->DepthOfField) CreateEffect(EffectRecord::EffectRecordType::DepthOfField);
-	if (Effects->GodRays) CreateEffect(EffectRecord::EffectRecordType::GodRays);
-	if (Effects->LowHF) CreateEffect(EffectRecord::EffectRecordType::LowHF);
-	if (Effects->MotionBlur) CreateEffect(EffectRecord::EffectRecordType::MotionBlur);
-	if (Effects->Sharpening) CreateEffect(EffectRecord::EffectRecordType::Sharpening);
-	if (Effects->SnowAccumulation) CreateEffect(EffectRecord::EffectRecordType::SnowAccumulation);
-	if (Effects->Underwater) CreateEffect(EffectRecord::EffectRecordType::Underwater);
-	if (Effects->VolumetricFog) CreateEffect(EffectRecord::EffectRecordType::VolumetricFog);
-	if (Effects->WaterLens) CreateEffect(EffectRecord::EffectRecordType::WaterLens);
-	if (Effects->WetWorld) CreateEffect(EffectRecord::EffectRecordType::WetWorld);
-	if (Effects->Precipitations) CreateEffect(EffectRecord::EffectRecordType::Precipitations);
+	if (Effects->AmbientOcclusion) AmbientOcclusionEffect->Enabled = true;
+	if (Effects->BloodLens) BloodLensEffect->Enabled = true;
+	if (Effects->Bloom) BloomEffect->Enabled = true;
+	if (Effects->Cinema) CinemaEffect->Enabled = true;
+	if (Effects->Coloring) ColoringEffect->Enabled = true;
+	if (Effects->DepthOfField) DepthOfFieldEffect->Enabled = true;
+	if (Effects->GodRays) GodRaysEffect->Enabled = true;
+	if (Effects->LowHF) LowHFEffect->Enabled = true;
+	if (Effects->MotionBlur) MotionBlurEffect->Enabled = true;
+	if (Effects->Sharpening) SharpeningEffect->Enabled = true;
+	if (Effects->SnowAccumulation) SnowAccumulationEffect->Enabled = true;
+	if (Effects->Underwater) UnderwaterEffect->Enabled = true;
+	if (Effects->VolumetricFog) VolumetricFogEffect->Enabled = true;
+	if (Effects->WaterLens) WaterLensEffect->Enabled = true;
+	if (Effects->WetWorld) WetWorldEffect->Enabled = true;
+	if (Effects->Precipitations) {
+		RainEffect->Enabled = true;
+		SnowEffect->Enabled = true;
+	}
+	if (Effects->ShadowsExteriors) ShadowsExteriorsEffect->Enabled = true;
+	if (Effects->ShadowsInteriors) ShadowsInteriorsEffect->Enabled = true;
+	if (Effects->Specular) SpecularEffect->Enabled = true;
+	
+	
+	/*TODO*/
 	if (Effects->Extra) CreateEffect(EffectRecord::EffectRecordType::Extra);
-	if (Effects->ShadowsExteriors) CreateEffect(EffectRecord::EffectRecordType::ShadowsExteriors);
-	if (Effects->ShadowsInteriors) CreateEffect(EffectRecord::EffectRecordType::ShadowsInteriors);
-	if (Effects->Specular) CreateEffect(EffectRecord::EffectRecordType::Specular);
+
 }
 
 void ShaderManager::InitializeConstants() {
@@ -1627,103 +1694,103 @@ void ShaderManager::CreateEffect(EffectRecord::EffectRecordType EffectType) {
 		case EffectRecord::EffectRecordType::Underwater:
 			strcat(Filename, "Underwater.fx");
 			UnderwaterEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.Underwater = (UnderwaterEffect != NULL);
+			SettingsMain->Effects.Underwater = (SettingsMain->Effects.Underwater && UnderwaterEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::WaterLens:
 			strcat(Filename, "WaterLens.fx");
 			WaterLensEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.WaterLens = (WaterLensEffect != NULL);
+			SettingsMain->Effects.WaterLens = (SettingsMain->Effects.WaterLens && WaterLensEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::GodRays:
 			strcat(Filename, "GodRays.fx");
 			GodRaysEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.GodRays = (GodRaysEffect != NULL);
+			SettingsMain->Effects.GodRays = (SettingsMain->Effects.GodRays && GodRaysEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::DepthOfField:
 			strcat(Filename, "DepthOfField.fx");
 			DepthOfFieldEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.DepthOfField = (DepthOfFieldEffect != NULL);
+			SettingsMain->Effects.DepthOfField = (SettingsMain->Effects.DepthOfField && DepthOfFieldEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::AmbientOcclusion:
 			strcat(Filename, "AmbientOcclusion.fx");
 			AmbientOcclusionEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.AmbientOcclusion = (AmbientOcclusionEffect != NULL);
+			SettingsMain->Effects.AmbientOcclusion = (SettingsMain->Effects.AmbientOcclusion && AmbientOcclusionEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::Coloring:
 			strcat(Filename, "Coloring.fx");
 			ColoringEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.Coloring = (ColoringEffect != NULL);
+			SettingsMain->Effects.Coloring = (SettingsMain->Effects.Coloring && ColoringEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::Cinema:
 			strcat(Filename, "Cinema.fx");
 			CinemaEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.Cinema = (CinemaEffect != NULL);
+			SettingsMain->Effects.Cinema = (SettingsMain->Effects.Cinema && CinemaEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::Bloom:
 			strcat(Filename, "Bloom.fx");
 			BloomEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.Bloom = (BloomEffect != NULL);
+			SettingsMain->Effects.Bloom = (SettingsMain->Effects.Bloom && BloomEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::SnowAccumulation:
 			strcat(Filename, "SnowAccumulation.fx");
 			SnowAccumulationEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.SnowAccumulation = (SnowAccumulationEffect != NULL);
+			SettingsMain->Effects.SnowAccumulation = (SettingsMain->Effects.SnowAccumulation && SnowAccumulationEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::BloodLens:
 			strcat(Filename, "BloodLens.fx");
 			BloodLensEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.BloodLens = (BloodLensEffect != NULL);
+			SettingsMain->Effects.BloodLens = (SettingsMain->Effects.BloodLens && BloodLensEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::MotionBlur:
 			strcat(Filename, "MotionBlur.fx");
 			MotionBlurEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.MotionBlur = (MotionBlurEffect != NULL);
+			SettingsMain->Effects.MotionBlur = (SettingsMain->Effects.MotionBlur && MotionBlurEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::LowHF:
 			strcat(Filename, "LowHF.fx");
 			LowHFEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.LowHF = (LowHFEffect != NULL);
+			SettingsMain->Effects.LowHF = (SettingsMain->Effects.LowHF && LowHFEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::WetWorld:
 			strcat(Filename, "WetWorld.fx");
 			WetWorldEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.WetWorld = (WetWorldEffect != NULL);
+			SettingsMain->Effects.WetWorld = (SettingsMain->Effects.WetWorld && WetWorldEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::Sharpening:
 			strcat(Filename, "Sharpening.fx");
 			SharpeningEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.Sharpening = (SharpeningEffect != NULL);
+			SettingsMain->Effects.Sharpening = (SettingsMain->Effects.Sharpening && SharpeningEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::Specular:
 			strcat(Filename, "Specular.fx");
 			SpecularEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.Specular = (SpecularEffect != NULL);
+			SettingsMain->Effects.Specular = (SettingsMain->Effects.Specular && SpecularEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::VolumetricFog:
 			strcat(Filename, "VolumetricFog.fx");
 			VolumetricFogEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.VolumetricFog = (VolumetricFogEffect != NULL);
+			SettingsMain->Effects.VolumetricFog = (SettingsMain->Effects.VolumetricFog && VolumetricFogEffect->IsLoaded());
 			break;
-		case EffectRecord::EffectRecordType::Precipitations:
+		case EffectRecord::EffectRecordType::Precipitations:  //TODO Split Rain and Snow
 			strcat(Filename, "Rain.fx");
 			RainEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.Precipitations = (RainEffect != NULL);
+			SettingsMain->Effects.Precipitations = ( SettingsMain->Effects.Precipitations && RainEffect->IsLoaded());
 			if (SettingsMain->Effects.Precipitations) {
 				strcpy(Filename, EffectsPath);
 				strcat(Filename, "Snow.fx");
 				SnowEffect = EffectRecord::LoadEffect(Filename);
-				SettingsMain->Effects.Precipitations = (SnowEffect != NULL);
+				SettingsMain->Effects.Precipitations = (SettingsMain->Effects.Precipitations && SnowEffect->IsLoaded());
 			}
 			break;
 		case EffectRecord::EffectRecordType::ShadowsExteriors:
 			strcat(Filename, "ShadowsExteriors.fx");
 			ShadowsExteriorsEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.ShadowsExteriors = (ShadowsExteriorsEffect != NULL);
+			SettingsMain->Effects.ShadowsExteriors = (SettingsMain->Effects.ShadowsExteriors && ShadowsExteriorsEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::ShadowsInteriors:
 			strcat(Filename, "ShadowsInteriors.fx");
 			ShadowsInteriorsEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.ShadowsInteriors = (ShadowsInteriorsEffect != NULL);
+			SettingsMain->Effects.ShadowsInteriors = (SettingsMain->Effects.ShadowsInteriors && ShadowsInteriorsEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::Extra:
 			WIN32_FIND_DATAA File;
@@ -1977,14 +2044,12 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 	IsMenuSwitch = true;
 
 	if (!strcmp(Name, "Specular")) {
-		Effects->Specular = !Effects->Specular;
-		DisposeEffect(EffectRecord::EffectRecordType::Specular);
-		if (Effects->Specular) CreateEffect(EffectRecord::EffectRecordType::Specular);
+		SpecularEffect->SwitchEffect();
+		Effects->Specular = SpecularEffect->Enabled;
 	}
 	if (!strcmp(Name, "AmbientOcclusion")) {
-		Effects->AmbientOcclusion = !Effects->AmbientOcclusion;
-		DisposeEffect(EffectRecord::EffectRecordType::AmbientOcclusion);
-		if (Effects->AmbientOcclusion) CreateEffect(EffectRecord::EffectRecordType::AmbientOcclusion);
+		AmbientOcclusionEffect->SwitchEffect();
+		Effects->AmbientOcclusion = AmbientOcclusionEffect->Enabled;
 	}
 	else if (!strcmp(Name, "Blood")) {
 		Shaders->Blood = !Shaders->Blood;
@@ -1992,31 +2057,26 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		if (Shaders->Blood) CreateShader(Name);
 	}
 	else if (!strcmp(Name, "BloodLens")) {
-		Effects->BloodLens = !Effects->BloodLens;
-		DisposeEffect(EffectRecord::EffectRecordType::BloodLens);
-		if (Effects->BloodLens) CreateEffect(EffectRecord::EffectRecordType::BloodLens);
+		BloodLensEffect->SwitchEffect();
+		Effects->BloodLens = BloodLensEffect->Enabled;
 	}
 	else if (!strcmp(Name, "Bloom")) {
-		Effects->Bloom = !Effects->Bloom;
-		DisposeEffect(EffectRecord::EffectRecordType::Bloom);
-		if (Effects->Bloom) CreateEffect(EffectRecord::EffectRecordType::Bloom);
+		BloomEffect->SwitchEffect();
+		Effects->Bloom = BloomEffect->Enabled;
 	}
 	else if (!strcmp(Name, "Cinema")) {
-		Effects->Cinema = !Effects->Cinema;
-		DisposeEffect(EffectRecord::EffectRecordType::Cinema);
-		if (Effects->Cinema) CreateEffect(EffectRecord::EffectRecordType::Cinema);
+		CinemaEffect->SwitchEffect();
+		Effects->Cinema = CinemaEffect->Enabled;
 	}
 	else if (!strcmp(Name, "Coloring")) {
-		Effects->Coloring = !Effects->Coloring;
-		DisposeEffect(EffectRecord::EffectRecordType::Coloring);
-		if (Effects->Coloring) CreateEffect(EffectRecord::EffectRecordType::Coloring);
+		ColoringEffect->SwitchEffect();
+		Effects->Coloring = ColoringEffect->Enabled;
 	}
 	else if (!strcmp(Name, "DepthOfField")) {
-		Effects->DepthOfField = !Effects->DepthOfField;
-		DisposeEffect(EffectRecord::EffectRecordType::DepthOfField);
-		if (Effects->DepthOfField) CreateEffect(EffectRecord::EffectRecordType::DepthOfField);
+		DepthOfFieldEffect->SwitchEffect();
+		Effects->DepthOfField = DepthOfFieldEffect->Enabled;
 	}
-	else if (!strcmp(Name, "ExtraEffects")) {
+	else if (!strcmp(Name, "ExtraEffects")) { //TODO change to new effect switch
 		Effects->Extra = !Effects->Extra;
 		DisposeEffect(EffectRecord::EffectRecordType::Extra);
 		if (Effects->Extra) CreateEffect(EffectRecord::EffectRecordType::Extra);
@@ -2032,9 +2092,8 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		if (Shaders->Grass) CreateShader(Name);
 	}
 	else if (!strcmp(Name, "GodRays")) {
-		Effects->GodRays = !Effects->GodRays;
-		DisposeEffect(EffectRecord::EffectRecordType::GodRays);
-		if (Effects->GodRays) CreateEffect(EffectRecord::EffectRecordType::GodRays);
+		GodRaysEffect->SwitchEffect();
+		Effects->GodRays = GodRaysEffect->Enabled;
 	}
 	else if (!strcmp(Name, "HDR")) {
 		Shaders->HDR = !Shaders->HDR;
@@ -2042,14 +2101,12 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		if (Shaders->HDR) CreateShader(Name);
 	}
 	else if (!strcmp(Name, "LowHF")) {
-		Effects->LowHF = !Effects->LowHF;
-		DisposeEffect(EffectRecord::EffectRecordType::LowHF);
-		if (Effects->LowHF) CreateEffect(EffectRecord::EffectRecordType::LowHF);
+		LowHFEffect->SwitchEffect();
+		Effects->LowHF = LowHFEffect->Enabled;
 	}
 	else if (!strcmp(Name, "MotionBlur")) {
-		Effects->MotionBlur = !Effects->MotionBlur;
-		DisposeEffect(EffectRecord::EffectRecordType::MotionBlur);
-		if (Effects->MotionBlur) CreateEffect(EffectRecord::EffectRecordType::MotionBlur);
+		MotionBlurEffect->SwitchEffect();
+		Effects->MotionBlur = MotionBlurEffect->Enabled;
 	}
 	else if (!strcmp(Name, "NightEye")) {
 		Shaders->NightEye = !Shaders->NightEye;
@@ -2062,9 +2119,9 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		if (Shaders->POM) CreateShader(Name);
 	}
 	else if (!strcmp(Name, "Precipitations")) {
-		Effects->Precipitations = !Effects->Precipitations;
-		DisposeEffect(EffectRecord::EffectRecordType::Precipitations);
-		if (Effects->Precipitations) CreateEffect(EffectRecord::EffectRecordType::Precipitations);
+		RainEffect->SwitchEffect();
+		SnowEffect->SwitchEffect();
+		Effects->Precipitations = RainEffect->Enabled && SnowEffect->Enabled; 
 	}
 	else if (!strcmp(Name, "Skin")) {
 		Shaders->Skin = !Shaders->Skin;
@@ -2072,9 +2129,8 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		if (Shaders->Skin) CreateShader(Name);
 	}
 	else if (!strcmp(Name, "SnowAccumulation")) {
-		Effects->SnowAccumulation = !Effects->SnowAccumulation;
-		DisposeEffect(EffectRecord::EffectRecordType::SnowAccumulation);
-		if (Effects->SnowAccumulation) CreateEffect(EffectRecord::EffectRecordType::SnowAccumulation);
+		SnowAccumulationEffect->SwitchEffect();
+		Effects->SnowAccumulation = SnowAccumulationEffect->Enabled;
 	}
 	else if (!strcmp(Name, "Terrain")) {
 		Shaders->Terrain = !Shaders->Terrain;
@@ -2082,9 +2138,8 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		if (Shaders->Terrain) CreateShader(Name);
 	}
 	else if (!strcmp(Name, "Underwater")) {
-		Effects->Underwater = !Effects->Underwater;
-		DisposeEffect(EffectRecord::EffectRecordType::Underwater);
-		if (Effects->Underwater) CreateEffect(EffectRecord::EffectRecordType::Underwater);
+		UnderwaterEffect->SwitchEffect();
+		Effects->Underwater = UnderwaterEffect->Enabled;
 	}
 	else if (!strcmp(Name, "Water")) {
 		Shaders->Water = !Shaders->Water;
@@ -2092,34 +2147,28 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		if (Shaders->Water) CreateShader(Name);
 	}
 	else if (!strcmp(Name, "WaterLens")) {
-		Effects->WaterLens = !Effects->WaterLens;
-		DisposeEffect(EffectRecord::EffectRecordType::WaterLens);
-		if (Effects->WaterLens) CreateEffect(EffectRecord::EffectRecordType::WaterLens);
+		WaterLensEffect->SwitchEffect();
+		Effects->WaterLens = WaterLensEffect->Enabled;
 	}
 	else if (!strcmp(Name, "WetWorld")) {
-		Effects->WetWorld = !Effects->WetWorld;
-		DisposeEffect(EffectRecord::EffectRecordType::WetWorld);
-		if (Effects->WetWorld) CreateEffect(EffectRecord::EffectRecordType::WetWorld);
+		WetWorldEffect->SwitchEffect();
+		Effects->WetWorld = WetWorldEffect->Enabled;
 	}
 	else if (!strcmp(Name, "Sharpening")) {
-		Effects->Sharpening = !Effects->Sharpening;
-		DisposeEffect(EffectRecord::EffectRecordType::Sharpening);
-		if (Effects->Sharpening) CreateEffect(EffectRecord::EffectRecordType::Sharpening);
+		SharpeningEffect->SwitchEffect();
+		Effects->Sharpening = SharpeningEffect->Enabled;
 	}
 	else if (!strcmp(Name, "VolumetricFog")) {
-		Effects->VolumetricFog = !Effects->VolumetricFog;
-		DisposeEffect(EffectRecord::EffectRecordType::VolumetricFog);
-		if (Effects->VolumetricFog) CreateEffect(EffectRecord::EffectRecordType::VolumetricFog);
+		VolumetricFogEffect->SwitchEffect();
+		Effects->VolumetricFog = VolumetricFogEffect->Enabled;
 	}
 	else if (!strcmp(Name, "ShadowsExteriors")) {
-		Effects->ShadowsExteriors = !Effects->ShadowsExteriors;
-		DisposeEffect(EffectRecord::EffectRecordType::ShadowsExteriors);
-		if (Effects->ShadowsExteriors) CreateEffect(EffectRecord::EffectRecordType::ShadowsExteriors);
+		ShadowsExteriorsEffect->SwitchEffect();
+		Effects->ShadowsExteriors = ShadowsExteriorsEffect->Enabled;
 	}
 	else if (!strcmp(Name, "ShadowsInteriors")) {
-		Effects->ShadowsInteriors = !Effects->ShadowsInteriors;
-		DisposeEffect(EffectRecord::EffectRecordType::ShadowsInteriors);
-		if (Effects->ShadowsInteriors) CreateEffect(EffectRecord::EffectRecordType::ShadowsInteriors);
+		ShadowsInteriorsEffect->SwitchEffect();
+		Effects->ShadowsInteriors = ShadowsInteriorsEffect->Enabled;
 	}
 	IsMenuSwitch = false;
 }
