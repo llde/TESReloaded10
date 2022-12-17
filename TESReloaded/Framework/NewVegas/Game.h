@@ -4171,6 +4171,50 @@ public:
 };
 assert(sizeof(GridCellArray) == 0x028);
 
+template <typename Data> class DNode{
+public:
+  DNode<Data> *next;
+  DNode<Data> *prev;
+  Data* data;
+};
+template <typename Data> class DList{
+public:
+    DNode<Data>* first;
+    DNode<Data>* last;
+    UInt32 count;  
+};
+assert(sizeof(DList<void>) == 0xC);
+
+struct WaterGroup
+{
+    TESWaterForm			*waterForm;		// 00
+    NiVector4				vector04;		// 04
+    NiVector4				vector14;		// 14
+    DList<TESObjectREFR>	waterPlanes;	// 24
+    DList<void>				list30;			// 30
+    DList<void>				list3C;			// 3C
+    DList<void>				list48;			// 48
+    NiAVObject				*object54;		// 54
+    NiAVObject				*object58;		// 58
+    UInt8					byte5C;			// 5C
+    UInt8					byte5D;			// 5D
+    UInt8					byte5E;			// 5E
+    UInt8					byte5F;			// 5F
+    UInt8					byte60;			// 60
+    UInt8					pad61[3];		// 61
+    DList<void>				list64;			// 64
+    DList<void>				list70;			// 70
+    DList<void>				list7C;			// 7C
+    DList<void>				list88;			// 88
+    NiObject				*object94;		// 94
+    NiObject				*object98;		// 98
+    UInt32					unk9C;			// 9C
+    UInt32					unkA0;			// A0
+    NiObject				*objectA4;		// A4
+    NiObject				*objectA8;		// A8
+    UInt32					unkAC;			// AC
+};
+
 class WaterManager {
 public:
 	UInt32				unk00;					// 000
@@ -4189,11 +4233,9 @@ public:
 	UInt8				unk34;					// 034
 	UInt8				pad34[3];
 	float				unk38;					// 038
-	UInt32				unk3C;					// 03C
-	UInt32				unk40;					// 040
-	UInt32				unk44;					// 044
-	UInt32				unk48;					// 048
-	NiTMap<TESObjectREFR*, TESObjectREFR*>		unk4C;	// 04C
+	DList<WaterGroup>	unk3C;					// 03C
+	WaterGroup			*waterLOD; 				// 048
+	NiTMap<TESObjectREFR*, TESObjectREFR*>		unkReflectionExplosion;	// 04C Seems to be used only under a bReflectExplosions = 1 condition
 	NiTMap<TESObjectREFR*, TESObjectREFR*>		unk5C;	// 05C
 	NiTMap<TESWaterForm*, bool>					unk6C;	// 06C
 	NiTMap<TESObjectREFR*, void*>				unk7C;	// 07C NiTMap<TESObjectREFR*, WadingWaterData*>
@@ -5200,6 +5242,8 @@ namespace Pointers {
 	namespace Generic {
 		static float*			  MPF					= (float*)0x00000000;
 		static BSRenderedTexture* MenuRenderedTexture	= *(BSRenderedTexture**)0x011DED3C;
+		static BSRenderedTexture* BlurredReflection	= *(BSRenderedTexture**)0x011C7AD4;
+        
 		static NiPoint3*		  CameraWorldTranslate	= (NiPoint3*)0x011F474C;
 		static NiPoint3*		  CameraLocation		= (NiPoint3*)0x011F426C;
 		static NiNode**			  DetectorWindowNode	= (NiNode**)0x011FA008;

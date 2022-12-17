@@ -444,6 +444,24 @@ public:
 };
 assert(sizeof(NiObjectNET) == 0x018);
 
+struct PropertyNode{
+    PropertyNode* next;
+    PropertyNode* prev;
+    NiProperty* data;
+};
+struct PropertyList {
+    PropertyNode* first;
+    PropertyNode* last;
+    UInt32 count;
+};
+
+
+template <std::size_t N> struct Debug; // No definition
+
+template <> struct Debug<12> {}; // Definition for "old" sizeof;
+
+template struct Debug<sizeof(PropertyNode)>; // Issue error if definition is missing
+
 class NiAVObject : public NiObjectNET {
 public:
 	virtual void			UpdateControllers(float fTime);
@@ -482,7 +500,7 @@ public:
 	NiNode*					m_parent;				// 018
 	UInt32					unk001C;				// 01C
 	NiBound*				m_kWorldBound;			// 020
-	UInt32					unk024[3];				// 024
+	PropertyList			propertyList;			// 024
 	UInt32					m_flags;				// 030
 	NiTransform				m_localTransform;		// 034
 	NiTransform				m_worldTransform;		// 068
@@ -748,6 +766,7 @@ public:
 		kType_Stencil,
 		kType_Texturing,
 	};
+    virtual PropertyType GetPropertyType();
 };
 assert(sizeof(NiProperty) == 0x18);
 
@@ -1641,6 +1660,75 @@ public:
 	float	Unk05C;		// 05C
 };
 assert(sizeof(BSShaderProperty) == 0x60);
+
+class WaterShaderProperty : BSShaderProperty
+{
+public:
+    struct VarAmounts
+    {
+      float unk;
+      float fWaterReflectivityAmt;
+      float fWaterOpacity;
+      float fWaterDistortionAmt;
+    };
+
+  UInt8 byte60;
+  UInt8 byte61;
+  UInt8 byte62;
+  bool bDepth;
+  UInt32 dword64;
+  UInt32 dword68;
+  float blendRadiusX;
+  float blendRadiusY;
+  float fogPower;
+  float fog78;
+  UInt8 byte7C;
+  UInt8 byte7D;
+  UInt8 byte7E;
+  bool isUseDefaultWater;
+  bool bReflect;
+  UInt8 bRefract;
+  UInt8 UV;
+  UInt8 byte83;
+  UInt32 dword84;
+  NiColorAlpha shallowColor;
+  NiColorAlpha deepColor;
+  NiColorAlpha reflectionColor;
+  WaterShaderProperty::VarAmounts Vars;
+  float floatC8;
+  float floatCC;
+  float blendRadiusZ;
+  float floatD4;
+  NiVector4 depthData;
+  float floatE8;
+  float floatEC;
+  float floatF0;
+  float floatF4;
+  float floatF8;
+  float floatFC;
+  float fresnelZ;
+  float fresnelW;
+  float float108;
+  float float10C;
+  float float110;
+  float float114;
+  UInt8 fWaterFresnelTerm[4];
+  float fWaterNoise;
+  float fFogAmount;
+  float texScale;
+  UInt32 dword128;
+  UInt32 dword12C;
+  UInt32 dword130;
+  NiSourceTexture *noiseTexture;
+  BSRenderedTexture *noDepth;
+  BSRenderedTexture *reflections;
+  BSRenderedTexture *refractions;
+  BSRenderedTexture *depth;
+  UInt32 dword148;
+  UInt32 dword14C;
+};
+assert(sizeof(WaterShaderProperty) == 0x150);
+
 
 class BSShaderLightingProperty : public BSShaderProperty {
 public:
