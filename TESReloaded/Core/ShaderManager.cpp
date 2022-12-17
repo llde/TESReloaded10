@@ -1774,12 +1774,10 @@ void ShaderManager::CreateEffect(EffectRecord::EffectRecordType EffectType) {
 			strcat(Filename, "Rain.fx");
 			RainEffect = EffectRecord::LoadEffect(Filename);
 			SettingsMain->Effects.Precipitations = ( SettingsMain->Effects.Precipitations && RainEffect->IsLoaded());
-			if (SettingsMain->Effects.Precipitations) {
-				strcpy(Filename, EffectsPath);
-				strcat(Filename, "Snow.fx");
-				SnowEffect = EffectRecord::LoadEffect(Filename);
-				SettingsMain->Effects.Precipitations = (SettingsMain->Effects.Precipitations && SnowEffect->IsLoaded());
-			}
+			strcpy(Filename, EffectsPath);
+			strcat(Filename, "Snow.fx");
+			SnowEffect = EffectRecord::LoadEffect(Filename);
+			SettingsMain->Effects.Precipitations = (SettingsMain->Effects.Precipitations && SnowEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::ShadowsExteriors:
 			strcat(Filename, "ShadowsExteriors.fx");
