@@ -672,7 +672,6 @@ void EffectRecord::Render(IDirect3DDevice9* Device, IDirect3DSurface9* RenderTar
 		Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
 	}
 	Effect->End();
-
 }
 
 /**
@@ -1827,7 +1826,6 @@ void ShaderManager::CreateEffect(EffectRecord::EffectRecordType EffectType) {
 
 }
 
-
 /*
 * Deletes an Effect based on the Effect Record effect type. 
 */
@@ -1921,48 +1919,47 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	Device->SetFVF(FrameFVF);
 	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
 
-
-	if (Effects->WetWorld && currentWorldSpace && ShaderConst.WetWorld.Data.x > 0.0f) {
+	if (WetWorldEffect->Enabled && currentWorldSpace && ShaderConst.WetWorld.Data.x > 0.0f) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		WetWorldEffect->SetCT();
 		WetWorldEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	else if (Effects->SnowAccumulation && currentWorldSpace && ShaderConst.SnowAccumulation.Params.w > 0.0f) {
+	else if (SnowAccumulationEffect->Enabled && currentWorldSpace && ShaderConst.SnowAccumulation.Params.w > 0.0f) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		SnowAccumulationEffect->SetCT();
 		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->AmbientOcclusion && ShaderConst.AmbientOcclusion.Enabled) {
+	if (AmbientOcclusionEffect->Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		AmbientOcclusionEffect->SetCT();
 		AmbientOcclusionEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->ShadowsExteriors && currentWorldSpace) {
+	if (ShadowsExteriorsEffect->Enabled && currentWorldSpace) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		ShadowsExteriorsEffect->SetCT();
 		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->ShadowsInteriors && !currentWorldSpace) {
+	if (ShadowsInteriorsEffect->Enabled && !currentWorldSpace) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		ShadowsInteriorsEffect->SetCT();
 		ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->Coloring) {
+	if (ColoringEffect->Enabled) {
 		ColoringEffect->SetCT();
 		ColoringEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->Specular && currentWorldSpace) {
+	if (SpecularEffect->Enabled && currentWorldSpace) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		SpecularEffect->SetCT();
 		SpecularEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->Bloom) {
+	if (BloomEffect->Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		BloomEffect->SetCT();
 		BloomEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
  	bool isCellTransition = currentCell != PreviousCell;
-	if (Effects->Underwater && Tes->sky->GetIsUnderWater()) {
+	if (UnderwaterEffect->Enabled && Tes->sky->GetIsUnderWater() /*TODO do this work in interior????*/) {
 		if (!isCellTransition && TheRenderManager->CameraPosition.z < ShaderConst.Water.waterSettings.x) {
 			ShaderConst.BloodLens.Percent = 0.0f;
 			ShaderConst.WaterLens.Percent = -1.0f;
@@ -1972,48 +1969,48 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	}
 	else {
 		if (ShaderConst.WaterLens.Percent == -1.0f) ShaderConst.WaterLens.Percent = 1.0f;
-		if (Effects->Precipitations && currentWorldSpace) {
-			if (ShaderConst.Precipitations.RainData.x > 0.0f) {
+		if (currentWorldSpace) {
+			if (RainEffect->Enabled && ShaderConst.Precipitations.RainData.x > 0.0f) {
 				RainEffect->SetCT();
 				RainEffect->Render(Device, RenderTarget, RenderedSurface, false);
 			}
-			if (ShaderConst.Precipitations.SnowData.x > 0.0f) {
+			if (SnowEffect->Enabled && ShaderConst.Precipitations.SnowData.x > 0.0f) {
 				SnowEffect->SetCT();
 				SnowEffect->Render(Device, RenderTarget, RenderedSurface, false);
 			}
 		}
-		if (Effects->GodRays && currentWorldSpace) {
+		if (GodRaysEffect->Enabled && currentWorldSpace) {
 			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 			GodRaysEffect->SetCT();
 			GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
-		if (Effects->VolumetricFog && currentWorldSpace && ShaderConst.VolumetricFog.Data.w) {
+		if (VolumetricFogEffect->Enabled && currentWorldSpace && ShaderConst.VolumetricFog.Data.w) {
 			VolumetricFogEffect->SetCT();
 			VolumetricFogEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
 	}
-	if (Effects->DepthOfField && ShaderConst.DepthOfField.Enabled) {
+	if (DepthOfFieldEffect->Enabled && ShaderConst.DepthOfField.Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		DepthOfFieldEffect->SetCT();
 		DepthOfFieldEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->BloodLens && ShaderConst.BloodLens.Percent > 0.0f) {
+	if (BloodLensEffect->Enabled && ShaderConst.BloodLens.Percent > 0.0f) {
 		BloodLensEffect->SetCT();
 		BloodLensEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->WaterLens && ShaderConst.WaterLens.Percent > 0.0f) {
+	if (WaterLensEffect->Enabled && ShaderConst.WaterLens.Percent > 0.0f) {
 		WaterLensEffect->SetCT();
 		WaterLensEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->MotionBlur && (ShaderConst.MotionBlur.Data.x || ShaderConst.MotionBlur.Data.y)) {
+	if (MotionBlurEffect->Enabled && (ShaderConst.MotionBlur.Data.x || ShaderConst.MotionBlur.Data.y)) {
 		MotionBlurEffect->SetCT();
 		MotionBlurEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->LowHF && ShaderConst.LowHF.Data.x) {
+	if (LowHFEffect->Enabled && ShaderConst.LowHF.Data.x) {
 		LowHFEffect->SetCT();
 		LowHFEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->Sharpening) {
+	if (SharpeningEffect->Enabled) {
 		SharpeningEffect->SetCT();
 		SharpeningEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
@@ -2026,7 +2023,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 			}
 		}
 	}
-	if (Effects->Cinema && (ShaderConst.Cinema.Data.x != 0.0f || ShaderConst.Cinema.Data.y != 0.0f)) {
+	if (CinemaEffect->Enabled && (ShaderConst.Cinema.Data.x != 0.0f || ShaderConst.Cinema.Data.y != 0.0f)) {
 		CinemaEffect->SetCT();
 		CinemaEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
