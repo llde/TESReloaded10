@@ -2,15 +2,23 @@
 
 float4x4 TESR_WorldTransform;
 float4x4 TESR_WorldViewProjectionTransform;
-float4x4 TESR_ViewTransform;
+float4x4 TESR_ViewProjectionTransform;
+float4x4 TESR_InvViewProjectionTransform;
 float4x4 TESR_ShadowCameraToLightTransformNear;
 float4x4 TESR_ShadowCameraToLightTransformMiddle;
 float4x4 TESR_ShadowCameraToLightTransformFar;
 float4x4 TESR_ShadowCameraToLightTransformLod;
+float4 TESR_LightPosition0;
+float4 TESR_LightPosition1;
+float4 TESR_LightPosition2;
+float4 TESR_LightPosition3;
+float4 TESR_LightPosition4;
+float4 TESR_LightPosition5;
+float4 TESR_LightPosition6;
+float4 TESR_LightPosition7;
 float4 TESR_ReciprocalResolution;
 float4 TESR_ViewSpaceLightDir;
 float4 TESR_ScreenSpaceLightDir;
-float4 TESR_CameraPosition;
 float4 TESR_WaterSettings;
 float4 TESR_ShadowData; // x: quality, y: darkness, z: nearmap resolution, w: farmap resolution
 float4 TESR_ShadowScreenSpaceData; // x: Enabled, y: blurRadius, z: renderDistance
@@ -62,16 +70,6 @@ VSOUT FrameVS(VSIN IN)
 	OUT.UVCoord = IN.UVCoord;
 	return OUT;
 }
-
-
-float3 toWorld(float2 tex)
-{
-	float3 v = float3(TESR_ViewTransform[0][2], TESR_ViewTransform[1][2], TESR_ViewTransform[2][2]);
-	v += (1 / TESR_ProjectionTransform[0][0] * (2 * tex.x - 1)).xxx * float3(TESR_ViewTransform[0][0], TESR_ViewTransform[1][0], TESR_ViewTransform[2][0]);
-	v += (-1 / TESR_ProjectionTransform[1][1] * (2 * tex.y - 1)).xxx * float3(TESR_ViewTransform[0][1], TESR_ViewTransform[1][1], TESR_ViewTransform[2][1]);
-	return v;
-}
-
 
 float linstep(float low, float high, float t)
 {
@@ -227,8 +225,7 @@ float4 ScreenSpaceShadow(VSOUT IN) : COLOR0
 	float3 pos = reconstructPosition(uv) ; 
 
 	float bias = 0.0;
-	
-	[branch]
+
 	if (pos.z > SSS_MAXDEPTH) return float4 (1.0f, 1.0, 1.0, 1.0);
 	
 	float occlusion = 0.0;
@@ -258,6 +255,13 @@ float4 ScreenSpaceShadow(VSOUT IN) : COLOR0
 	return lerp(1.0f - occlusion, 1.0, pos.z/SSS_MAXDEPTH);
 }
 
+float attenuation(float4 world_pos, float4 lightPosition){
+	float coeff = 50000;
+	float strength = 1 / distance(lightPosition.xyz, world_pos.xyz);
+
+	return strength * strength * coeff;
+}
+
 float4 Shadow(VSOUT IN) : COLOR0
 {
 	// returns a shadow value from darkness setting value (full shadow) to 1 (full light)
@@ -265,6 +269,7 @@ float4 Shadow(VSOUT IN) : COLOR0
 	float depth = readDepth(IN.UVCoord);
 	float3 camera_vector = toWorld(IN.UVCoord) * depth;
 	float4 world_pos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
+
 	float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 
 	Shadow = saturate(GetLightAmount(pos, depth));
@@ -272,6 +277,16 @@ float4 Shadow(VSOUT IN) : COLOR0
 
 	// fade shadows to light when sun is low
 	Shadow = lerp(Shadow, 1.0f, TESR_ShadowFade.x);
+
+	// fade shadow close to light sources
+	Shadow += attenuation(world_pos, TESR_LightPosition0);
+	Shadow += attenuation(world_pos, TESR_LightPosition1);
+	Shadow += attenuation(world_pos, TESR_LightPosition2);
+	Shadow += attenuation(world_pos, TESR_LightPosition3);
+	Shadow += attenuation(world_pos, TESR_LightPosition4);
+	Shadow += attenuation(world_pos, TESR_LightPosition5);
+	Shadow += attenuation(world_pos, TESR_LightPosition6);
+	Shadow += attenuation(world_pos, TESR_LightPosition7);
 
 	// calculate fog impact
 	float fog = fogCoeff(depth);
