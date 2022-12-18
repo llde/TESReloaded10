@@ -589,9 +589,9 @@ assert(sizeof(NiLight) == 0xF0);
 
 class NiPointLight : public NiLight {
 public:
-	float			attenuation1;		// F0
-	float			attenuation2;		// F4
-	float			attenuation3;		// F8
+	float			Atten0;		// F0
+	float			Atten1;		// F4
+	float			Atten2;		// F8
 };
 assert(sizeof(NiPointLight) == 0xFC);
 
