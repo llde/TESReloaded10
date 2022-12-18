@@ -368,6 +368,6 @@ public:
 	NiD3DPixelShader*		WaterPixelShaders[51];
     TESObjectCELL*          PreviousCell;
     bool                    IsMenuSwitch;
-	
+	D3DXVECTOR4				LightPosition[8];
 };
 

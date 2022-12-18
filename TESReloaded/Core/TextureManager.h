@@ -1,6 +1,7 @@
 #pragma once
 #define SamplerStatesMax 12
 #define ShadowCubeMapsMax 4
+#define TrackedLightsMax 8
 
 class TextureRecord {
 public:

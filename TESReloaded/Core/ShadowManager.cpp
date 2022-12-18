@@ -688,8 +688,57 @@ void ShadowManager::RenderShadowMaps() {
 	RenderState->SetRenderState(D3DRS_STENCILENABLE , 0 ,RenderStateArgs);
 	RenderState->SetRenderState(D3DRS_STENCILREF , 0 ,RenderStateArgs);
  	RenderState->SetRenderState(D3DRS_STENCILFUNC , 8 ,RenderStateArgs);
-    
+
+	TheRenderManager->UpdateSceneCameraData();
 	TheRenderManager->SetupSceneCamera();
+	
+	D3DXVECTOR4 PlayerPosition;
+	PlayerPosition.x = Player->pos.x;
+	PlayerPosition.y = Player->pos.y;
+	PlayerPosition.z = Player->pos.z;
+
+	// grab a list of all nearby lights and sort them per distance to player
+	std::map<int, NiPointLight*> SceneLights;
+	NiTList<ShadowSceneLight>::Entry* Entry = SceneNode->lights.start;
+	//int i = 0;
+	while (Entry) {
+		NiPointLight* Light = Entry->data->sourceLight;
+
+		D3DXVECTOR4 LightPosition;
+		LightPosition.x = Light->m_worldTransform.pos.x;
+		LightPosition.y = Light->m_worldTransform.pos.y;
+		LightPosition.z = Light->m_worldTransform.pos.z;
+
+		D3DXVECTOR4 LightVector = LightPosition - PlayerPosition;
+		D3DXVec4Normalize(&LightVector, &LightVector);
+		int Distance = (int)Light->GetDistance(&Player->pos);
+		if ((D3DXVec4Dot(&LightVector, &TheRenderManager->CameraForward) < 0 && Distance > 500) || !(Light->Diff.r + Light->Diff.g + Light->Diff.b)) {
+			// skip lights behind the player and lights with no diffuse
+			Entry = Entry->next;
+			continue;
+		}
+		SceneLights[Distance] = Light;
+		Entry = Entry->next;
+	}
+
+	// save only the n first lights (based on #define TrackedLightsMax)
+	int LightIndex = -1;
+	std::map<int, NiPointLight*>::iterator v = SceneLights.begin();
+	while (v != SceneLights.end()) {
+		NiPointLight* Light = v->second;
+		LightIndex += 1;
+		if (LightIndex == TrackedLightsMax) break;
+
+		D3DXVECTOR4 LightPosition;
+		LightPosition.x = Light->m_worldTransform.pos.x;
+		LightPosition.y = Light->m_worldTransform.pos.y;
+		LightPosition.z = Light->m_worldTransform.pos.z;
+		LightPosition.w = Light->Atten2; //quadratic attenuation
+
+		TheShaderManager->LightPosition[LightIndex] = LightPosition;
+		v++;
+	}
+
 	if (Player->GetWorldSpace() && ShadowsExteriors->Enabled) {
 		ShadowData->w = ShadowsExteriors->ShadowMode;	// Mode (0:off, 1:VSM, 2:ESM, 3: ESSM);
 		NiNode* PlayerNode = Player->GetNode();
