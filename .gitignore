@@ -5,3 +5,4 @@ packages
 *.aps
 *.fx
 /build/*
+Configurator/target
