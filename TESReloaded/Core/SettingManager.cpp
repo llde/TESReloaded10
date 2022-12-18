@@ -134,7 +134,8 @@ void SettingManager::Configuration::FillSections(StringList* Sections, const cha
 				Sections->push_back(SectionName);
 			InnerSectionPosition = GoToSection(SectionName, InnerSectionPosition.Start);
 			SectionPositionStart = InnerSectionPosition.End + 1;
-		}
+		}			Logger::Log("%0X", KeyPositionEnd);
+
 		std::sort(Sections->begin(), Sections->end());
 	}
 
@@ -453,7 +454,8 @@ void SettingManager::LoadSettings() {
 	SettingsMain.Effects.WetWorld = GetSettingI("Shaders.WetWorld.Status", "Enabled");
 	SettingsMain.Effects.Sharpening = GetSettingI("Shaders.Sharpening.Status", "Enabled");
 	SettingsMain.Effects.VolumetricFog = GetSettingI("Shaders.VolumetricFog.Status", "Enabled");
-	SettingsMain.Effects.Precipitations = GetSettingI("Shaders.Precipitations.Status", "Enabled");
+	SettingsMain.Effects.Rain = GetSettingI("Shaders.Precipitations.Status", "Enabled");
+	SettingsMain.Effects.Snow = GetSettingI("Shaders.Precipitations.Status", "Enabled"); //TODO change in the INI
 	SettingsMain.Effects.ShadowsExteriors = GetSettingI("Shaders.ShadowsExteriors.Status", "PostProcess");
 	SettingsMain.Effects.ShadowsInteriors = GetSettingI("Shaders.ShadowsInteriors.Status", "PostProcess");
 	SettingsMain.Effects.Specular = GetSettingI("Shaders.Specular.Status", "Enabled");
@@ -734,11 +736,11 @@ void SettingManager::LoadSettings() {
 	SettingsPOM.MaxSamples = GetSettingF("Shaders.POM.Main", "MaxSamples");
 
 
-	SettingsPrecipitations.Rain.DepthStep = GetSettingF("Shaders.Precipitations.Rain", "DepthStep");
-	SettingsPrecipitations.Rain.Speed = GetSettingF("Shaders.Precipitations.Rain", "Speed");
-	SettingsPrecipitations.Snow.DepthStep = GetSettingF("Shaders.Precipitations.Snow", "DepthStep");
-	SettingsPrecipitations.Snow.Flakes = GetSettingF("Shaders.Precipitations.Snow", "Flakes");
-	SettingsPrecipitations.Snow.Speed = GetSettingF("Shaders.Precipitations.Snow", "Speed");
+	SettingsPrecipitations.Rain.DepthStep = GetSettingF("Shaders.Rain.Main", "DepthStep");
+	SettingsPrecipitations.Rain.Speed = GetSettingF("Shaders.Rain.Main", "Speed");
+	SettingsPrecipitations.Snow.DepthStep = GetSettingF("Shaders.Snow.Main", "DepthStep");
+	SettingsPrecipitations.Snow.Flakes = GetSettingF("Shaders.Snow.Main", "Flakes");
+	SettingsPrecipitations.Snow.Speed = GetSettingF("Shaders.Snow.Main", "Speed");
 	SettingsPrecipitations.WetWorld.Amount = GetSettingF("Shaders.Precipitations.WetWorld", "Amount");
 	SettingsPrecipitations.WetWorld.Increase = GetSettingF("Shaders.Precipitations.WetWorld", "Increase");
 	SettingsPrecipitations.WetWorld.Decrease = GetSettingF("Shaders.Precipitations.WetWorld", "Decrease");
@@ -1328,8 +1330,10 @@ bool SettingManager::GetMenuShaderEnabled(const char* Name) {
 		Value = SettingsMain.Shaders.NightEye;
 	else if (!strcmp(Name, "POM"))
 		Value = SettingsMain.Shaders.POM;
-	else if (!strcmp(Name, "Precipitations"))
-		Value = SettingsMain.Effects.Precipitations;
+	else if (!strcmp(Name, "Rain"))
+		Value = SettingsMain.Effects.Rain;
+	else if (!strcmp(Name, "Snow"))
+		Value = SettingsMain.Effects.Snow;
 	else if (!strcmp(Name, "ShadowsExteriors"))
 		Value = SettingsMain.Effects.ShadowsExteriors;
 	else if (!strcmp(Name, "ShadowsInteriors"))

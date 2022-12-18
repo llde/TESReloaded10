@@ -137,7 +137,8 @@ struct SettingsMainStruct {
 		bool GodRays;
 		bool LowHF;
 		bool MotionBlur;
-		bool Precipitations;
+		bool Rain;
+		bool Snow;
 		bool Sharpening;
 		bool SnowAccumulation;
 		bool Underwater;

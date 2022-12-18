@@ -40,9 +40,9 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 	else if (!strcmp(Name, "TESR_OrthoData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Shadow.OrthoData;
 	else if (!strcmp(Name, "TESR_RainData"))
-		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Precipitations.RainData;
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Rain.RainData;
 	else if (!strcmp(Name, "TESR_SnowData"))
-		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Precipitations.SnowData;
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Snow.SnowData;
 	else if (!strcmp(Name, "TESR_WorldTransform"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheRenderManager->worldMatrix;
 	else if (!strcmp(Name, "TESR_ViewTransform"))
@@ -758,7 +758,8 @@ void ShaderManager::CreateEffects() {
 	CreateEffect(EffectRecord::EffectRecordType::VolumetricFog);
 	CreateEffect(EffectRecord::EffectRecordType::WaterLens);
 	CreateEffect(EffectRecord::EffectRecordType::WetWorld);
-	CreateEffect(EffectRecord::EffectRecordType::Precipitations);
+	CreateEffect(EffectRecord::EffectRecordType::Rain);
+	CreateEffect(EffectRecord::EffectRecordType::Snow);
 	CreateEffect(EffectRecord::EffectRecordType::ShadowsExteriors);
 	CreateEffect(EffectRecord::EffectRecordType::ShadowsInteriors);
 	CreateEffect(EffectRecord::EffectRecordType::Specular);
@@ -779,10 +780,8 @@ void ShaderManager::CreateEffects() {
 	if (Effects->VolumetricFog) VolumetricFogEffect->Enabled = true;
 	if (Effects->WaterLens) WaterLensEffect->Enabled = true;
 	if (Effects->WetWorld) WetWorldEffect->Enabled = true;
-	if (Effects->Precipitations) {
-		RainEffect->Enabled = true;
-		SnowEffect->Enabled = true;
-	}
+	if (Effects->Rain) RainEffect->Enabled = true;
+	if (Effects->Snow) SnowEffect->Enabled = true;
 	if (Effects->ShadowsExteriors) ShadowsExteriorsEffect->Enabled = true;
 	if (Effects->ShadowsInteriors) ShadowsInteriorsEffect->Enabled = true;
 	if (Effects->Specular) SpecularEffect->Enabled = true;
@@ -1215,20 +1214,20 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.WetWorld.Coeffs.w = TheSettingManager->SettingsPrecipitations.WetWorld.PuddleSpecularMultiplier;
 		}
 		
-		if (TheSettingManager->SettingsMain.Effects.Precipitations && currentWeather) {
+		if (currentWeather) {
 			if (currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy)
-				ShaderConst.Precipitations.RainData.x = weatherPercent;
+				ShaderConst.Rain.RainData.x = weatherPercent;
 			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy))
-				ShaderConst.Precipitations.RainData.x = 1.0f - weatherPercent;
-			ShaderConst.Precipitations.RainData.y = TheSettingManager->SettingsPrecipitations.Rain.DepthStep;
-			ShaderConst.Precipitations.RainData.z = TheSettingManager->SettingsPrecipitations.Rain.Speed;
+				ShaderConst.Rain.RainData.x = 1.0f - weatherPercent;
+			ShaderConst.Rain.RainData.y = TheSettingManager->SettingsPrecipitations.Rain.DepthStep;
+			ShaderConst.Rain.RainData.z = TheSettingManager->SettingsPrecipitations.Rain.Speed;
 			if (currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow)
-				ShaderConst.Precipitations.SnowData.x = weatherPercent;
+				ShaderConst.Snow.SnowData.x = weatherPercent;
 			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow))
-				ShaderConst.Precipitations.SnowData.x = 1.0f - weatherPercent;
-			ShaderConst.Precipitations.SnowData.y = TheSettingManager->SettingsPrecipitations.Snow.DepthStep;
-			ShaderConst.Precipitations.SnowData.z = TheSettingManager->SettingsPrecipitations.Snow.Speed;
-			ShaderConst.Precipitations.SnowData.w = TheSettingManager->SettingsPrecipitations.Snow.Flakes;
+				ShaderConst.Snow.SnowData.x = 1.0f - weatherPercent;
+			ShaderConst.Snow.SnowData.y = TheSettingManager->SettingsPrecipitations.Snow.DepthStep;
+			ShaderConst.Snow.SnowData.z = TheSettingManager->SettingsPrecipitations.Snow.Speed;
+			ShaderConst.Snow.SnowData.w = TheSettingManager->SettingsPrecipitations.Snow.Flakes;
 		}
 		
 		if (TheSettingManager->SettingsMain.Shaders.Grass) {
@@ -1770,14 +1769,14 @@ void ShaderManager::CreateEffect(EffectRecord::EffectRecordType EffectType) {
 			VolumetricFogEffect = EffectRecord::LoadEffect(Filename);
 			SettingsMain->Effects.VolumetricFog = (SettingsMain->Effects.VolumetricFog && VolumetricFogEffect->IsLoaded());
 			break;
-		case EffectRecord::EffectRecordType::Precipitations:  //TODO Split Rain and Snow
+		case EffectRecord::EffectRecordType::Rain:
 			strcat(Filename, "Rain.fx");
 			RainEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.Precipitations = ( SettingsMain->Effects.Precipitations && RainEffect->IsLoaded());
-			strcpy(Filename, EffectsPath);
+			SettingsMain->Effects.Rain = ( SettingsMain->Effects.Rain && RainEffect->IsLoaded());
+		case EffectRecord::EffectRecordType::Snow:
 			strcat(Filename, "Snow.fx");
 			SnowEffect = EffectRecord::LoadEffect(Filename);
-			SettingsMain->Effects.Precipitations = (SettingsMain->Effects.Precipitations && SnowEffect->IsLoaded());
+			SettingsMain->Effects.Snow = (SettingsMain->Effects.Snow && SnowEffect->IsLoaded());
 			break;
 		case EffectRecord::EffectRecordType::ShadowsExteriors:
 			strcat(Filename, "ShadowsExteriors.fx");
@@ -1878,8 +1877,10 @@ void ShaderManager::DisposeEffect(EffectRecord::EffectRecordType EffectType) {
 		case EffectRecord::EffectRecordType::VolumetricFog:
 			delete VolumetricFogEffect; VolumetricFogEffect = NULL;
 			break;
-		case EffectRecord::EffectRecordType::Precipitations:
+		case EffectRecord::EffectRecordType::Rain:
 			delete RainEffect; RainEffect = NULL;
+			break;
+		case EffectRecord::EffectRecordType::Snow:
 			delete SnowEffect; SnowEffect = NULL;
 			break;
 		case EffectRecord::EffectRecordType::ShadowsExteriors:
@@ -1968,11 +1969,11 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	else {
 		if (ShaderConst.WaterLens.Percent == -1.0f) ShaderConst.WaterLens.Percent = 1.0f;
 		if (currentWorldSpace) {
-			if (RainEffect->Enabled && ShaderConst.Precipitations.RainData.x > 0.0f) {
+			if (RainEffect->Enabled && ShaderConst.Rain.RainData.x > 0.0f) {
 				RainEffect->SetCT();
 				RainEffect->Render(Device, RenderTarget, RenderedSurface, false);
 			}
-			if (SnowEffect->Enabled && ShaderConst.Precipitations.SnowData.x > 0.0f) {
+			if (SnowEffect->Enabled && ShaderConst.Snow.SnowData.x > 0.0f) {
 				SnowEffect->SetCT();
 				SnowEffect->Render(Device, RenderTarget, RenderedSurface, false);
 			}
@@ -2113,10 +2114,13 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		DisposeShader(Name);
 		if (Shaders->POM) CreateShader(Name);
 	}
-	else if (!strcmp(Name, "Precipitations")) {
+	else if (!strcmp(Name, "Rain")) {
 		RainEffect->SwitchEffect();
+		Effects->Rain = RainEffect->Enabled;
+	}
+	else if (!strcmp(Name, "Snow")) {
 		SnowEffect->SwitchEffect();
-		Effects->Precipitations = RainEffect->Enabled && SnowEffect->Enabled; 
+		Effects->Snow = SnowEffect->Enabled; 
 	}
 	else if (!strcmp(Name, "Skin")) {
 		Shaders->Skin = !Shaders->Skin;

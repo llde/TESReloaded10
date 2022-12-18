@@ -52,8 +52,10 @@ struct ShaderConstants {
 		D3DXVECTOR4		Data;
 		D3DXVECTOR4		OrthoData;
 	};
-	struct PrecipitationsStruct {
+	struct RainStruct{
 		D3DXVECTOR4		RainData;
+	};
+	struct SnowStruct{
 		D3DXVECTOR4		SnowData;
 	};
 	struct WaterLensStruct {
@@ -159,7 +161,8 @@ struct ShaderConstants {
 	TerrainStruct			Terrain;
 	SkinStruct				Skin;
 	ShadowStruct			Shadow;
-	PrecipitationsStruct	Precipitations;
+	RainStruct				Rain;
+	SnowStruct				Snow;
 	WaterLensStruct			WaterLens;
 	GodRaysStruct			GodRays;
 	DepthOfFieldStruct		DepthOfField;
@@ -284,7 +287,8 @@ public:
 		Sharpening,
 		Specular,
 		VolumetricFog,
-		Precipitations,
+		Rain,
+		Snow,
 		ShadowsExteriors,
 		ShadowsInteriors,
 		Extra,
