@@ -123,7 +123,7 @@ float invLerp(float from, float to, float value){
 }
 
 float fogCoeff(float depth){
-	return clamp(invLerp(TESR_FogDistance.x, TESR_FogDistance.y, depth), 0.0, 1.0) / TESR_FogDistance.z;
+	return saturate(invLerp(TESR_FogDistance.x, TESR_FogDistance.y, depth));
 }
 
 float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord){
@@ -256,10 +256,11 @@ float4 ScreenSpaceShadow(VSOUT IN) : COLOR0
 }
 
 float attenuation(float4 world_pos, float4 lightPosition){
-	float coeff = 50000;
+	float coeff = 6000; // conversion value between diffuse/dimmer strength and attenuation effect
 	float strength = 1 / distance(lightPosition.xyz, world_pos.xyz);
 
-	return strength * strength * coeff;
+	// inverse square law with conversion coeff and light strength influence
+	return strength * strength * coeff * lightPosition.w;
 }
 
 float4 Shadow(VSOUT IN) : COLOR0
@@ -327,6 +328,11 @@ technique {
 		PixelShader = compile ps_3_0 ScreenSpaceShadow();
 	}
 
+	pass {
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 Shadow();
+	}
+
 	pass
 	{ 
 		VertexShader = compile vs_3_0 FrameVS();
@@ -338,12 +344,6 @@ technique {
 		VertexShader = compile vs_3_0 FrameVS();
 		PixelShader = compile ps_3_0 BlurRChannel(float2(0.0f, 1.0f), TESR_ShadowScreenSpaceData.y, 5, SSS_MAXDEPTH);
 	}
-
-	pass {
-		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 Shadow();
-	}
-
 
 	pass {
 		VertexShader = compile vs_3_0 FrameVS();
