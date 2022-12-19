@@ -712,7 +712,7 @@ void ShadowManager::RenderShadowMaps() {
 		D3DXVECTOR4 LightVector = LightPosition - PlayerPosition;
 		D3DXVec4Normalize(&LightVector, &LightVector);
 		int Distance = (int)Light->GetDistance(&Player->pos);
-		if ((D3DXVec4Dot(&LightVector, &TheRenderManager->CameraForward) < 0 && Distance > 500) || !(Light->Diff.r + Light->Diff.g + Light->Diff.b)) {
+		if ((D3DXVec4Dot(&LightVector, &TheRenderManager->CameraForward) < 0 && Distance > 500) || Light->Spec.r + Light->Spec.g + Light->Spec.b < 8) {
 			// skip lights behind the player and lights with no diffuse
 			Entry = Entry->next;
 			continue;
@@ -722,6 +722,7 @@ void ShadowManager::RenderShadowMaps() {
 	}
 
 	// save only the n first lights (based on #define TrackedLightsMax)
+	memset(&TheShaderManager->LightPosition, 0, TrackedLightsMax * sizeof(D3DXVECTOR4)); // clear previous lights from array
 	int LightIndex = -1;
 	std::map<int, NiPointLight*>::iterator v = SceneLights.begin();
 	while (v != SceneLights.end()) {
@@ -733,13 +734,15 @@ void ShadowManager::RenderShadowMaps() {
 		LightPosition.x = Light->m_worldTransform.pos.x;
 		LightPosition.y = Light->m_worldTransform.pos.y;
 		LightPosition.z = Light->m_worldTransform.pos.z;
-		LightPosition.w = Light->Atten2; //quadratic attenuation
+		LightPosition.w = (Light->Diff.r + Light->Diff.g + Light->Diff.b) * Light->Dimmer; //light strength
 
 		TheShaderManager->LightPosition[LightIndex] = LightPosition;
 		v++;
 	}
 
-	if (Player->GetWorldSpace() && ShadowsExteriors->Enabled) {
+	bool isExterior = Player->GetWorldSpace() || Player->parentCell->flags0 & TESObjectCELL::kFlags0_BehaveLikeExterior;
+
+	if (isExterior && ShadowsExteriors->Enabled) {
 		ShadowData->w = ShadowsExteriors->ShadowMode;	// Mode (0:off, 1:VSM, 2:ESM, 3: ESSM);
 		NiNode* PlayerNode = Player->GetNode();
 		D3DXVECTOR3 At;

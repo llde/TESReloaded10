@@ -843,6 +843,8 @@ void ShaderManager::UpdateConstants() {
 	TheRenderManager->UpdateSceneCameraData();
 	TheRenderManager->SetupSceneCamera();
 
+	bool isExterior = Player->GetWorldSpace() || Player->parentCell->flags0 & TESObjectCELL::kFlags0_BehaveLikeExterior;
+
 	TimeGlobals* GameTimeGlobals = TimeGlobals::Get();
 	float GameHour = GameTimeGlobals->GameHour->data;
 	float DaysPassed = GameTimeGlobals->GameDaysPassed ? GameTimeGlobals->GameDaysPassed->data : 1.0f;
@@ -906,7 +908,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.ShadowFade.x = lerp(MoonVisibility, 1, ShaderConst.ShadowFade.x);
 		}
 
-		if (currentWorldSpace) {
+		if (isExterior) {
 			if (currentWeather) {
 				// calculating fog color/fog amount based on sun amount
 				ShaderConst.SunDir.w = 1.0f;
@@ -1938,6 +1940,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	IDirect3DSurface9* RenderedSurface = TheTextureManager->RenderedSurface;
 	TESWorldSpace* currentWorldSpace = Player->GetWorldSpace();
 	TESObjectCELL* currentCell = Player->parentCell;
+	bool isExterior = Player->GetWorldSpace() || Player->parentCell->flags0 & TESObjectCELL::kFlags0_BehaveLikeExterior;
 
 	TheShaderManager->UpdateConstants();
 
@@ -1960,12 +1963,11 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		AmbientOcclusionEffect->SetCT();
 		AmbientOcclusionEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (ShadowsExteriorsEffect->Enabled && currentWorldSpace) {
+	if (ShadowsExteriorsEffect->Enabled && isExterior) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		ShadowsExteriorsEffect->SetCT();
 		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	if (ShadowsInteriorsEffect->Enabled && !currentWorldSpace) {
+	}else if (ShadowsInteriorsEffect->Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		ShadowsInteriorsEffect->SetCT();
 		ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
@@ -1974,7 +1976,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		ColoringEffect->SetCT();
 		ColoringEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (SpecularEffect->Enabled && currentWorldSpace) {
+	if (SpecularEffect->Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		SpecularEffect->SetCT();
 		SpecularEffect->Render(Device, RenderTarget, RenderedSurface, false);
