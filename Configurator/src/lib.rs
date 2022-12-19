@@ -13,11 +13,17 @@ type UInt8 = u8;
 #[repr(C)]
 pub struct Config{
 	Main : MainStruct,
+	Develop : DevelopStruct,
+	FlyCam : FlyCamStruct
 }
 
 impl Config{
 	pub fn new() -> Config{
-		Config{Main : MainStruct::new()}
+		Config{
+			Main : MainStruct::new(),
+			Develop : DevelopStruct::new(),
+			FlyCam : FlyCamStruct::new()
+		}
 	}
 }
 
@@ -54,9 +60,41 @@ pub	struct DevelopStruct {
 	CompileEffects : UInt8,
 	DebugMode : bool,       // enables hotkeys to print textures
 	TraceShaders : UInt8,
-};
+}
 
+impl DevelopStruct{
+	pub fn new() -> DevelopStruct{
+		DevelopStruct{
+			CompileShaders : 2,
+			CompileEffects : 2,
+			DebugMode : true,
+			TraceShaders : 25
+		}
+	}
+	
+}
 
+#[derive(Serialize, Deserialize, Debug)]
+#[repr(C)]
+pub	struct FlyCamStruct {
+	Enabled : bool,
+	ScrollMultiplier : f32,
+	KeyAdd : UInt16,   
+	KeySubtract : UInt16,
+	StepValue : f32
+}
+
+impl FlyCamStruct{
+	pub fn new() -> FlyCamStruct{
+		FlyCamStruct{
+			Enabled : true,
+			ScrollMultiplier : 2.0,
+			KeyAdd : 78,
+			KeySubtract : 74,
+			StepValue : 1.0,
+		}
+	}
+}
 
 pub fn read_file(left: usize, right: usize) -> usize {
     0
