@@ -257,10 +257,10 @@ float4 ScreenSpaceShadow(VSOUT IN) : COLOR0
 
 float attenuation(float4 world_pos, float4 lightPosition){
 	float coeff = 6000; // conversion value between diffuse/dimmer strength and attenuation effect
-	float strength = 1 / distance(lightPosition.xyz, world_pos.xyz);
+	float strength = distance(lightPosition.xyz, world_pos.xyz);
 
 	// inverse square law with conversion coeff and light strength influence
-	return strength * strength * coeff * lightPosition.w;
+	return 1/(strength * strength) * coeff * lightPosition.w;
 }
 
 float4 Shadow(VSOUT IN) : COLOR0
@@ -273,7 +273,7 @@ float4 Shadow(VSOUT IN) : COLOR0
 
 	float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 
-	Shadow = saturate(GetLightAmount(pos, depth));
+	Shadow = saturate(GetLightAmount(pos, depth)) + TESR_ShadowFade.y; //turn off shadow maps if settings disabled
 	Shadow = min(tex2D(TESR_RenderedBuffer, IN.UVCoord).r, Shadow);
 
 	// fade shadows to light when sun is low

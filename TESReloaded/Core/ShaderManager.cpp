@@ -908,6 +908,9 @@ void ShaderManager::UpdateConstants() {
 		}
 
 		if (isExterior) {
+			// pass the enabled/disabled property of the shadow maps to the shadowfade constant
+			ShaderConst.ShadowFade.y = !TheSettingManager->SettingsShadows.Exteriors.Enabled;
+
 			if (currentWeather) {
 				// calculating fog color/fog amount based on sun amount
 				ShaderConst.SunDir.w = 1.0f;
