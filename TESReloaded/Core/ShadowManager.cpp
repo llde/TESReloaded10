@@ -493,7 +493,6 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 	GridCellArray* CellArray = Tes->gridCellArray;
 	UInt32 CellArraySize = CellArray->size * CellArray->size;
 	float FarPlane = ShadowsExteriors->ShadowMapFarPlane;
-	float MinRadius = ShadowsExteriors->Forms[ShadowMapType].MinRadius;
 	D3DXVECTOR3 Up = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
 	D3DXMATRIX View;
 	D3DXVECTOR3 Eye;
@@ -535,27 +534,38 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 		RenderState->SetVertexShader(ShadowMapVertex->ShaderHandle, false);
 		RenderState->SetPixelShader(ShadowMapPixel->ShaderHandle, false);
 		Device->BeginScene();
-		for (UInt32 i = 0; i < CellArraySize; i++) {
-			if (TESObjectCELL* Cell = CellArray->GetCell(i)) {
-				if (ShadowsExteriors->Forms[ShadowMapType].Terrain) {
-					NiNode* CellNode = Cell->GetNode();
-		//			if (ShadowsExteriors->Forms[ShadowMapType].Lod) RenderLod(Tes->landLOD, ShadowMapType); //Render terrain LOD
-					NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[2]; //0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker
-                    for (int i = 0; i < TerrainNode->m_children.numObjs; i++){
-                        RenderTerrain(TerrainNode->m_children.data[i], ShadowMapType);                            
-                    }
-				}
-				TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
-				while (Entry) {
-					if (TESObjectREFR* Ref = GetRef(Entry->item, &ShadowsExteriors->Forms[ShadowMapType], &ShadowsExteriors->ExcludedForms)) {
-						NiNode* RefNode = Ref->GetNode();
-						if (InFrustum(ShadowMapType, RefNode)) RenderExterior(RefNode, MinRadius);
-					}
-					Entry = Entry->next;
+
+		if (Player->GetWorldSpace()) {
+			for (UInt32 i = 0; i < CellArraySize; i++) {
+				if (TESObjectCELL* Cell = CellArray->GetCell(i)) {
+					RenderExteriorCell(Cell, ShadowsExteriors, ShadowMapType);
 				}
 			}
 		}
+		else {
+			RenderExteriorCell(Player->parentCell, ShadowsExteriors, ShadowMapType);
+		}
 		Device->EndScene();
+	}
+}
+
+
+void ShadowManager::RenderExteriorCell(TESObjectCELL* Cell, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, ShadowMapTypeEnum ShadowMapType) {
+	if (ShadowsExteriors->Forms[ShadowMapType].Terrain) {
+		NiNode* CellNode = Cell->GetNode();
+		//			if (ShadowsExteriors->Forms[ShadowMapType].Lod) RenderLod(Tes->landLOD, ShadowMapType); //Render terrain LOD
+		NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[2]; //0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker
+		for (int i = 0; i < TerrainNode->m_children.numObjs; i++) {
+			RenderTerrain(TerrainNode->m_children.data[i], ShadowMapType);
+		}
+	}
+	TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
+	while (Entry) {
+		if (TESObjectREFR* Ref = GetRef(Entry->item, &ShadowsExteriors->Forms[ShadowMapType], &ShadowsExteriors->ExcludedForms)) {
+			NiNode* RefNode = Ref->GetNode();
+			if (InFrustum(ShadowMapType, RefNode)) RenderExterior(RefNode, ShadowsExteriors->Forms[ShadowMapType].MinRadius);
+		}
+		Entry = Entry->next;
 	}
 }
 
