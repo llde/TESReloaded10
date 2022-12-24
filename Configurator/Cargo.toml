@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 serde = { version = "*", features = ["derive"]}
 toml = "*"
+libc = "*"
+memchr = "*"
