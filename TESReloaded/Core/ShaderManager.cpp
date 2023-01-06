@@ -1980,7 +1980,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		ColoringEffect->SetCT();
 		ColoringEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (SpecularEffect->Enabled) {
+	if (SpecularEffect->Enabled && isExterior) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		SpecularEffect->SetCT();
 		SpecularEffect->Render(Device, RenderTarget, RenderedSurface, false);
