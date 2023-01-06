@@ -134,7 +134,8 @@ void SettingManager::Configuration::FillSections(StringList* Sections, const cha
 				Sections->push_back(SectionName);
 			InnerSectionPosition = GoToSection(SectionName, InnerSectionPosition.Start);
 			SectionPositionStart = InnerSectionPosition.End + 1;
-		}			Logger::Log("%0X", KeyPositionEnd);
+		}			
+
 
 		std::sort(Sections->begin(), Sections->end());
 	}
