@@ -27,7 +27,7 @@ float4 TESR_FogColor;
 float4 TESR_ShadowFade;
 float4 TESR_SunDirection;
 float4 TESR_ShadowRadius; // radius of the 4 cascades
-float4 TESR_FogDistance; // x: fog start, y: fog end, z: weather percentage, w: sun glare
+float4 TESR_FogData; // x: fog start, y: fog end, z: sun glare, w: fog power
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = ANISOTROPIC; MIPFILTER = LINEAR; };
@@ -123,7 +123,7 @@ float invLerp(float from, float to, float value){
 }
 
 float fogCoeff(float depth){
-	return saturate(invLerp(TESR_FogDistance.x, TESR_FogDistance.y, depth));
+	return saturate(invLerp(TESR_FogData.x, TESR_FogData.y, depth));
 }
 
 float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float4 coord){
