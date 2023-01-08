@@ -146,7 +146,11 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Water.shorelineParams;
 	else if (!strcmp(Name, "TESR_FogColor"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.fogColor;
+	else if (!strcmp(Name, "TESR_HorizonColor"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.horizonColor;
 	else if (!strcmp(Name, "TESR_SunColor"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.sunColor;
+	else if (!strcmp(Name, "TESR_SunAmbient"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.sunColor;
 	else if (!strcmp(Name, "TESR_FogData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.fogData;
@@ -838,7 +842,7 @@ void ShaderManager::UpdateConstants() {
 	TESRegion* currentRegion = Player->GetRegion();
 	float weatherPercent = WorldSky->weatherPercent;
 	float lastGameTime = ShaderConst.GameTime.y;
-
+	
 	TheRenderManager->UpdateSceneCameraData();
 	TheRenderManager->SetupSceneCamera();
 
@@ -857,6 +861,8 @@ void ShaderManager::UpdateConstants() {
 	ShaderConst.GameTime.y = GameHour; //time in hours
 	ShaderConst.GameTime.z = (float)TheFrameRateManager->Time;
 
+	float updateDelay = 0.01;
+
 	if (currentCell) {
 		ShaderConst.SunTiming.x = WorldSky->GetSunriseColorBegin();
 		ShaderConst.SunTiming.y = SunriseEnd;
@@ -866,9 +872,20 @@ void ShaderManager::UpdateConstants() {
 		if (lastGameTime != ShaderConst.GameTime.y) {
 			// update Sun position
 			float deltaz = ShaderConst.SunDir.z;
-			ShaderConst.SunDir.x = Tes->directionalLight->direction.x * -1;
-			ShaderConst.SunDir.y = Tes->directionalLight->direction.y * -1;
-			ShaderConst.SunDir.z = Tes->directionalLight->direction.z * -1;
+
+			if (GameHour > SunsetEnd || GameHour < SunriseStart) {
+				// use lighting direction at night time
+				ShaderConst.SunDir.x = Tes->directionalLight->direction.x * -1;
+				ShaderConst.SunDir.y = Tes->directionalLight->direction.y * -1;
+				ShaderConst.SunDir.z = Tes->directionalLight->direction.z * -1;
+			}
+			else {
+				ShaderConst.SunDir.x = SunRoot->m_localTransform.pos.x;
+				ShaderConst.SunDir.y = SunRoot->m_localTransform.pos.y;
+				ShaderConst.SunDir.z = SunRoot->m_localTransform.pos.z;
+			}
+
+			D3DXVec4Normalize(&ShaderConst.SunDir, &ShaderConst.SunDir);
 		}
 
 		// expose the light vector in view space for screen space lighting
@@ -907,9 +924,13 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.ShadowFade.x = lerp(MoonVisibility, 1, ShaderConst.ShadowFade.x);
 		}
 
+		//Logger::Log("=======GameTime %f=========", ShaderConst.GameTime.y);
+
 		if (isExterior) {
 			// pass the enabled/disabled property of the shadow maps to the shadowfade constant
 			ShaderConst.ShadowFade.y = !TheSettingManager->SettingsShadows.Exteriors.Enabled;
+
+			//Logger::Log("exterior");
 
 			if (currentWeather) {
 				// calculating fog color/fog amount based on sun amount
@@ -967,180 +988,105 @@ void ShaderManager::UpdateConstants() {
 					}
 				}
 
-				if (ShaderConst.pWeather == NULL) ShaderConst.pWeather = currentWeather;
+//				if (ShaderConst.pWeather == NULL || weatherPercent == 1.0f) ShaderConst.pWeather = currentWeather;
 
-				for (int t = TESWeather::eTime_Sunrise; t <= TESWeather::eTime_Night ; t++) {
-					RGBA color = currentWeather->colors[TESWeather::eColor_Fog].colors[t];
-					switch (t)
-					{
-						case TESWeather::eTime_Sunrise:
-							ShaderConst.fogColor.x = color.r / 255.0f * ShaderConst.SunAmount.x;
-							ShaderConst.fogColor.y = color.g / 255.0f * ShaderConst.SunAmount.x;
-							ShaderConst.fogColor.z = color.b / 255.0f * ShaderConst.SunAmount.x;
-							break;
-						case TESWeather::eTime_Day:
-							ShaderConst.fogColor.x += color.r / 255.0f * ShaderConst.SunAmount.y;
-							ShaderConst.fogColor.y += color.g / 255.0f * ShaderConst.SunAmount.y;
-							ShaderConst.fogColor.z += color.b / 255.0f * ShaderConst.SunAmount.y;
-							break;
-						case TESWeather::eTime_Sunset:
-							ShaderConst.fogColor.x += color.r / 255.0f * ShaderConst.SunAmount.z;
-							ShaderConst.fogColor.y += color.g / 255.0f * ShaderConst.SunAmount.z;
-							ShaderConst.fogColor.z += color.b / 255.0f * ShaderConst.SunAmount.z;
-							break;
-						case TESWeather::eTime_Night:
-							ShaderConst.fogColor.x += color.r / 255.0f * ShaderConst.SunAmount.w;
-							ShaderConst.fogColor.y += color.g / 255.0f * ShaderConst.SunAmount.w;
-							ShaderConst.fogColor.z += color.b / 255.0f * ShaderConst.SunAmount.w;
-							break;
-					}
-				}
-				for (int t = TESWeather::eTime_Sunrise; t <= TESWeather::eTime_Night ; t++) {
-					RGBA color = ShaderConst.pWeather->colors[TESWeather::eColor_Fog].colors[t];
-					switch (t)
-					{
-						case TESWeather::eTime_Sunrise:
-							ShaderConst.oldfogColor.x = color.r / 255.0f * ShaderConst.SunAmount.x;
-							ShaderConst.oldfogColor.y = color.g / 255.0f * ShaderConst.SunAmount.x;
-							ShaderConst.oldfogColor.z = color.b / 255.0f * ShaderConst.SunAmount.x;
-							break;
-						case TESWeather::eTime_Day:
-							ShaderConst.oldfogColor.x += color.r / 255.0f * ShaderConst.SunAmount.y;
-							ShaderConst.oldfogColor.y += color.g / 255.0f * ShaderConst.SunAmount.y;
-							ShaderConst.oldfogColor.z += color.b / 255.0f * ShaderConst.SunAmount.y;
-							break;
-						case TESWeather::eTime_Sunset:
-							ShaderConst.oldfogColor.x += color.r / 255.0f * ShaderConst.SunAmount.z;
-							ShaderConst.oldfogColor.y += color.g / 255.0f * ShaderConst.SunAmount.z;
-							ShaderConst.oldfogColor.z += color.b / 255.0f * ShaderConst.SunAmount.z;
-							break;
-						case TESWeather::eTime_Night:
-							ShaderConst.oldfogColor.x += color.r / 255.0f * ShaderConst.SunAmount.w;
-							ShaderConst.oldfogColor.y += color.g / 255.0f * ShaderConst.SunAmount.w;
-							ShaderConst.oldfogColor.z += color.b / 255.0f * ShaderConst.SunAmount.w;
-							break;
-					}
-				}
+//				ShaderConst.oldsunGlare = ShaderConst.pWeather->GetSunGlare();
+				ShaderConst.sunGlare = currentWeather->GetSunGlare();//lerp(ShaderConst.oldsunGlare, currentWeather->GetSunGlare(), weatherPercent) / 255.0f;
+				ShaderConst.windSpeed = WorldSky->windSpeed;
 
-				for (int t = TESWeather::eTime_Sunrise; t <= TESWeather::eTime_Night ; t++) {
-					RGBA color = currentWeather->colors[TESWeather::eColor_Sun].colors[t];
-					switch (t)
-					{
-						case TESWeather::eTime_Sunrise:
-							ShaderConst.sunColor.x = color.r / 255.0f * ShaderConst.SunAmount.x;
-							ShaderConst.sunColor.y = color.g / 255.0f * ShaderConst.SunAmount.x;
-							ShaderConst.sunColor.z = color.b / 255.0f * ShaderConst.SunAmount.x;
-							break;
-						case TESWeather::eTime_Day:
-							ShaderConst.sunColor.x += color.r / 255.0f * ShaderConst.SunAmount.y;
-							ShaderConst.sunColor.y += color.g / 255.0f * ShaderConst.SunAmount.y;
-							ShaderConst.sunColor.z += color.b / 255.0f * ShaderConst.SunAmount.y;
-							break;
-						case TESWeather::eTime_Sunset:
-							ShaderConst.sunColor.x += color.r / 255.0f * ShaderConst.SunAmount.z;
-							ShaderConst.sunColor.y += color.g / 255.0f * ShaderConst.SunAmount.z;
-							ShaderConst.sunColor.z += color.b / 255.0f * ShaderConst.SunAmount.z;
-							break;
-						case TESWeather::eTime_Night:
-							ShaderConst.sunColor.x += color.r / 255.0f * ShaderConst.SunAmount.w;
-							ShaderConst.sunColor.y += color.g / 255.0f * ShaderConst.SunAmount.w;
-							ShaderConst.sunColor.z += color.b / 255.0f * ShaderConst.SunAmount.w;
-							break;
-					}
-				}
-				for (int t = TESWeather::eTime_Sunrise; t <= TESWeather::eTime_Night ; t++) {
-					RGBA color = ShaderConst.pWeather->colors[TESWeather::eColor_Sun].colors[t];
-					switch (t)
-					{
-						case TESWeather::eTime_Sunrise:
-							ShaderConst.oldsunColor.x = color.r / 255.0f * ShaderConst.SunAmount.x;
-							ShaderConst.oldsunColor.y = color.g / 255.0f * ShaderConst.SunAmount.x;
-							ShaderConst.oldsunColor.z = color.b / 255.0f * ShaderConst.SunAmount.x;
-							break;
-						case TESWeather::eTime_Day:
-							ShaderConst.oldsunColor.x += color.r / 255.0f * ShaderConst.SunAmount.y;
-							ShaderConst.oldsunColor.y += color.g / 255.0f * ShaderConst.SunAmount.y;
-							ShaderConst.oldsunColor.z += color.b / 255.0f * ShaderConst.SunAmount.y;
-							break;
-						case TESWeather::eTime_Sunset:
-							ShaderConst.oldsunColor.x += color.r / 255.0f * ShaderConst.SunAmount.z;
-							ShaderConst.oldsunColor.y += color.g / 255.0f * ShaderConst.SunAmount.z;
-							ShaderConst.oldsunColor.z += color.b / 255.0f * ShaderConst.SunAmount.z;
-							break;
-						case TESWeather::eTime_Night:
-							ShaderConst.oldsunColor.x += color.r / 255.0f * ShaderConst.SunAmount.w;
-							ShaderConst.oldsunColor.y += color.g / 255.0f * ShaderConst.SunAmount.w;
-							ShaderConst.oldsunColor.z += color.b / 255.0f * ShaderConst.SunAmount.w;
-							break;
-					}
-				}
-
-				if (ShaderConst.SunAmount.w == 1.0f) {
-					ShaderConst.currentfogStart = currentWeather->GetFogNightNear();
-					ShaderConst.currentfogEnd = currentWeather->GetFogNightFar();
-					ShaderConst.oldfogStart = ShaderConst.pWeather->GetFogNightNear();
-					ShaderConst.oldfogEnd = ShaderConst.pWeather->GetFogNightFar();
-				}
-				else {
-					ShaderConst.currentfogStart = currentWeather->GetFogDayNear();
-					ShaderConst.currentfogEnd = currentWeather->GetFogDayFar();
-					ShaderConst.oldfogStart = ShaderConst.pWeather->GetFogDayNear();
-					ShaderConst.oldfogEnd = ShaderConst.pWeather->GetFogDayFar();
-				}
-
-				ShaderConst.fogDistance.x = ShaderConst.currentfogStart;
-				ShaderConst.fogDistance.y = ShaderConst.currentfogEnd;
-				ShaderConst.fogDistance.z = weatherPercent;
-				ShaderConst.fogDistance.w = currentWeather->GetSunGlare();
-				ShaderConst.oldsunGlare = ShaderConst.pWeather->GetSunGlare();
-				ShaderConst.oldwindSpeed = ShaderConst.pWeather->GetWindSpeed();
-				ShaderConst.currentsunGlare = (ShaderConst.oldsunGlare - ((ShaderConst.oldsunGlare - currentWeather->GetSunGlare()) * weatherPercent)) / 255.0f;
-				ShaderConst.currentwindSpeed = (ShaderConst.oldwindSpeed - ((ShaderConst.oldwindSpeed - currentWeather->GetWindSpeed()) * weatherPercent)) / 255.0f;
-
-				ShaderConst.fogColor.x = ShaderConst.oldfogColor.x - ((ShaderConst.oldfogColor.x - ShaderConst.fogColor.x) * weatherPercent);
-				ShaderConst.fogColor.y = ShaderConst.oldfogColor.y - ((ShaderConst.oldfogColor.y - ShaderConst.fogColor.y) * weatherPercent);
-				ShaderConst.fogColor.z = ShaderConst.oldfogColor.z - ((ShaderConst.oldfogColor.z - ShaderConst.fogColor.z) * weatherPercent);
+				ShaderConst.fogColor.x = WorldSky->fogColor.r;
+				ShaderConst.fogColor.y = WorldSky->fogColor.g;
+				ShaderConst.fogColor.z = WorldSky->fogColor.b;
 				ShaderConst.fogColor.w = 1.0f;
 
-				ShaderConst.sunColor.x = ShaderConst.oldsunColor.x - ((ShaderConst.oldsunColor.x - ShaderConst.sunColor.x) * weatherPercent);
-				ShaderConst.sunColor.y = ShaderConst.oldsunColor.y - ((ShaderConst.oldsunColor.y - ShaderConst.sunColor.y) * weatherPercent);
-				ShaderConst.sunColor.z = ShaderConst.oldsunColor.z - ((ShaderConst.oldsunColor.z - ShaderConst.sunColor.z) * weatherPercent);
-				ShaderConst.sunColor.w = ShaderConst.SunAmount.w;
+				ShaderConst.horizonColor.x = WorldSky->Horizon.r;
+				ShaderConst.horizonColor.y = WorldSky->Horizon.g;
+				ShaderConst.horizonColor.z = WorldSky->Horizon.b;
+				ShaderConst.horizonColor.w = 1.0f;
 
-				ShaderConst.fogData.x = ShaderConst.oldfogStart - ((ShaderConst.oldfogStart - ShaderConst.currentfogStart) * weatherPercent);
-				ShaderConst.fogData.y = ShaderConst.oldfogEnd - ((ShaderConst.oldfogEnd - ShaderConst.currentfogEnd) * weatherPercent);
-				ShaderConst.fogData.z = ShaderConst.currentsunGlare;
+				ShaderConst.sunColor.x = WorldSky->sunDirectional.r;
+				ShaderConst.sunColor.y = WorldSky->sunDirectional.g;
+				ShaderConst.sunColor.z = WorldSky->sunDirectional.b;
+				ShaderConst.sunColor.w = 1.0f;
 
-				if (weatherPercent == 1.0f) ShaderConst.pWeather = currentWeather;
+				ShaderConst.sunAmbient.x = WorldSky->sunAmbient.r;
+				ShaderConst.sunAmbient.y = WorldSky->sunAmbient.g;
+				ShaderConst.sunAmbient.z = WorldSky->sunDirectional.b;
+				ShaderConst.sunAmbient.w = 1.0f;
+
+				ShaderConst.fogData.x = WorldSky->fogNearPlane;
+				ShaderConst.fogData.y = WorldSky->fogFarPlane;
+				ShaderConst.fogData.z = ShaderConst.sunGlare;
+				ShaderConst.fogData.w = WorldSky->fogPower;
 			}
 		}
 		else {
-			ShaderConst.SunDir.w = 0.0f;
+			//Logger::Log("interior");
+			TESObjectCELL::LightingData* LightData = currentCell->lighting;
 			ShaderConst.SunAmount.x = 0.0f;
 			ShaderConst.SunAmount.y = 1.0f;
 			ShaderConst.SunAmount.z = 0.0f;
 			ShaderConst.SunAmount.w = 0.0f;
-			ShaderConst.currentsunGlare = 0.5f;
-			TESObjectCELL::LightingData* LightData = currentCell->lighting;
+
+			ShaderConst.sunGlare = 100.0f;
+
 			ShaderConst.fogColor.x = LightData->fog.r / 255.0f;
 			ShaderConst.fogColor.y = LightData->fog.g / 255.0f;
 			ShaderConst.fogColor.z = LightData->fog.b / 255.0f;
 			ShaderConst.fogColor.w = 1.0f;
 
-			ShaderConst.sunColor.x = LightData->ambient.r / 255.0f;
-			ShaderConst.sunColor.y = LightData->ambient.g / 255.0f;
-			ShaderConst.sunColor.z = LightData->ambient.b / 255.0f;
+			ShaderConst.horizonColor.x = ShaderConst.fogColor.x;
+			ShaderConst.horizonColor.y = ShaderConst.fogColor.y;
+			ShaderConst.horizonColor.z = ShaderConst.fogColor.z;
+			ShaderConst.horizonColor.w = ShaderConst.fogColor.w;
+
+			ShaderConst.SunDir.x = Tes->directionalLight->direction.x * -1;
+			ShaderConst.SunDir.y = Tes->directionalLight->direction.y * -1;
+			ShaderConst.SunDir.z = Tes->directionalLight->direction.z * -1;
+			ShaderConst.SunDir.w = 0.0f;
+
+			ShaderConst.sunColor.x = LightData->directional.r / 255.0f;
+			ShaderConst.sunColor.y = LightData->directional.g / 255.0f;
+			ShaderConst.sunColor.z = LightData->directional.b / 255.0f;
 			ShaderConst.sunColor.w = ShaderConst.SunAmount.w;
+
+			ShaderConst.sunAmbient.x = LightData->ambient.r / 255.0f;
+			ShaderConst.sunAmbient.y = LightData->ambient.g / 255.0f;
+			ShaderConst.sunAmbient.z = LightData->ambient.b / 255.0f;
+			ShaderConst.sunAmbient.w = 1.0f;
 
 			ShaderConst.fogData.x = LightData->fogNear;
 			ShaderConst.fogData.y = LightData->fogFar;
-			ShaderConst.fogData.z = ShaderConst.currentsunGlare;
+			ShaderConst.fogData.z = ShaderConst.sunGlare;
+			ShaderConst.fogData.w = LightData->fogPower;
 
-			ShaderConst.fogDistance.x = ShaderConst.currentfogStart;
-			ShaderConst.fogDistance.y = ShaderConst.currentfogEnd;
+			ShaderConst.fogDistance.x = ShaderConst.fogData.x;
+			ShaderConst.fogDistance.y = ShaderConst.fogData.y;
 			ShaderConst.fogDistance.z = 1.0f;
-			ShaderConst.fogDistance.w = ShaderConst.currentsunGlare;
+			ShaderConst.fogDistance.w = ShaderConst.sunGlare;
+
+			if (WorldSky->GetIsUnderWater()) {
+				TESWaterForm* currentWater = Tes->GetWaterForm();
+
+				ShaderConst.fogDistance.x = currentWater->properties.fogNearUW;
+				ShaderConst.fogDistance.y = currentWater->properties.fogFarUW;
+				ShaderConst.fogDistance.z = 1.0f;
+				ShaderConst.fogDistance.w = ShaderConst.sunGlare;
+			}
 		}
+
+		//if (weatherPercent == 1.0f) ShaderConst.pWeather = currentWeather;
+
+		//Logger::Log("Night? %f", ShaderConst.SunAmount.w);
+		//Logger::Log("weather percent %f", weatherPercent);
+		//Logger::Log("fog power %f", ShaderConst.fogData.w);
+		//Logger::Log("fog near %f", ShaderConst.fogData.x);
+		//Logger::Log("fog far %f", ShaderConst.fogData.y);
+		//Logger::Log("sun r %f", ShaderConst.sunColor.x);
+		//Logger::Log("sun g %f", ShaderConst.sunColor.y);
+		//Logger::Log("sun b %f", ShaderConst.sunColor.z);
+		//Logger::Log("sunglare %f", ShaderConst.fogData.z);
+		//Logger::Log("sunglare %f", WorldSky->sun->glareScale);
 
 		if (TheSettingManager->SettingsMain.Shaders.Water || TheSettingManager->SettingsMain.Effects.Underwater) {
 			RGBA* rgba = NULL;
@@ -1183,7 +1129,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Water.waterSettings.x = Tes->GetWaterHeight(Player);
 			ShaderConst.Water.waterSettings.y = sws->depthDarkness;
 
-			ShaderConst.Water.waterVolume.x = sws->causticsStrength * ShaderConst.currentsunGlare;
+			ShaderConst.Water.waterVolume.x = sws->causticsStrength * ShaderConst.sunGlare;
 			ShaderConst.Water.waterVolume.y = sws->shoreFactor;
 			ShaderConst.Water.waterVolume.z = sws->turbidity;
 			ShaderConst.Water.waterVolume.w = sws->causticsStrengthS;
@@ -1301,7 +1247,7 @@ void ShaderManager::UpdateConstants() {
 			*Pointers::Settings::GrassStartFadeDistance = TheSettingManager->SettingsGrass.MinDistance;
 			*Pointers::Settings::GrassEndDistance = TheSettingManager->SettingsGrass.MaxDistance;
 			if (TheSettingManager->SettingsGrass.WindEnabled) {
-				*Pointers::Settings::GrassWindMagnitudeMax = *Pointers::ShaderParams::GrassWindMagnitudeMax = TheSettingManager->SettingsGrass.WindCoefficient * ShaderConst.currentwindSpeed;
+				*Pointers::Settings::GrassWindMagnitudeMax = *Pointers::ShaderParams::GrassWindMagnitudeMax = TheSettingManager->SettingsGrass.WindCoefficient * ShaderConst.windSpeed;
 				*Pointers::Settings::GrassWindMagnitudeMin = *Pointers::ShaderParams::GrassWindMagnitudeMin = *Pointers::Settings::GrassWindMagnitudeMax * 0.5f;
 			}
 		}
@@ -1340,8 +1286,8 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.GodRays.Ray.x = TheSettingManager->SettingsGodRays.RayIntensity;
 			ShaderConst.GodRays.Ray.y = TheSettingManager->SettingsGodRays.RayLength;
 			if (TheSettingManager->SettingsGodRays.SunGlareEnabled) {
-				ShaderConst.GodRays.Ray.z = TheSettingManager->SettingsGodRays.RayDensity * ShaderConst.currentsunGlare;
-				ShaderConst.GodRays.Ray.w = TheSettingManager->SettingsGodRays.RayVisibility * ShaderConst.currentsunGlare;
+				ShaderConst.GodRays.Ray.z = TheSettingManager->SettingsGodRays.RayDensity * ShaderConst.sunGlare;
+				ShaderConst.GodRays.Ray.w = TheSettingManager->SettingsGodRays.RayVisibility * ShaderConst.sunGlare;
 			}
 			else {
 				ShaderConst.GodRays.Ray.z = TheSettingManager->SettingsGodRays.RayDensity;
@@ -1606,8 +1552,8 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.VolumetricFog.Data.x = TheSettingManager->SettingsVolumetricFog.Exponent;
 			ShaderConst.VolumetricFog.Data.y = TheSettingManager->SettingsVolumetricFog.ColorCoeff;
 			ShaderConst.VolumetricFog.Data.z = TheSettingManager->SettingsVolumetricFog.Amount;
-			ShaderConst.VolumetricFog.Data.w = 1.0f;
-			if (weatherPercent == 1.0f && ShaderConst.fogData.y > TheSettingManager->SettingsVolumetricFog.MaxDistance) ShaderConst.VolumetricFog.Data.w = 0.0f;
+			ShaderConst.VolumetricFog.Data.w = TheSettingManager->SettingsVolumetricFog.MaxDistance;
+			//if (weatherPercent == 1.0f && ShaderConst.fogData.y > TheSettingManager->SettingsVolumetricFog.MaxDistance) ShaderConst.VolumetricFog.Data.w = 0.0f;
 		}
 	}
 
@@ -2010,13 +1956,13 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 				SnowEffect->SetCT();
 				SnowEffect->Render(Device, RenderTarget, RenderedSurface, false);
 			}
+			if (GodRaysEffect->Enabled) {
+				Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+				GodRaysEffect->SetCT();
+				GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
+			}
 		}
-		if (GodRaysEffect->Enabled && currentWorldSpace) {
-			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-			GodRaysEffect->SetCT();
-			GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
-		}
-		if (VolumetricFogEffect->Enabled && currentWorldSpace && ShaderConst.VolumetricFog.Data.w) {
+		if (VolumetricFogEffect->Enabled && ShaderConst.VolumetricFog.Data.w) {
 			VolumetricFogEffect->SetCT();
 			VolumetricFogEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}

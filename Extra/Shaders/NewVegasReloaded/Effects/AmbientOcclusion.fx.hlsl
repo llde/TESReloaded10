@@ -5,7 +5,7 @@
 float4 TESR_AmbientOcclusionAOData;
 float4 TESR_AmbientOcclusionData;
 float4 TESR_ReciprocalResolution;
-float4 TESR_FogDistance; // x: fog start, y: fog end, z: weather percentage, w: sun glare
+float4 TESR_FogData; // x: fog start, y: fog end, z: sun glare, w: fog power
 float4 TESR_FogColor;
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
@@ -78,7 +78,7 @@ float4 Desaturate(float4 input)
 }
 
 float fogCoeff(float depth){
-	return clamp(invLerp(TESR_FogDistance.x, TESR_FogDistance.y, depth), 0.0, 1.0) / TESR_FogDistance.z;
+	return saturate(invLerp(TESR_FogData.x, TESR_FogData.y, depth));
 }
 
 float4 SSAO(VSOUT IN) : COLOR0
@@ -87,7 +87,7 @@ float4 SSAO(VSOUT IN) : COLOR0
 
 	// generate the sampling kernel with random points in a hemisphere
 	int kernelSize = 20;
-	float3 kernel[20]; // max supported kernel size is 32 samples
+	float3 kernel[20]; // max supported kernel size is 20 samples
 	float uRadius = abs(AOrange);
 	float bias = saturate(AOangleBias);
 
