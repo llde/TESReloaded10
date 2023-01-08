@@ -1854,6 +1854,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	IDirect3DSurface9* RenderedSurface = TheTextureManager->RenderedSurface;
 	TESWorldSpace* currentWorldSpace = Player->GetWorldSpace();
 	TESObjectCELL* currentCell = Player->parentCell;
+	Sky* WorldSky = Tes->sky;
 	bool isExterior = Player->GetWorldSpace() || Player->parentCell->flags0 & TESObjectCELL::kFlags0_BehaveLikeExterior;
 
 	TheShaderManager->UpdateConstants();
@@ -1926,7 +1927,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 				GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
 			}
 		}
-		if (VolumetricFogEffect->Enabled && ShaderConst.VolumetricFog.Data.w) {
+		if (VolumetricFogEffect->Enabled && !Tes->sky->GetIsUnderWater()) {
 			VolumetricFogEffect->SetCT();
 			VolumetricFogEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
