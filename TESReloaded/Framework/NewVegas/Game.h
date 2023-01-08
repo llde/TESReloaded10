@@ -1309,7 +1309,7 @@ public:
 	void*					imageSpaceMods[6];			// 01C TESImageSpaceModifier*
 	TESTexture				textureLayers[4];			// 034
 	UInt8					cloudSpeed[4];				// 064
-	UInt32					unk068[24];					// 068
+	UInt32					cloudColor[4][6];			// 068
 	TESModel				model;						// 0C8
 	UInt8					windSpeed;					// 0E0
 	UInt8					cloudSpeedLower;			// 0E1
@@ -1323,7 +1323,7 @@ public:
 	UInt8					lightningEndFadeOut;		// 0E9
 	UInt8					lightningFrequency;			// 0EA
 	UInt8					weatherType;				// 0EB
-	UInt32					lightningColor;				// 0EC
+	DWORD					lightningColor;				// 0EC color in hex
 	FogInfo					fogDay;						// 0F0
 	FogInfo					fogNight;					// 0FC
 	ColorData				colors[10];					// 108
@@ -2174,7 +2174,12 @@ public:
 		RGBA		fog;
 		float		fogNear;
 		float		fogFar;
-		// it continues....
+		int			directionalRotXY;
+		int			directionalRotZ;
+		float		directionalFade;
+		float		fogClipDist;
+		float		fogPower;
+		UINT*		getValuesFrom;
 	};
 	
 	struct StructC4 {
@@ -3942,7 +3947,7 @@ public:
 	NiTriShape*			 SunGlareGeometry;	// 14
 	NiTArray<NiPick*>*	 SunPickList;		// 18
 	NiDirectionalLight*  SunDirLight;		// 1C Same as g_TES->directionalLight
-	float				 flt20;				// 20
+	float				 glareScale;		// 20
 	UInt8				 byte24;			// 24
 	UInt8				 byte25;			// 25
 	UInt8			     byte26;			// 26
@@ -4098,21 +4103,25 @@ public:
 	Moon*			masserMoon;			// 030
 	Moon*			secundaMoon;		// 034
 	Precipitation*	precipitation;		// 038
-	NiPoint3		vector03C;			// 03C
-	NiColor			waterReflection;	// 048
-	NiPoint3		vector054;			// 054
+	NiColor			skyUpper;			// 03C
+	NiColor			fogColor;			// 048
+	NiColor			CloudsLower;		// 054
 	NiColor			sunAmbient;			// 060
 	NiColor			sunDirectional;		// 06C
-	NiPoint3		vector078;			// 078
-	NiPoint3		vector084;			// 084
-	NiPoint3		vector090;			// 090
-	NiPoint3		vector09C;			// 09C	virtual void	Refresh(NiNode* niNode, const char* moonStr);
-	NiPoint3		vector0A8;			// 0A8
-	NiPoint3		vector0B4;			// 0B4
+	NiColor			SunColor;			// 078
+	NiColor			Stars;				// 084
+	NiColor			SkyLower;			// 090
+	NiColor			Horizon;			// 09C	virtual void	Refresh(NiNode* niNode, const char* moonStr);
+	NiColor			CloudsUpper;		// 0A8
+	NiColor			Lighting;			// 0B4
 	NiColor			sunFog;				// 0C0
 	float			windSpeed;			// 0CC
 	float			windDirection;		// 0D0
-	UInt32			unk0D4[5];			// 0D4
+	float			fogNearPlane;		// 0D4
+	float			fogFarPlane;		// 0D8
+	UInt32			unk0DC;				// 0DC
+	UInt32			unk0E0;				// 0E0
+	UInt32			unk0E4;				// 0E4
 	float			fogPower;			// 0E8
 	float			gameHour;			// 0EC
 	float			lastUpdateHour;		// 0F0
