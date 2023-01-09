@@ -53,9 +53,14 @@ float ExponentialFog(float posHeight, float distance) {
 	return fogAmount;
 }
 
+float Luma(float3 input)
+{
+	return input.r * 0.3f + input.g * 0.59f +input.b * 0.11f;
+}
+
 float4 VolumetricFog(VSOUT IN) : COLOR0 {
 
-	float SunExponent = min(TESR_VolumetricFogData.x, 1); // 8
+	float SunExponent = max(TESR_VolumetricFogData.x, 1); // 8
 	float SunGlareCoeff = TESR_VolumetricFogData.y; // 100
 	float FogStrength = TESR_VolumetricFogData.z; // 1
 	float MaxFogHeight = TESR_VolumetricFogData.w; // 80000
@@ -66,18 +71,27 @@ float4 VolumetricFog(VSOUT IN) : COLOR0 {
 	float3 eyeVector = normalize(toWorld(IN.UVCoord));
 
 	// quadratic fog based on linear distance in fog range with fog power
-	float distance = invLerp(TESR_FogData.x, TESR_FogData.y, depth);
+	float distance = saturate(invLerp(TESR_FogData.x, TESR_FogData.y, depth));
 	float fogAmount = saturate(pow(distance, TESR_FogData.w) * FogStrength);
 	fogAmount = fogAmount * saturate(exp( - height/MaxFogHeight)); // fade with height
 
 	// calculate color
-	float4 fogColor  = lerp(TESR_FogColor, TESR_HorizonColor, distance); // fade color between fog to horizon based on depth
-	float sunAmount = pow(saturate(dot(eyeVector, TESR_SunDirection)), SunExponent) * TESR_FogData.z/SunGlareCoeff; //sun influence
-	fogColor  = TESR_HorizonColor + lerp(0, TESR_SunColor, sunAmount); // add sun color to the fog
+	float3 fogColor  = lerp(TESR_HorizonColor, TESR_FogColor, saturate(1/ (1 + distance))); // fade color between fog to horizon based on depth
+	float sunAmount = pow(saturate(dot(eyeVector, TESR_SunDirection.xyz)), SunExponent) * (TESR_FogData.z * SunGlareCoeff); //sun influence
+	fogColor = fogColor + TESR_SunColor.rgb * sunAmount; // add sun color to the fog
 
-	color = lerp( color.rgb , fogColor.rgb, fogAmount);
+	fogColor = lerp(color.rgb, fogColor.rgb, fogAmount); // calculate final color of scene through the fog
+	float lumaDiff = saturate(invLerp(saturate(Luma(fogColor)), 1.0f, Luma(color)));
+	color = lerp(fogColor, color, lumaDiff); // bring back some of the original color based on luma (brightest lights will come through)
 
-	return float4(color, 1.0f);
+	// if (IN.UVCoord.x > 0.8 && IN.UVCoord.x < 0.9){
+	// 	if (IN.UVCoord.y > 0.3 && IN.UVCoord.y < 0.4) return TESR_FogColor;
+	// 	if (IN.UVCoord.y > 0.4 && IN.UVCoord.y < 0.5) return TESR_HorizonColor;
+	// 	if (IN.UVCoord.y > 0.5 && IN.UVCoord.y < 0.6) return TESR_SunColor;
+	// 	if (IN.UVCoord.y > 0.6 && IN.UVCoord.y < 0.7) return TESR_SunAmbient;
+	// }
+
+	return float4(saturate(color), 1.0f);
 }
 
 technique
