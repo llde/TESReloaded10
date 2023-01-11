@@ -87,7 +87,6 @@ void __fastcall RenderPipboyHook(Main* This, UInt32 edx, NiGeometry* Geo, NiDX9R
 	WorldSceneGraph->UpdateParticleShaderFoV(Player->firstPersonFoV);
 //	Player->SetFoV(Player->firstPersonFoV);
 	(*RenderPipboy)(This, Geo, Renderer);
-
 }
 
 float (__thiscall* GetWaterHeightLOD)(TESWorldSpace*) = (float (__thiscall*)(TESWorldSpace*))Hooks::GetWaterHeightLOD;
@@ -95,7 +94,50 @@ float __fastcall GetWaterHeightLODHook(TESWorldSpace* This, UInt32 edx) {
 	
 	float r = This->waterHeight;
 
-	if (*(void**)This == (void*)0x0103195C) r = Tes->GetWaterHeight(Player);
+	DList<WaterGroup> watergroups = Tes->waterManager->waterGroups;
+	DNode<WaterGroup>* water = watergroups.first;
+	D3DXVECTOR4 playerPosition, waterPosition;
+	playerPosition.x = Player->pos.x;
+	playerPosition.y = Player->pos.y;
+	playerPosition.z = Player->pos.z;
+	playerPosition.w = 1.0;
+
+	float height = Tes->GetWaterHeight(Player); // default value uses the cell default waterheight
+
+	float distance = 1000000;
+	float inFront = -1;
+
+	// look at all water planes in nearby scene
+	for (int i = 0; i < watergroups.count; i++) {
+		DList<TESObjectREFR> waterplanes = water->data->waterPlanes;
+		DNode<TESObjectREFR>* plane = waterplanes.first;
+
+		for (int j = 0; j < waterplanes.count; j++) {
+			NiNode* node = plane->data->GetNode();
+			NiBound* bounds = node->GetWorldBound();
+
+			waterPosition.x = bounds->Center.x;
+			waterPosition.y = bounds->Center.y;
+			waterPosition.z = bounds->Center.z;
+			waterPosition.x = 1.0f;
+
+			float waterDistance = node->GetDistance(&Player->pos) - bounds->Radius;
+			D3DXVECTOR4 waterVector = waterPosition - playerPosition;
+			D3DXVec4Normalize(&waterVector, &waterVector);
+			float waterInFront = D3DXVec4Dot(&waterVector, &TheRenderManager->CameraForward);
+
+			// select water that is the closest and the most in front
+			if (waterDistance < 0|| (waterInFront > inFront && waterDistance < distance)) {
+				distance = waterDistance;
+				inFront = waterInFront;
+				height = bounds->Center.z;
+			}
+			plane = plane->next;
+		}
+		water = water->next;
+	}
+
+	if (*(void**)This == (void*)0x0103195C) r = height;
 	return r;
 
 }

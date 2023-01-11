@@ -4250,7 +4250,7 @@ struct WaterGroup
 
 class WaterManager {
 public:
-	UInt32				unk00;					// 000
+	UInt32 numWaterGroups;					// 000
 	UInt32				unk04;					// 004
 	UInt32				unk08;					// 008
 	UInt32				unk0C;					// 00C
@@ -4266,7 +4266,7 @@ public:
 	UInt8				unk34;					// 034
 	UInt8				pad34[3];
 	float				unk38;					// 038
-	DList<WaterGroup>	unk3C;					// 03C
+	DList<WaterGroup>	waterGroups;			// 03C
 	WaterGroup			*waterLOD; 				// 048
 	NiTMap<TESObjectREFR*, TESObjectREFR*>		unkReflectionExplosion;	// 04C Seems to be used only under a bReflectExplosions = 1 condition
 	NiTMap<TESObjectREFR*, TESObjectREFR*>		unk5C;	// 05C
