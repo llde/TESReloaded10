@@ -328,6 +328,7 @@ void ShadowManager::Render(NiGeometry* Geo) {
 				if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) {
 					if (NiTexture* Texture = *((BSShaderPPLightingProperty*)ShaderProperty)->textures[0]) {
 						TheShaderManager->ShaderConst.Shadow.Data.y = 1.0f; // Alpha Control
+						// gives shader access to the shadow constants and samplers
 						RenderState->SetTexture(0, Texture->rendererData->dTexture);
 						RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
 						RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
@@ -550,6 +551,7 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 }
 
 
+
 void ShadowManager::RenderExteriorCell(TESObjectCELL* Cell, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, ShadowMapTypeEnum ShadowMapType) {
 	if (ShadowsExteriors->Forms[ShadowMapType].Terrain) {
 		NiNode* CellNode = Cell->GetNode();
@@ -723,7 +725,6 @@ void ShadowManager::RenderShadowMaps() {
 		D3DXVec4Normalize(&LightVector, &LightVector);
 		int Distance = (int)Light->GetDistance(&Player->pos);
 		if ((D3DXVec4Dot(&LightVector, &TheRenderManager->CameraForward) < 0 && Distance > 500) || Light->Spec.r + Light->Spec.g + Light->Spec.b < 8) {
-			// skip lights behind the player and lights with no diffuse
 			Entry = Entry->next;
 			continue;
 		}
@@ -815,7 +816,7 @@ void ShadowManager::RenderShadowMaps() {
 				LightIndex += 1;
 				Lights[LightIndex] = Light;
 			}
-			if (LightIndex == ShadowsInteriors->LightPoints - 1 || LightIndex == 3) break;
+			if (LightIndex == ShadowsInteriors->LightPoints - 1 || LightIndex == ShadowCubeMapsMax - 1) break;
 			v++;
 		}
 
