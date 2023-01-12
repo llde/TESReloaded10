@@ -16,7 +16,7 @@ struct ShaderConstants {
 		D3DXMATRIX		ShadowViewProj;
 		D3DXMATRIX		ShadowCameraToLight[5];
 		D3DXVECTOR4		ShadowCubeMapLightPosition;
-		D3DXVECTOR4		ShadowLightPosition[4];
+		D3DXVECTOR4		ShadowLightPosition[ShadowCubeMapsMax];
 		D3DXVECTOR4		ShadowCubeMapBlend;
 		D3DXVECTOR4		ShadowMapRadius;
 	};
@@ -369,6 +369,7 @@ public:
 	NiD3DPixelShader*		WaterPixelShaders[51];
     TESObjectCELL*          PreviousCell;
     bool                    IsMenuSwitch;
-	D3DXVECTOR4				LightPosition[8];
+	D3DXVECTOR4				LightPosition[TrackedLightsMax];
+	D3DXVECTOR4				LightAttenuation[TrackedLightsMax];
 };
 

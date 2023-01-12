@@ -29,6 +29,15 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Name) {
 	IDirect3DVolumeTexture9* TexV = NULL;
 	IDirect3DCubeTexture9* TexC = NULL;
 
+	// assigning shadow cube maps
+	for (int i = 0; i < ShadowCubeMapsMax; i++) {
+		if (Type == ShadowCubeMapBuffer0 + i) {
+			Texture = TheTextureManager->ShadowCubeMapTexture[i];
+			return true;
+		}
+	}
+
+	// other buffers
 	switch (Type) {
 		case PlanarBuffer:
 			D3DXCreateTextureFromFileA(TheRenderManager->device, Name, &Tex);
@@ -68,18 +77,6 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Name) {
 			break;
 		case OrthoMapBuffer:
 			Texture = TheTextureManager->ShadowMapTexture[ShadowManager::ShadowMapTypeEnum::MapOrtho];
-			break;
-		case ShadowCubeMapBuffer0:
-			Texture = TheTextureManager->ShadowCubeMapTexture[0];
-			break;
-		case ShadowCubeMapBuffer1:
-			Texture = TheTextureManager->ShadowCubeMapTexture[1];
-			break;
-		case ShadowCubeMapBuffer2:
-			Texture = TheTextureManager->ShadowCubeMapTexture[2];
-			break;
-		case ShadowCubeMapBuffer3:
-			Texture = TheTextureManager->ShadowCubeMapTexture[3];
 			break;
         default:
             return false; //Texture is invalid or not assigned here.
@@ -162,6 +159,15 @@ TextureRecord* TextureManager::LoadTexture(ID3DXBuffer* ShaderSourceBuffer, D3DX
 	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer1") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer1 : Type;
 	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer2") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer2 : Type;
 	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer3") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer3 : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer4") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer4 : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer5") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer5 : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer6") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer6 : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer7") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer7 : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer8") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer8 : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer9") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer9 : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer10") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer10 : Type;
+	Type = !strcmp(ConstantName, "TESR_ShadowCubeMapBuffer11") ? TextureRecord::TextureRecordType::ShadowCubeMapBuffer11 : Type;
+
 	Type = !strcmp(ConstantName, WordWaterHeightMapBuffer) ? TextureRecord::TextureRecordType::WaterHeightMapBuffer : Type;
 	Type = !strcmp(ConstantName, WordWaterReflectionMapBuffer) ? TextureRecord::TextureRecordType::WaterReflectionMapBuffer : Type;
 

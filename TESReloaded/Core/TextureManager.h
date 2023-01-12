@@ -1,7 +1,7 @@
 #pragma once
 #define SamplerStatesMax 12
-#define ShadowCubeMapsMax 4
-#define TrackedLightsMax 8
+#define ShadowCubeMapsMax 12
+#define TrackedLightsMax 12
 
 class TextureRecord {
 public:
@@ -24,6 +24,14 @@ public:
 		ShadowCubeMapBuffer1,
 		ShadowCubeMapBuffer2,
 		ShadowCubeMapBuffer3,
+		ShadowCubeMapBuffer4,
+		ShadowCubeMapBuffer5,
+		ShadowCubeMapBuffer6,
+		ShadowCubeMapBuffer7,
+		ShadowCubeMapBuffer8,
+		ShadowCubeMapBuffer9,
+		ShadowCubeMapBuffer10,
+		ShadowCubeMapBuffer11,
 		WaterHeightMapBuffer, /*Textures assigned after init*/
         WaterReflectionMapBuffer,
 	};

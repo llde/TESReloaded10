@@ -9,6 +9,10 @@ float4 TESR_ShadowLightPosition0;
 float4 TESR_ShadowLightPosition1;
 float4 TESR_ShadowLightPosition2;
 float4 TESR_ShadowLightPosition3;
+float4 TESR_ShadowLightPosition4;
+float4 TESR_ShadowLightPosition5;
+float4 TESR_ShadowLightPosition6;
+float4 TESR_ShadowLightPosition7;
 float4 TESR_ShadowCubeMapBlend;
 float4 TESR_ReciprocalResolution;
 //sampler_state removed to avoid a artifact. TODO investigate
@@ -19,6 +23,10 @@ samplerCUBE TESR_ShadowCubeMapBuffer0 : register(s3);// = sampler_state { ADDRES
 samplerCUBE TESR_ShadowCubeMapBuffer1 : register(s4);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 samplerCUBE TESR_ShadowCubeMapBuffer2 : register(s5);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 samplerCUBE TESR_ShadowCubeMapBuffer3 : register(s6);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer4 : register(s7);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer5 : register(s8);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer6 : register(s9);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer7 : register(s10);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 static const float nearZ = TESR_ProjectionTransform._43 / TESR_ProjectionTransform._33;
 static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
@@ -134,6 +142,10 @@ float4 Shadow( VSOUT IN ) : COLOR0 {
 	if (TESR_ShadowLightPosition1.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer1, pos, TESR_ShadowLightPosition1, TESR_ShadowCubeMapBlend.y);
 	if (TESR_ShadowLightPosition2.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer2, pos, TESR_ShadowLightPosition2, TESR_ShadowCubeMapBlend.z);
 	if (TESR_ShadowLightPosition3.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer3, pos, TESR_ShadowLightPosition3, TESR_ShadowCubeMapBlend.w);
+	if (TESR_ShadowLightPosition4.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer4, pos, TESR_ShadowLightPosition4, TESR_ShadowCubeMapBlend.w);
+	if (TESR_ShadowLightPosition5.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer5, pos, TESR_ShadowLightPosition5, TESR_ShadowCubeMapBlend.w);
+	if (TESR_ShadowLightPosition6.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer6, pos, TESR_ShadowLightPosition6, TESR_ShadowCubeMapBlend.w);
+	if (TESR_ShadowLightPosition7.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer7, pos, TESR_ShadowLightPosition7, TESR_ShadowCubeMapBlend.w);
     return float4(Shadow, Shadow, Shadow, 1.0f);
 	
 }

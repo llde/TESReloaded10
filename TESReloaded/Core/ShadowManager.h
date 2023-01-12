@@ -57,7 +57,7 @@ public:
     float                   ShadowMapInverseResolution[5];
     
 	D3DVIEWPORT9			ShadowCubeMapViewPort;
-	NiPointLight*			ShadowCubeMapLights[4];
+	NiPointLight*			ShadowCubeMapLights[ShadowCubeMapsMax];
 	ShaderRecordVertex*		CurrentVertex;
 	ShaderRecordPixel*		CurrentPixel;
 	bool					AlphaEnabled;

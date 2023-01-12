@@ -90,6 +90,22 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[2];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition3"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[3];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition4"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[4];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition5"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[5];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition6"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[6];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition7"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[7];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition8"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[8];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition9"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[9];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition10"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[10];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition11"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[11];
 	else if (!strcmp(Name, "TESR_LightPosition0"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->LightPosition[0];
 	else if (!strcmp(Name, "TESR_LightPosition1"))
@@ -106,6 +122,22 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->LightPosition[6];
 	else if (!strcmp(Name, "TESR_LightPosition7"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->LightPosition[7];
+	else if (!strcmp(Name, "TESR_LightAttenuation0"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->LightAttenuation[0];
+	else if (!strcmp(Name, "TESR_LightAttenuation1"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->LightAttenuation[1];
+	else if (!strcmp(Name, "TESR_LightAttenuation2"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->LightAttenuation[2];
+	else if (!strcmp(Name, "TESR_LightAttenuation3"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->LightAttenuation[3];
+	else if (!strcmp(Name, "TESR_LightAttenuation4"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->LightAttenuation[4];
+	else if (!strcmp(Name, "TESR_LightAttenuation5"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->LightAttenuation[5];
+	else if (!strcmp(Name, "TESR_LightAttenuation6"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->LightAttenuation[6];
+	else if (!strcmp(Name, "TESR_LightAttenuation7"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->LightAttenuation[7];
 	else if (!strcmp(Name, "TESR_ShadowCubeMapBlend"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
 	else if (!strcmp(Name, "TESR_OcclusionWorldViewProjTransform"))
