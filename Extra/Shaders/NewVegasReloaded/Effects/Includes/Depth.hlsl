@@ -3,9 +3,7 @@
 
 float4x4 TESR_ProjectionTransform;
 float4x4 TESR_InvProjectionTransform;
-float4x4 TESR_InvViewTransform;
 float4x4 TESR_ViewTransform;
-float4x4 TESR_InvWorldViewProjectionTransform;
 float4 TESR_DepthConstants;
 float4 TESR_CameraData;
 float4 TESR_CameraPosition;
