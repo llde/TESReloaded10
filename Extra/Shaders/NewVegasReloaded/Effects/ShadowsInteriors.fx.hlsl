@@ -149,6 +149,10 @@ float4 Shadow( VSOUT IN ) : COLOR0 {
 	
 }
 
+float Luma(float3 input)
+{
+	return input.r * 0.3f + input.g * 0.59f +input.b * 0.11f;
+}
 
 float4 CombineShadow( VSOUT IN ) : COLOR0 {
 
@@ -156,14 +160,10 @@ float4 CombineShadow( VSOUT IN ) : COLOR0 {
 	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
 
 	//multiply by 2 to only use the lower half of values to impact darkness
-	return color *= saturate(tex2D(TESR_RenderedBuffer, IN.UVCoord).r * 2);
+	float4 shadow = color * saturate(tex2D(TESR_RenderedBuffer, IN.UVCoord).r * 2);
 
-	color.a = 1.0f;
-	float shadow = 1.0f - tex2D(TESR_RenderedBuffer, IN.UVCoord).r;
-	float4 shadowColor = float4(color.rgb, shadow);
-
-	return BlendMode_Overlay(color, Desaturate(shadowColor));
-	
+	float lumaDiff = saturate(invLerp(Luma(shadow), 1.0f, Luma(color)));
+	return lerp(shadow, color, lumaDiff); // bring back some of the original color based on luma (brightest lights will come through)
 }
 
 technique {
