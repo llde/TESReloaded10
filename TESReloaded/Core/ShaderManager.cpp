@@ -883,9 +883,9 @@ void ShaderManager::UpdateConstants() {
 				ShaderConst.SunDir.x = SunRoot->m_localTransform.pos.x;
 				ShaderConst.SunDir.y = SunRoot->m_localTransform.pos.y;
 				ShaderConst.SunDir.z = SunRoot->m_localTransform.pos.z;
+				D3DXVec4Normalize(&ShaderConst.SunDir, &ShaderConst.SunDir);
 			}
 
-			D3DXVec4Normalize(&ShaderConst.SunDir, &ShaderConst.SunDir);
 		}
 
 		// expose the light vector in view space for screen space lighting
@@ -895,185 +895,149 @@ void ShaderManager::UpdateConstants() {
 		D3DXVec4Transform(&ShaderConst.ViewSpaceLightDir, &ShaderConst.SunDir, &TheRenderManager->ViewMatrix);
 		D3DXVec4Normalize(&ShaderConst.ViewSpaceLightDir, &ShaderConst.ViewSpaceLightDir);
 
-		// fade shadows at sunrise/sunset
-		float shadowFadeTime = 1.0f;
 		ShaderConst.ShadowFade.x = 0;
-		if ((GameHour >= SunsetEnd - shadowFadeTime) && GameHour < SunsetEnd) { //sunset
-			ShaderConst.ShadowFade.x = smoothStep(SunsetEnd - shadowFadeTime, SunsetEnd, GameHour);
-		}
-		else if (GameHour >= SunsetEnd && GameHour < SunsetEnd + shadowFadeTime) { //moonrise
-			ShaderConst.ShadowFade.x = 1.0f - smoothStep(SunsetEnd, SunsetEnd + shadowFadeTime, GameHour);
-		}
-		else if(GameHour >= SunriseStart - shadowFadeTime && GameHour < SunriseStart){ //moonset
-			ShaderConst.ShadowFade.x = smoothStep(SunriseStart - shadowFadeTime, SunriseStart, GameHour);
-		}
-		else if(GameHour >= SunriseStart && GameHour < SunriseStart + shadowFadeTime){ //sunrise
-			ShaderConst.ShadowFade.x = 1.0f - smoothStep(SunriseStart, SunriseStart + shadowFadeTime, GameHour);
-		}
-
-		// at night time, fade based on moonphase
-		if (GameHour > SunsetEnd || GameHour < SunriseStart) {
-			// moonphase goes from 0 to 8
-			float MoonPhase = (fmod(DaysPassed, 8 * currentClimate->phaseLength & 0x3F)) / (currentClimate->phaseLength & 0x3F);
-
-			float PI = 3.1416; // use cos curve to fade moon light shadows strength
-			MoonPhase = lerp(-PI, PI, MoonPhase / 8) - PI/4; // map moonphase to 1/2PI/2PI + 1/2
-
-			// map MoonVisibility to MinNightDarkness/1 range
-			float MoonVisibility = lerp(0.0, TheSettingManager->SettingsShadows.Exteriors.NightMinDarkness, cos(MoonPhase) * 0.5 + 0.5);
-			ShaderConst.ShadowFade.x = lerp(MoonVisibility, 1, ShaderConst.ShadowFade.x);
-		}
-
-		//Logger::Log("=======GameTime %f=========", ShaderConst.GameTime.y);
 
 		if (isExterior) {
+			// fade shadows at sunrise/sunset
+			float shadowFadeTime = 1.0f;
+			if ((GameHour >= SunsetEnd - shadowFadeTime) && GameHour < SunsetEnd) { //sunset
+				ShaderConst.ShadowFade.x = smoothStep(SunsetEnd - shadowFadeTime, SunsetEnd, GameHour);
+			}
+			else if (GameHour >= SunsetEnd && GameHour < SunsetEnd + shadowFadeTime) { //moonrise
+				ShaderConst.ShadowFade.x = 1.0f - smoothStep(SunsetEnd, SunsetEnd + shadowFadeTime, GameHour);
+			}
+			else if (GameHour >= SunriseStart - shadowFadeTime && GameHour < SunriseStart) { //moonset
+				ShaderConst.ShadowFade.x = smoothStep(SunriseStart - shadowFadeTime, SunriseStart, GameHour);
+			}
+			else if (GameHour >= SunriseStart && GameHour < SunriseStart + shadowFadeTime) { //sunrise
+				ShaderConst.ShadowFade.x = 1.0f - smoothStep(SunriseStart, SunriseStart + shadowFadeTime, GameHour);
+			}
+
+			// at night time, fade based on moonphase
+			if (GameHour > SunsetEnd || GameHour < SunriseStart) {
+				// moonphase goes from 0 to 8
+				float MoonPhase = (fmod(DaysPassed, 8 * currentClimate->phaseLength & 0x3F)) / (currentClimate->phaseLength & 0x3F);
+
+				float PI = 3.1416; // use cos curve to fade moon light shadows strength
+				MoonPhase = lerp(-PI, PI, MoonPhase / 8) - PI / 4; // map moonphase to 1/2PI/2PI + 1/2
+
+				// map MoonVisibility to MinNightDarkness/1 range
+				float MoonVisibility = lerp(0.0, TheSettingManager->SettingsShadows.Exteriors.NightMinDarkness, cos(MoonPhase) * 0.5 + 0.5);
+				ShaderConst.ShadowFade.x = lerp(MoonVisibility, 1, ShaderConst.ShadowFade.x);
+			}
+
 			// pass the enabled/disabled property of the shadow maps to the shadowfade constant
 			ShaderConst.ShadowFade.y = !TheSettingManager->SettingsShadows.Exteriors.Enabled;
+		}
+		else {
+			// pass the enabled/disabled property of the shadow maps to the shadowfade constant
+			ShaderConst.ShadowFade.y = !TheSettingManager->SettingsShadows.Interiors.Enabled;
+		}
 
 			//Logger::Log("exterior");
 
-			if (currentWeather) {
 				// calculating fog color/fog amount based on sun amount
-				ShaderConst.SunDir.w = 1.0f;
-				if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.y && ShaderConst.GameTime.y <= ShaderConst.SunTiming.z) {
-					// Day time
-					ShaderConst.SunAmount.x = 0.0f;
-					ShaderConst.SunAmount.y = 1.0f;
-					ShaderConst.SunAmount.z = 0.0f;
-					ShaderConst.SunAmount.w = 0.0f;
-				}
-				else if ((ShaderConst.GameTime.y >= ShaderConst.SunTiming.w && ShaderConst.GameTime.y <= 23.59) || (ShaderConst.GameTime.y >= 0 && ShaderConst.GameTime.y <= ShaderConst.SunTiming.x)) {
-					// Night time
-					ShaderConst.SunAmount.x = 0.0f;
-					ShaderConst.SunAmount.y = 0.0f;
-					ShaderConst.SunAmount.z = 0.0f;
-					ShaderConst.SunAmount.w = 1.0f;
-				}
-				else if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.x && ShaderConst.GameTime.y <= ShaderConst.SunTiming.y) {
-					// Sunrise
-					float delta = 2.0f * invLerp(ShaderConst.SunTiming.x, ShaderConst.SunTiming.y, ShaderConst.GameTime.y); // from 0 (transition start) to 2 (transition end)
-
-					if (delta <= 1.0f) {
-						// first half: night is more prevalent than sun
-						ShaderConst.SunAmount.x = delta;
-						ShaderConst.SunAmount.y = 0.0f;
-						ShaderConst.SunAmount.z = 0.0f;
-						ShaderConst.SunAmount.w = 1.0f - delta;
-					}
-					else {
-						// sun is more prevalent than night
-						ShaderConst.SunAmount.x = 2.0f - delta;
-						ShaderConst.SunAmount.y = delta - 1.0f;
-						ShaderConst.SunAmount.z = 0.0f;
-						ShaderConst.SunAmount.w = 0.0f;
-					}
-				}
-				else if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.z && ShaderConst.GameTime.y <= ShaderConst.SunTiming.w) {
-					// Sunset
-					float delta = 2.0f * invLerp(ShaderConst.SunTiming.w, ShaderConst.SunTiming.z, ShaderConst.GameTime.y); // from 0 (transition start) to 2 (transition end)
-
-					if (delta <= 1.0f) {
-						// first half, sun is more prevalent than night
-						ShaderConst.SunAmount.x = 0.0f;
-						ShaderConst.SunAmount.y = 1.0f - delta;
-						ShaderConst.SunAmount.z = delta;
-						ShaderConst.SunAmount.w = 0.0f;
-					}
-					else {
-						// night is more prevalent than sun
-						ShaderConst.SunAmount.x = 0.0f;
-						ShaderConst.SunAmount.y = 0.0f;
-						ShaderConst.SunAmount.z = 2.0f - delta;
-						ShaderConst.SunAmount.w = delta - 1.0f;
-					}
-				}
-
-//				if (ShaderConst.pWeather == NULL || weatherPercent == 1.0f) ShaderConst.pWeather = currentWeather;
-
-//				ShaderConst.oldsunGlare = ShaderConst.pWeather->GetSunGlare();
-				ShaderConst.sunGlare = currentWeather->GetSunGlare();//lerp(ShaderConst.oldsunGlare, currentWeather->GetSunGlare(), weatherPercent) / 255.0f;
-				ShaderConst.windSpeed = WorldSky->windSpeed;
-
-				ShaderConst.fogColor.x = WorldSky->fogColor.r;
-				ShaderConst.fogColor.y = WorldSky->fogColor.g;
-				ShaderConst.fogColor.z = WorldSky->fogColor.b;
-				ShaderConst.fogColor.w = 1.0f;
-
-				ShaderConst.horizonColor.x = WorldSky->Horizon.r;
-				ShaderConst.horizonColor.y = WorldSky->Horizon.g;
-				ShaderConst.horizonColor.z = WorldSky->Horizon.b;
-				ShaderConst.horizonColor.w = 1.0f;
-
-				ShaderConst.sunColor.x = WorldSky->sunDirectional.r;
-				ShaderConst.sunColor.y = WorldSky->sunDirectional.g;
-				ShaderConst.sunColor.z = WorldSky->sunDirectional.b;
-				ShaderConst.sunColor.w = 1.0f;
-
-				ShaderConst.sunAmbient.x = WorldSky->sunAmbient.r;
-				ShaderConst.sunAmbient.y = WorldSky->sunAmbient.g;
-				ShaderConst.sunAmbient.z = WorldSky->sunDirectional.b;
-				ShaderConst.sunAmbient.w = 1.0f;
-
-				ShaderConst.fogData.x = WorldSky->fogNearPlane;
-				ShaderConst.fogData.y = WorldSky->fogFarPlane;
-				ShaderConst.fogData.z = ShaderConst.sunGlare;
-				ShaderConst.fogData.w = WorldSky->fogPower;
-			}
-		}
-		else {
-			//Logger::Log("interior");
-			TESObjectCELL::LightingData* LightData = currentCell->lighting;
+		ShaderConst.SunDir.w = 1.0f;
+		if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.y && ShaderConst.GameTime.y <= ShaderConst.SunTiming.z) {
+			// Day time
 			ShaderConst.SunAmount.x = 0.0f;
 			ShaderConst.SunAmount.y = 1.0f;
 			ShaderConst.SunAmount.z = 0.0f;
 			ShaderConst.SunAmount.w = 0.0f;
+		}
+		else if ((ShaderConst.GameTime.y >= ShaderConst.SunTiming.w && ShaderConst.GameTime.y <= 23.59) || (ShaderConst.GameTime.y >= 0 && ShaderConst.GameTime.y <= ShaderConst.SunTiming.x)) {
+			// Night time
+			ShaderConst.SunAmount.x = 0.0f;
+			ShaderConst.SunAmount.y = 0.0f;
+			ShaderConst.SunAmount.z = 0.0f;
+			ShaderConst.SunAmount.w = 1.0f;
+		}
+		else if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.x && ShaderConst.GameTime.y <= ShaderConst.SunTiming.y) {
+			// Sunrise
+			float delta = 2.0f * invLerp(ShaderConst.SunTiming.x, ShaderConst.SunTiming.y, ShaderConst.GameTime.y); // from 0 (transition start) to 2 (transition end)
 
-			ShaderConst.sunGlare = 100.0f;
-
-			ShaderConst.fogColor.x = LightData->fog.r / 255.0f;
-			ShaderConst.fogColor.y = LightData->fog.g / 255.0f;
-			ShaderConst.fogColor.z = LightData->fog.b / 255.0f;
-			ShaderConst.fogColor.w = 1.0f;
-
-			ShaderConst.horizonColor.x = ShaderConst.fogColor.x;
-			ShaderConst.horizonColor.y = ShaderConst.fogColor.y;
-			ShaderConst.horizonColor.z = ShaderConst.fogColor.z;
-			ShaderConst.horizonColor.w = ShaderConst.fogColor.w;
-
-			ShaderConst.SunDir.x = Tes->directionalLight->direction.x * -1;
-			ShaderConst.SunDir.y = Tes->directionalLight->direction.y * -1;
-			ShaderConst.SunDir.z = Tes->directionalLight->direction.z * -1;
-			ShaderConst.SunDir.w = 0.0f;
-
-			ShaderConst.sunColor.x = LightData->directional.r / 255.0f;
-			ShaderConst.sunColor.y = LightData->directional.g / 255.0f;
-			ShaderConst.sunColor.z = LightData->directional.b / 255.0f;
-			ShaderConst.sunColor.w = ShaderConst.SunAmount.w;
-
-			ShaderConst.sunAmbient.x = LightData->ambient.r / 255.0f;
-			ShaderConst.sunAmbient.y = LightData->ambient.g / 255.0f;
-			ShaderConst.sunAmbient.z = LightData->ambient.b / 255.0f;
-			ShaderConst.sunAmbient.w = 1.0f;
-
-			ShaderConst.fogData.x = LightData->fogNear;
-			ShaderConst.fogData.y = LightData->fogFar;
-			ShaderConst.fogData.z = ShaderConst.sunGlare;
-			ShaderConst.fogData.w = LightData->fogPower;
-
-			ShaderConst.fogDistance.x = ShaderConst.fogData.x;
-			ShaderConst.fogDistance.y = ShaderConst.fogData.y;
-			ShaderConst.fogDistance.z = 1.0f;
-			ShaderConst.fogDistance.w = ShaderConst.sunGlare;
-
-			if (WorldSky->GetIsUnderWater()) {
-				TESWaterForm* currentWater = Tes->GetWaterForm();
-
-				ShaderConst.fogDistance.x = currentWater->properties.fogNearUW;
-				ShaderConst.fogDistance.y = currentWater->properties.fogFarUW;
-				ShaderConst.fogDistance.z = 1.0f;
-				ShaderConst.fogDistance.w = ShaderConst.sunGlare;
+			if (delta <= 1.0f) {
+				// first half: night is more prevalent than sun
+				ShaderConst.SunAmount.x = delta;
+				ShaderConst.SunAmount.y = 0.0f;
+				ShaderConst.SunAmount.z = 0.0f;
+				ShaderConst.SunAmount.w = 1.0f - delta;
+			}
+			else {
+				// sun is more prevalent than night
+				ShaderConst.SunAmount.x = 2.0f - delta;
+				ShaderConst.SunAmount.y = delta - 1.0f;
+				ShaderConst.SunAmount.z = 0.0f;
+				ShaderConst.SunAmount.w = 0.0f;
 			}
 		}
+		else if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.z && ShaderConst.GameTime.y <= ShaderConst.SunTiming.w) {
+			// Sunset
+			float delta = 2.0f * invLerp(ShaderConst.SunTiming.w, ShaderConst.SunTiming.z, ShaderConst.GameTime.y); // from 0 (transition start) to 2 (transition end)
+
+			if (delta <= 1.0f) {
+				// first half, sun is more prevalent than night
+				ShaderConst.SunAmount.x = 0.0f;
+				ShaderConst.SunAmount.y = 1.0f - delta;
+				ShaderConst.SunAmount.z = delta;
+				ShaderConst.SunAmount.w = 0.0f;
+			}
+			else {
+				// night is more prevalent than sun
+				ShaderConst.SunAmount.x = 0.0f;
+				ShaderConst.SunAmount.y = 0.0f;
+				ShaderConst.SunAmount.z = 2.0f - delta;
+				ShaderConst.SunAmount.w = delta - 1.0f;
+			}
+		}
+
+//				if (ShaderConst.pWeather == NULL || weatherPercent == 1.0f) ShaderConst.pWeather = currentWeather;
+
+//				ShaderConst.oldsunGlare = ShaderConst.pWeather->GetSunGlare();
+
+		if (currentWeather) {
+			ShaderConst.sunGlare = currentWeather->GetSunGlare() / 255.0f; //lerp(ShaderConst.oldsunGlare, currentWeather->GetSunGlare(), weatherPercent) / 255.0f;
+		}
+		else {
+			ShaderConst.sunGlare = 0.5f;
+		}
+
+		ShaderConst.windSpeed = WorldSky->windSpeed;
+
+		ShaderConst.fogColor.x = WorldSky->fogColor.r;
+		ShaderConst.fogColor.y = WorldSky->fogColor.g;
+		ShaderConst.fogColor.z = WorldSky->fogColor.b;
+		ShaderConst.fogColor.w = 1.0f;
+
+		ShaderConst.horizonColor.x = WorldSky->Horizon.r;
+		ShaderConst.horizonColor.y = WorldSky->Horizon.g;
+		ShaderConst.horizonColor.z = WorldSky->Horizon.b;
+		ShaderConst.horizonColor.w = 1.0f;
+
+		ShaderConst.sunColor.x = WorldSky->sunDirectional.r;
+		ShaderConst.sunColor.y = WorldSky->sunDirectional.g;
+		ShaderConst.sunColor.z = WorldSky->sunDirectional.b;
+		ShaderConst.sunColor.w = 1.0f;
+
+		ShaderConst.sunAmbient.x = WorldSky->sunAmbient.r;
+		ShaderConst.sunAmbient.y = WorldSky->sunAmbient.g;
+		ShaderConst.sunAmbient.z = WorldSky->sunAmbient.b;
+		ShaderConst.sunAmbient.w = 1.0f;
+
+		ShaderConst.fogData.x = WorldSky->fogNearPlane;
+		ShaderConst.fogData.y = WorldSky->fogFarPlane;
+		ShaderConst.fogData.z = ShaderConst.sunGlare;
+		ShaderConst.fogData.w = WorldSky->fogPower;
+
+		ShaderConst.fogData.x = WorldSky->atmosphere->fogProperty->fStartDistance;
+		ShaderConst.fogData.y = WorldSky->atmosphere->fogProperty->fEndDistance;
+		ShaderConst.fogData.z = ShaderConst.sunGlare;
+		ShaderConst.fogData.w = WorldSky->atmosphere->fogProperty->fPower;
+
+		ShaderConst.fogDistance.x = ShaderConst.fogData.x;
+		ShaderConst.fogDistance.y = ShaderConst.fogData.y;
+		ShaderConst.fogDistance.z = 1.0f;
+		ShaderConst.fogDistance.w = ShaderConst.sunGlare;
 
 		//if (weatherPercent == 1.0f) ShaderConst.pWeather = currentWeather;
 
