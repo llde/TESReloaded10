@@ -3970,6 +3970,30 @@ public:
 };
 assert(sizeof(Atmosphere) == 0x01C);
 
+class NiFogProperty : public NiProperty
+{
+public:
+	unsigned __int16 m_flags;
+	float m_fDepth;
+	NiColor m_kColor;
+};
+
+class BSFogProperty : public NiFogProperty
+{
+public:
+	float fStartDistance;
+	float fEndDistance;
+	float fStartWaterDistance;
+	float fEndWaterDistance;
+	NiPlane kPlane;
+	float fFalloff;
+	float fHeight;
+	NiColor kWaterColor;
+	float fPower;
+};
+assert(sizeof(BSFogProperty) == 0x64);
+
+
 class Stars : public SkyObject {	
 public:
 	NiNode*			node08;			// 08
