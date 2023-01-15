@@ -1,9 +1,6 @@
 // Image space shadows shader for Oblivion Reloaded
 
 float4x4 TESR_WorldTransform;
-float4x4 TESR_ViewTransform;
-float4x4 TESR_ProjectionTransform;
-float4 TESR_CameraPosition;
 float4 TESR_ShadowData;
 float4 TESR_ShadowLightPosition0;
 float4 TESR_ShadowLightPosition1;
@@ -13,30 +10,47 @@ float4 TESR_ShadowLightPosition4;
 float4 TESR_ShadowLightPosition5;
 float4 TESR_ShadowLightPosition6;
 float4 TESR_ShadowLightPosition7;
+float4 TESR_ShadowLightPosition8;
+float4 TESR_ShadowLightPosition9;
+float4 TESR_ShadowLightPosition10;
+float4 TESR_ShadowLightPosition11;
+float4 TESR_LightAttenuation0;
+float4 TESR_LightAttenuation1;
+float4 TESR_LightAttenuation2;
+float4 TESR_LightAttenuation3;
+float4 TESR_LightAttenuation4;
+float4 TESR_LightAttenuation5;
+float4 TESR_LightAttenuation6;
+float4 TESR_LightAttenuation7;
 float4 TESR_ShadowCubeMapBlend;
 float4 TESR_ReciprocalResolution;
 //sampler_state removed to avoid a artifact. TODO investigate
 sampler2D TESR_RenderedBuffer : register(s0);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_SourceBuffer : register(s2);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer0 : register(s3);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer1 : register(s4);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer2 : register(s5);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer3 : register(s6);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer4 : register(s7);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer5 : register(s8);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer6 : register(s9);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer7 : register(s10);// = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-
-static const float nearZ = TESR_ProjectionTransform._43 / TESR_ProjectionTransform._33;
-static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
-static const float Zmul = nearZ * farZ;
-static const float Zdiff = farZ - nearZ;
-static const float BIAS = 0.0015f;
-static const float2 OffsetMaskH = float2(1.0f, 0.0f);
-static const float2 OffsetMaskV = float2(0.0f, 1.0f);
+samplerCUBE TESR_ShadowCubeMapBuffer0 : register(s3) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer1 : register(s4) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer2 : register(s5) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer3 : register(s6) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer4 : register(s7) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer5 : register(s8) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer6 : register(s9) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer7 : register(s10) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer8 : register(s11) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer9 : register(s12) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer10: register(s13) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+samplerCUBE TESR_ShadowCubeMapBuffer11 : register(s14) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 #include "Includes/Blending.hlsl"
+#include "Includes/Depth.hlsl"
+
+static const float Zmul = nearZ * farZ;
+static const float Zdiff = farZ - nearZ;
+static const float BIAS = 0.005f;
+static const float2 OffsetMaskH = float2(1.0f, 0.0f);
+static const float2 OffsetMaskV = float2(0.0f, 1.0f);
+static const float LIGHTRADIUS = 250;
+static const float MAXDISTANCE = 4000;
 
 struct VSOUT
 {
@@ -58,77 +72,51 @@ VSOUT FrameVS(VSIN IN)
 	return OUT;
 }
 
-static const int cKernelSize = 7;
+#include "Includes/Blur.hlsl"
 
-static const float BlurWeights[cKernelSize] = 
-{
-    0.064759,
-    0.120985,
-    0.176033,
-    0.199471,
-    0.176033,
-    0.120985,
-    0.064759,
-};
- 
-static const float2 BlurOffsets[cKernelSize] = 
-{
-	float2(-3.0f * TESR_ReciprocalResolution.x, -3.0f * TESR_ReciprocalResolution.y),
-	float2(-2.0f * TESR_ReciprocalResolution.x, -2.0f * TESR_ReciprocalResolution.y),
-	float2(-1.0f * TESR_ReciprocalResolution.x, -1.0f * TESR_ReciprocalResolution.y),
-	float2( 0.0f * TESR_ReciprocalResolution.x,  0.0f * TESR_ReciprocalResolution.y),
-	float2( 1.0f * TESR_ReciprocalResolution.x,  1.0f * TESR_ReciprocalResolution.y),
-	float2( 2.0f * TESR_ReciprocalResolution.x,  2.0f * TESR_ReciprocalResolution.y),
-	float2( 3.0f * TESR_ReciprocalResolution.x,  3.0f * TESR_ReciprocalResolution.y),
-};
+float GetLightAmountValue(samplerCUBE ShadowCubeMapBuffer, float3 LightDir, float Distance) {
+	float lightDepth = texCUBE(ShadowCubeMapBuffer, LightDir).r;
 
-float readDepth(in float2 coord : TEXCOORD0)
-{
-	float posZ = tex2D(TESR_DepthBuffer, coord).x;
-	posZ = Zmul / ((posZ * Zdiff) - farZ);
-	return posZ;
+	float Shadow = lightDepth + BIAS > Distance;
+
+	return lerp(1, Shadow, lightDepth > 0.0f && lightDepth < 1.0f);
 }
 
-float3 toWorld(float2 tex)
-{
-    float3 v = float3(TESR_ViewTransform[0][2], TESR_ViewTransform[1][2], TESR_ViewTransform[2][2]);
-    v += (1 / TESR_ProjectionTransform[0][0] * (2 * tex.x - 1)).xxx * float3(TESR_ViewTransform[0][0], TESR_ViewTransform[1][0], TESR_ViewTransform[2][0]);
-    v += (-1 / TESR_ProjectionTransform[1][1] * (2 * tex.y - 1)).xxx * float3(TESR_ViewTransform[0][1], TESR_ViewTransform[1][1], TESR_ViewTransform[2][1]);
-    return v;
+// returns a value from 0 to 1 based on the positions of a value between a min/max 
+float invLerp(float from, float to, float value){
+  return (value - from) / (to - from);
 }
 
-float Lookup(samplerCUBE ShadowCubeMapBuffer, float3 LightDir, float Distance, float Blend) {
-	// decides if the point is in shadow or not, and returns a value based on the blend 
-	// (strength of the shadow from the shadow strength buffer)
-	float Shadow = texCUBE(ShadowCubeMapBuffer, LightDir).r; // get an average here of the texture?
-	float BaseBrightness = 0.2;
-	float FalloffSpeed = 0.6;
-
-	// display the shadow if the depth from the shadow map is smaller than the distance to the light 
-	// (means our point is behind the occlusion zone around the light)
-	// BIAS is used as an offset to the distance in order to solve Z fighting and shadow acne
-	if (Shadow > 0.0f && Shadow < 1.0f && Shadow < Distance - BIAS){
-		//multiply by distance to fade out shadows with distance (higher value means less shadow)
-		return Blend * BaseBrightness + Blend * (Distance * FalloffSpeed);
-	} 
-	return 1.0f; // no shadow (1=white)	
-}
-
-float GetLightAmount(samplerCUBE ShadowCubeMapBuffer, float4 WorldPos, float4 LightPos, float Blend) {
-	
-	float Shadow = 0.0f;
+float GetLightAmount(samplerCUBE ShadowCubeMapBuffer, float4 WorldPos, float4 LightPos, float4 normal, float4 attenuation) {
+	float LightAmount = 0.0f;
 	float3 LightDir;
 	float Distance;
 	
-	LightDir = WorldPos.xyz - LightPos.xyz; 
-	LightDir.z *= -1;
+	LightDir = LightPos.xyz - WorldPos.xyz;
+	float3 LightUV = LightDir * float3(-1, -1, 1);
+
 	Distance = length(LightDir);
-	LightDir = LightDir / Distance;
+	LightDir = normalize(LightDir);
 	Distance = Distance / LightPos.w;
-	Blend = max(1.0f - Blend, saturate(Distance) * TESR_ShadowData.y);
-	return Lookup(ShadowCubeMapBuffer, LightDir, Distance, Blend);
-	
+
+	float radius = 1;
+	float atten = saturate(1/((Distance/radius + 1) * (Distance/radius + 1))) ;
+	// float atten = saturate(1/(attenuation.x + Distance * attenuation.y + Distance * Distance * attenuation.z)) * 0.01;
+
+	// return atten;
+
+	// return GetLightAmountValue(ShadowCubeMapBuffer, LightDir, Distance);
+	// float atten = saturate(1/(Distance * Distance)) * 0.5;
+	float diffuse = dot(LightDir, normal);
+
+	LightAmount = GetLightAmountValue(ShadowCubeMapBuffer, LightUV, Distance) * diffuse * atten;
+	// LightAmount = lerp(1, GetLightAmountValue(ShadowCubeMapBuffer, LightDir, Distance) * atten, attenuation.w);
+	// LightAmount = lerp(1, GetLightAmountValue(ShadowCubeMapBuffer, LightDir, Distance) * atten, attenuation.w);
+	// LightAmount = GetLightAmountValue(ShadowCubeMapBuffer, LightDir, Distance) * atten;
+
+	return saturate(LightAmount);
 }
+
 
 float4 Shadow( VSOUT IN ) : COLOR0 {
 
@@ -138,36 +126,38 @@ float4 Shadow( VSOUT IN ) : COLOR0 {
     float4 world_pos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);	
 	
 	float4 pos = mul(world_pos, TESR_WorldTransform);
-	Shadow = GetLightAmount(TESR_ShadowCubeMapBuffer0, pos, TESR_ShadowLightPosition0, TESR_ShadowCubeMapBlend.x);
-	if (TESR_ShadowLightPosition1.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer1, pos, TESR_ShadowLightPosition1, TESR_ShadowCubeMapBlend.y);
-	if (TESR_ShadowLightPosition2.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer2, pos, TESR_ShadowLightPosition2, TESR_ShadowCubeMapBlend.z);
-	if (TESR_ShadowLightPosition3.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer3, pos, TESR_ShadowLightPosition3, TESR_ShadowCubeMapBlend.w);
-	if (TESR_ShadowLightPosition4.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer4, pos, TESR_ShadowLightPosition4, TESR_ShadowCubeMapBlend.w);
-	if (TESR_ShadowLightPosition5.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer5, pos, TESR_ShadowLightPosition5, TESR_ShadowCubeMapBlend.w);
-	if (TESR_ShadowLightPosition6.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer6, pos, TESR_ShadowLightPosition6, TESR_ShadowCubeMapBlend.w);
-	if (TESR_ShadowLightPosition7.w) Shadow *= GetLightAmount(TESR_ShadowCubeMapBuffer7, pos, TESR_ShadowLightPosition7, TESR_ShadowCubeMapBlend.w);
-    return float4(Shadow, Shadow, Shadow, 1.0f);
+
+	float4 normal = float4(GetWorldNormal(IN.UVCoord), 1.0);
+
+	Shadow = GetLightAmount(TESR_ShadowCubeMapBuffer0, pos, TESR_ShadowLightPosition0, normal, TESR_LightAttenuation0);
+	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer1, pos, TESR_ShadowLightPosition1, normal, TESR_LightAttenuation1);
+	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer2, pos, TESR_ShadowLightPosition2,normal,  TESR_LightAttenuation2);
+	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer3, pos, TESR_ShadowLightPosition3, normal, TESR_LightAttenuation3);
+	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer4, pos, TESR_ShadowLightPosition4, normal, TESR_LightAttenuation4);
+	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer5, pos, TESR_ShadowLightPosition5, normal, TESR_LightAttenuation5);
+	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer6, pos, TESR_ShadowLightPosition6, normal, TESR_LightAttenuation6);
+	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer7, pos, TESR_ShadowLightPosition7, normal, TESR_LightAttenuation7);
+	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer8, pos, TESR_ShadowLightPosition8, normal, TESR_LightAttenuation7);
+	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer9, pos, TESR_ShadowLightPosition9, normal, TESR_LightAttenuation7);
+	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer10, pos, TESR_ShadowLightPosition10, normal, TESR_LightAttenuation7);
+	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer11, pos, TESR_ShadowLightPosition11, normal, TESR_LightAttenuation7);
+
+    Shadow = saturate(pow(Shadow, TESR_ShadowData.y)); // modify shadow density curve
+	Shadow = lerp(Shadow, 1.0, saturate(invLerp(300, MAXDISTANCE, depth))); // fade shadows with distance
+	
+	return float4(Shadow, Shadow, Shadow, 1.0f);
 	
 }
 
-float4 BlurPass(VSOUT IN, uniform float2 OffsetMask) : COLOR0
-{
-	float3 Color = 0.0f;
-	float w = 0.0f;
-
-    for (int i = 0; i < cKernelSize; i++) {
-		float2 uvOff = (BlurOffsets[i] * OffsetMask);
-		Color += tex2D(TESR_RenderedBuffer, IN.UVCoord + uvOff).rgb * BlurWeights[i];
-		w += BlurWeights[i];
-    }
-	Color /= w;
-    return float4(Color, 1.0f);
-}
 
 float4 CombineShadow( VSOUT IN ) : COLOR0 {
 
 	// combine Shadow pass and source using an overlay mode + alpha blending
 	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
+
+	//multiply by 2 to only use the lower half of values to impact darkness
+	return color *= saturate(tex2D(TESR_RenderedBuffer, IN.UVCoord).r * 2);
+
 	color.a = 1.0f;
 	float shadow = 1.0f - tex2D(TESR_RenderedBuffer, IN.UVCoord).r;
 	float4 shadowColor = float4(color.rgb, shadow);
@@ -183,14 +173,16 @@ technique {
 		PixelShader = compile ps_3_0 Shadow();
 	}
 	
-	pass {
+	pass
+	{ 
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 BlurPass(OffsetMaskH);
+		PixelShader = compile ps_3_0 BlurRChannel(float2(1.0f, 0.0f), 1, 5, MAXDISTANCE);
 	}
 	
-	pass {
+	pass
+	{ 
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 BlurPass(OffsetMaskV);
+		PixelShader = compile ps_3_0 BlurRChannel(float2(0.0f, 1.0f), 1, 5, MAXDISTANCE);
 	}
 	
 	pass {
