@@ -731,8 +731,8 @@ void ShadowManager::RenderShadowMaps() {
 		float Distance = Light->GetDistance(&Player->pos);
 
 		// select lights that will be tracked
-		if ((D3DXVec4Dot(&LightVector, &TheRenderManager->CameraForward) > 0 || Distance < 1000) && (Light->Spec.r + Light->Spec.g + Light->Spec.b) > 8) {
-			SceneLights[(int)(Distance * 10000)] = Light;
+		if ((D3DXVec4Dot(&LightVector, &TheRenderManager->CameraForward) > 0 || Distance < 1000) && (Light->Spec.r + Light->Spec.g + Light->Spec.b > 8) && Light->CastShadows) {
+			SceneLights[(int)(Distance * 10000)] = Light; // mutliplying distance before convertion to avoid duplicates in case of similar values
 		}
 		Entry = Entry->next;
 	}
@@ -750,13 +750,6 @@ void ShadowManager::RenderShadowMaps() {
 
 			NiPointLight* Light = v->second;
 
-			D3DXVECTOR4 LightPosition;
-			LightPosition.x = Light->m_worldTransform.pos.x;
-			LightPosition.y = Light->m_worldTransform.pos.y;
-			LightPosition.z = Light->m_worldTransform.pos.z;
-			LightPosition.w = (Light->Diff.r + Light->Diff.g + Light->Diff.b) * Light->Dimmer; //light strength
-			TheShaderManager->LightPosition[i] = LightPosition;
-
 			// determin if light is a shadow caster
 			bool CastShadow = true;
 			bool TorchOnBeltEnabled = EquipmentModeSettings->Enabled && EquipmentModeSettings->TorchKey != 255;
@@ -764,6 +757,13 @@ void ShadowManager::RenderShadowMaps() {
 				HighProcessEx* Process = (HighProcessEx*)Player->process;
 				if (Process->OnBeltState == HighProcessEx::State::In) CastShadow = false;
 			}
+
+			D3DXVECTOR4 LightPosition;
+			LightPosition.x = Light->m_worldTransform.pos.x;
+			LightPosition.y = Light->m_worldTransform.pos.y;
+			LightPosition.z = Light->m_worldTransform.pos.z;
+			LightPosition.w = (Light->Diff.r + Light->Diff.g + Light->Diff.b) * Light->Dimmer; //light strength
+			TheShaderManager->LightPosition[i] = LightPosition;
 
 			D3DXVECTOR4 LightAttenuation;
 			LightAttenuation.x = Light->Atten0; // constant
