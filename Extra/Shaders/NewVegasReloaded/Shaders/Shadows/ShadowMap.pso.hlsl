@@ -30,36 +30,30 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     	depth = IN.texcoord_0.z / IN.texcoord_0.w;
 	}
 
-	// Quality : shadow technique
+	OUT.color_0 = float4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// TESR_ShadowData.w : shadow technique
 	// 0: disabled
 	// 1: VSM
 	// 2: simple ESM
 	// 3: filtered ESM
-	
-	if (TESR_ShadowData.w == 1.0f){
-		// VSM
-		//cheat to reduce shadow acne in variance maps
-		float dx = ddx(depth);
-		float dy = ddy(depth);
-		float moment2 = depth * depth + 0.25 * (dx * dx + dy * dy);
+	// 4: PCF
+	float4 shadowMode = {TESR_ShadowData.w == 1.0f, TESR_ShadowData.w == 2.0f, TESR_ShadowData.w == 3.0f, TESR_ShadowData.w == 4.0f};
 
-		OUT.color_0 = float4(depth, moment2, 0.0f, 1.0f);
+	// VSM
+	//cheat to reduce shadow acne in variance maps
+	float dx = ddx(depth);
+	float dy = ddy(depth);
+	float moment2 = depth * depth + 0.25 * (dx * dx + dy * dy);
+	OUT.color_0 += float4(depth, moment2, 0.0f, 1.0f) * shadowMode.x; 
 
-	} else if (TESR_ShadowData.w == 2.0f){
-		// PCF/simple ESM
-		OUT.color_0 = float4(depth, 0.0f, 0.0f, 1.0f);
+	// PCF/simple ESM
+	OUT.color_0 += float4(depth, 0.0f, 0.0f, 1.0f) * (shadowMode.y + shadowMode.w);
 
-	} else if (TESR_ShadowData.w == 3.0f){
-		// ESSM
-		float k = 80;
-		float esm = exp( 80 * depth);
-
-		OUT.color_0 = float4(esm, esm - depth, 0.0f, 1.0f);
-	}else {
-		// disabled
-		OUT.color_0 = float4 (0.0f, 0.0f, 0.0f, 0.0f);
-	}
+	// ESSM
+	float k = 80;
+	float esm = exp( 80 * depth);
+	OUT.color_0 += float4(esm, esm - depth, 0.0f, 1.0f) * shadowMode.z;
 
 	return OUT;	
-
 };
