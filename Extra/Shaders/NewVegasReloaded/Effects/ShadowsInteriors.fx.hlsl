@@ -142,7 +142,6 @@ float4 Shadow( VSOUT IN ) : COLOR0 {
 	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer10, pos, TESR_ShadowLightPosition10, normal, TESR_LightAttenuation7);
 	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer11, pos, TESR_ShadowLightPosition11, normal, TESR_LightAttenuation7);
 
-    Shadow = saturate(pow(Shadow, TESR_ShadowData.y)); // modify shadow density curve
 	Shadow = lerp(Shadow, 1.0, saturate(invLerp(300, MAXDISTANCE, depth))); // fade shadows with distance
 	
 	return float4(Shadow, Shadow, Shadow, 1.0f);
@@ -160,10 +159,13 @@ float4 CombineShadow( VSOUT IN ) : COLOR0 {
 	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
 
 	//multiply by 2 to only use the lower half of values to impact darkness
-	float4 shadow = color * saturate(tex2D(TESR_RenderedBuffer, IN.UVCoord).r * 2);
+	float4 Shadow = saturate(tex2D(TESR_RenderedBuffer, IN.UVCoord).r * 2);
+    Shadow = saturate(lerp(Shadow, 1, TESR_ShadowData.y)); // shadow darkness
 
-	float lumaDiff = saturate(invLerp(Luma(shadow), 1.0f, Luma(color)));
-	return lerp(shadow, color, lumaDiff); // bring back some of the original color based on luma (brightest lights will come through)
+	Shadow *= color;
+
+	float lumaDiff = saturate(invLerp(Luma(Shadow), 1.0f, Luma(color)));
+	return lerp(Shadow, color, lumaDiff); // bring back some of the original color based on luma (brightest lights will come through)
 }
 
 technique {
