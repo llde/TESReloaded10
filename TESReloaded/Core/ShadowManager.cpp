@@ -731,7 +731,7 @@ void ShadowManager::RenderShadowMaps() {
 		float Distance = Light->GetDistance(&Player->pos);
 
 		// select lights that will be tracked
-		if ((D3DXVec4Dot(&LightVector, &TheRenderManager->CameraForward) > 0 || Distance < 1000) && (Light->Spec.r + Light->Spec.g + Light->Spec.b > 8) && Light->CastShadows) {
+		if ((D3DXVec4Dot(&LightVector, &TheRenderManager->CameraForward) > 0 || Distance < 1000) && NiAVObject::kFlag_AppCulled && Light->CastShadows) {
 			SceneLights[(int)(Distance * 10000)] = Light; // mutliplying distance before convertion to avoid duplicates in case of similar values
 		}
 		Entry = Entry->next;
