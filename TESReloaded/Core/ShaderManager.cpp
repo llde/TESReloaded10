@@ -1889,6 +1889,10 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	Sky* WorldSky = Tes->sky;
 	bool isExterior = Player->GetWorldSpace() || Player->parentCell->flags0 & TESObjectCELL::kFlags0_BehaveLikeExterior;
 
+	bool pipboyIsOn = InterfaceManager->IsActive(Menu::kMenuType_BigFour);
+	bool VATSIsOn = InterfaceManager->IsActive(Menu::kMenuType_VATS);
+	bool terminalIsOn = InterfaceManager->IsActive(Menu::kMenuType_Computers) || InterfaceManager->IsActive(Menu::kMenuType_LockPick);
+
 	TheShaderManager->UpdateConstants();
 
 	Device->SetStreamSource(0, FrameVertex, 0, sizeof(FrameVS));
@@ -1905,16 +1909,16 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		SnowAccumulationEffect->SetCT();
 		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (AmbientOcclusionEffect->Enabled) {
+	if (AmbientOcclusionEffect->Enabled && !terminalIsOn) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		AmbientOcclusionEffect->SetCT();
 		AmbientOcclusionEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (ShadowsExteriorsEffect->Enabled && isExterior) {
+	if (ShadowsExteriorsEffect->Enabled && isExterior && !VATSIsOn && !terminalIsOn) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		ShadowsExteriorsEffect->SetCT();
 		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}else if (ShadowsInteriorsEffect->Enabled) {
+	}else if (ShadowsInteriorsEffect->Enabled && !VATSIsOn && !terminalIsOn) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		ShadowsInteriorsEffect->SetCT();
 		ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
@@ -1944,25 +1948,25 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	}
 	else {
 		if (ShaderConst.WaterLens.Percent == -1.0f) ShaderConst.WaterLens.Percent = 1.0f;
-		if (currentWorldSpace) {
-			if (RainEffect->Enabled && ShaderConst.Rain.RainData.x > 0.0f) {
-				RainEffect->SetCT();
-				RainEffect->Render(Device, RenderTarget, RenderedSurface, false);
-			}
-			if (SnowEffect->Enabled && ShaderConst.Snow.SnowData.x > 0.0f) {
-				SnowEffect->SetCT();
-				SnowEffect->Render(Device, RenderTarget, RenderedSurface, false);
-			}
-			if (GodRaysEffect->Enabled) {
-				Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-				GodRaysEffect->SetCT();
-				GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
-			}
+	}
+	if (currentWorldSpace) {
+		if (RainEffect->Enabled && ShaderConst.Precipitations.RainData.x > 0.0f) {
+			RainEffect->SetCT();
+			RainEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
-		if (VolumetricFogEffect->Enabled && !Tes->sky->GetIsUnderWater()) {
-			VolumetricFogEffect->SetCT();
-			VolumetricFogEffect->Render(Device, RenderTarget, RenderedSurface, false);
+		if (SnowEffect->Enabled && ShaderConst.Precipitations.SnowData.x > 0.0f) {
+			SnowEffect->SetCT();
+			SnowEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
+		if (GodRaysEffect->Enabled) {
+			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+			GodRaysEffect->SetCT();
+			GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
+		}
+	}
+	if (VolumetricFogEffect->Enabled && !Tes->sky->GetIsUnderWater() && !pipboyIsOn) {
+		VolumetricFogEffect->SetCT();
+		VolumetricFogEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 	if (DepthOfFieldEffect->Enabled && ShaderConst.DepthOfField.Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
