@@ -182,6 +182,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.horizonColor;
 	else if (!strcmp(Name, "TESR_SunColor"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.sunColor;
+	else if (!strcmp(Name, "TESR_SkyColor"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.skyColor;
 	else if (!strcmp(Name, "TESR_SunAmbient"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.sunColor;
 	else if (!strcmp(Name, "TESR_FogData"))
@@ -959,11 +961,11 @@ void ShaderManager::UpdateConstants() {
 			}
 
 			// pass the enabled/disabled property of the shadow maps to the shadowfade constant
-			ShaderConst.ShadowFade.y = !TheSettingManager->SettingsShadows.Exteriors.Enabled;
+			ShaderConst.ShadowFade.y = TheSettingManager->SettingsShadows.Exteriors.Enabled;
 		}
 		else {
 			// pass the enabled/disabled property of the shadow maps to the shadowfade constant
-			ShaderConst.ShadowFade.y = !TheSettingManager->SettingsShadows.Interiors.Enabled;
+			ShaderConst.ShadowFade.y = TheSettingManager->SettingsShadows.Interiors.Enabled;
 		}
 
 			//Logger::Log("exterior");
@@ -1055,6 +1057,11 @@ void ShaderManager::UpdateConstants() {
 		ShaderConst.sunAmbient.y = WorldSky->sunAmbient.g;
 		ShaderConst.sunAmbient.z = WorldSky->sunAmbient.b;
 		ShaderConst.sunAmbient.w = 1.0f;
+
+		ShaderConst.skyColor.x = WorldSky->skyUpper.r;
+		ShaderConst.skyColor.y = WorldSky->skyUpper.g;
+		ShaderConst.skyColor.z = WorldSky->skyUpper.b;
+		ShaderConst.skyColor.w = 1.0f;
 
 		ShaderConst.fogData.x = WorldSky->fogNearPlane;
 		ShaderConst.fogData.y = WorldSky->fogFarPlane;

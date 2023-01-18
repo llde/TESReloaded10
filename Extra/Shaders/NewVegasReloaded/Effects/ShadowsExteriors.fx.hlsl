@@ -28,6 +28,7 @@ float4 TESR_ShadowFade;
 float4 TESR_SunDirection;
 float4 TESR_ShadowRadius; // radius of the 4 cascades
 float4 TESR_FogData; // x: fog start, y: fog end, z: sun glare, w: fog power
+float4 TESR_SkyColor;
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = ANISOTROPIC; MIPFILTER = LINEAR; };
@@ -38,7 +39,7 @@ sampler2D TESR_ShadowMapBufferLod : register(s5) = sampler_state { ADDRESSU = CL
 sampler2D TESR_SourceBuffer : register(s6) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_NoiseSampler : register(s7) < string ResourceName = "Effects\noise.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
 
-static const float DARKNESS = TESR_ShadowData.y;
+static const float DARKNESS = 1-TESR_ShadowData.y;
 static const float MIN_VARIANCE = 0.000005;
 static const float BLEED_CORRECTION = 0.4;
 static const float SSS_DIST = 20;
@@ -273,7 +274,7 @@ float4 Shadow(VSOUT IN) : COLOR0
 
 	float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 
-	Shadow = saturate(GetLightAmount(pos, depth)) + TESR_ShadowFade.y; //turn off shadow maps if settings disabled
+	Shadow = lerp(1, saturate(GetLightAmount(pos, depth)), TESR_ShadowFade.y); //turn off shadow maps if settings disabled
 	Shadow = min(tex2D(TESR_RenderedBuffer, IN.UVCoord).r, Shadow);
 
 	// fade shadows to light when sun is low
@@ -317,8 +318,11 @@ float4 SimpleCombineShadow (VSOUT IN) : COLOR0
 {
 	// old style multiply blending (for testing)
 	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
+	float Shadow = tex2D(TESR_RenderedBuffer, IN.UVCoord).r;
 
-	return tex2D(TESR_RenderedBuffer, IN.UVCoord).r * color; 
+	float4 colorShadow = Luma(color) * Shadow * TESR_SkyColor;
+
+	return lerp(colorShadow, color * Shadow, saturate(Shadow + 0.2)); // bias the transition between the 2 colors to make it less noticeable
 }
 
 technique {
