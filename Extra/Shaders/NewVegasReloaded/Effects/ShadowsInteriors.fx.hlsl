@@ -2,6 +2,7 @@
 
 float4x4 TESR_WorldTransform;
 float4 TESR_ShadowData;
+float4 TESR_ShadowFade;
 float4 TESR_ShadowLightPosition0;
 float4 TESR_ShadowLightPosition1;
 float4 TESR_ShadowLightPosition2;
@@ -160,7 +161,7 @@ float4 CombineShadow( VSOUT IN ) : COLOR0 {
 
 	//multiply by 2 to only use the lower half of values to impact darkness
 	float4 Shadow = saturate(tex2D(TESR_RenderedBuffer, IN.UVCoord).r * 2);
-    Shadow = saturate(lerp(Shadow, 1, TESR_ShadowData.y)); // shadow darkness
+    Shadow = saturate(lerp(1, Shadow, TESR_ShadowData.y * TESR_ShadowFade.y)); // shadow darkness (shadowFade.y is set to 0 when shadows are disabled)
 
 	Shadow *= color;
 

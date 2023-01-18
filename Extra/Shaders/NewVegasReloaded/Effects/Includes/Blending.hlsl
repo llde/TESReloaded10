@@ -3,11 +3,18 @@ float4 alphaBlend(float4 base, float4 blend)
 	return base*base.a +(1-base.a)*blend;
 }
 
-float4 Desaturate(float4 input)
+float Luma(float4 input)
 {
 	float greyscale = input.r * 0.3f + input.g * 0.59f +input.b * 0.11f;
+	return greyscale;
+}
+
+float4 Desaturate(float4 input)
+{
+	float greyscale = Luma(input);
 	return float4(greyscale, greyscale, greyscale, input.a);
 }
+
 
 // photoshop overlay blend mode code from https://www.ryanjuckett.com/photoshop-blend-modes-in-hlsl/
 float BlendMode_Overlay(float base, float blend)
