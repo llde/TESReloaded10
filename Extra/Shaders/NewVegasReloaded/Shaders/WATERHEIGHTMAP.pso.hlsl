@@ -7,7 +7,7 @@
 // Parameters:
 //
 float fNoiseScale : register(c3);
-float4 TESR_Tick : register(c6);
+float4 TESR_GameTime : register(c6);
 float4 TESR_WaveParams : register(c7);
 
 sampler2D NoiseMap : register(s0);
@@ -55,7 +55,7 @@ struct PS_OUTPUT {
 PS_OUTPUT main(VS_OUTPUT IN) {
     PS_OUTPUT OUT;
 
-    float frame = TESR_Tick.y * TESR_WaveParams.z / 1500;
+    float frame = TESR_GameTime.z * TESR_WaveParams.z;
     OUT.color_0 = tex3D(TESR_samplerWater, float3(IN.texcoord_0.xy, frac(frame)));
     return OUT;
 };

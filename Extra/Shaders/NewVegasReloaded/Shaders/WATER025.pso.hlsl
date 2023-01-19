@@ -26,7 +26,6 @@ float4 TESR_WaveParams : register(c16);
 float4 TESR_WaterVolume : register(c17);
 float4 TESR_WaterSettings : register(c18);
 float4 TESR_ReciprocalResolution : register(c19);
-float4 TESR_Tick : register(c20);
 float4x4 TESR_ViewTransform : register(c21);
 float4x4 TESR_ProjectionTransform : register(c25);
 float4 TESR_WaterShorelineParams : register(c29);

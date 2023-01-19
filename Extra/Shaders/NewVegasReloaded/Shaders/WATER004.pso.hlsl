@@ -26,7 +26,7 @@ float4 TESR_WaveParams : register(c16);
 float4 TESR_WaterVolume : register(c17);
 float4 TESR_WaterSettings : register(c18);
 float4 TESR_ReciprocalResolution : register(c19);
-float4 TESR_Tick : register(c20);
+float4 TESR_GameTime : register(c20);
 float4x4 TESR_ViewTransform : register(c21);
 float4x4 TESR_ProjectionTransform : register(c25);
 float4 TESR_WaterShorelineParams : register(c29);
@@ -238,5 +238,7 @@ PS_OUTPUT main(VS_OUTPUT IN, float2 PixelPos : VPOS){
 	OUT.color_0.rgb = lerp(water_result.rgb, color.rgb, saturate( pow(saturate(exp(world_pos.z/(800*shoreFactor))), 90) ));
 	OUT.color_0.a = 1;
 	
+    //OUT.color_0 = float4(0.0, 0.0, 1.0, 1.0);
+
     return OUT;
 };
