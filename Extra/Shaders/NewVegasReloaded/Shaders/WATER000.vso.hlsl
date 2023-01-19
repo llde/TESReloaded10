@@ -35,10 +35,10 @@ struct VS_OUTPUT {
     float4 position : POSITION;
     float4 texcoord_0 : TEXCOORD0;
     float4 texcoord_1 : TEXCOORD1;
-    float4 texcoord_2 : TEXCOORD2;
-    float4 texcoord_3 : TEXCOORD3;
-    float4 texcoord_4 : TEXCOORD4;
-    float4 texcoord_5 : TEXCOORD5;
+    float4 texcoord_2 : TEXCOORD2; // modelviewproj matrix 1st row 
+    float4 texcoord_3 : TEXCOORD3; // modelviewproj matrix 2nd row
+    float4 texcoord_4 : TEXCOORD4; // modelviewproj matrix 3rd row
+    float4 texcoord_5 : TEXCOORD5; // modelviewproj matrix 4th row
     float4 texcoord_6 : TEXCOORD6;
     float4 texcoord_7 : TEXCOORD7;
 };
@@ -58,21 +58,21 @@ VS_OUTPUT main(VS_INPUT IN) {
     float2 r0;
     float2 r1;
 
-    OUT.position.xyzw = mul(ModelViewProj, IN.LPOSITION.xyzw);
-    r1.y = dot(WorldMat[1].xyzw, IN.LPOSITION.xyzw);
-    r1.x = dot(WorldMat[0].xyzw, IN.LPOSITION.xyzw);
+    OUT.position = mul(ModelViewProj, IN.LPOSITION); // screen position
+    r1.y = dot(WorldMat[1], IN.LPOSITION);
+    r1.x = dot(WorldMat[0], IN.LPOSITION);
     OUT.texcoord_0.w = length(WorldMat[0].xyz);
-    OUT.texcoord_0.z = dot(WorldMat[2].xyzw, IN.LPOSITION.xyzw);
+    OUT.texcoord_0.z = dot(WorldMat[2], IN.LPOSITION);
     OUT.texcoord_0.xy = r1.xy;
     r0.xy = const_7.xy;
-    mdl0.xyzw = r0.x * ModelViewProj[3].xyzw;
-    OUT.texcoord_1.xyzw = IN.LPOSITION.xyzw;
+    mdl0 = r0.x * ModelViewProj[3];
+    OUT.texcoord_1 = IN.LPOSITION;
     q4.xy = (r1.xy + QPosAdjust.xy) / TexScale.x;
-    OUT.texcoord_2.xyzw = (r0.x * ModelViewProj[0].xyzw) + mdl0.xyzw;
-    OUT.texcoord_3.xyzw = (r0.x * ModelViewProj[1].xyzw) + mdl0.xyzw;
-    OUT.texcoord_4.xyzw = (r0.x * ModelViewProj[2].xyzw) + mdl0.xyzw;
-    OUT.texcoord_5.xyzw = ModelViewProj[3].xyzw;
-    OUT.texcoord_6.xyzw = (IN.LTEXCOORD_0.xyzx * const_7.zzzw) + const_7.wwwz;
+    OUT.texcoord_2 = (r0.x * ModelViewProj[0]) + mdl0;
+    OUT.texcoord_3 = (r0.x * ModelViewProj[1]) + mdl0;
+    OUT.texcoord_4 = (r0.x * ModelViewProj[2]) + mdl0;
+    OUT.texcoord_5 = ModelViewProj[3];
+    OUT.texcoord_6 = (IN.LTEXCOORD_0.xyzx * const_7.zzzw) + const_7.wwwz;
     r0.x = (-(sqr(ObjectUV.x)) < sqr(ObjectUV.x) ? 1.0 : 0.0);
     OUT.texcoord_7.zw = 0;
     OUT.texcoord_7.xy = (r0.x * ((IN.LTEXCOORD_0.xy / (r0.y * TexScale.x)) - q4.xy)) + q4.xy;

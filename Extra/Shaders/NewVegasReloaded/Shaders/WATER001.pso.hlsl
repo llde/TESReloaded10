@@ -3,6 +3,8 @@
 //
 // Parameters:
 
+// placed water surface shader 
+
 float4 EyePos : register(c1);
 float4 ShallowColor : register(c2);
 float4 DeepColor : register(c3);
@@ -134,6 +136,7 @@ VS_OUTPUT main(VS_INPUT IN) {
     r0.xyz = saturate((SunDir.w * ((q6.x + q7.x) * SunColor.rgb)) + lerp(r0.xyz, r1.yzw, r4.y));
     OUT.color_0.a = IN.LTEXCOORD_6.w;
     OUT.color_0.rgb = (r1.x * (FogColor.xyz - r0.xyz)) + r0.xyz;
+
     return OUT;
 	
 };
