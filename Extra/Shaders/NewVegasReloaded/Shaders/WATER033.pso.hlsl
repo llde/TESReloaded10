@@ -64,10 +64,11 @@ PS_OUTPUT main(PS_INPUT IN) {
     float4 reflection = tex2Dproj(ReflectionMap, reflectionPos);
 
     float4 color = ShallowColor;
-    color = getDiffuse(surfaceNormal, SunDir.xyz, eyeDirection, distance, TESR_HorizonColor, color);
     color = getFresnel(surfaceNormal, eyeDirection, reflection, color);
-    color = getSpecular(surfaceNormal, SunDir.xyz, eyeDirection, SunColor.rgb, color);
+    color = getSpecular(surfaceNormal, TESR_SunDirection.xyz, eyeDirection, SunColor.rgb, color);
 
-    OUT.color_0 = color;
+    OUT.color_0.rgb = color;
+    OUT.color_0.a = 1;
+
     return OUT;	
 };

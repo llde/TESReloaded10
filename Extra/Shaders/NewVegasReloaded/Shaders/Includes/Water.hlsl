@@ -68,7 +68,7 @@ float4 getWaveTexture(PS_INPUT IN, float distance) {
 
 	float waveWidth = TESR_WaveParams.y;
     float choppiness = TESR_WaveParams.x;
-    float speed = TESR_GameTime * 0.002 * TESR_WaveParams.z;
+    float speed = TESR_GameTime.x * 0.002 * TESR_WaveParams.z;
     float smallScale = 0.5;
     float bigScale = 2;
     float4 waveTexture = tex2D(TESR_samplerWater, texPos * smallScale * waveWidth + normalize(float2(1, 4)) * speed);
@@ -76,13 +76,8 @@ float4 getWaveTexture(PS_INPUT IN, float distance) {
 
     // combine waves
     waveTexture = mix(waveTextureLarge, waveTexture);
-    // waveTexture.xy += waveTextureLarge.xy;
-    // waveTexture.z *= waveTextureLarge.z;
     waveTexture = expand(waveTexture) * float4(1, 1, choppiness, 1);
     waveTexture = normalize(waveTexture);
-    // float4 waveTexture = tex2D(NoiseMap, IN.LTEXCOORD_7.xy * waveWidth);
-    // waveTexture.xyz = pow(waveTexture.xyz, 1 + choppiness);
-    // waveTexture.xy = LODfade * waveTexture.xy;
 
     return waveTexture;
 }
@@ -100,15 +95,30 @@ float4 getReflectionSamplePosition(PS_INPUT IN, float3 surfaceNormal, float refr
     return reflectionPos;
 }
 
-float4 getDisplacement(PS_INPUT IN, float blendRadius){
+float3 getDisplacement(PS_INPUT IN, float blendRadius, float3 surfaceNormal){
     // sample displacement and mix with the wave texture
     float4 displacement = tex2D(DisplacementMap, IN.LTEXCOORD_6.xy);
-    displacement.xy = (displacement.zw - 0.5) * blendRadius;
-    displacement.z = 0.04;
+    // float3 displacementCoeff = displacement;
+    // float3 displacementCoeff = abs(displacement.z - 0.5);
+    // float displacementCoeff = dot(displacement, float4(0, 0, 1, 1));
 
-    return displacement;
+    displacement.xy = (displacement.zw - 0.5) * blendRadius / 2;
+    displacement.z = 1;
+
+    // sample displacement and mix with the wave texture
+    float4 DisplacementNormal = normalize(displacement);
+    // float4 DisplacementNormal = displacement;
+
+    // surfaceNormal = normalize(saturate(DisplacementNormal.z * surfaceNormal - DisplacementNormal) + DisplacementNormal);
+    // surfaceNormal = DisplacementNormal;
+    surfaceNormal = surfaceNormal * 0.5 + 0.5;
+    surfaceNormal = float3(surfaceNormal.xy + DisplacementNormal.xy,  surfaceNormal.z);
+    surfaceNormal = expand(surfaceNormal);
+    // surfaceNormal = lerp(surfaceNormal, normalize(surfaceNormal + DisplacementNormal * 0.5), displacementCoeff);
+    // return displacementCoeff;
+    // return displacementCoeff.xxx;
+    return surfaceNormal;
 }
-
 
 float4 getLightTravel(float3 refractedDepth, float4 ShallowColor, float4 DeepColor, float sunLuma, float4 color){
     float4 waterColor = lerp(ShallowColor, DeepColor, refractedDepth.y); 
@@ -123,7 +133,6 @@ float4 getTurbidityFog(float3 refractedDepth, float4 ShallowColor, float sunLuma
     float3 fog = ShallowColor * sunLuma;
 
     float3 result = lerp(color.rgb, fog.rgb, saturate(fogCoeff * FogColor.a * turbidity));
-    // float3 result = saturate(fogCoeff * FogColor.a * turbidity).xxx;
     return float4(result, 1);
 }
 
@@ -131,7 +140,6 @@ float4 getDiffuse(float3 surfaceNormal, float3 lightDir, float3 eyeDirection, fl
     float verticalityFade =  (1 - shades(eyeDirection, float3(0, 0, 1)));
     float distanceFade = smoothstep(0, 1, distance * 0.001);
     float diffuse = shades(lightDir, surfaceNormal) * verticalityFade * distanceFade; // increase intensity with distance
-    // float diffuse = shades(lightDir, surfaceNormal) * smoothstep(0, 1, distance * 0.001); // increase intensity with distance
     float3 result = lerp(color, diffuseColor, saturate(diffuse));
 
     return float4(result, 1);
@@ -151,7 +159,7 @@ float4 getFresnel(float3 surfaceNormal, float3 eyeDirection, float4 reflection, 
 float4 getSpecular(float3 surfaceNormal, float3 lightDir, float3 eyeDirection, float3 specColor, float4 color){
     float2 scatteringConst = {-0.569999993, 0.819999993}; //scattering to simulate water coming through the waves
     float specularBoost = 2;
-    float glossiness = 50;
+    float glossiness = 100;
 
     float specular = pow(abs(shades(reflect(-eyeDirection, surfaceNormal), lightDir)), VarAmounts.x);
     float scattering = pow(abs(saturate(dot(surfaceNormal.xz, scatteringConst))), glossiness);
@@ -159,7 +167,13 @@ float4 getSpecular(float3 surfaceNormal, float3 lightDir, float3 eyeDirection, f
     return float4(result, 1);
 }
 
-float4 getShoreFade(float depth, float4 color){
+
+float4 getShoreFade(PS_INPUT IN, float depth, float4 color){
     color.a = 1 - pow(abs(1 - depth), FresnelRI.y);
+    float scale = 20;
+    float speed = 0.3;
+    float shoreAnimation = sin(IN.LTEXCOORD_1.x/scale - TESR_GameTime * speed) * 0.4 + 0.8; //reframe sin() from -1/1 to 0.2/1.2 to ensure some fading happens 
+    color.a = 1 - pow(1 - abs(depth), 60) * shoreAnimation;
+    // return float2(color.a, 1).xxxy;
     return color;
 }

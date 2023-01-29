@@ -56,15 +56,9 @@ PS_OUTPUT main(PS_INPUT IN, float2 PixelPos : VPOS) {
     float2 depths = float2(fadedDepth.y + depth, depth); // deepfog
     depths = saturate((FogParam.x - depths) / FogParam.y); 
 
-    float4 waveTexture = getWaveTexture(IN, distance);
-
-
     // sample displacement and mix with the wave texture
-    float4 displacement = getDisplacement(IN, BlendRadius.w);
-    float4 DisplacementNormal = normalize(displacement);
-    float3 surfaceNormal = normalize((saturate(DisplacementNormal.z) * waveTexture.xyz - DisplacementNormal) + DisplacementNormal);
-    surfaceNormal.xy += DisplacementNormal.xy * 0.2;
-
+    float3 surfaceNormal = getWaveTexture(IN, distance).xyz;
+    surfaceNormal = getDisplacement(IN, BlendRadius.w, surfaceNormal);
 
     float refractionCoeff = (waterDepth.y * depthFog) * ((saturate(distance * 0.002) * (-4 + VarAmounts.w)) + 4);
     float4 reflectionPos = getReflectionSamplePosition(IN, surfaceNormal, refractionCoeff * interiorRefractionModifier );
