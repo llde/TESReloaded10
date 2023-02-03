@@ -1957,11 +1957,11 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		if (ShaderConst.WaterLens.Percent == -1.0f) ShaderConst.WaterLens.Percent = 1.0f;
 	}
 	if (currentWorldSpace) {
-		if (RainEffect->Enabled && ShaderConst.Precipitations.RainData.x > 0.0f) {
+		if (RainEffect->Enabled && ShaderConst.Rain.RainData.x > 0.0f) {
 			RainEffect->SetCT();
 			RainEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
-		if (SnowEffect->Enabled && ShaderConst.Precipitations.SnowData.x > 0.0f) {
+		if (SnowEffect->Enabled && ShaderConst.Snow.SnowData.x > 0.0f) {
 			SnowEffect->SetCT();
 			SnowEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
