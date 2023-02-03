@@ -123,14 +123,14 @@ float3 getDisplacement(PS_INPUT IN, float blendRadius, float3 surfaceNormal){
 float4 getLightTravel(float3 refractedDepth, float4 ShallowColor, float4 DeepColor, float sunLuma, float4 color){
     float4 waterColor = lerp(ShallowColor, DeepColor, refractedDepth.y); 
     // return color * waterColor * sunLuma / TESR_WaterSettings.y;
-    float3 result = color * lerp(0.7, waterColor * sunLuma / TESR_WaterSettings.y, pow(refractedDepth.x, TESR_WaterSettings.y)); //never reach 1 so that water is always absorbing some light
+    float3 result = color.rgb * lerp(0.7, waterColor.rgb * sunLuma / TESR_WaterSettings.y, pow(abs(refractedDepth.x), TESR_WaterSettings.y)); //never reach 1 so that water is always absorbing some light
     return float4(result, 1);
 }
 
 float4 getTurbidityFog(float3 refractedDepth, float4 ShallowColor, float sunLuma, float4 color){
     float turbidity = max(0.00001, TESR_WaterVolume.z); // clamp minimum value to avoid division by 0
     float fogCoeff = 1 - saturate((FogParam.z - (refractedDepth.x * FogParam.z)) / FogParam.w);
-    float3 fog = ShallowColor * sunLuma;
+    float3 fog = ShallowColor.rgb * sunLuma;
 
     float3 result = lerp(color.rgb, fog.rgb, saturate(fogCoeff * FogColor.a * turbidity));
     return float4(result, 1);
@@ -140,7 +140,7 @@ float4 getDiffuse(float3 surfaceNormal, float3 lightDir, float3 eyeDirection, fl
     float verticalityFade =  (1 - shades(eyeDirection, float3(0, 0, 1)));
     float distanceFade = smoothstep(0, 1, distance * 0.001);
     float diffuse = shades(lightDir, surfaceNormal) * verticalityFade * distanceFade; // increase intensity with distance
-    float3 result = lerp(color, diffuseColor, saturate(diffuse));
+    float3 result = lerp(color.rgb, diffuseColor.rgb, saturate(diffuse));
 
     return float4(result, 1);
 }
@@ -172,8 +172,8 @@ float4 getShoreFade(PS_INPUT IN, float depth, float4 color){
     color.a = 1 - pow(abs(1 - depth), FresnelRI.y);
     float scale = 20;
     float speed = 0.3;
-    float shoreAnimation = sin(IN.LTEXCOORD_1.x/scale - TESR_GameTime * speed) * 0.4 + 0.8; //reframe sin() from -1/1 to 0.2/1.2 to ensure some fading happens 
-    color.a = 1 - pow(1 - abs(depth), 60) * shoreAnimation;
+    float shoreAnimation = sin(IN.LTEXCOORD_1.x/scale - TESR_GameTime.y * speed) * 0.4 + 0.8; //reframe sin() from -1/1 to 0.2/1.2 to ensure some fading happens 
+    color.a = 1 - pow(abs(1 - depth), 60) * shoreAnimation;
     // return float2(color.a, 1).xxxy;
     return color;
 }
