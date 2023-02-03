@@ -172,7 +172,7 @@ float4 getShoreFade(PS_INPUT IN, float depth, float4 color){
     color.a = 1 - pow(abs(1 - depth), FresnelRI.y);
     float scale = 20;
     float speed = 0.3;
-    float shoreAnimation = sin(IN.LTEXCOORD_1.x/scale - TESR_GameTime.y * speed) * 0.4 + 0.8; //reframe sin() from -1/1 to 0.2/1.2 to ensure some fading happens 
+    float shoreAnimation = sin(IN.LTEXCOORD_1.x/scale - TESR_GameTime * speed) * 0.4 + 0.8; //reframe sin() from -1/1 to 0.2/1.2 to ensure some fading happens 
     color.a = 1 - pow(abs(1 - depth), 60) * shoreAnimation;
     // return float2(color.a, 1).xxxy;
     return color;
