@@ -290,12 +290,14 @@ void SettingManager::LoadSettings() {
 	if (!Config.Config) Config.Init();
 	SettingsMain.Main.RemoveUnderwater = GetSettingI("Main.Main.Water", "RemoveUnderwater");
 	SettingsMain.Main.RemovePrecipitations = GetSettingI("Main.Main.Precipitations", "RemovePrecipitations");
+	SettingsMain.Main.ForceReflections = GetSettingI("Main.Main.Water", "ForceReflections");
 	SettingsMain.Main.MemoryHeapManagement = GetSettingI("Main.Main.Memory", "HeapManagement");
 	SettingsMain.Main.MemoryTextureManagement = GetSettingI("Main.Main.Memory", "TextureManagement");
 	SettingsMain.Main.AnisotropicFilter = GetSettingI("Main.Main.Misc", "AnisotropicFilter");
 	SettingsMain.Main.FarPlaneDistance = GetSettingF("Main.Main.Misc", "FarPlaneDistance");
 	SettingsMain.Main.ScreenshotKey = GetSettingI("Main.Main.Misc", "ScreenshotKey");
 	SettingsMain.Main.ReplaceIntro = GetSettingI("Main.Main.Misc", "ReplaceIntro");
+	SettingsMain.Main.ForceMSAA = GetSettingI("Main.Main.Misc", "ForceMSAA");
 	SettingsMain.Main.SkipFog = GetSettingI("Main.Main.Misc", "SkipFog");
 
 	SettingsMain.FrameRate.SmartControl = GetSettingI("Main.FrameRate.SmartControl", "SmartControl");

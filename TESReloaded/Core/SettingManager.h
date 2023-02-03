@@ -4,6 +4,8 @@ struct SettingsMainStruct {
 
 	struct MainStruct {
 		bool	RemoveUnderwater;
+		bool	ForceMSAA;
+		bool	ForceReflections;
 		bool	RemovePrecipitations;
 		bool	MemoryHeapManagement;
 		bool	MemoryTextureManagement;
