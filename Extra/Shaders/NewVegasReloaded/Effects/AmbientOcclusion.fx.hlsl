@@ -85,6 +85,9 @@ float4 SSAO(VSOUT IN) : COLOR0
 {
 	float2 coord = IN.UVCoord;
 
+	clip(coord > 0); // discard half the screen to render at half resolution
+	coord *= 2;
+
 	// generate the sampling kernel with random points in a hemisphere
 	int kernelSize = 20;
 	float3 kernel[20]; // max supported kernel size is 20 samples
@@ -149,6 +152,12 @@ float4 Normal(VSOUT IN) : COLOR0
 	return float4(GetNormal(IN.UVCoord), readDepth(IN.UVCoord));
 }
 
+float4 Expand(VSOUT IN) : COLOR0
+{
+	float2 coord = IN.UVCoord * 0.5;
+	return tex2D(TESR_RenderedBuffer, coord);
+}
+
 float4 Combine(VSOUT IN) : COLOR0
 {
 	float3 color = tex2D(TESR_SourceBuffer, IN.UVCoord).rgb;
@@ -176,6 +185,12 @@ technique
 	{
 		VertexShader = compile vs_3_0 FrameVS();
 		PixelShader = compile ps_3_0 SSAO();
+	}
+
+	pass
+	{
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 Expand();
 	}
 	
 	pass
