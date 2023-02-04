@@ -83,42 +83,40 @@ float fogCoeff(float depth){
 
 float4 SSAO(VSOUT IN) : COLOR0
 {
-	float2 coord = IN.UVCoord;
+	if (IN.UVCoord.x > 0.5 || IN.UVCoord.y > 0.5) return 1.0; // discard half the screen to render at half resolution
 
-	clip(coord > 0); // discard half the screen to render at half resolution
-	coord *= 2;
+	float2 uv = IN.UVCoord.xy * 2;
 
 	// generate the sampling kernel with random points in a hemisphere
-	int kernelSize = 20;
-	float3 kernel[20]; // max supported kernel size is 20 samples
+	int kernelSize = clamp(AOsamples, 0, 32);
+	// float3 kernel[20]; // max supported kernel size is 20 samples
 	float uRadius = abs(AOrange);
 	float bias = saturate(AOangleBias);
 
-	float3 origin = reconstructPosition(coord);
+	float3 origin = reconstructPosition(uv);
 	if (origin.z > endFade) return 1.0;
 
-	for (int i = 0; i < kernelSize; ++i) {
-		// generate random samples in a unit sphere (random vector coordinates from -1 to 1);
-		float3 rand = random(coord * i);
-		kernel[i] = float3 (rand.x * 2 - 1, rand.y * 2 - 1, rand.z);
-		normalize(kernel[i]);
-
-		//randomize points distance to sphere center, making them more concentrated towards the center
-		kernel[i] *= random(coord * i/2);
-		float scale = 1 - float(i) / float(kernelSize);
-		scale = lerp(bias, 1.0f, scale * scale);
-		kernel[i] *= scale; 
-	}
-
 	//reorient our sample kernel along the origin's normal
-	float3 normal = GetNormal(coord);
+	float3 normal = GetNormal(uv);
 
 	// calculate occlusion by sampling depth of each point from the kernel
 	float occlusion = 0.0;
-	for (i = 0; i < kernelSize; ++i) {
+	for (int i = 0; i < kernelSize; ++i) {
+
+		// generate random samples in a unit sphere (random vector coordinates from -1 to 1);
+		float3 rand = random(uv * i);
+		float3 sampleVector = float3 (rand.x * 2 - 1, rand.y * 2 - 1, rand.z);
+		sampleVector = normalize(sampleVector);
+
+		//randomize points distance to sphere center, making them more concentrated towards the center
+		sampleVector *= random(uv * i/2);
+		float scale = 1 - float(i) / float(kernelSize);
+		scale = lerp(bias, 1.0f, scale * scale);
+		sampleVector *= scale; 
+
 		// get sample positions around origin:
-		kernel[i] *= dot(normal, kernel[i]) < 0.0 ? -1.0 : 1.0; // if our sample vector goes inside the geometry, we flip it
-		float3 samplePoint = origin + kernel[i] * uRadius;
+		sampleVector *= dot(normal, sampleVector) < 0.0 ? -1.0 : 1.0; // if our sample vector goes inside the geometry, we flip it
+		float3 samplePoint = origin + sampleVector * uRadius;
 		
 		// compare depth of the projected sample with the value from depthbuffer
 		float3 screenSpaceSample = projectPosition (samplePoint);
