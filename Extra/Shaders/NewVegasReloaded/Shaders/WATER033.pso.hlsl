@@ -43,6 +43,7 @@ sampler2D TESR_samplerWater : register(s5) < string ResourceName = "Water\water_
 //   ReflectionMap   texture_0       1
 //
 
+#include "Includes/Helpers.hlsl"
 #include "Includes/Water.hlsl"
 
 PS_OUTPUT main(PS_INPUT IN) {
@@ -57,8 +58,8 @@ PS_OUTPUT main(PS_INPUT IN) {
     float4 screenPos = getScreenpos(IN);                // point coordinates in screen space for water surface
     float sunLuma = luma(SunColor);
 
-    float4 waveTexture = getWaveTexture(IN, distance);
-    float3 surfaceNormal = normalize(waveTexture.xyz);
+    float3 waveTexture = getWaveTexture(IN, distance).xyz;
+    float3 surfaceNormal = normalize(waveTexture);
     float refractionCoeff = ((saturate(distance * 0.002) * (-4 + VarAmounts.w)) + 4);
     float4 reflectionPos = getReflectionSamplePosition(IN, surfaceNormal, refractionCoeff);
     float4 reflection = tex2Dproj(ReflectionMap, reflectionPos);
@@ -66,9 +67,9 @@ PS_OUTPUT main(PS_INPUT IN) {
     float4 color = ShallowColor;
     color = getFresnel(surfaceNormal, eyeDirection, reflection, color);
     color = getSpecular(surfaceNormal, TESR_SunDirection.xyz, eyeDirection, SunColor.rgb, color);
+    color.a = 1;
 
-    OUT.color_0.rgb = color;
-    OUT.color_0.a = 1;
+    OUT.color_0 = color;
 
     return OUT;	
 };

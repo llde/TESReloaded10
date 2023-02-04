@@ -25,6 +25,7 @@ sampler2D DisplacementMap : register(s3); //unused
 sampler2D DepthMap : register(s4);
 sampler2D TESR_samplerWater : register(s5) < string ResourceName = "Water\water_NRM.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; ADDRESSW = WRAP; MAGFILTER = ANISOTROPIC; MINFILTER = ANISOTROPIC; MIPFILTER = ANISOTROPIC; } ;
 
+#include "Includes/Helpers.hlsl"
 #include "Includes/Water.hlsl"
 
 PS_OUTPUT main(PS_INPUT IN) {
@@ -50,7 +51,7 @@ PS_OUTPUT main(PS_INPUT IN) {
     float exteriorRefractionModifier = 0.5;		// reduce refraction because of the way interior depth is encoded
     float exteriorDepthModifier = 1;			// reduce depth value for fog because of the way interior depth is encoded
 
-    float3 surfaceNormal = getWaveTexture(IN, distance);
+    float3 surfaceNormal = getWaveTexture(IN, distance).xyz;
     float refractionCoeff = (waterDepth.y * depthFog) * ((saturate(distance * 0.002) * (-4 + VarAmounts.w)) + 4);
     float4 reflectionPos = getReflectionSamplePosition(IN, surfaceNormal, refractionCoeff * exteriorRefractionModifier);
     float4 reflection = tex2Dproj(ReflectionMap, reflectionPos);

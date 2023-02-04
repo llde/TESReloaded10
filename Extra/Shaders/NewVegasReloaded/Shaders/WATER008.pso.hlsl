@@ -22,17 +22,6 @@ float4 TESR_GameTime : register(c17);
 float4 TESR_HorizonColor : register(c18);
 float4 TESR_SunDirection : register(c19);
 
-// float4 TESR_SunColor : register(c14);
-// float4 TESR_WaterCoefficients : register(c15);
-// float4 TESR_WaveParams : register(c16);
-// float4 TESR_WaterVolume : register(c17);
-// float4 TESR_WaterSettings : register(c18);
-
-// float4 TESR_ReciprocalResolution : register(c19);
-// float4x4 TESR_ViewTransform : register(c20);
-// float4x4 TESR_ProjectionTransform : register(c24);
-// float4 TESR_WaterShorelineParams : register(c28);
-
 sampler2D ReflectionMap : register(s0);
 sampler2D RefractionMap : register(s1);
 sampler2D NormalMap : register(s2);
@@ -41,7 +30,7 @@ sampler2D DepthMap : register(s4);
 
 sampler2D TESR_samplerWater : register(s5) < string ResourceName = "Water\watercalm_NRM.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; ADDRESSW = WRAP; MAGFILTER = ANISOTROPIC; MINFILTER = ANISOTROPIC; MIPFILTER = ANISOTROPIC; } ;
 
-
+#include "Includes/Helpers.hlsl"
 #include "Includes/Water.hlsl"
 
 
@@ -67,7 +56,7 @@ PS_OUTPUT main(PS_INPUT IN, float2 PixelPos : VPOS) {
     float2 depths = float2(fadedDepth.y + depth, depth); // deepfog
     depths = saturate((FogParam.x - depths) / FogParam.y); 
 
-    float3 surfaceNormal = getWaveTexture(IN, distance);
+    float3 surfaceNormal = getWaveTexture(IN, distance).xyz;
 
     float refractionCoeff = (waterDepth.y * depthFog) * ((saturate(distance * 0.002) * (-4 + VarAmounts.w)) + 4);
     float4 reflectionPos = getReflectionSamplePosition(IN, surfaceNormal, refractionCoeff * interiorRefractionModifier );

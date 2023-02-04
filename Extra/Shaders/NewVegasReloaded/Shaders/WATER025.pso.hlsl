@@ -29,7 +29,7 @@ sampler2D DisplacementMap : register(s3);
 sampler2D DepthMap : register(s4);
 sampler2D TESR_samplerWater : register(s5) < string ResourceName = "Water\watercalm_NRM.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; ADDRESSW = WRAP; MAGFILTER = ANISOTROPIC; MINFILTER = ANISOTROPIC; MIPFILTER = ANISOTROPIC; } ;
 
-
+#include "Includes/Helpers.hlsl"
 #include "Includes/Water.hlsl"
 
 

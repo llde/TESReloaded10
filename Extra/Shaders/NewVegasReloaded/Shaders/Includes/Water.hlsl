@@ -1,9 +1,3 @@
-#define	expand(v)	        (((v) - 0.5) / 0.5)  // from 0/1 to -1/1
-#define	shade(n, l)         max(dot(n, l), 0)
-#define	shades(n, l)        saturate(dot(n, l))
-#define invlerp(a, b, t)    (t-a)/(b-a)
-#define luma(color)         color.r * 0.3f + color.g * 0.59f +color.b * 0.11f; // extract luma
-#define mix(colora, colorb) colora * colorb * 2 // mix two colors without darkening
 
 
 // Requires the following registers:
@@ -148,7 +142,7 @@ float4 getDiffuse(float3 surfaceNormal, float3 lightDir, float3 eyeDirection, fl
 float4 getFresnel(float3 surfaceNormal, float3 eyeDirection, float4 reflection, float4 color){
     float reflectivity = TESR_WaveParams.w;
 
-    float fresnelCoeff = saturate(pow((1 - max(0, dot(eyeDirection, surfaceNormal))), 5));
+    float fresnelCoeff = saturate(pow((1 - shade(eyeDirection, surfaceNormal), 5)));
 
     float4 reflectionColor = lerp (reflection * ReflectionColor, reflection, saturate(reflectivity));
     // float3 reflectionColor = VarAmounts.y * (reflection - ReflectionColor) + ReflectionColor.rgbb;
@@ -172,7 +166,7 @@ float4 getShoreFade(PS_INPUT IN, float depth, float4 color){
     color.a = 1 - pow(abs(1 - depth), FresnelRI.y);
     float scale = 20;
     float speed = 0.3;
-    float shoreAnimation = sin(IN.LTEXCOORD_1.x/scale - TESR_GameTime * speed) * 0.4 + 0.8; //reframe sin() from -1/1 to 0.2/1.2 to ensure some fading happens 
+    float shoreAnimation = sin(IN.LTEXCOORD_1.x/scale - TESR_GameTime.x * speed) * 0.4 + 0.8; //reframe sin() from -1/1 to 0.2/1.2 to ensure some fading happens 
     color.a = 1 - pow(abs(1 - depth), 60) * shoreAnimation;
     // return float2(color.a, 1).xxxy;
     return color;

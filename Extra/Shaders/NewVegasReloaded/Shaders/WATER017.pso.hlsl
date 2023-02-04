@@ -27,7 +27,7 @@ sampler2D DisplacementMap : register(s3);
 sampler2D DepthMap : register(s4);
 sampler2D TESR_samplerWater : register(s5) < string ResourceName = "Water\water_NRM.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; ADDRESSW = WRAP; MAGFILTER = ANISOTROPIC; MINFILTER = ANISOTROPIC; MIPFILTER = ANISOTROPIC; } ;
 
-
+#include "Includes/Helpers.hlsl"
 #include "Includes/Water.hlsl"
 
 PS_OUTPUT main(PS_INPUT IN) {
@@ -48,7 +48,7 @@ PS_OUTPUT main(PS_INPUT IN) {
     float2 depths = float2(fadedDepth.y + depth, depth); // deepfog
     depths = saturate((FogParam.x - depths) / FogParam.y); 
 
-    float3 surfaceNormal = getWaveTexture(IN, distance);
+    float3 surfaceNormal = getWaveTexture(IN, distance).xyz;
     surfaceNormal = getDisplacement(IN, BlendRadius.w, surfaceNormal);
 
     float LODfade = saturate(smoothstep(4096,4096 * 2, distance));
