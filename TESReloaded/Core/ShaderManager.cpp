@@ -1,4 +1,60 @@
 
+/*
+* Constructor of Animator class. Starts an animator for a given value.
+*/
+Animator::Animator() {
+	time = TimeGlobals::Get();
+	startValue = 0;
+	endValue = 0;
+	startTime = 0;
+	endTime = 0;
+	running = false;
+};
+
+
+Animator::~Animator() {
+};
+
+
+void Animator::Initialize(float value) {
+	startValue = value;
+	endValue = value;
+}
+
+/*
+* Starts the animator by setting a target value and a duration to reach it.
+*/
+void Animator::Start(float duration, float finalValue) {
+	float currenttime = time->GameHour->data;
+
+	startTime = currenttime;
+	endTime = currenttime + duration;
+	running = true;
+
+	startValue = endValue;
+	endValue = finalValue;
+}
+
+
+/*
+* Gets the value for the animated value at the current time.
+*/
+float Animator::GetValue() {
+	float currenttime = time->GameHour->data;
+	if (!running) return startValue;
+	
+	if (currenttime > endTime) {
+		running = false;
+		startValue = endValue;
+		return endValue;
+	}
+
+	running = true;
+	currenttime = ShaderManager::invLerp(startTime, endTime, currenttime);
+	return ShaderManager::lerp(startValue, endValue, currenttime);
+};
+
+
 ShaderProgram::ShaderProgram() {
 
 	FloatShaderValues = NULL;
@@ -857,6 +913,8 @@ void ShaderManager::InitializeConstants() {
 	ShaderConst.SnowAccumulation.Params.w = 0.0f;
 	ShaderConst.WetWorld.Data.x = 0.0f;
 	
+	ShaderConst.Animators.PuddlesAnimator.Initialize(0);
+	ShaderConst.Animators.RainAnimator.Initialize(0);
 }
 
 

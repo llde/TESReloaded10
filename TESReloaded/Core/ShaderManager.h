@@ -1,6 +1,24 @@
 #pragma once
 #define FrameFVF D3DFVF_XYZ | D3DFVF_TEX1
 
+
+class Animator {
+public:
+	Animator();
+	virtual ~Animator();
+	void				Initialize(float startValue);
+	float				GetValue();
+	void				Start(float duration, float finalValue);
+
+	TimeGlobals* time;
+	float				startValue;
+	float				endValue;
+	float				startTime;
+	float				endTime;
+	bool				running;
+};
+
+
 enum ShaderCompileType{
 	AlwaysOff,
 	AlwaysOn,
@@ -131,6 +149,11 @@ struct ShaderConstants {
 		D3DXVECTOR4		Data;
 	};
 
+	struct AnimatorsStruct {
+		Animator			RainAnimator;
+		Animator			PuddlesAnimator;
+	};
+
 	D3DXVECTOR4				ReciprocalResolution;
 	D3DXVECTOR4				SunDir;
 	D3DXVECTOR4				SunTiming;
@@ -152,6 +175,7 @@ struct ShaderConstants {
 	float					fogStart;
 	float					fogEnd;
 	float					fogPower;
+	AnimatorsStruct			Animators;
 	ShadowMapStruct			ShadowMap;
 	OcclusionMapStruct		OcclusionMap;
 	WaterStruct				Water;
