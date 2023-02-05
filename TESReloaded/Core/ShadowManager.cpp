@@ -726,12 +726,14 @@ void ShadowManager::RenderShadowMaps() {
 		LightPosition.z = Light->m_worldTransform.pos.z;
 		LightPosition.w = 1.0f;
 
+		bool lightCulled = Light->m_flags & NiAVObject::kFlag_AppCulled;
 		D3DXVECTOR4 LightVector = LightPosition - PlayerPosition;
 		D3DXVec4Normalize(&LightVector, &LightVector);
+		float inFront = D3DXVec4Dot(&LightVector, &TheRenderManager->CameraForward);
 		float Distance = Light->GetDistance(&Player->pos);
 
 		// select lights that will be tracked
-		if ((D3DXVec4Dot(&LightVector, &TheRenderManager->CameraForward) > 0 || Distance < 1000) && NiAVObject::kFlag_AppCulled && Light->CastShadows) {
+		if ((inFront > 0 || Distance < 800) && !lightCulled && Light->CastShadows) {
 			SceneLights[(int)(Distance * 10000)] = Light; // mutliplying distance before convertion to avoid duplicates in case of similar values
 		}
 		Entry = Entry->next;
