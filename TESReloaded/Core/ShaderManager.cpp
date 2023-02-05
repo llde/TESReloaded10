@@ -1221,16 +1221,19 @@ void ShaderManager::UpdateConstants() {
 		if (WorldSky->GetIsUnderWater()) {
 			ShaderConst.BloodLens.Percent = 0.0f;
 			ShaderConst.WaterLens.Percent = -1.0f;
+			ShaderConst.Animators.WaterLensAnimator.switched = true;
 		}
 
 		if (TheSettingManager->SettingsMain.Effects.WaterLens) {
-			if (!WorldSky->GetIsUnderWater() && ShaderConst.WaterLens.Percent == -1) {
+
+			if (!WorldSky->GetIsUnderWater() && ShaderConst.Animators.WaterLensAnimator.switched == true) {
+				ShaderConst.Animators.WaterLensAnimator.switched = false;
 				// start the waterlens effect and animate it fading
 				ShaderConst.WaterLens.Time.x = TheSettingManager->SettingsWaterLens.TimeMultA;
 				ShaderConst.WaterLens.Time.y = TheSettingManager->SettingsWaterLens.TimeMultB;
 				ShaderConst.WaterLens.Time.z = TheSettingManager->SettingsWaterLens.Viscosity;
 				ShaderConst.Animators.WaterLensAnimator.Initialize(1);
-				ShaderConst.Animators.WaterLensAnimator.Start(0.001, 0);
+				ShaderConst.Animators.WaterLensAnimator.Start(0.01, 0);
 			}
 			ShaderConst.WaterLens.Percent = ShaderConst.Animators.WaterLensAnimator.GetValue();
 			ShaderConst.WaterLens.Time.w = TheSettingManager->SettingsWaterLens.Amount * ShaderConst.WaterLens.Percent;
