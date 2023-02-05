@@ -69,6 +69,8 @@ void AttachHooks() {
 	SafeWriteCall(0x00875B86, 0x00710AB0); // Sets the world fov at the end of 1st person rendering
 	SafeWriteCall(0x00875B9D, 0x00710AB0); // Sets the world fov at the end of 1st person rendering
 	SafeWriteJump(0x00C03F49, 0x00C03F5A); // Fixes wrong rendering for image space effects
+
+	SafeWriteCall(0x9BB158, (UInt32)MuzzleLightCullingFix);
 	
 	if (SettingsMain->Main.ForceReflections) {
 		//*Pointers::ShaderParams::WaterHighResolution = 1;

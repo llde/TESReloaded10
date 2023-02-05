@@ -36,6 +36,8 @@ void DetectorWindowDumpAttributesHook();
 void DetectorWindowConsoleCommandHook();
 void DetectorWindowDumpAttributesHook();
 
+void __fastcall MuzzleLightCullingFix(MuzzleFlash* This);
+
 float MultiBoundWaterHeightFix();
 void DetectorWindowDumpAttributes(HWND TreeView, UInt32 Msg, WPARAM wParam, LPTVINSERTSTRUCTA lParam);
 

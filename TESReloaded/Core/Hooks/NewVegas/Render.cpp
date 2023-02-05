@@ -292,3 +292,15 @@ __declspec(naked) void DetectorWindowConsoleCommandHook() {
 	}
 
 }
+
+void __fastcall MuzzleLightCullingFix(MuzzleFlash* This) {
+	if (This->light) {
+		if (!This->bEnabled) {
+			This->light->m_flags |= 1;
+		}
+		else {
+			This->light->m_flags &= ~1;
+		}
+	}
+	ThisCall(0x9BB8A0, This);
+}

@@ -5271,6 +5271,21 @@ public:
 };
 assert(sizeof(GameSetting) == 0x0C);
 
+struct MuzzleFlash
+{
+	bool bEnabled;
+	bool bMPSEnabled;
+	bool bUpdateLight;
+	bool gap03;
+	float fEnableTimer;
+	float fDurationTimer;
+	NiNode* node;
+	NiPointLight* light;
+	BGSProjectile* projectile;
+	TESObjectWEAP* sourceWeap;
+	Actor* sourceActor;
+};
+
 namespace Pointers {
 	namespace Generic {
 		static float*			  MPF					= (float*)0x00000000;
