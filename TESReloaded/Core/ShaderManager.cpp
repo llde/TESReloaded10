@@ -911,8 +911,10 @@ void ShaderManager::InitializeConstants() {
 	ShaderConst.WaterLens.Percent = 0.0f;
 	ShaderConst.BloodLens.Percent = 0.0f;
 	ShaderConst.SnowAccumulation.Params.w = 0.0f;
-	ShaderConst.WetWorld.Data.x = 0.0f;
-	
+	ShaderConst.WetWorld.Data.x = 0;
+	ShaderConst.WetWorld.Data.y = 0;
+	ShaderConst.WetWorld.Data.z = 0;
+
 	ShaderConst.Animators.PuddlesAnimator.Initialize(0);
 	ShaderConst.Animators.RainAnimator.Initialize(0);
 }
@@ -938,7 +940,17 @@ void ShaderManager::UpdateConstants() {
 	TheRenderManager->UpdateSceneCameraData();
 	TheRenderManager->SetupSceneCamera();
 
+	// context variables
 	bool isExterior = Player->GetWorldSpace() || Player->parentCell->flags0 & TESObjectCELL::kFlags0_BehaveLikeExterior;
+	bool isDialog = InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog);
+	bool isPersuasion = InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion);
+
+	bool isRainy = false;
+	bool isSnow = false;
+	if (currentWeather) {
+		isRainy = currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy;
+		isSnow = currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow;
+	}
 
 	TimeGlobals* GameTimeGlobals = TimeGlobals::Get();
 	float GameHour = GameTimeGlobals->GameHour->data;
@@ -1216,7 +1228,7 @@ void ShaderManager::UpdateConstants() {
 		}		
 
 		if (TheSettingManager->SettingsMain.Effects.SnowAccumulation && currentWeather) {
-			if (currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow) {
+			if (isSnow) {
 				if (ShaderConst.SnowAccumulation.Params.w < TheSettingManager->SettingsPrecipitations.SnowAccumulation.Amount) ShaderConst.SnowAccumulation.Params.w = ShaderConst.SnowAccumulation.Params.w + TheSettingManager->SettingsPrecipitations.SnowAccumulation.Increase;
 			}
 			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow)) {
@@ -1230,33 +1242,43 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.SnowAccumulation.Params.z = TheSettingManager->SettingsPrecipitations.SnowAccumulation.SunPower;
 		}
 			
-		if ((TheSettingManager->SettingsMain.Effects.WetWorld || TheSettingManager->SettingsMain.Shaders.Water) && currentWeather) {
-			if (currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy) {
+		if ((TheSettingManager->SettingsMain.Effects.WetWorld || TheSettingManager->SettingsMain.Shaders.Water) && isExterior) {
+			if (isRainy && ShaderConst.WetWorld.Data.y == 0) {
+				// it just started raining
+				Logger::Log("rain just started");
 				ShaderConst.WetWorld.Data.y = 1.0f;
-				if (ShaderConst.WetWorld.Data.x < TheSettingManager->SettingsPrecipitations.WetWorld.Amount) ShaderConst.WetWorld.Data.x = ShaderConst.WetWorld.Data.x + TheSettingManager->SettingsPrecipitations.WetWorld.Increase;
+				ShaderConst.Animators.PuddlesAnimator.Start(0.3, 1);
+				ShaderConst.Animators.RainAnimator.Start(0.05, 1);
 			}
-			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy)) {
-				ShaderConst.WetWorld.Data.y = 0.3f - weatherPercent;
-				if (ShaderConst.WetWorld.Data.y <= 0.0f) ShaderConst.WetWorld.Data.y = 0.05f;
-				if (ShaderConst.WetWorld.Data.x > 0.0f)
-					ShaderConst.WetWorld.Data.x = ShaderConst.WetWorld.Data.x - TheSettingManager->SettingsPrecipitations.WetWorld.Decrease;
-				else if (ShaderConst.WetWorld.Data.x < 0.0f)
-					ShaderConst.WetWorld.Data.x = 0.0f;
+			else if (!isRainy && ShaderConst.WetWorld.Data.y == 1) {
+				// it just stopped raining
+				Logger::Log("rain just stopped");
+
+				ShaderConst.WetWorld.Data.y = 0.0f;
+				ShaderConst.Animators.PuddlesAnimator.Start(2, 0);
+				ShaderConst.Animators.RainAnimator.Start(0.1, 0);
 			}
+			ShaderConst.WetWorld.Data.x = ShaderConst.Animators.RainAnimator.GetValue();
+			ShaderConst.WetWorld.Data.z = ShaderConst.Animators.PuddlesAnimator.GetValue();
+
+			Logger::Log("rain coeff, %f", ShaderConst.WetWorld.Data.x);
+			Logger::Log("puddles coeff, %f", ShaderConst.WetWorld.Data.z);
+
+
 			ShaderConst.WetWorld.Coeffs.x = TheSettingManager->SettingsPrecipitations.WetWorld.PuddleCoeff_R;
 			ShaderConst.WetWorld.Coeffs.y = TheSettingManager->SettingsPrecipitations.WetWorld.PuddleCoeff_G;
 			ShaderConst.WetWorld.Coeffs.z = TheSettingManager->SettingsPrecipitations.WetWorld.PuddleCoeff_B;
 			ShaderConst.WetWorld.Coeffs.w = TheSettingManager->SettingsPrecipitations.WetWorld.PuddleSpecularMultiplier;
 		}
 		
-		if (currentWeather) {
-			if (currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy)
+		if (isExterior) {
+			if (isRainy)
 				ShaderConst.Rain.RainData.x = weatherPercent;
 			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy))
 				ShaderConst.Rain.RainData.x = 1.0f - weatherPercent;
 			ShaderConst.Rain.RainData.y = TheSettingManager->SettingsPrecipitations.Rain.DepthStep;
 			ShaderConst.Rain.RainData.z = TheSettingManager->SettingsPrecipitations.Rain.Speed;
-			if (currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow)
+			if (isSnow)
 				ShaderConst.Snow.SnowData.x = weatherPercent;
 			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow))
 				ShaderConst.Snow.SnowData.x = 1.0f - weatherPercent;
@@ -1470,16 +1492,16 @@ void ShaderManager::UpdateConstants() {
 			else
 				sds = &TheSettingManager->SettingsDepthOfFieldFirstPersonView;
 			if (sds->Mode == 1) {
-				if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog) || InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) sds->Enabled = false;
+				if (isDialog || isPersuasion) sds->Enabled = false;
 			}
 			else if (sds->Mode == 2) {
-				if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog)) sds->Enabled = false;
+				if (!isDialog) sds->Enabled = false;
 			}
 			else if (sds->Mode == 3) {
-				if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) sds->Enabled = false;
+				if (!isPersuasion) sds->Enabled = false;
 			}
 			else if (sds->Mode == 4) {
-				if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog) && !InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) sds->Enabled = false;
+				if (!isDialog && !isPersuasion) sds->Enabled = false;
 			}
 			if (ShaderConst.DepthOfField.Enabled = sds->Enabled) {
 				ShaderConst.DepthOfField.Blur.x = sds->DistantBlur;
@@ -1499,16 +1521,16 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Cinema.Data.x = TheSettingManager->SettingsCinema.AspectRatio;
 			ShaderConst.Cinema.Data.y = TheSettingManager->SettingsCinema.VignetteRadius;
 			if (Mode == 1) {
-				if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog) || InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) Mode = -1;
+				if (isDialog || isPersuasion) Mode = -1;
 			}
 			else if (Mode == 2) {
-				if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog)) Mode = -1;
+				if (!isDialog) Mode = -1;
 			}
 			else if (Mode == 3) {
-				if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) Mode = -1;
+				if (!isPersuasion) Mode = -1;
 			}
 			else if (Mode == 4) {
-				if (!InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog) && !InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) Mode = -1;
+				if (!isDialog && !isPersuasion) Mode = -1;
 			}
 			if (Mode == -1) {
 				ShaderConst.Cinema.Data.x = 0.0f;
@@ -1964,7 +1986,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	Device->SetFVF(FrameFVF);
 	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
 
-	if (WetWorldEffect->Enabled && currentWorldSpace && ShaderConst.WetWorld.Data.x > 0.0f) {
+	if (WetWorldEffect->Enabled && currentWorldSpace && ShaderConst.WetWorld.Data.z > 0.0f) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		WetWorldEffect->SetCT();
 		WetWorldEffect->Render(Device, RenderTarget, RenderedSurface, false);

@@ -21,7 +21,7 @@ float4 TESR_SkyColor;
 float4 TESR_SunColor;
 float4 TESR_WetWorldCoeffs; // Puddle color R, G, B + spec multiplier
 float4 TESR_WaterSettings; // for water height to avoid rendering puddles underwater
-float4 TESR_WetWorldData; // x: current rain amount, y: max rain amount
+float4 TESR_WetWorldData; // x: current rain amount, y: max rain amount z: puddle amount
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
@@ -33,7 +33,7 @@ sampler2D TESR_OrthoMapBuffer : register(s4) = sampler_state { ADDRESSU = CLAMP;
 //------------------------------------------------------
 // Custimizable
 //------------------------------------------------------
-static const float RipplesIntensity = 2.7f; // Original 3.14159265, changes intensity of the ripples normal
+static const float PI = 3.14159265; //changes intensity of the ripples normal
 static const float time1 = TESR_GameTime.z * 0.96f; // Ripple timing, make sure to offset each by atleast a few
 static const float time2 = TESR_GameTime.z * 0.97f; // Ripple timing, original 1.0-1.4
 static const float time3 = TESR_GameTime.z * 0.98f; // Ripple timing
@@ -70,12 +70,12 @@ float3 ComputeRipple(float2 UV, float CurrentTime, float Weight)
 {
     float4 Ripple = tex2D(TESR_RippleSampler, UV);
 	
-    Ripple.yz = Ripple.yz * 2 - 1;
+    Ripple.yz = expand(Ripple.yz); // convert from 0/1 to -1/1 
 
-    float DropFrac = frac(Ripple.w + CurrentTime);
-    float TimeFrac = DropFrac - 1.0f + Ripple.x;
-    float DropFactor = saturate(0.2f + Weight * 0.8f - DropFrac);
-    float FinalFactor = DropFactor * Ripple.x * sin( clamp(TimeFrac * 9.0f, 0.0f, 3.0f) * RipplesIntensity);
+    float period = frac(Ripple.w + CurrentTime);
+    float TimeFrac = period - 1.0f + Ripple.x;
+    float DropFactor = saturate(0.2f + Weight * 0.8f - period);
+    float FinalFactor = DropFactor * Ripple.x * sin( clamp(TimeFrac * 9.0f, 0.0f, 3.0f) * PI);
 
     return float3(Ripple.yz * FinalFactor * 0.35f, 1.0f);
 }
@@ -99,7 +99,7 @@ float4 WetMap (VSOUT IN ) : COLOR0
 	float4 color = tex2D(TESR_SourceBuffer, uv);
 	float bias = 0.000001;
 
-	float radius = 0.05;// * TESR_WetWorldData.x; // radius will increase with rain status
+	float radius = 0.05 * TESR_WetWorldData.z;// radius will increase with rain status
 	float center = tex2D(TESR_OrthoMapBuffer, IN.UVCoord).r;
 	float left = tex2D(TESR_OrthoMapBuffer, IN.UVCoord + normalize(float2(-1, -0.3)) * radius).r;
 	float right = tex2D(TESR_OrthoMapBuffer, IN.UVCoord + normalize(float2(1, -0.3)) * radius).r;
@@ -158,7 +158,7 @@ float4 Wet( VSOUT IN ) : COLOR0
 
 	// sample and combine rain ripples
 	float2 rippleUV = worldPos.xy / 160.0f;
-	float4 Weights = float4(1, 0.75, 0.5, 0.25) * TESR_WetWorldData.y;
+	float4 Weights = float4(1, 0.75, 0.5, 0.25) * TESR_WetWorldData.x;
 	Weights = saturate(Weights * 4);
 	float3 Ripple1 = ComputeRipple(rippleUV + float2( 0.25f,0.0f), time1, Weights.x);
 	float3 Ripple2 = ComputeRipple(rippleUV * 1.1 + float2(-0.55f,0.3f), time2, Weights.y);
