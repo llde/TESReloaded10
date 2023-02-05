@@ -142,7 +142,7 @@ float4 getDiffuse(float3 surfaceNormal, float3 lightDir, float3 eyeDirection, fl
 float4 getFresnel(float3 surfaceNormal, float3 eyeDirection, float4 reflection, float4 color){
     float reflectivity = TESR_WaveParams.w;
 
-    float fresnelCoeff = saturate(pow((1 - shade(eyeDirection, surfaceNormal), 5)));
+    float fresnelCoeff = saturate(pow(1 - shade(eyeDirection, surfaceNormal), 5));
 
     float4 reflectionColor = lerp (reflection * ReflectionColor, reflection, saturate(reflectivity));
     // float3 reflectionColor = VarAmounts.y * (reflection - ReflectionColor) + ReflectionColor.rgbb;
