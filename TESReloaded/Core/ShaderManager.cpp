@@ -2008,7 +2008,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		SnowAccumulationEffect->SetCT();
 		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (AmbientOcclusionEffect->Enabled && !terminalIsOn) {
+	if (ShaderConst.AmbientOcclusion.Enabled && !terminalIsOn) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		AmbientOcclusionEffect->SetCT();
 		AmbientOcclusionEffect->Render(Device, RenderTarget, RenderedSurface, false);
