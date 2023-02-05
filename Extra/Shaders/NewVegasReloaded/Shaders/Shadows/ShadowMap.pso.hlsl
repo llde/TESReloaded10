@@ -37,8 +37,9 @@ PS_OUTPUT main(VS_OUTPUT IN) {
 	// 1: VSM
 	// 2: simple ESM
 	// 3: filtered ESM
-	// 4: PCF
-	float4 shadowMode = {TESR_ShadowData.w == 1.0f, TESR_ShadowData.w == 2.0f, TESR_ShadowData.w == 3.0f, TESR_ShadowData.w == 4.0f};
+	// 4: PCF or Orthomap
+	float4 shadowMode = {TESR_ShadowData.w == 1.0f, TESR_ShadowData.w == 2.0f, TESR_ShadowData.w == 3.0f, (TESR_ShadowData.w == 4.0f)};
+	shadowMode = (1 - TESR_ShadowData.z) * shadowMode + float4(0, 0, 0, 1) * TESR_ShadowData.z; //will cancel out shadowData.w if ortho map and replace by PCF mode
 
 	// VSM
 	//cheat to reduce shadow acne in variance maps

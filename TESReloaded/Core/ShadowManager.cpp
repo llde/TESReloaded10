@@ -801,10 +801,12 @@ void ShadowManager::RenderShadowMaps() {
 		CurrentPixel = ShadowMapPixel;
 
 		// render ortho map
+		ShadowData->z = 1; // identify ortho map
 		D3DXVECTOR4 OrthoDir = D3DXVECTOR3(0.05f, 0.05f, 1.0f);
 		RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir);
 
 		// Render all other shadow maps
+		ShadowData->z = 0;
 		D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
 		for (int i = MapNear; i < MapOrtho; i++) {
 			ShadowMapTypeEnum ShadowMapType = static_cast<ShadowMapTypeEnum>(i);
