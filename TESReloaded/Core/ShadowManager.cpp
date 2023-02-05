@@ -425,7 +425,7 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, Se
 		zfar = ShadowsExteriors->ShadowMapRadius[ShadowMapTypeEnum::MapLod];
 		break;
 	default:
-		D3DXMatrixOrthoOffCenterRH(&Proj, -Radius, Radius, -Radius, Radius, 0.0f, 2.0f * FarPlane);
+		D3DXMatrixOrthoOffCenterRH(&Proj, -Radius * 2, Radius * 2, -Radius * 2, Radius * 2, FarPlane * 0.8f, 1.2f * FarPlane);
 		return View * Proj;
 	}
 
