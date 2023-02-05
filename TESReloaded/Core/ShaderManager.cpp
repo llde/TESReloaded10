@@ -9,6 +9,7 @@ Animator::Animator() {
 	startTime = 0;
 	endTime = 0;
 	running = false;
+	switched = false;
 };
 
 
@@ -917,6 +918,7 @@ void ShaderManager::InitializeConstants() {
 
 	ShaderConst.Animators.PuddlesAnimator.Initialize(0);
 	ShaderConst.Animators.RainAnimator.Initialize(0);
+	ShaderConst.Animators.SnowAnimator.Initialize(0);
 }
 
 
@@ -1209,23 +1211,26 @@ void ShaderManager::UpdateConstants() {
 			
 			ShaderConst.Water.shorelineParams.x = sws->shoreMovement;
 
-			if (TheSettingManager->SettingsMain.Effects.Underwater && TheSettingManager->SettingsMain.Effects.WaterLens) {
+
+		}		
+
+		if (WorldSky->GetIsUnderWater()) {
+			ShaderConst.BloodLens.Percent = 0.0f;
+			ShaderConst.WaterLens.Percent = -1.0f;
+		}
+
+		if (TheSettingManager->SettingsMain.Effects.WaterLens) {
+			if (!WorldSky->GetIsUnderWater() && ShaderConst.WaterLens.Percent == -1) {
+				// start the waterlens effect and animate it fading
 				ShaderConst.WaterLens.Time.x = TheSettingManager->SettingsWaterLens.TimeMultA;
 				ShaderConst.WaterLens.Time.y = TheSettingManager->SettingsWaterLens.TimeMultB;
 				ShaderConst.WaterLens.Time.z = TheSettingManager->SettingsWaterLens.Viscosity;
-				if (ShaderConst.WaterLens.Percent == -1.0f) {
-					ShaderConst.WaterLens.TimeAmount = 0.0f;
-					ShaderConst.WaterLens.Time.w = TheSettingManager->SettingsWaterLens.Amount;
-				}
-				else if (ShaderConst.WaterLens.Percent > 0.0f) {
-					ShaderConst.WaterLens.TimeAmount += 1.0f;
-					ShaderConst.WaterLens.Percent = 1.0f - ShaderConst.WaterLens.TimeAmount / TheSettingManager->SettingsWaterLens.Time;
-					if (ShaderConst.WaterLens.Percent < 0.0f) ShaderConst.WaterLens.Percent = 0.0f;
-					ShaderConst.WaterLens.Time.w = TheSettingManager->SettingsWaterLens.Amount * ShaderConst.WaterLens.Percent;
-				}
+				ShaderConst.Animators.WaterLensAnimator.Initialize(1);
+				ShaderConst.Animators.WaterLensAnimator.Start(0.001, 0);
 			}
-
-		}		
+			ShaderConst.WaterLens.Percent = ShaderConst.Animators.WaterLensAnimator.GetValue();
+			ShaderConst.WaterLens.Time.w = TheSettingManager->SettingsWaterLens.Amount * ShaderConst.WaterLens.Percent;
+		}
 
 		if (TheSettingManager->SettingsMain.Effects.SnowAccumulation && currentWeather) {
 			if (isSnow) {
@@ -1242,46 +1247,46 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.SnowAccumulation.Params.z = TheSettingManager->SettingsPrecipitations.SnowAccumulation.SunPower;
 		}
 			
-		if ((TheSettingManager->SettingsMain.Effects.WetWorld || TheSettingManager->SettingsMain.Shaders.Water) && isExterior) {
-			if (isRainy && ShaderConst.WetWorld.Data.y == 0) {
+		if (isExterior) {
+			if (isRainy && ShaderConst.Animators.RainAnimator.switched == false) {
 				// it just started raining
-				Logger::Log("rain just started");
 				ShaderConst.WetWorld.Data.y = 1.0f;
 				ShaderConst.Animators.PuddlesAnimator.Start(0.3, 1);
+				ShaderConst.Animators.RainAnimator.switched = true;
 				ShaderConst.Animators.RainAnimator.Start(0.05, 1);
 			}
-			else if (!isRainy && ShaderConst.WetWorld.Data.y == 1) {
+			else if (!isRainy && ShaderConst.Animators.RainAnimator.switched) {
 				// it just stopped raining
-				Logger::Log("rain just stopped");
-
 				ShaderConst.WetWorld.Data.y = 0.0f;
 				ShaderConst.Animators.PuddlesAnimator.Start(2, 0);
+				ShaderConst.Animators.RainAnimator.switched = false;
 				ShaderConst.Animators.RainAnimator.Start(0.1, 0);
 			}
 			ShaderConst.WetWorld.Data.x = ShaderConst.Animators.RainAnimator.GetValue();
 			ShaderConst.WetWorld.Data.z = ShaderConst.Animators.PuddlesAnimator.GetValue();
-
-			Logger::Log("rain coeff, %f", ShaderConst.WetWorld.Data.x);
-			Logger::Log("puddles coeff, %f", ShaderConst.WetWorld.Data.z);
 
 
 			ShaderConst.WetWorld.Coeffs.x = TheSettingManager->SettingsPrecipitations.WetWorld.PuddleCoeff_R;
 			ShaderConst.WetWorld.Coeffs.y = TheSettingManager->SettingsPrecipitations.WetWorld.PuddleCoeff_G;
 			ShaderConst.WetWorld.Coeffs.z = TheSettingManager->SettingsPrecipitations.WetWorld.PuddleCoeff_B;
 			ShaderConst.WetWorld.Coeffs.w = TheSettingManager->SettingsPrecipitations.WetWorld.PuddleSpecularMultiplier;
-		}
-		
-		if (isExterior) {
-			if (isRainy)
-				ShaderConst.Rain.RainData.x = weatherPercent;
-			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy))
-				ShaderConst.Rain.RainData.x = 1.0f - weatherPercent;
+
+			ShaderConst.Rain.RainData.x = ShaderConst.Animators.RainAnimator.GetValue();
 			ShaderConst.Rain.RainData.y = TheSettingManager->SettingsPrecipitations.Rain.DepthStep;
 			ShaderConst.Rain.RainData.z = TheSettingManager->SettingsPrecipitations.Rain.Speed;
-			if (isSnow)
-				ShaderConst.Snow.SnowData.x = weatherPercent;
-			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow))
-				ShaderConst.Snow.SnowData.x = 1.0f - weatherPercent;
+			if (isSnow && ShaderConst.Animators.SnowAnimator.switched == false) {
+				// it just started snowing
+				ShaderConst.Animators.SnowAnimator.switched = true;
+				ShaderConst.Animators.SnowAnimator.Initialize(0);
+				ShaderConst.Animators.SnowAnimator.Start(0.5, 1);
+			}
+			else if (!isSnow && ShaderConst.Animators.SnowAnimator.switched) {
+				// it just stopped snowing
+				ShaderConst.Animators.SnowAnimator.switched = false;
+				ShaderConst.Animators.SnowAnimator.Start(12, 0);
+			}
+			ShaderConst.Snow.SnowData.x = ShaderConst.Animators.SnowAnimator.GetValue();
+
 			ShaderConst.Snow.SnowData.y = TheSettingManager->SettingsPrecipitations.Snow.DepthStep;
 			ShaderConst.Snow.SnowData.z = TheSettingManager->SettingsPrecipitations.Snow.Speed;
 			ShaderConst.Snow.SnowData.w = TheSettingManager->SettingsPrecipitations.Snow.Flakes;
@@ -2026,16 +2031,13 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	}
  	bool isCellTransition = currentCell != PreviousCell;
 	if (UnderwaterEffect->Enabled && Tes->sky->GetIsUnderWater() /*TODO do this work in interior????*/) {
-		if (!isCellTransition && TheRenderManager->CameraPosition.z < ShaderConst.Water.waterSettings.x) {
-			ShaderConst.BloodLens.Percent = 0.0f;
-			ShaderConst.WaterLens.Percent = -1.0f;
-		}
 		UnderwaterEffect->SetCT();
 		UnderwaterEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 	else {
 		if (ShaderConst.WaterLens.Percent == -1.0f) ShaderConst.WaterLens.Percent = 1.0f;
 	}
+
 	if (currentWorldSpace) {
 		if (RainEffect->Enabled && ShaderConst.Rain.RainData.x > 0.0f) {
 			RainEffect->SetCT();

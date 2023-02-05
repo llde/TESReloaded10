@@ -16,6 +16,7 @@ public:
 	float				startTime;
 	float				endTime;
 	bool				running;
+	bool				switched; // set to true/false to detect if animator has been run before
 };
 
 
@@ -152,6 +153,8 @@ struct ShaderConstants {
 	struct AnimatorsStruct {
 		Animator			RainAnimator;
 		Animator			PuddlesAnimator;
+		Animator			WaterLensAnimator;
+		Animator			SnowAnimator;
 	};
 
 	D3DXVECTOR4				ReciprocalResolution;
