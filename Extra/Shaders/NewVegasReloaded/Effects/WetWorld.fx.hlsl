@@ -11,30 +11,24 @@
 //----------------------------------------------------------
 // Boomstick was here
 
-float4x4 TESR_ViewTransform;
-float4x4 TESR_ProjectionTransform;
-float4 TESR_CameraPosition;
 float4 TESR_SunDirection;
 float4 TESR_ReciprocalResolution;
+float4x4 TESR_WorldViewProjectionTransform;
+float4x4 TESR_ShadowCameraToLightTransformOrtho;
+
 float4 TESR_GameTime;
-float4 TESR_FogColor;
+float4 TESR_SkyColor;
 float4 TESR_SunColor;
-float4 TESR_WetWorldCoeffs;
-float4 TESR_WaterSettings;
-float4 TESR_FogData;
-float4 TESR_WetWorldData;
+float4 TESR_WetWorldCoeffs; // Puddle color R, G, B + spec multiplier
+float4 TESR_WaterSettings; // for water height to avoid rendering puddles underwater
+float4 TESR_WetWorldData; // x: current rain amount, y: max rain amount
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_SourceBuffer : register(s2) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-sampler2D TESR_PuddleSampler : register(s3) < string ResourceName = "Precipitations\puddles.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-sampler2D TESR_RippleSampler : register(s4) < string ResourceName = "Precipitations\ripples.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+sampler2D TESR_RippleSampler : register(s3) < string ResourceName = "Precipitations\ripples.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+sampler2D TESR_OrthoMapBuffer : register(s4) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
-static const float nearZ = TESR_ProjectionTransform._43 / TESR_ProjectionTransform._33;
-static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
-static const float Zmul = nearZ * farZ;
-static const float Zdiff = farZ - nearZ;
-static const float depthRange = nearZ - farZ;
 
 //------------------------------------------------------
 // Custimizable
@@ -44,9 +38,7 @@ static const float time1 = TESR_GameTime.z * 0.96f; // Ripple timing, make sure 
 static const float time2 = TESR_GameTime.z * 0.97f; // Ripple timing, original 1.0-1.4
 static const float time3 = TESR_GameTime.z * 0.98f; // Ripple timing
 static const float time4 = TESR_GameTime.z * 0.99f; // Ripple timing
-static const float DrawD = 800.0f; // Max draw distance for puddles 0-1000000
-static const float Darkness = 2.0f; // Darkness of puddles
-static const float Opacity = 0.7; // It's calc with darkness so really it's lightness but whatevs
+static const float DrawD = 2000.0f; // Max draw distance for puddles 0-1000000
 //------------------------------------------------------
 
 struct VSOUT
@@ -69,43 +61,10 @@ VSOUT FrameVS(VSIN IN)
 	return OUT;
 }
 
-float readDepth(in float2 coord : TEXCOORD0)
-{
-	float posZ = tex2D(TESR_DepthBuffer, coord).x;
-	posZ = Zmul / ((posZ * Zdiff) - farZ);
-	return posZ;
-}
+#include "Includes/Helpers.hlsl"
+#include "Includes/Depth.hlsl"
+#include "Includes/Blur.hlsl"
 
-float3 toWorld(float2 tex)
-{
-    float3 v = float3(TESR_ViewTransform[0][2], TESR_ViewTransform[1][2], TESR_ViewTransform[2][2]);
-    v += (1 / TESR_ProjectionTransform[0][0] * (2 * tex.x - 1)).xxx * float3(TESR_ViewTransform[0][0], TESR_ViewTransform[1][0], TESR_ViewTransform[2][0]);
-    v += (-1 / TESR_ProjectionTransform[1][1] * (2 * tex.y - 1)).xxx * float3(TESR_ViewTransform[0][1], TESR_ViewTransform[1][1], TESR_ViewTransform[2][1]);
-    return v;
-}
-
-float3 getPosition(in float2 tex, in float depth)
-{
-	return (TESR_CameraPosition.xyz + toWorld(tex) * depth);
-}
-
-float4 GetNormals( VSOUT IN ) : COLOR0
-{
-	float depth = readDepth(IN.UVCoord);
-	float3 pos = getPosition(IN.UVCoord, depth);
-
-    float3 left = pos - getPosition(IN.UVCoord + TESR_ReciprocalResolution.xy * float2(-1, 0), readDepth(IN.UVCoord + TESR_ReciprocalResolution.xy * float2(-1, 0)));
-    float3 right = getPosition(IN.UVCoord + TESR_ReciprocalResolution.xy * float2(1, 0), readDepth(IN.UVCoord + TESR_ReciprocalResolution.xy * float2(1, 0))) - pos;
-    float3 up = pos - getPosition(IN.UVCoord + TESR_ReciprocalResolution.xy * float2(0, -1), readDepth(IN.UVCoord + TESR_ReciprocalResolution.xy * float2(0, -1)));
-    float3 down = getPosition(IN.UVCoord + TESR_ReciprocalResolution.xy * float2(0, 1), readDepth(IN.UVCoord + TESR_ReciprocalResolution.xy * float2(0, 1))) - pos;
-    float3 dx = length(left) < length(right) ? left : right;
-    float3 dy = length(up) < length(down) ? up : down;
-	float3 norm = normalize(cross(dx,dy));
-	
-	norm.z *= -1;
-
-	return float4((norm + 1) / 2, 1);
-}
 
 float3 ComputeRipple(float2 UV, float CurrentTime, float Weight)
 {
@@ -121,78 +80,126 @@ float3 ComputeRipple(float2 UV, float CurrentTime, float Weight)
     return float3(Ripple.yz * FinalFactor * 0.35f, 1.0f);
 }
 
+
+float4 ScreenCoordToTexCoord(float4 coord, float mult){
+	// apply perspective (perspective division) and convert from -1/1 to range to 0/1 (shadowMap range);
+	coord.xyz /= coord.w;
+	coord.x = coord.x * 0.5f + 0.5f;
+	coord.y = coord.y * -0.5f + 0.5f;
+	coord *= mult;
+
+	return coord;
+}
+
+
+float4 WetMap (VSOUT IN ) : COLOR0
+{
+	// sample the ortho map and detect pockets by sampling around the center and comparing depth
+	float2 uv = IN.UVCoord;
+	float4 color = tex2D(TESR_SourceBuffer, uv);
+	float bias = 0.000001;
+
+	float radius = 0.05;// * TESR_WetWorldData.x; // radius will increase with rain status
+	float center = tex2D(TESR_OrthoMapBuffer, IN.UVCoord).r;
+	float left = tex2D(TESR_OrthoMapBuffer, IN.UVCoord + normalize(float2(-1, -0.3)) * radius).r;
+	float right = tex2D(TESR_OrthoMapBuffer, IN.UVCoord + normalize(float2(1, -0.3)) * radius).r;
+	float top = tex2D(TESR_OrthoMapBuffer, IN.UVCoord + float2(0, 1) * radius).r;
+
+	float crease = (center > left +bias && center > right +bias && center > top+bias);
+
+	return float4(crease, center, 0, 1);
+}
+
+
+float4 BlurWetMap(VSOUT IN, uniform float2 OffsetMask, uniform float blurRadius) : COLOR0
+{
+	// blur puddles using a gaussian blur
+	float WeightSum = 0.114725602f;
+	float2 uv = IN.UVCoord;
+	float color = tex2D(TESR_RenderedBuffer, uv).r * WeightSum;
+
+    for (int i = 0; i < cKernelSize; i++)
+    {
+		float2 uvOff = (BlurOffsets[i] * OffsetMask) * blurRadius;
+		color += BlurWeights[i] * tex2D(TESR_RenderedBuffer, uv + uvOff).r;
+		WeightSum += BlurWeights[i];
+    }
+	color /= WeightSum;
+    return color;
+}
+
 float4 Wet( VSOUT IN ) : COLOR0
 {
-	float3 color = tex2D(TESR_SourceBuffer, IN.UVCoord).rgb;
-    float3 screen_color = color;
+	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
 
-    float depth = readDepth(IN.UVCoord);
-    float3 camera_vector = toWorld(IN.UVCoord) * depth;
-	float3 norm_camera_vector = normalize(camera_vector);
-    float3 world_pos = TESR_CameraPosition.xyz + camera_vector;
+	float depth = readDepth(IN.UVCoord);
+	float3 eyeDirection = toWorld(IN.UVCoord);
+	float3 camera_vector = eyeDirection * depth;
+	float4 worldPos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
+	float3 normal = GetWorldNormal(IN.UVCoord);
+	float3 up = float3(0, 0, 1);
+	float floorAngle = smoothstep(0.92,1, dot(normal, up));
+	eyeDirection = normalize(eyeDirection);
+
+	// early out to avoid computing pixels that aren't puddles
+    if (depth > DrawD || worldPos.z < TESR_WaterSettings.x || floorAngle == 0) return color;
+
+	float LODfade = smoothstep(0, DrawD, depth);
+	float thickness = 0.001; // thickness of the valid areas around the ortho map depth that will receive the effect (cancels out too far above or below ortho value)
+
+	// get puddle mask from ortho map
+	float4 pos = mul(worldPos, TESR_WorldViewProjectionTransform);
+	float4 ortho_pos = mul(pos, TESR_ShadowCameraToLightTransformOrtho);
+	float puddles = tex2D(TESR_RenderedBuffer, ScreenCoordToTexCoord(ortho_pos, 1).xy).r; // puddles, ortho height
+	float ortho = tex2D(TESR_OrthoMapBuffer, ScreenCoordToTexCoord(ortho_pos, 1).xy).r; // puddles, ortho height
+
+	float puddlemask = lerp(pow(puddles * 2, 3), 0, LODfade); // fade out puddles
+	puddlemask *= ((ortho_pos.z < ortho + thickness) && (ortho_pos.z > ortho - thickness)); 
+
+	// sample and combine rain ripples
+	float2 rippleUV = worldPos.xy / 160.0f;
+	float4 Weights = float4(1, 0.75, 0.5, 0.25) * TESR_WetWorldData.y;
+	Weights = saturate(Weights * 4);
+	float3 Ripple1 = ComputeRipple(rippleUV + float2( 0.25f,0.0f), time1, Weights.x);
+	float3 Ripple2 = ComputeRipple(rippleUV * 1.1 + float2(-0.55f,0.3f), time2, Weights.y);
+	float3 Ripple3 = ComputeRipple(rippleUV * 1.3 + float2(0.6f, 0.85f), time3, Weights.z);
+	float3 Ripple4 = ComputeRipple(rippleUV * 1.5 + float2(0.5f,-0.75f), time4, Weights.w);
+
+	float4 Z = lerp(1, float4(Ripple1.z, Ripple2.z, Ripple3.z, Ripple4.z), Weights);
+	float3 ripple = float3( Weights.x * Ripple1.xy + Weights.y * Ripple2.xy + Weights.z * Ripple3.xy + Weights.w * Ripple4.xy, Z.x * Z.y * Z.z * Z.w);
+	float3 ripnormal = normalize(ripple);
+	float3 combnom = float3(ripnormal.xy, 1);
+
+	// calculate puddle color
+	float4 puddleColor = color * 0.4; // base color is just darkened ground color
+	float glossiness = 500;
+	float fresnel = saturate(pow(1 - shade(-eyeDirection, combnom), 10));
+	float specular = saturate(pow(shade(eyeDirection, reflect(TESR_SunDirection.xyz, combnom)), glossiness));
+
+	puddleColor += fresnel * TESR_SkyColor;
+	puddleColor += specular * TESR_SunColor * 2;
 	
-    if ( (depth / depthRange < 1) && ( world_pos.z >= TESR_WaterSettings.x + 1 ) )
-    {
-		float3 norm = tex2D(TESR_RenderedBuffer, IN.UVCoord ).rgb * 2 - 1;
-		float2 uv = world_pos.xy / 750.0f;
-		float2 ruv = world_pos.xy / 160.0f;
-		float4 Weights = float4(1, 0.75, 0.5, 0.25) * TESR_WetWorldData.y;
-		Weights = saturate(Weights * 4);
-		
-		float3 Ripple1 = ComputeRipple(ruv + float2( 0.25f,0.0f), time1, Weights.x);
-		float3 Ripple2 = ComputeRipple(ruv * 1.1 + float2(-0.55f,0.3f), time2, Weights.y);
-		float3 Ripple3 = ComputeRipple(ruv * 1.3 + float2(0.6f, 0.85f), time3, Weights.z);
-		float3 Ripple4 = ComputeRipple(ruv * 1.5 + float2(0.5f,-0.75f), time4, Weights.w);
-
-		float4 Z = lerp(1, float4(Ripple1.z, Ripple2.z, Ripple3.z, Ripple4.z), Weights);
-		float3 Normal = float3( Weights.x * Ripple1.xy + Weights.y * Ripple2.xy + Weights.z * Ripple3.xy + Weights.w * Ripple4.xy, Z.x * Z.y * Z.z * Z.w);
-		float3 ripnorm = normalize(Normal) * 0.5 + 0.5;
-		ripnorm = ripnorm * 2.0 - 1.0;
-		float3 combnom = float3((norm.xy + 10 * ripnorm.xy), 1);
-		float3 mudp = float3(0.62, 0.6, 0.54);
-		
-		float fresnel = dot(-norm_camera_vector, combnom);
-		fresnel = 0.02 + pow(( 2 * (fresnel - 0.23)), 5) * 0.2;
-		fresnel = saturate( 1-fresnel);
-
-		float3 rain_diffuse = screen_color * lerp(Darkness, Opacity, TESR_WetWorldData.x * 0.3);
-		rain_diffuse = lerp(rain_diffuse, mudp, TESR_WetWorldData.x * 0.4);
-		rain_diffuse = lerp(rain_diffuse * 0.6, TESR_FogColor.rgb * TESR_WetWorldCoeffs.xyz, fresnel * 0.7);
-		
-		float vdotr = dot(-norm_camera_vector, reflect(-TESR_SunDirection.xyz, ripnorm));
-		vdotr = saturate(1.0025 * vdotr);
-		float3 spec = TESR_SunColor.rgb * (pow(vdotr, 170) + 0.07 * pow(vdotr, 4));
-		rain_diffuse += spec * TESR_WetWorldCoeffs.w;
-		
-		float hormask = smoothstep(0.92,1, norm.z);
-		float puddlemask = tex2D(TESR_PuddleSampler, uv * 0.5).r;
-		float pm2 = tex2D(TESR_PuddleSampler, uv * 1.5).r;
-		float pm3 = tex2D(TESR_PuddleSampler, uv * 0.3).r;
-		puddlemask = saturate(puddlemask * pm2 + pm3);	
-		puddlemask = saturate(pow(puddlemask, lerp(4, 1, TESR_WetWorldData.x * 0.5)));		
-		puddlemask += saturate(1 - hormask);
-		puddlemask = saturate(puddlemask);		
-  		rain_diffuse *= (1 - puddlemask);
-		rain_diffuse += puddlemask * screen_color;
-		screen_color *= 1 - (saturate(saturate(norm.z * TESR_WetWorldData.x) * 2 - 1) * saturate(lerp(1,0, (depth - TESR_FogData.x) / (TESR_FogData.y - TESR_FogData.x))));
-		rain_diffuse *= saturate(saturate(norm.z * TESR_WetWorldData.x) * 2 - 1) * saturate(lerp(1,0, (depth - TESR_FogData.x) / (TESR_FogData.y - TESR_FogData.x)));
-		
-        color = lerp(color, DrawD, Opacity);
-		
-		color = screen_color + rain_diffuse;
-		
-	}
-    return float4(color, 1.0f);
+    return lerp(color, puddleColor, saturate(puddlemask));
 }
+
 
 technique
 {
 	pass
 	{
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 GetNormals();
+		PixelShader = compile ps_3_0 WetMap();
 	}
-
+	pass
+	{
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 BlurWetMap(float2(1.0f, 0.0f), 2);
+	}
+	pass
+	{
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 BlurWetMap(float2(0.0f, 1.0f), 2);
+	}
 	pass
 	{
 		VertexShader = compile vs_3_0 FrameVS();
