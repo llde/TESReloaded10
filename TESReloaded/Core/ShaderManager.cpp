@@ -912,9 +912,13 @@ void ShaderManager::InitializeConstants() {
 	ShaderConst.WaterLens.Percent = 0.0f;
 	ShaderConst.BloodLens.Percent = 0.0f;
 	ShaderConst.SnowAccumulation.Params.w = 0.0f;
-	ShaderConst.WetWorld.Data.x = 0;
-	ShaderConst.WetWorld.Data.y = 0;
-	ShaderConst.WetWorld.Data.z = 0;
+	ShaderConst.WetWorld.Data.x = 0.0f;
+	ShaderConst.WetWorld.Data.y = 0.0f;
+	ShaderConst.WetWorld.Data.z = 0.0f;
+	ShaderConst.Rain.RainData.x = 0.0f;
+	ShaderConst.Rain.RainData.y = 0.0f;
+	ShaderConst.Rain.RainData.z = 0.0f;
+	ShaderConst.Rain.RainData.w = 0.0f;
 
 	ShaderConst.Animators.PuddlesAnimator.Initialize(0);
 	ShaderConst.Animators.RainAnimator.Initialize(0);

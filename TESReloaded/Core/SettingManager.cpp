@@ -458,7 +458,7 @@ void SettingManager::LoadSettings() {
 	SettingsMain.Effects.Sharpening = GetSettingI("Shaders.Sharpening.Status", "Enabled");
 	SettingsMain.Effects.VolumetricFog = GetSettingI("Shaders.VolumetricFog.Status", "Enabled");
 	SettingsMain.Effects.Rain = GetSettingI("Shaders.Precipitations.Status", "Enabled");
-	SettingsMain.Effects.Snow = GetSettingI("Shaders.Precipitations.Status", "Enabled"); //TODO change in the INI
+	SettingsMain.Effects.Snow = GetSettingI("Shaders.Snow.Status", "Enabled"); //TODO change in the INI
 	SettingsMain.Effects.ShadowsExteriors = GetSettingI("Shaders.ShadowsExteriors.Status", "PostProcess");
 	SettingsMain.Effects.ShadowsInteriors = GetSettingI("Shaders.ShadowsInteriors.Status", "PostProcess");
 	SettingsMain.Effects.Specular = GetSettingI("Shaders.Specular.Status", "Enabled");
@@ -739,24 +739,24 @@ void SettingManager::LoadSettings() {
 	SettingsPOM.MaxSamples = GetSettingF("Shaders.POM.Main", "MaxSamples");
 
 
-	SettingsPrecipitations.Rain.DepthStep = GetSettingF("Shaders.Rain.Main", "DepthStep");
-	SettingsPrecipitations.Rain.Speed = GetSettingF("Shaders.Rain.Main", "Speed");
+	SettingsPrecipitations.Rain.DepthStep = GetSettingF("Shaders.Precipitations.Main", "DepthStep");
+	SettingsPrecipitations.Rain.Speed = GetSettingF("Shaders.Precipitations.Main", "Speed");
 	SettingsPrecipitations.Snow.DepthStep = GetSettingF("Shaders.Snow.Main", "DepthStep");
 	SettingsPrecipitations.Snow.Flakes = GetSettingF("Shaders.Snow.Main", "Flakes");
 	SettingsPrecipitations.Snow.Speed = GetSettingF("Shaders.Snow.Main", "Speed");
-	SettingsPrecipitations.WetWorld.Amount = GetSettingF("Shaders.Precipitations.WetWorld", "Amount");
-	SettingsPrecipitations.WetWorld.Increase = GetSettingF("Shaders.Precipitations.WetWorld", "Increase");
-	SettingsPrecipitations.WetWorld.Decrease = GetSettingF("Shaders.Precipitations.WetWorld", "Decrease");
-	SettingsPrecipitations.WetWorld.PuddleCoeff_R = GetSettingF("Shaders.Precipitations.WetWorld", "PuddleCoeff_R");
-	SettingsPrecipitations.WetWorld.PuddleCoeff_G = GetSettingF("Shaders.Precipitations.WetWorld", "PuddleCoeff_G");
-	SettingsPrecipitations.WetWorld.PuddleCoeff_B = GetSettingF("Shaders.Precipitations.WetWorld", "PuddleCoeff_B");
-	SettingsPrecipitations.WetWorld.PuddleSpecularMultiplier = GetSettingF("Shaders.Precipitations.WetWorld", "PuddleSpecularMultiplier");
-	SettingsPrecipitations.SnowAccumulation.Amount = GetSettingF("Shaders.Precipitations.SnowAccumulation", "Amount");
-	SettingsPrecipitations.SnowAccumulation.Increase = GetSettingF("Shaders.Precipitations.SnowAccumulation", "Increase");
-	SettingsPrecipitations.SnowAccumulation.Decrease = GetSettingF("Shaders.Precipitations.SnowAccumulation", "Decrease");
-	SettingsPrecipitations.SnowAccumulation.SunPower = GetSettingF("Shaders.Precipitations.SnowAccumulation", "SunPower");
-	SettingsPrecipitations.SnowAccumulation.BlurNormDropThreshhold = GetSettingF("Shaders.Precipitations.SnowAccumulation", "BlurNormDropThreshhold");
-	SettingsPrecipitations.SnowAccumulation.BlurRadiusMultiplier = GetSettingF("Shaders.Precipitations.SnowAccumulation", "BlurRadiusMultiplier");
+	SettingsPrecipitations.WetWorld.Amount = GetSettingF("Shaders.WetWorld.Main", "Amount");
+	SettingsPrecipitations.WetWorld.Increase = GetSettingF("Shaders.WetWorld.Main", "Increase");
+	SettingsPrecipitations.WetWorld.Decrease = GetSettingF("Shaders.WetWorld.Main", "Decrease");
+	SettingsPrecipitations.WetWorld.PuddleCoeff_R = GetSettingF("Shaders.WetWorld.Main", "PuddleCoeff_R");
+	SettingsPrecipitations.WetWorld.PuddleCoeff_G = GetSettingF("Shaders.WetWorld.Main", "PuddleCoeff_G");
+	SettingsPrecipitations.WetWorld.PuddleCoeff_B = GetSettingF("Shaders.WetWorld.Main", "PuddleCoeff_B");
+	SettingsPrecipitations.WetWorld.PuddleSpecularMultiplier = GetSettingF("Shaders.WetWorld.Main", "PuddleSpecularMultiplier");
+	SettingsPrecipitations.SnowAccumulation.Amount = GetSettingF("Shaders.SnowAccumulation.Main", "Amount");
+	SettingsPrecipitations.SnowAccumulation.Increase = GetSettingF("Shaders.SnowAccumulation.Main", "Increase");
+	SettingsPrecipitations.SnowAccumulation.Decrease = GetSettingF("Shaders.SnowAccumulation.Main", "Decrease");
+	SettingsPrecipitations.SnowAccumulation.SunPower = GetSettingF("Shaders.SnowAccumulation.Main", "SunPower");
+	SettingsPrecipitations.SnowAccumulation.BlurNormDropThreshhold = GetSettingF("Shaders.SnowAccumulation.Main", "BlurNormDropThreshhold");
+	SettingsPrecipitations.SnowAccumulation.BlurRadiusMultiplier = GetSettingF("Shaders..SnowAccumulation.Main", "BlurRadiusMultiplier");
 
 	// Specular effect settings
 	SettingsSpecular.Exterior.Strength = GetSettingF("Shaders.Specular.Exterior", "Strength");
@@ -1336,7 +1336,7 @@ bool SettingManager::GetMenuShaderEnabled(const char* Name) {
 		Value = SettingsMain.Shaders.NightEye;
 	else if (!strcmp(Name, "POM"))
 		Value = SettingsMain.Shaders.POM;
-	else if (!strcmp(Name, "Rain"))
+	else if (!strcmp(Name, "Precipitations"))
 		Value = SettingsMain.Effects.Rain;
 	else if (!strcmp(Name, "Snow"))
 		Value = SettingsMain.Effects.Snow;
