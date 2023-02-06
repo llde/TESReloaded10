@@ -18,6 +18,7 @@ float4x4 TESR_ShadowCameraToLightTransformOrtho;
 
 float4 TESR_GameTime;
 float4 TESR_SkyColor;
+float4 TESR_HorizonColor;
 float4 TESR_SunColor;
 float4 TESR_WetWorldCoeffs; // Puddle color R, G, B + spec multiplier
 float4 TESR_WaterSettings; // for water height to avoid rendering puddles underwater
@@ -100,12 +101,12 @@ float4 WetMap (VSOUT IN ) : COLOR0
 	float bias = 0.000001;
 
 	float radius = 0.05 * TESR_WetWorldData.z;// radius will increase with rain status
-	float center = tex2D(TESR_OrthoMapBuffer, IN.UVCoord).r;
+	float center = tex2D(TESR_OrthoMapBuffer, IN.UVCoord).r - bias;
 	float left = tex2D(TESR_OrthoMapBuffer, IN.UVCoord + normalize(float2(-1, -0.3)) * radius).r;
 	float right = tex2D(TESR_OrthoMapBuffer, IN.UVCoord + normalize(float2(1, -0.3)) * radius).r;
 	float top = tex2D(TESR_OrthoMapBuffer, IN.UVCoord + float2(0, 1) * radius).r;
 
-	float crease = (center > left +bias && center > right +bias && center > top+bias);
+	float crease = (center > left && center > right && center > top);
 
 	return float4(crease, center, 0, 1);
 }
@@ -138,14 +139,14 @@ float4 Wet( VSOUT IN ) : COLOR0
 	float4 worldPos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
 	float3 normal = GetWorldNormal(IN.UVCoord);
 	float3 up = float3(0, 0, 1);
-	float floorAngle = smoothstep(0.92,1, dot(normal, up));
+	float floorAngle = smoothstep(0.94,1, dot(normal, up));
 	eyeDirection = normalize(eyeDirection);
 
 	// early out to avoid computing pixels that aren't puddles
     if (depth > DrawD || worldPos.z < TESR_WaterSettings.x || floorAngle == 0) return color;
 
 	float LODfade = smoothstep(0, DrawD, depth);
-	float thickness = 0.005; // thickness of the valid areas around the ortho map depth that will receive the effect (cancels out too far above or below ortho value)
+	float thickness = 0.001; // thickness of the valid areas around the ortho map depth that will receive the effect (cancels out too far above or below ortho value)
 
 	// get puddle mask from ortho map
 	float4 pos = mul(worldPos, TESR_WorldViewProjectionTransform);
@@ -154,7 +155,8 @@ float4 Wet( VSOUT IN ) : COLOR0
 	float ortho = tex2D(TESR_OrthoMapBuffer, ScreenCoordToTexCoord(ortho_pos, 1).xy).r; // puddles, ortho height
 
 	float puddlemask = lerp(pow(puddles * 2, 3), 0, LODfade); // fade out puddles
-	puddlemask *= ((ortho_pos.z < ortho + thickness) && (ortho_pos.z > ortho - thickness)); 
+	// puddlemask *= ((ortho_pos.z < ortho + thickness) && (ortho_pos.z > ortho - thickness)); 
+	puddlemask *= (ortho_pos.z > ortho - thickness); 
 
 	// sample and combine rain ripples
 	float2 rippleUV = worldPos.xy / 160.0f;
@@ -171,12 +173,13 @@ float4 Wet( VSOUT IN ) : COLOR0
 	float3 combnom = float3(ripnormal.xy, 1);
 
 	// calculate puddle color
-	float4 puddleColor = color * 0.4; // base color is just darkened ground color
-	float glossiness = 500;
-	float fresnel = saturate(pow(1 - shade(-eyeDirection, combnom), 10));
+	float4 puddleColor = color * 0.5; // base color is just darkened ground color
+	float4 fresnelColor = TESR_HorizonColor * 0.8;
+	float glossiness = 100;
+	float fresnel = saturate(pow(1 - shade(-eyeDirection, combnom), 5));
 	float specular = saturate(pow(shade(eyeDirection, reflect(TESR_SunDirection.xyz, combnom)), glossiness));
 
-	puddleColor += fresnel * TESR_SkyColor;
+	puddleColor = lerp(puddleColor, fresnelColor, fresnel);
 	puddleColor += specular * TESR_SunColor * 2;
 	
     return lerp(color, puddleColor, saturate(puddlemask));
