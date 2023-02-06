@@ -923,6 +923,7 @@ void ShaderManager::InitializeConstants() {
 	ShaderConst.Animators.PuddlesAnimator.Initialize(0);
 	ShaderConst.Animators.RainAnimator.Initialize(0);
 	ShaderConst.Animators.SnowAnimator.Initialize(0);
+	ShaderConst.Animators.SnowAccumulationAnimator.Initialize(0);
 }
 
 
@@ -1238,23 +1239,9 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.WaterLens.Percent = ShaderConst.Animators.WaterLensAnimator.GetValue();
 			ShaderConst.WaterLens.Time.w = TheSettingManager->SettingsWaterLens.Amount * ShaderConst.WaterLens.Percent;
 		}
-
-		if (TheSettingManager->SettingsMain.Effects.SnowAccumulation && currentWeather) {
-			if (isSnow) {
-				if (ShaderConst.SnowAccumulation.Params.w < TheSettingManager->SettingsPrecipitations.SnowAccumulation.Amount) ShaderConst.SnowAccumulation.Params.w = ShaderConst.SnowAccumulation.Params.w + TheSettingManager->SettingsPrecipitations.SnowAccumulation.Increase;
-			}
-			else if (!previousWeather || (previousWeather && previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Snow)) {
-				if (ShaderConst.SnowAccumulation.Params.w > 0.0f)
-					ShaderConst.SnowAccumulation.Params.w = ShaderConst.SnowAccumulation.Params.w - TheSettingManager->SettingsPrecipitations.SnowAccumulation.Decrease;
-				else if (ShaderConst.SnowAccumulation.Params.w < 0.0f)
-					ShaderConst.SnowAccumulation.Params.w = 0.0f;
-			}
-			ShaderConst.SnowAccumulation.Params.x = TheSettingManager->SettingsPrecipitations.SnowAccumulation.BlurNormDropThreshhold;
-			ShaderConst.SnowAccumulation.Params.y = TheSettingManager->SettingsPrecipitations.SnowAccumulation.BlurRadiusMultiplier;
-			ShaderConst.SnowAccumulation.Params.z = TheSettingManager->SettingsPrecipitations.SnowAccumulation.SunPower;
-		}
 			
 		if (isExterior) {
+			// Rain fall & puddles
 			if (isRainy && ShaderConst.Animators.RainAnimator.switched == false) {
 				// it just started raining
 				ShaderConst.WetWorld.Data.y = 1.0f;
@@ -1265,13 +1252,12 @@ void ShaderManager::UpdateConstants() {
 			else if (!isRainy && ShaderConst.Animators.RainAnimator.switched) {
 				// it just stopped raining
 				ShaderConst.WetWorld.Data.y = 0.0f;
-				ShaderConst.Animators.PuddlesAnimator.Start(2, 0);
+				ShaderConst.Animators.PuddlesAnimator.Start(1.2, 0);
 				ShaderConst.Animators.RainAnimator.switched = false;
-				ShaderConst.Animators.RainAnimator.Start(0.1, 0);
+				ShaderConst.Animators.RainAnimator.Start(0.07, 0);
 			}
 			ShaderConst.WetWorld.Data.x = ShaderConst.Animators.RainAnimator.GetValue();
 			ShaderConst.WetWorld.Data.z = ShaderConst.Animators.PuddlesAnimator.GetValue();
-
 
 			ShaderConst.WetWorld.Coeffs.x = TheSettingManager->SettingsPrecipitations.WetWorld.PuddleCoeff_R;
 			ShaderConst.WetWorld.Coeffs.y = TheSettingManager->SettingsPrecipitations.WetWorld.PuddleCoeff_G;
@@ -1281,22 +1267,45 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Rain.RainData.x = ShaderConst.Animators.RainAnimator.GetValue();
 			ShaderConst.Rain.RainData.y = TheSettingManager->SettingsPrecipitations.Rain.DepthStep;
 			ShaderConst.Rain.RainData.z = TheSettingManager->SettingsPrecipitations.Rain.Speed;
-			if (isSnow && ShaderConst.Animators.SnowAnimator.switched == false) {
-				// it just started snowing
-				ShaderConst.Animators.SnowAnimator.switched = true;
-				ShaderConst.Animators.SnowAnimator.Initialize(0);
-				ShaderConst.Animators.SnowAnimator.Start(0.5, 1);
-			}
-			else if (!isSnow && ShaderConst.Animators.SnowAnimator.switched) {
-				// it just stopped snowing
-				ShaderConst.Animators.SnowAnimator.switched = false;
-				ShaderConst.Animators.SnowAnimator.Start(12, 0);
-			}
-			ShaderConst.Snow.SnowData.x = ShaderConst.Animators.SnowAnimator.GetValue();
 
-			ShaderConst.Snow.SnowData.y = TheSettingManager->SettingsPrecipitations.Snow.DepthStep;
-			ShaderConst.Snow.SnowData.z = TheSettingManager->SettingsPrecipitations.Snow.Speed;
-			ShaderConst.Snow.SnowData.w = TheSettingManager->SettingsPrecipitations.Snow.Flakes;
+			if (TheSettingManager->SettingsMain.Effects.Snow) {
+				// Snow fall
+				if (isSnow && ShaderConst.Animators.SnowAnimator.switched == false) {
+					// it just started snowing
+					ShaderConst.Animators.SnowAnimator.switched = true;
+					ShaderConst.Animators.SnowAnimator.Initialize(0);
+					ShaderConst.Animators.SnowAnimator.Start(0.5, 1);
+				}
+				else if (!isSnow && ShaderConst.Animators.SnowAnimator.switched) {
+					// it just stopped snowing
+					ShaderConst.Animators.SnowAnimator.switched = false;
+					ShaderConst.Animators.SnowAnimator.Start(0.2, 0);
+				}
+				ShaderConst.Snow.SnowData.x = ShaderConst.Animators.SnowAnimator.GetValue();
+
+				ShaderConst.Snow.SnowData.y = TheSettingManager->SettingsPrecipitations.Snow.DepthStep;
+				ShaderConst.Snow.SnowData.z = TheSettingManager->SettingsPrecipitations.Snow.Speed;
+				ShaderConst.Snow.SnowData.w = TheSettingManager->SettingsPrecipitations.Snow.Flakes;
+			}
+
+			if (TheSettingManager->SettingsMain.Effects.SnowAccumulation) {
+				// Snow Accumulation
+				if (isSnow && ShaderConst.Animators.SnowAccumulationAnimator.switched == false) {
+					// it just started snowing
+					ShaderConst.Animators.SnowAccumulationAnimator.switched = true;
+					ShaderConst.Animators.SnowAccumulationAnimator.Initialize(0);
+					ShaderConst.Animators.SnowAccumulationAnimator.Start(0.8, 1);
+				}
+				else if (!isSnow && ShaderConst.Animators.SnowAccumulationAnimator.switched) {
+					// it just stopped snowing
+					ShaderConst.Animators.SnowAccumulationAnimator.switched = false;
+					ShaderConst.Animators.SnowAccumulationAnimator.Start(12, 0);
+				}
+				ShaderConst.SnowAccumulation.Params.x = TheSettingManager->SettingsPrecipitations.SnowAccumulation.BlurNormDropThreshhold;
+				ShaderConst.SnowAccumulation.Params.y = TheSettingManager->SettingsPrecipitations.SnowAccumulation.BlurRadiusMultiplier;
+				ShaderConst.SnowAccumulation.Params.z = TheSettingManager->SettingsPrecipitations.SnowAccumulation.SunPower;
+				ShaderConst.SnowAccumulation.Params.w = ShaderConst.Animators.SnowAccumulationAnimator.GetValue();
+			}
 		}
 		
 		if (TheSettingManager->SettingsMain.Shaders.Grass) {
@@ -1998,12 +2007,8 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	Device->SetFVF(FrameFVF);
 	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
 
-	if (WetWorldEffect->Enabled && currentWorldSpace && ShaderConst.WetWorld.Data.z > 0.0f) {
-		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-		WetWorldEffect->SetCT();
-		WetWorldEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	else if (SnowAccumulationEffect->Enabled && currentWorldSpace && ShaderConst.SnowAccumulation.Params.w > 0.0f) {
+
+	if (SnowAccumulationEffect->Enabled && currentWorldSpace && ShaderConst.SnowAccumulation.Params.w > 0.0f) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		SnowAccumulationEffect->SetCT();
 		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
@@ -2022,14 +2027,19 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		ShadowsInteriorsEffect->SetCT();
 		ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (ColoringEffect->Enabled) {
-		ColoringEffect->SetCT();
-		ColoringEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
 	if (SpecularEffect->Enabled && isExterior) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		SpecularEffect->SetCT();
 		SpecularEffect->Render(Device, RenderTarget, RenderedSurface, false);
+	}
+	if (WetWorldEffect->Enabled && currentWorldSpace && ShaderConst.WetWorld.Data.z > 0.0f) {
+		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+		WetWorldEffect->SetCT();
+		WetWorldEffect->Render(Device, RenderTarget, RenderedSurface, false);
+	}
+	if (ColoringEffect->Enabled) {
+		ColoringEffect->SetCT();
+		ColoringEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 	if (BloomEffect->Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
@@ -2190,7 +2200,7 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		DisposeShader(Name);
 		if (Shaders->POM) CreateShader(Name);
 	}
-	else if (!strcmp(Name, "Rain")) {
+	else if (!strcmp(Name, "Precipitations")) {
 		RainEffect->SwitchEffect();
 		Effects->Rain = RainEffect->Enabled;
 	}

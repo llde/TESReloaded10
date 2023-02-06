@@ -155,6 +155,7 @@ struct ShaderConstants {
 		Animator			PuddlesAnimator;
 		Animator			WaterLensAnimator;
 		Animator			SnowAnimator;
+		Animator			SnowAccumulationAnimator;
 	};
 
 	D3DXVECTOR4				ReciprocalResolution;
