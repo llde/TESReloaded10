@@ -15,9 +15,9 @@ sampler2D TESR_OrthoMapBuffer : register(s2) = sampler_state { ADDRESSU = CLAMP;
 
 static const float PI = 3.14159265;
 static const float timetick = TESR_GameTime.z;
-static const float hscale = 0.005f; // low values stretch the volume vertically
+static const float hscale = 0.004f; // low values stretch the volume vertically
 static const float3x3 p = float3x3(30.323122,30.323122,30.323122,30.323122,30.323122,30.323122,30.323122,30.323122,30.323122);
-static const float DEPTH = TESR_RainData.y; // distance step between each layer
+static const float DEPTH = TESR_RainData.y * 5; // distance step between each layer
 static const float SPEED = TESR_RainData.z; // speed multiplier for falling animation 
 
 struct VSOUT
@@ -54,81 +54,59 @@ float2 cylindrical(float3 world)
 // checks wether a point is underneath something occluding
 float GetOrtho(float4 OrthoPos) {	
 	OrthoPos.xyz /= OrthoPos.w;
-    if (OrthoPos.x < -1.0f || OrthoPos.x > 1.0f ||
+    float outofbounds = (OrthoPos.x < -1.0f || OrthoPos.x > 1.0f ||
         OrthoPos.y < -1.0f || OrthoPos.y > 1.0f ||
-        OrthoPos.z <  0.0f || OrthoPos.z > 1.0f)
-		return 1.0f;
+        OrthoPos.z <  0.0f || OrthoPos.z > 1.0f);
  
     OrthoPos.x = OrthoPos.x *  0.5f + 0.5f;
     OrthoPos.y = OrthoPos.y * -0.5f + 0.5f;
 	float Ortho = tex2D(TESR_OrthoMapBuffer, OrthoPos.xy).r;
-	return (Ortho > OrthoPos.z - 0.0001); 
+	return (Ortho > OrthoPos.z - 0.0001) * (1 - outofbounds); 
 }
 
 float4 Rain( VSOUT IN ) : COLOR0
 {
 	float4 color = tex2D(TESR_RenderedBuffer, IN.UVCoord);
+	int iterations = RainLayers;
 
+	// calculating the ray along which the  volumetric rain will be calculated
 	float3 world = toWorld(IN.UVCoord);
-	float depth = readDepth(IN.UVCoord);
-	float3 camera_vector = world * depth;
-	float4 world_pos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
-	float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
-
-	float4 ortho_pos = mul(pos, TESR_ShadowCameraToLightTransformOrtho);	
-	
-	float stepdepth = (max(depth, 1000) - nearZ) / orthosteps; 
-	float3 camera_vectorS = world * (depth - stepdepth * orthosteps);
-	float4 world_posS = float4(TESR_CameraPosition.xyz + camera_vectorS, 1.0f);
-	float4 posS = mul(world_posS, TESR_WorldViewProjectionTransform);
-	float4 ortho_posS = mul(posS, TESR_ShadowCameraToLightTransformOrtho);
-	float4 step = (ortho_posS - ortho_pos) / orthosteps;
-	float samplePoint = ortho_pos;
-	float ortho = GetOrtho(ortho_pos); // get wether the shaded point is occluded
-
-	// raymarch towards the point depth to find if any point between the camera and the point is occluded
-	[unroll]
-	for (int j = 1; j <= orthosteps; j++) {
-		ortho += GetOrtho(samplePoint += step);
-	}
-	clip (ortho - 1);
-
-	float2 noiseSurfacePosition;
-	float3 m;
-	float3 mp;
-	float3 rainNoise;
-	float2 s;
-	float dropGradient;
-	float edge;
-	float totalRain = 0.0f;
-	int iterations = TESR_RainData.x * RainLayers;
-	float2 uv = cylindrical(world); // converts world coordinates to cylinder coordinates around the player
+	float4 rayStart = float4(TESR_CameraPosition.xyz + world, 1.0f);
+	float4 rayStartPos = mul(rayStart, TESR_WorldViewProjectionTransform);
+	float4 orthoStart = mul(rayStartPos, TESR_ShadowCameraToLightTransformOrtho);	
+	float3 camera_vectorS = world * (DEPTH * iterations);
+	float4 rayEnd = float4(TESR_CameraPosition.xyz + camera_vectorS, 1.0f);
+	float4 rayEndPos = mul(rayEnd, TESR_WorldViewProjectionTransform);
+	float4 orthoEnd = mul(rayEndPos, TESR_ShadowCameraToLightTransformOrtho);
+	float4 step = (orthoEnd - orthoStart) / iterations;
 	
 	// each iteration adds a cylindrical layer of drops 
-	// int i = 9;
-// 
-	// color *= (depth > DEPTH * i);
-	for (int i = 3; i < iterations; i++){
-		noiseSurfacePosition = uv * (1.0f + i * DEPTH); // scale cylinder coordinates with iterations
+	float2 uv = cylindrical(world); // converts world coordinates to cylinder coordinates around the player
+	float depth = readDepth(IN.UVCoord);
+	float totalRain = 0.0f;
+
+	[unroll]
+	for (int i = 1; i < iterations; i++){
+		float2 noiseSurfacePosition = uv * (1.0f + i * DEPTH); // scale cylinder coordinates with iterations
 		noiseSurfacePosition += float2(noiseSurfacePosition.y * (fmod(i * 107.238917f, 1.0f) - 0.5f), SPEED * timetick); // animate y offset, not sure what x does?
 
-		m = float3(floor(noiseSurfacePosition), i); // places the drops at the same distance from the camera?
-		mp = m/frac(mul(p, m)); // bayer matrix? grid of grey values stretch depending on the world positions
-		rainNoise = frac(mp); //r.x is a random generated grid of different darknesses
+		float3 m = float3(floor(noiseSurfacePosition), i); // places the drops at the same distance from the camera?
+		float3 mp = m/frac(mul(p, m)); // bayer matrix? grid of grey values stretch depending on the world positions
+		float3 rainNoise = frac(mp); //r.x is a random generated grid of different darknesses
 
         // determin drop shape
-		s = abs(fmod(noiseSurfacePosition, 1.0f) + rainNoise.xy - 1.0f);
-		s += 0.01f * abs(2.0f * frac(10.0f * noiseSurfacePosition.yx) - 1.0f); // s is a horizontal gradient on each square 
-		dropGradient = 0.6f * max(s.x - s.y, s.x + s.y) + max(s.x, s.y) - 0.01f; // creates a circular gradient on each square of the noise grid to focus the drop
-		edge = 0.005f + 0.05f * min(0.25f * i, 1.5f); // can't be 0 or smoothstep will fail. the smaller this value, the smaller the drops
+		float2 shape = abs(fmod(noiseSurfacePosition, 1.0f) + rainNoise.xy - 1.0f);
+		shape += 0.01f * abs(2.0f * frac(10.0f * noiseSurfacePosition.yx) - 1.0f); // shape is a horizontal gradient on each square 
+		float dropGradient = 0.6f * max(shape.x - shape.y, shape.x + shape.y) + max(shape.x, shape.y) - 0.01f; // creates a circular gradient on each square of the noise grid to focus the drop
+		float edge = 0.005f + 0.05f * min(1.0f * i, 4.0f * TESR_RainData.x); // can't be 0 or smoothstep will fail. the smaller this value, the smaller the drops
 
 		// add new drop influence to the fragment, by extracting the brightest spots in the gradients grid using the edge parameter
-		float drop = smoothstep(edge, -edge, dropGradient) * (rainNoise.x / (1.0f + 0.01f * i * DEPTH)); // fade opacity with each iteration
+		float drop = smoothstep(edge, -edge, dropGradient) * (rainNoise.x / (1.0f + 0.2f * i)); // fade opacity with each iteration
+		drop *= GetOrtho(orthoStart + step * i) * (depth > DEPTH * i); // depth and ortho check for rain
 		totalRain += drop;
 	}
 
-	color += totalRain * float(0.6);
-	// color += (totalRain * (0.2 + 0.5f));
+	color += totalRain * float(0.3);
 	return float4(color.rgb, 1.0f);
 
 }
