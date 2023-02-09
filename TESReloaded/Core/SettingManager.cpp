@@ -739,8 +739,9 @@ void SettingManager::LoadSettings() {
 	SettingsPOM.MaxSamples = GetSettingF("Shaders.POM.Main", "MaxSamples");
 
 
-	SettingsPrecipitations.Rain.DepthStep = GetSettingF("Shaders.Precipitations.Main", "DepthStep");
+	SettingsPrecipitations.Rain.Opacity = GetSettingF("Shaders.Precipitations.Main", "Opacity");
 	SettingsPrecipitations.Rain.Speed = GetSettingF("Shaders.Precipitations.Main", "Speed");
+	SettingsPrecipitations.Rain.VerticalScale = GetSettingF("Shaders.Precipitations.Main", "VerticalScale");
 	SettingsPrecipitations.Snow.DepthStep = GetSettingF("Shaders.Snow.Main", "DepthStep");
 	SettingsPrecipitations.Snow.Flakes = GetSettingF("Shaders.Snow.Main", "Flakes");
 	SettingsPrecipitations.Snow.Speed = GetSettingF("Shaders.Snow.Main", "Speed");

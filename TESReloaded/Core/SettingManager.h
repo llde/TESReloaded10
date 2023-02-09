@@ -477,7 +477,8 @@ struct SettingsBloomStruct {
 
 struct SettingsPrecipitationsStruct {
 	struct RainStruct {
-		float DepthStep;
+		float Opacity;
+		float VerticalScale;
 		float Speed;
 	};
 	

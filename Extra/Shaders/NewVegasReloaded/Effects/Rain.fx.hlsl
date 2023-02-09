@@ -1,13 +1,14 @@
 // Rain fullscreen shader for Oblivion Reloaded
-#define RainLayers 20
-#define orthosteps 5
+#define RainLayers 15
 
 float4x4 TESR_WorldViewProjectionTransform;
 float4x4 TESR_ShadowCameraToLightTransformOrtho;
 float4 TESR_ReciprocalResolution;
 float4 TESR_GameTime;
-float4 TESR_RainData;
+float4 TESR_RainData; // x:rain amount, set by weather (0 to 1), y: vertical scale, z: speed of rainfall w: opacity
 float4 TESR_FogColor;
+float4 TESR_SunDirection;
+float4 TESR_SunColor;
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
@@ -15,9 +16,9 @@ sampler2D TESR_OrthoMapBuffer : register(s2) = sampler_state { ADDRESSU = CLAMP;
 
 static const float PI = 3.14159265;
 static const float timetick = TESR_GameTime.z;
-static const float hscale = 0.004f; // low values stretch the volume vertically
+static const float hscale = 0.004f * TESR_RainData.y; // low values stretch the volume vertically
 static const float3x3 p = float3x3(30.323122,30.323122,30.323122,30.323122,30.323122,30.323122,30.323122,30.323122,30.323122);
-static const float DEPTH = TESR_RainData.y * 5; // distance step between each layer
+static const float DEPTH = 100; // distance step between each layer
 static const float SPEED = TESR_RainData.z; // speed multiplier for falling animation 
 
 struct VSOUT
@@ -90,6 +91,7 @@ float4 Rain( VSOUT IN ) : COLOR0
 		float2 noiseSurfacePosition = uv * (1.0f + i * DEPTH); // scale cylinder coordinates with iterations
 		noiseSurfacePosition += float2(noiseSurfacePosition.y * (fmod(i * 107.238917f, 1.0f) - 0.5f), SPEED * timetick); // animate y offset, not sure what x does?
 
+		// creating the noise with magic
 		float3 m = float3(floor(noiseSurfacePosition), i); // places the drops at the same distance from the camera?
 		float3 mp = m/frac(mul(p, m)); // bayer matrix? grid of grey values stretch depending on the world positions
 		float3 rainNoise = frac(mp); //r.x is a random generated grid of different darknesses
@@ -106,7 +108,9 @@ float4 Rain( VSOUT IN ) : COLOR0
 		totalRain += drop;
 	}
 
-	color += totalRain * float(0.3);
+	float4 rainColor = (float(0.4).xxxx + TESR_SunColor * shade(normalize(world), TESR_SunDirection)) * TESR_RainData.w;
+
+	color += totalRain * rainColor;
 	return float4(color.rgb, 1.0f);
 
 }

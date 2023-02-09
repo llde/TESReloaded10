@@ -1265,13 +1265,15 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.WetWorld.Coeffs.w = TheSettingManager->SettingsPrecipitations.WetWorld.PuddleSpecularMultiplier;
 
 			ShaderConst.Rain.RainData.x = ShaderConst.Animators.RainAnimator.GetValue();
-			ShaderConst.Rain.RainData.y = TheSettingManager->SettingsPrecipitations.Rain.DepthStep;
+			ShaderConst.Rain.RainData.y = TheSettingManager->SettingsPrecipitations.Rain.VerticalScale;
 			ShaderConst.Rain.RainData.z = TheSettingManager->SettingsPrecipitations.Rain.Speed;
+			ShaderConst.Rain.RainData.w = TheSettingManager->SettingsPrecipitations.Rain.Opacity;
 
 			if (TheSettingManager->SettingsMain.Effects.Snow) {
 				// Snow fall
 				if (isSnow && ShaderConst.Animators.SnowAnimator.switched == false) {
 					// it just started snowing
+					ShaderConst.Animators.PuddlesAnimator.Start(0.3, 0); // fade out any puddles if they exist
 					ShaderConst.Animators.SnowAnimator.switched = true;
 					ShaderConst.Animators.SnowAnimator.Initialize(0);
 					ShaderConst.Animators.SnowAnimator.Start(0.5, 1);
