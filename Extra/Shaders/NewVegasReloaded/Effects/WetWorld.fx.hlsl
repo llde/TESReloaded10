@@ -146,7 +146,7 @@ float4 Wet( VSOUT IN ) : COLOR0
     if (depth > DrawD || worldPos.z < TESR_WaterSettings.x || floorAngle == 0) return color;
 
 	float LODfade = smoothstep(0, DrawD, depth);
-	float thickness = 0.001; // thickness of the valid areas around the ortho map depth that will receive the effect (cancels out too far above or below ortho value)
+	float thickness = 0.003; // thickness of the valid areas around the ortho map depth that will receive the effect (cancels out too far above or below ortho value)
 
 	// get puddle mask from ortho map
 	float4 pos = mul(worldPos, TESR_WorldViewProjectionTransform);
