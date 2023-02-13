@@ -1,6 +1,8 @@
 // Ambient Occlusion fullscreen shader for Oblivion/Skyrim Reloaded
 
-#define viewao 0
+#define viewao 1
+#define halfres 0
+#define kernelSize 12
 
 float4 TESR_AmbientOcclusionAOData;
 float4 TESR_AmbientOcclusionData;
@@ -83,12 +85,16 @@ float fogCoeff(float depth){
 
 float4 SSAO(VSOUT IN) : COLOR0
 {
-	if (IN.UVCoord.x > 0.5 || IN.UVCoord.y > 0.5) return 1.0; // discard half the screen to render at half resolution
+	float2 uv = IN.UVCoord.xy;
 
-	float2 uv = IN.UVCoord.xy * 2;
-
+#if halfres
+	clip ((IN.UVCoord.x < 0.5 && IN.UVCoord.y < 0.5)-1); // discard half the screen to render at half resolution
+	uv *= 2;
+#endif
+	
 	// generate the sampling kernel with random points in a hemisphere
-	int kernelSize = clamp(AOsamples, 0, 32);
+	// int kernelSize = clamp(AOsamples, 0, 32);
+	// int kernelSize = 20;
 	// float3 kernel[20]; // max supported kernel size is 20 samples
 	float uRadius = abs(AOrange);
 	float bias = saturate(AOangleBias);
@@ -101,6 +107,7 @@ float4 SSAO(VSOUT IN) : COLOR0
 
 	// calculate occlusion by sampling depth of each point from the kernel
 	float occlusion = 0.0;
+	[unroll]
 	for (int i = 0; i < kernelSize; ++i) {
 
 		// generate random samples in a unit sphere (random vector coordinates from -1 to 1);
@@ -185,11 +192,13 @@ technique
 		PixelShader = compile ps_3_0 SSAO();
 	}
 
+#if halfres
 	pass
 	{
 		VertexShader = compile vs_3_0 FrameVS();
 		PixelShader = compile ps_3_0 Expand();
 	}
+#endif
 	
 	pass
 	{ 
