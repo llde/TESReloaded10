@@ -1,8 +1,8 @@
 // Ambient Occlusion fullscreen shader for Oblivion/Skyrim Reloaded
 
-#define viewao 1
+#define viewao 0
 #define halfres 0
-#define kernelSize 12
+#define kernelSize 20
 
 float4 TESR_AmbientOcclusionAOData;
 float4 TESR_AmbientOcclusionData;
@@ -13,7 +13,7 @@ float4 TESR_FogColor;
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_SourceBuffer : register(s2) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-sampler2D TESR_NoiseSampler : register(s3) < string ResourceName = "Effects\noise.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
+sampler2D TESR_BlueNoiseSampler : register(s3) < string ResourceName = "Effects\bluenoise256.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
 
 static const float AOsamples = TESR_AmbientOcclusionAOData.x;
 static const float AOstrength = TESR_AmbientOcclusionAOData.y;
@@ -48,39 +48,30 @@ VSOUT FrameVS(VSIN IN)
  
 #include "Includes/Depth.hlsl"
 #include "Includes/Blur.hlsl"
+#include "Includes/Helpers.hlsl"
 
 // returns a semi random float3 between 0 and 1 based on the given seed.
 // tailored to return a different value for each uv coord of the screen.
 float3 random(float2 seed)
 {
-	return tex2D(TESR_NoiseSampler, (seed/255 + 0.5) / TESR_ReciprocalResolution.xy).xyz;
-}
-
-// returns a value from 0 to 1 based on the positions of a value between a min/max 
-float invLerp(float from, float to, float value){
-  return (value - from) / (to - from);
+	return tex2D(TESR_BlueNoiseSampler, (seed/256 + 0.5) / TESR_ReciprocalResolution.xy).xyz;
 }
 
 
+// float unpackDepth(float2 depth)
+// {
+//     return depth.x + ((depth.y - 0.5) / 255.0);
+// }
 
-float unpackDepth(float2 depth)
-{
-    return depth.x + ((depth.y - 0.5) / 255.0);
-}
-
-float2 packDepth(float depth)
-{
-    return float2(depth, frac(depth * 255.0 - 0.5));
-}
 
 float4 Desaturate(float4 input)
 {
-	float greyscale = input.r * 0.3f + input.g * 0.59f +input.b * 0.11f;
+	float greyscale = luma(input);
 	return float4(greyscale, greyscale, greyscale, input.a);
 }
 
 float fogCoeff(float depth){
-	return saturate(invLerp(TESR_FogData.x, TESR_FogData.y, depth));
+	return saturate(invlerp(TESR_FogData.x, TESR_FogData.y, depth));
 }
 
 float4 SSAO(VSOUT IN) : COLOR0
@@ -109,15 +100,14 @@ float4 SSAO(VSOUT IN) : COLOR0
 	float occlusion = 0.0;
 	[unroll]
 	for (int i = 0; i < kernelSize; ++i) {
-
 		// generate random samples in a unit sphere (random vector coordinates from -1 to 1);
-		float3 rand = random(uv * i);
+		float3 rand = random(uv + i * TESR_ReciprocalResolution.x);
 		float3 sampleVector = float3 (rand.x * 2 - 1, rand.y * 2 - 1, rand.z);
 		sampleVector = normalize(sampleVector);
 
 		//randomize points distance to sphere center, making them more concentrated towards the center
 		sampleVector *= random(uv * i/2);
-		float scale = 1 - float(i) / float(kernelSize);
+		float scale = 1 + float(i) / float(kernelSize);
 		scale = lerp(bias, 1.0f, scale * scale);
 		sampleVector *= scale; 
 
@@ -142,13 +132,12 @@ float4 SSAO(VSOUT IN) : COLOR0
 	
 	occlusion = 1.0 - occlusion/kernelSize * AOstrength;
 
-	float fogColor = Desaturate(TESR_FogColor).x;
+	float fogColor = luma(TESR_FogColor);
 	float darkness = clamp(lerp(occlusion, fogColor, fogCoeff(origin.z)), occlusion, 1.0);
 
-	darkness = lerp(darkness, 1.0, saturate(invLerp(0.0, endFade, origin.z)));
-	// darkness = lerp(darkness, 1.0, saturate(invLerp(startFade, endFade, origin.z)));
+	darkness = lerp(darkness, 1.0, saturate(invlerp(startFade, endFade, origin.z)));
 
-	return float4(darkness, packDepth(origin.z), 1.0);
+	return float4(darkness.xxx, 1.0);
 }
 
 
@@ -168,7 +157,7 @@ float4 Combine(VSOUT IN) : COLOR0
 	float3 color = tex2D(TESR_SourceBuffer, IN.UVCoord).rgb;
 	float ao = lerp(AOclamp, 1.0, tex2D(TESR_RenderedBuffer, IN.UVCoord).r);
 
-	float luminance = color.r * 0.3 + color.g * 0.59 + color.b * 0.11;
+	float luminance = luma(color);
 	float white = 1.0;
 	float black = 0.0;
 	float lt = luminance - AOlumThreshold;
