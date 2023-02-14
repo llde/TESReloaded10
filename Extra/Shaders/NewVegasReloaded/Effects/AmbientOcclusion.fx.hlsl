@@ -2,7 +2,7 @@
 
 #define viewao 0
 #define halfres 0
-#define kernelSize 20
+#define kernelSize 5
 
 float4 TESR_AmbientOcclusionAOData;
 float4 TESR_AmbientOcclusionData;
@@ -25,6 +25,8 @@ static const float blurDrop = TESR_AmbientOcclusionData.z;
 static const float blurRadius = TESR_AmbientOcclusionData.w;
 static const int startFade = 2000;
 static const int endFade = 8000;
+static const float2 io = float2(1.0f, 0.0f);
+static const float PI = 3.14159265;
  
 struct VSOUT
 {
@@ -57,26 +59,15 @@ float3 random(float2 seed)
 	return tex2D(TESR_BlueNoiseSampler, (seed/256 + 0.5) / TESR_ReciprocalResolution.xy).xyz;
 }
 
-
-// float unpackDepth(float2 depth)
-// {
-//     return depth.x + ((depth.y - 0.5) / 255.0);
-// }
-
-
-float4 Desaturate(float4 input)
-{
-	float greyscale = luma(input);
-	return float4(greyscale, greyscale, greyscale, input.a);
-}
-
 float fogCoeff(float depth){
 	return saturate(invlerp(TESR_FogData.x, TESR_FogData.y, depth));
 }
 
-float4 SSAO(VSOUT IN) : COLOR0
+float4 SSAO(VSOUT IN, uniform float2 OffsetMask) : COLOR0
 {
 	float2 uv = IN.UVCoord.xy;
+	float4 color = tex2D(TESR_RenderedBuffer, uv);
+	color = OffsetMask.y?color:float(1).xxxx; // use previous rendered buffer if not first pass
 
 #if halfres
 	clip ((IN.UVCoord.x < 0.5 && IN.UVCoord.y < 0.5)-1); // discard half the screen to render at half resolution
@@ -85,8 +76,6 @@ float4 SSAO(VSOUT IN) : COLOR0
 	
 	// generate the sampling kernel with random points in a hemisphere
 	// int kernelSize = clamp(AOsamples, 0, 32);
-	// int kernelSize = 20;
-	// float3 kernel[20]; // max supported kernel size is 20 samples
 	float uRadius = abs(AOrange);
 	float bias = saturate(AOangleBias);
 
@@ -96,14 +85,20 @@ float4 SSAO(VSOUT IN) : COLOR0
 	//reorient our sample kernel along the origin's normal
 	float3 normal = GetNormal(uv);
 
+	float angle = -random(uv).x / 2 * PI; // random angle between 0 and 90degrees
+	float3 kernelRotation = float3( -sin(angle), cos(angle), 0);
+	float3 tangent = normalize(kernelRotation - normal * dot(kernelRotation, normal));
+	float3 bitangent = cross(normal, tangent);
+	float3x3 tbn = float3x3(tangent, bitangent, normal);
+
 	// calculate occlusion by sampling depth of each point from the kernel
 	float occlusion = 0.0;
 	[unroll]
 	for (int i = 0; i < kernelSize; ++i) {
 		// generate random samples in a unit sphere (random vector coordinates from -1 to 1);
 		float3 rand = random(uv + i * TESR_ReciprocalResolution.x);
-		float3 sampleVector = float3 (rand.x * 2 - 1, rand.y * 2 - 1, rand.z);
-		sampleVector = normalize(sampleVector);
+		float3 sampleVector = float3 (expand(rand.xy), rand.z) * float3(OffsetMask, 1); // separate kernel
+		sampleVector = mul(normalize(sampleVector), tbn);
 
 		//randomize points distance to sphere center, making them more concentrated towards the center
 		sampleVector *= random(uv * i/2);
@@ -135,15 +130,9 @@ float4 SSAO(VSOUT IN) : COLOR0
 	float fogColor = luma(TESR_FogColor);
 	float darkness = clamp(lerp(occlusion, fogColor, fogCoeff(origin.z)), occlusion, 1.0);
 
-	darkness = lerp(darkness, 1.0, saturate(invlerp(startFade, endFade, origin.z)));
+	darkness = lerp(darkness, 1.0, saturate(invlerp(startFade, endFade, origin.z))) * color.x;
 
-	return float4(darkness.xxx, 1.0);
-}
-
-
-float4 Normal(VSOUT IN) : COLOR0
-{
-	return float4(GetNormal(IN.UVCoord), readDepth(IN.UVCoord));
+	return float2(darkness, 1.0).xyyy;
 }
 
 float4 Expand(VSOUT IN) : COLOR0
@@ -170,7 +159,6 @@ float4 Combine(VSOUT IN) : COLOR0
 	#endif
 	
 	return float4(color, 1.0f);
-   
 }
  
 technique
@@ -178,7 +166,13 @@ technique
 	pass
 	{
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 SSAO();
+		PixelShader = compile ps_3_0 SSAO(io.xy);
+	}
+
+	pass
+	{
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 SSAO(io.yx);
 	}
 
 #if halfres
@@ -192,13 +186,13 @@ technique
 	pass
 	{ 
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 BlurRChannel(float2(1.0f, 0.0f), blurRadius, blurDrop, endFade);
+		PixelShader = compile ps_3_0 BlurRChannel(io.xy, blurRadius, blurDrop, endFade);
 	}
 	
 	pass
 	{ 
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 BlurRChannel(float2(0.0f, 1.0f), blurRadius, blurDrop, endFade);
+		PixelShader = compile ps_3_0 BlurRChannel(io.yx, blurRadius, blurDrop, endFade);
 	}
 	
 	pass
