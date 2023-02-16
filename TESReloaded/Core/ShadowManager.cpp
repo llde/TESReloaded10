@@ -733,7 +733,7 @@ void ShadowManager::RenderShadowMaps() {
 		float Distance = Light->GetDistance(&Player->pos);
 
 		// select lights that will be tracked
-		if ((inFront > 0 || Distance < 800) && !lightCulled && Light->CastShadows) {
+		if ((inFront > 0 || Distance < 800) && !lightCulled) {
 			SceneLights[(int)(Distance * 10000)] = Light; // mutliplying distance before convertion to avoid duplicates in case of similar values
 		}
 		Entry = Entry->next;
@@ -749,7 +749,6 @@ void ShadowManager::RenderShadowMaps() {
 	for (int i = 0; i < TrackedLightsMax; i++) {
 		if (v != SceneLights.end())
 		{
-
 			NiPointLight* Light = v->second;
 
 			// determin if light is a shadow caster
