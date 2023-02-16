@@ -164,6 +164,39 @@ float4 Combine(VSOUT IN) : COLOR0
 	return float4(color, 1.0f);
 }
  
+
+// perform depth aware 12 taps blur along the direction of the offsetmask
+float4 NormalBlurRChannel(VSOUT IN, uniform float2 OffsetMask, uniform float blurRadius,uniform float depthDrop,uniform float endFade) : COLOR0
+{
+	float WeightSum = 0.114725602f;
+	float4 color1 = tex2D(TESR_RenderedBuffer, IN.UVCoord) * WeightSum;
+	float3 normal = GetNormal(IN.UVCoord);
+	float depth = tex2D(TESR_DepthBuffer, IN.UVCoord).x;
+
+	float depth1 = readDepth(IN.UVCoord);
+	clip(endFade - depth1);
+
+	// coeff for blurring to increase blur depthDrop on surfaces facing away from the camera
+	float normalCoeff = (0.5 + 2 * compress(dot(normal, float3(0, 0, 1))));
+
+    for (int i = 0; i < cKernelSize; i++)
+    {
+		float2 uvOff = (BlurOffsets[i] * OffsetMask) * blurRadius/depth;
+		float4 color2 = tex2D(TESR_RenderedBuffer, IN.UVCoord + uvOff).r;
+		float depth2 = readDepth(IN.UVCoord + uvOff);
+		float3 normal2 = GetNormal(IN.UVCoord + uvOff);
+
+		float diff = abs(depth1 - depth2);
+
+		int useForBlur = (diff <= depthDrop * normalCoeff);
+		color1.r += BlurWeights[i] * color2.r * useForBlur;
+		WeightSum += BlurWeights[i] * useForBlur;
+    }
+	color1.r /= WeightSum;
+    return color1;
+}
+
+
 technique
 {
 	pass
@@ -189,13 +222,13 @@ technique
 	pass
 	{ 
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 BlurRChannel(io.xy, blurRadius, blurDrop, endFade);
+		PixelShader = compile ps_3_0 NormalBlurRChannel(io.xy, blurRadius, blurDrop, endFade);
 	}
 	
 	pass
 	{ 
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 BlurRChannel(io.yx, blurRadius, blurDrop, endFade);
+		PixelShader = compile ps_3_0 NormalBlurRChannel(io.yx, blurRadius, blurDrop, endFade);
 	}
 	
 	pass
