@@ -816,6 +816,7 @@ void ShaderManager::Initialize() {
 	TheShaderManager->VolumetricFogEffect = NULL;
 	TheShaderManager->RainEffect = NULL;
 	TheShaderManager->SnowEffect = NULL;
+	TheShaderManager->NormalsEffect = NULL;
 	TheShaderManager->ShadowsExteriorsEffect = NULL;
 	TheShaderManager->ShadowsInteriorsEffect = NULL;
 	memset(TheShaderManager->WaterVertexShaders, NULL, sizeof(WaterVertexShaders));
@@ -877,8 +878,10 @@ void ShaderManager::CreateEffects() {
 	CreateEffect(EffectRecord::EffectRecordType::ShadowsExteriors);
 	CreateEffect(EffectRecord::EffectRecordType::ShadowsInteriors);
 	CreateEffect(EffectRecord::EffectRecordType::Specular);
+	CreateEffect(EffectRecord::EffectRecordType::Normals);
 //	CreateEffect(EffectRecord::EffectRecordType::Extra);
 
+	NormalsEffect->Enabled = true;
 	if (Effects->AmbientOcclusion) AmbientOcclusionEffect->Enabled = true;
 	if (Effects->BloodLens) BloodLensEffect->Enabled = true;
 	if (Effects->Bloom) BloomEffect->Enabled = true;
@@ -899,8 +902,7 @@ void ShaderManager::CreateEffects() {
 	if (Effects->ShadowsExteriors) ShadowsExteriorsEffect->Enabled = true;
 	if (Effects->ShadowsInteriors) ShadowsInteriorsEffect->Enabled = true;
 	if (Effects->Specular) SpecularEffect->Enabled = true;
-	
-	
+		
 	/*TODO*/
 	if (Effects->Extra) CreateEffect(EffectRecord::EffectRecordType::Extra);
 
@@ -1773,6 +1775,10 @@ void ShaderManager::CreateEffect(EffectRecord::EffectRecordType EffectType) {
 
 	strcpy(Filename, EffectsPath);
 	switch (EffectType) {
+		case EffectRecord::EffectRecordType::Normals:
+			strcat(Filename, "Normals.fx");
+			NormalsEffect = EffectRecord::LoadEffect(Filename);
+			break;
 		case EffectRecord::EffectRecordType::Underwater:
 			strcat(Filename, "Underwater.fx");
 			UnderwaterEffect = EffectRecord::LoadEffect(Filename);
@@ -1913,6 +1919,9 @@ void ShaderManager::CreateEffect(EffectRecord::EffectRecordType EffectType) {
 void ShaderManager::DisposeEffect(EffectRecord::EffectRecordType EffectType) {
 
 	switch (EffectType) {
+		case EffectRecord::EffectRecordType::Normals:
+			delete NormalsEffect; NormalsEffect = NULL;
+			break;
 		case EffectRecord::EffectRecordType::Underwater:
 			delete UnderwaterEffect; UnderwaterEffect = NULL;
 			break;
@@ -2007,8 +2016,17 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 
 	Device->SetStreamSource(0, FrameVertex, 0, sizeof(FrameVS));
 	Device->SetFVF(FrameFVF);
-	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
+	
+	// render post process normals for use by shaders
+	Device->SetRenderTarget(0, TheTextureManager->NormalsSurface);
+	Device->StretchRect(TheTextureManager->NormalsSurface, NULL, TheTextureManager->NormalsSurface, NULL, D3DTEXF_NONE);
+	NormalsEffect->SetCT();
+	NormalsEffect->Render(Device, TheTextureManager->NormalsSurface, TheTextureManager->NormalsSurface, false);
 
+	// prepare device for effects
+	Device->SetRenderTarget(0, RenderTarget);
+	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
+	Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 
 	if (SnowAccumulationEffect->Enabled && currentWorldSpace && ShaderConst.SnowAccumulation.Params.w > 0.0f) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);

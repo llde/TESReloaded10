@@ -15,6 +15,7 @@ public:
 		SourceBuffer,
 		RenderedBuffer,
 		DepthBuffer,
+		NormalsBuffer,
 		ShadowMapBufferNear,
 		ShadowMapBufferMiddle,
 		ShadowMapBufferFar,
@@ -60,6 +61,8 @@ public:
 	IDirect3DSurface9*		SourceSurface;
 	IDirect3DTexture9* 		RenderedTexture;
 	IDirect3DSurface9*		RenderedSurface;
+	IDirect3DTexture9* 		NormalsTexture;
+	IDirect3DSurface9*		NormalsSurface;
 	IDirect3DTexture9*		DepthTexture;
 	IDirect3DTexture9*		DepthTextureINTZ;
 	IDirect3DSurface9*		DepthSurface;

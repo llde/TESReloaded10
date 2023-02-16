@@ -63,6 +63,9 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Name) {
 		case DepthBuffer:
 			Texture = TheTextureManager->DepthTexture;
 			break;
+		case NormalsBuffer:
+			Texture = TheTextureManager->NormalsTexture;
+			break;
 		case ShadowMapBufferNear:
 			Texture = TheTextureManager->ShadowMapTextureBlurred[ShadowManager::ShadowMapTypeEnum::MapNear];
 			break;
@@ -102,12 +105,16 @@ void TextureManager::Initialize() {
 	TheTextureManager->SourceSurface = NULL;
 	TheTextureManager->RenderedTexture = NULL;
 	TheTextureManager->RenderedSurface = NULL;
+	TheTextureManager->NormalsTexture = NULL;
+	TheTextureManager->NormalsSurface = NULL;
 	TheTextureManager->DepthTexture = NULL;
 	TheTextureManager->DepthSurface = NULL;
 	Device->CreateTexture(Width, Height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &TheTextureManager->SourceTexture, NULL);
 	Device->CreateTexture(Width, Height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &TheTextureManager->RenderedTexture, NULL);
+	Device->CreateTexture(Width, Height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &TheTextureManager->NormalsTexture, NULL);
 	TheTextureManager->SourceTexture->GetSurfaceLevel(0, &TheTextureManager->SourceSurface);
 	TheTextureManager->RenderedTexture->GetSurfaceLevel(0, &TheTextureManager->RenderedSurface);
+	TheTextureManager->NormalsTexture->GetSurfaceLevel(0, &TheTextureManager->NormalsSurface);
 	Device->CreateTexture(Width, Height, 1, D3DUSAGE_DEPTHSTENCIL, (D3DFORMAT)MAKEFOURCC('I', 'N', 'T', 'Z'), D3DPOOL_DEFAULT, &TheTextureManager->DepthTexture, NULL);
 
 	for (int i = 0; i <= ShadowManager::ShadowMapTypeEnum::MapOrtho; i++) {
@@ -150,6 +157,7 @@ TextureRecord* TextureManager::LoadTexture(ID3DXBuffer* ShaderSourceBuffer, D3DX
 	Type = !strcmp(ConstantName, "TESR_SourceBuffer") ? TextureRecord::TextureRecordType::SourceBuffer : Type;
 	Type = !strcmp(ConstantName, "TESR_RenderedBuffer") ? TextureRecord::TextureRecordType::RenderedBuffer : Type;
 	Type = !strcmp(ConstantName, "TESR_DepthBuffer") ? TextureRecord::TextureRecordType::DepthBuffer : Type;
+	Type = !strcmp(ConstantName, "TESR_NormalsBuffer") ? TextureRecord::TextureRecordType::NormalsBuffer : Type;
 	Type = !strcmp(ConstantName, "TESR_ShadowMapBufferNear") ? TextureRecord::TextureRecordType::ShadowMapBufferNear : Type;
 	Type = !strcmp(ConstantName, "TESR_ShadowMapBufferMiddle") ? TextureRecord::TextureRecordType::ShadowMapBufferMiddle : Type;
 	Type = !strcmp(ConstantName, "TESR_ShadowMapBufferFar") ? TextureRecord::TextureRecordType::ShadowMapBufferFar : Type;
