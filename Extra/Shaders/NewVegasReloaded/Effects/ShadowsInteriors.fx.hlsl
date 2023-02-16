@@ -41,9 +41,12 @@ samplerCUBE TESR_ShadowCubeMapBuffer8 : register(s11) = sampler_state { ADDRESSU
 samplerCUBE TESR_ShadowCubeMapBuffer9 : register(s12) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 samplerCUBE TESR_ShadowCubeMapBuffer10: register(s13) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 samplerCUBE TESR_ShadowCubeMapBuffer11 : register(s14) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+sampler2D TESR_NormalsBuffer : register(s15) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
 
 #include "Includes/Blending.hlsl"
 #include "Includes/Depth.hlsl"
+#include "Includes/Normals.hlsl"
+
 
 static const float Zmul = nearZ * farZ;
 static const float Zdiff = farZ - nearZ;
@@ -128,7 +131,7 @@ float4 Shadow( VSOUT IN ) : COLOR0 {
 	
 	float4 pos = mul(world_pos, TESR_WorldTransform);
 
-	float4 normal = float4(GetWorldNormal(IN.UVCoord), 1.0);
+	float4 normal = float4(GetWorldNormal(IN.UVCoord), 1);
 
 	Shadow = GetLightAmount(TESR_ShadowCubeMapBuffer0, pos, TESR_ShadowLightPosition0, normal, TESR_LightAttenuation0);
 	Shadow += GetLightAmount(TESR_ShadowCubeMapBuffer1, pos, TESR_ShadowLightPosition1, normal, TESR_LightAttenuation1);

@@ -7,12 +7,14 @@ float4 TESR_ViewSpaceLightDir;
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_SourceBuffer : register(s2) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+sampler2D TESR_NormalsBuffer : register(s3) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
 
 static const float Strength = TESR_SpecularData.x;
 static const float BlurRadius = TESR_SpecularData.y;
 static const float Glossiness = TESR_SpecularData.z;
 static const float DrawDistance = TESR_SpecularData.w;
- 
+
+
 struct VSOUT
 {
 	float4 vertPos : POSITION;
@@ -34,6 +36,7 @@ VSOUT FrameVS(VSIN IN)
 }
 
 #include "Includes/Depth.hlsl"
+#include "Includes/Normals.hlsl"
 #include "Includes/Blur.hlsl"
 
 float4 Desaturate(float4 input)
@@ -50,7 +53,7 @@ float4 specularHighlight( VSOUT IN) : COLOR0
 	if (origin.z > DrawDistance) return 0.0;
 
 	//reorient our sample kernel along the origin's normal
-	float3 normal = GetNormal(IN.UVCoord);
+	float3 normal = GetNormal(coord);
 	float3 viewRay = normalize(origin);
 	float3 reflection = reflect(TESR_ViewSpaceLightDir.xyz, normal);
 

@@ -14,6 +14,7 @@ sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP;
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_SourceBuffer : register(s2) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_BlueNoiseSampler : register(s3) < string ResourceName = "Effects\bluenoise256.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
+sampler2D TESR_NormalsBuffer : register(s4) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
 
 static const float AOsamples = TESR_AmbientOcclusionAOData.x;
 static const float AOstrength = TESR_AmbientOcclusionAOData.y;
@@ -51,6 +52,8 @@ VSOUT FrameVS(VSIN IN)
 #include "Includes/Depth.hlsl"
 #include "Includes/Blur.hlsl"
 #include "Includes/Helpers.hlsl"
+#include "Includes/Normals.hlsl"
+
 
 // returns a semi random float3 between 0 and 1 based on the given seed.
 // tailored to return a different value for each uv coord of the screen.
@@ -153,7 +156,7 @@ float4 Combine(VSOUT IN) : COLOR0
 	luminance = clamp(max(black, lt) + max(black, lt) + max(black, lt), 0.0, 1.0);
 	ao = lerp(ao, white, luminance);
 	color *= ao;
-	
+
     #if viewao
 		return float4(ao, ao, ao, 1);
 	#endif

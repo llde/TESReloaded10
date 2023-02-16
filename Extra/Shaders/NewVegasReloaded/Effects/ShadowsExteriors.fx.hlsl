@@ -37,7 +37,8 @@ sampler2D TESR_ShadowMapBufferMiddle : register(s3) = sampler_state { ADDRESSU =
 sampler2D TESR_ShadowMapBufferFar : register(s4) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = ANISOTROPIC; MIPFILTER = LINEAR; };
 sampler2D TESR_ShadowMapBufferLod : register(s5) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = ANISOTROPIC; MIPFILTER = LINEAR; };
 sampler2D TESR_SourceBuffer : register(s6) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-sampler2D TESR_NoiseSampler : register(s7) < string ResourceName = "Effects\noise.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
+sampler2D TESR_NoiseSampler : register(s7) < string ResourceName = "Effects\bluenoise256.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
+
 
 static const float DARKNESS = 1-TESR_ShadowData.y;
 static const float MIN_VARIANCE = 0.000005;
@@ -60,6 +61,7 @@ struct VSIN
 	float2 UVCoord : TEXCOORD0;
 };
 
+#include "Includes/Helpers.hlsl"
 #include "Includes/Depth.hlsl"
 #include "Includes/Blur.hlsl"
 #include "Includes/Blending.hlsl"
