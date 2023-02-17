@@ -108,9 +108,9 @@ float4 Rain( VSOUT IN ) : COLOR0
 		totalRain += drop;
 	}
 
-	float4 rainColor = (float(0.4).xxxx + TESR_SunColor * shade(normalize(world), TESR_SunDirection)) * TESR_RainData.w;
+	float4 rainColor = lerp(float(0.5).xxxx, TESR_SunColor * 2, pow(shades(normalize(world), TESR_SunDirection), 2));
 
-	color = lerp(color, rainColor, totalRain);
+	color = lerp(color, rainColor, totalRain * TESR_RainData.w);
 	return float4(color.rgb, 1.0f);
 
 }
