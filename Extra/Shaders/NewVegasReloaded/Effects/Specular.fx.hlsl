@@ -3,6 +3,7 @@
 float4 TESR_ReciprocalResolution;
 float4 TESR_SpecularData;					// x: strength, y:blurMultiplier, z:glossiness, w:drawDistance
 float4 TESR_ViewSpaceLightDir;
+float4 TESR_SunColor;
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
@@ -35,6 +36,7 @@ VSOUT FrameVS(VSIN IN)
 	return OUT;
 }
 
+#include "Includes/Helpers.hlsl"
 #include "Includes/Depth.hlsl"
 #include "Includes/Normals.hlsl"
 #include "Includes/Blur.hlsl"
@@ -57,14 +59,13 @@ float4 specularHighlight( VSOUT IN) : COLOR0
 	float3 viewRay = normalize(origin);
 	float3 reflection = reflect(TESR_ViewSpaceLightDir.xyz, normal);
 
-	// float diffuse = dot(normal, TESR_ViewSpaceLightDir.xyz);
-	float specular = pow(dot(viewRay, reflection), Glossiness) * Glossiness * Glossiness;
+	float3 halfwayDir = normalize(TESR_ViewSpaceLightDir.xyz - viewRay);
+
+	float specular = pow(shades(normal, halfwayDir), Glossiness) ;//* Glossiness * Glossiness;
 	
 	specular = lerp(specular, 0.0, origin.z/DrawDistance);
 
-	// return diffuse;
 	return specular.xxxx;
-	// return specular + diffuse;
 }
 
 
@@ -72,12 +73,11 @@ float4 CombineSpecular(VSOUT IN) :COLOR0
 {
 	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
 	float specular = tex2D(TESR_RenderedBuffer, IN.UVCoord).r;
-	float luminance = Desaturate(color).r;
-	float lt = luminance;
+	float luminance = luma(color);
 
 	// scale effect with scene luminance
 	specular = lerp(0.0, specular, luminance) * TESR_SpecularData.x;
-	color += specular * color * TESR_SpecularData.x;
+	color += specular * TESR_SunColor * TESR_SpecularData.x;
 
 	return float4 (color.rgb, 1.0f);
 }
