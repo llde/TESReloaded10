@@ -760,15 +760,21 @@ void SettingManager::LoadSettings() {
 	SettingsPrecipitations.SnowAccumulation.BlurRadiusMultiplier = GetSettingF("Shaders..SnowAccumulation.Main", "BlurRadiusMultiplier");
 
 	// Specular effect settings
-	SettingsSpecular.Exterior.Strength = GetSettingF("Shaders.Specular.Exterior", "Strength");
+	SettingsSpecular.Exterior.SpecLumaTreshold = GetSettingF("Shaders.Specular.Exterior", "SpecLumaTreshold");
 	SettingsSpecular.Exterior.BlurMultiplier = GetSettingF("Shaders.Specular.Exterior", "BlurMultiplier");
 	SettingsSpecular.Exterior.Glossiness = GetSettingF("Shaders.Specular.Exterior", "Glossiness");
 	SettingsSpecular.Exterior.DistanceFade = GetSettingF("Shaders.Specular.Exterior", "DistanceFade");
+	SettingsSpecular.Exterior.SpecularStrength = GetSettingF("Shaders.Specular.Exterior", "SpecularStrength");
+	SettingsSpecular.Exterior.FresnelStrength = GetSettingF("Shaders.Specular.Exterior", "FresnelStrength");
+	SettingsSpecular.Exterior.SkyTintStrength = GetSettingF("Shaders.Specular.Exterior", "SkyTintStrength");
 
-	SettingsSpecular.Rain.Strength = GetSettingF("Shaders.Specular.Rain", "Strength");
+	SettingsSpecular.Rain.SpecLumaTreshold = GetSettingF("Shaders.Specular.Rain", "SpecLumaTreshold");
 	SettingsSpecular.Rain.BlurMultiplier = GetSettingF("Shaders.Specular.Rain", "BlurMultiplier");
 	SettingsSpecular.Rain.Glossiness = GetSettingF("Shaders.Specular.Rain", "Glossiness");
 	SettingsSpecular.Rain.DistanceFade = GetSettingF("Shaders.Specular.Rain", "DistanceFade");
+	SettingsSpecular.Rain.SpecularStrength = GetSettingF("Shaders.Specular.Rain", "SpecularStrength");
+	SettingsSpecular.Rain.FresnelStrength = GetSettingF("Shaders.Specular.Rain", "FresnelStrength");
+	SettingsSpecular.Rain.SkyTintStrength = GetSettingF("Shaders.Specular.Rain", "SkyTintStrength");
 
 	// Generic exterior shadows settings
 	SettingsShadows.Exteriors.Enabled = GetSettingI("Shaders.ShadowsExteriors.Main", "Enabled");

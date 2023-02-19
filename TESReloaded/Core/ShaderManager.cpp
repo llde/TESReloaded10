@@ -289,6 +289,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Sharpening.Data;
 	else if (!strcmp(Name, "TESR_SpecularData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Specular.Data;
+	else if (!strcmp(Name, "TESR_SpecularEffects"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Specular.EffectStrength;
 	else if (!strcmp(Name, "TESR_SnowAccumulationParams"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.SnowAccumulation.Params;
 	else if (!strcmp(Name, "TESR_VolumetricFogData"))
@@ -1618,42 +1620,30 @@ void ShaderManager::UpdateConstants() {
 		ShaderConst.Shadow.ScreenSpaceData.z = TheSettingManager->SettingsShadows.ScreenSpace.RenderDistance;
 
 		if (TheSettingManager->SettingsMain.Effects.Specular) {
-			D3DXVECTOR4 exteriorData;
-			D3DXVECTOR4 rainData;
-			D3DXVECTOR4* previousData;
-			D3DXVECTOR4* currentData;
+			float rainyPercent = ShaderConst.Animators.RainAnimator.GetValue();
+			//Logger::Log("==================================");
 
-			exteriorData.x = TheSettingManager->SettingsSpecular.Exterior.Strength;
-			exteriorData.y = TheSettingManager->SettingsSpecular.Exterior.BlurMultiplier;
-			exteriorData.z = TheSettingManager->SettingsSpecular.Exterior.Glossiness;
-			exteriorData.w = TheSettingManager->SettingsSpecular.Exterior.DistanceFade;
-			rainData.x = TheSettingManager->SettingsSpecular.Rain.Strength;
-			rainData.y = TheSettingManager->SettingsSpecular.Rain.BlurMultiplier;
-			rainData.z = TheSettingManager->SettingsSpecular.Rain.Glossiness;
-			rainData.w = TheSettingManager->SettingsSpecular.Rain.DistanceFade;
+			//Logger::Log("rain percent %f", rainyPercent);
 
-			bool currentIsRainy = false;
-			if (currentWeather) currentIsRainy = currentWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy;
+			SettingsSpecularStruct::ExteriorStruct* ext = &TheSettingManager->SettingsSpecular.Exterior;
+			SettingsSpecularStruct::RainStruct* rain = &TheSettingManager->SettingsSpecular.Rain;
 
-			bool previousIsRainy = false;
-			if (previousWeather) previousIsRainy = (previousWeather->GetWeatherType() == TESWeather::WeatherType::kType_Rainy);
+			// handle transition by interpolating previous and current weather settings
+			ShaderConst.Specular.Data.x = lerp(ext->SpecLumaTreshold, rain->SpecLumaTreshold, rainyPercent);
+			ShaderConst.Specular.Data.y = lerp(ext->BlurMultiplier, rain->BlurMultiplier, rainyPercent);
+			ShaderConst.Specular.Data.z = lerp(ext->Glossiness, rain->Glossiness, rainyPercent);
+			ShaderConst.Specular.Data.w = lerp(ext->DistanceFade, rain->DistanceFade, rainyPercent);
+			ShaderConst.Specular.EffectStrength.x = lerp(ext->SpecularStrength, rain->SpecularStrength, rainyPercent);
+			ShaderConst.Specular.EffectStrength.y = lerp(ext->SkyTintStrength, rain->SkyTintStrength, rainyPercent);
+			ShaderConst.Specular.EffectStrength.z = lerp(ext->FresnelStrength, rain->FresnelStrength, rainyPercent);
 
-			if (currentIsRainy) currentData = &rainData;
-			else currentData = &exteriorData;
-
-			if (weatherPercent > 0 && weatherPercent < 1 && (currentIsRainy != previousIsRainy)) {
-				// handle transition by interpolating previous and current weather settings
-				if (previousIsRainy) previousData = &rainData;
-				else previousData = &exteriorData;
-				
-				ShaderConst.Specular.Data.x = smoothStep(previousData->x, currentData->x, weatherPercent);
-				ShaderConst.Specular.Data.y = smoothStep(previousData->y, currentData->y, weatherPercent);
-				ShaderConst.Specular.Data.z = smoothStep(previousData->z, currentData->z, weatherPercent);
-				ShaderConst.Specular.Data.w = smoothStep(previousData->w, currentData->w, weatherPercent);
-			}
-			else {
-				ShaderConst.Specular.Data = *currentData;
-			}
+			//Logger::Log("spec luma %f", ShaderConst.Specular.Data.x);
+			//Logger::Log("spec blur %f", ShaderConst.Specular.Data.y);
+			//Logger::Log("spec glos %f", ShaderConst.Specular.Data.z);
+			//Logger::Log("spec fade %f", ShaderConst.Specular.Data.w);
+			//Logger::Log("spec spec %f", ShaderConst.Specular.EffectStrength.x);
+			//Logger::Log("spec fres %f", ShaderConst.Specular.EffectStrength.y);
+			//Logger::Log("spec skyt %f", ShaderConst.Specular.EffectStrength.z);
 		}
 
 		if (TheSettingManager->SettingsMain.Effects.VolumetricFog) {

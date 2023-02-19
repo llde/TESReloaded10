@@ -147,6 +147,7 @@ struct ShaderConstants {
 	};
 
 	struct SpecularStruct {
+		D3DXVECTOR4		EffectStrength;
 		D3DXVECTOR4		Data;
 	};
 

@@ -409,17 +409,23 @@ struct SettingsSpecularStruct {
 	bool Enabled;
 	
 	struct ExteriorStruct {
-		float Strength;
+		float SpecularStrength;
 		float BlurMultiplier;
 		float Glossiness;
 		float DistanceFade;
+		float FresnelStrength;
+		float SkyTintStrength;
+		float SpecLumaTreshold;
 	};
 
 	struct RainStruct {
-		float Strength;
+		float SpecularStrength;
 		float BlurMultiplier;
 		float Glossiness;
 		float DistanceFade;
+		float FresnelStrength;
+		float SkyTintStrength;
+		float SpecLumaTreshold;
 	};
 
 	ExteriorStruct Exterior;

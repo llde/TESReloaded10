@@ -1,19 +1,26 @@
 // Specular multiplier fullscreen shader for Oblivion/Skyrim Reloaded
 
 float4 TESR_ReciprocalResolution;
-float4 TESR_SpecularData;					// x: strength, y:blurMultiplier, z:glossiness, w:drawDistance
+float4 TESR_SpecularData;					// x: luma treshold, y:blurMultiplier, z:glossiness, w:drawDistance
+float4 TESR_SpecularEffects;				// x: specular strength, y:sky tint strenght, z:fresnel strength
 float4 TESR_ViewSpaceLightDir;
+float4 TESR_SunDirection;
 float4 TESR_SunColor;
+float4 TESR_SkyColor;
+float4 TESR_FogColor;
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_SourceBuffer : register(s2) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_NormalsBuffer : register(s3) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
 
-static const float Strength = TESR_SpecularData.x;
+static const float LumTreshold = TESR_SpecularData.x;
 static const float BlurRadius = TESR_SpecularData.y;
 static const float Glossiness = TESR_SpecularData.z;
 static const float DrawDistance = TESR_SpecularData.w;
+static const float SpecStrength = TESR_SpecularEffects.x;
+static const float SkyStrength = TESR_SpecularEffects.y;
+static const float FresnelStrength = TESR_SpecularEffects.z;
 
 
 struct VSOUT
@@ -55,33 +62,52 @@ float4 specularHighlight( VSOUT IN) : COLOR0
 	if (origin.z > DrawDistance) return 0.0;
 
 	//reorient our sample kernel along the origin's normal
-	float3 normal = GetNormal(coord);
-	float3 viewRay = normalize(origin);
-	float3 reflection = reflect(TESR_ViewSpaceLightDir.xyz, normal);
+	// float3 normal = GetNormal(coord);
+	// float3 worldNormal = mul(TESR_ViewTransform, float4(normal, 1)).xyz;
+	float3 worldNormal = GetWorldNormal(coord);
+	float3 viewRay = normalize(toWorld(IN.UVCoord) * -1);
 
-	float3 halfwayDir = normalize(TESR_ViewSpaceLightDir.xyz - viewRay);
+	// blinn phong specular
+	float3 halfwayDir = normalize(TESR_SunDirection.xyz + viewRay);
+	float specular = pow(shades(worldNormal, halfwayDir), Glossiness);
+	float skyLight = shades(worldNormal, float3(0, 0, 1));
 
-	float specular = pow(shades(normal, halfwayDir), Glossiness) ;//* Glossiness * Glossiness;
-	
-	specular = lerp(specular, 0.0, origin.z/DrawDistance);
+	// float fresnel = (dot(viewRay, halfwayDir));
+	float fresnel = pow(1 - dot(viewRay, worldNormal), 5);
+	float reflectance = 0.04;
+	fresnel = fresnel + reflectance * (1 - fresnel);
 
-	return specular.xxxx;
+	float3 result = float3(specular, skyLight, fresnel);
+	result = lerp(result, 0.0, smoothstep(0, DrawDistance, origin.z));
+
+	return float4(result, 1.0);
 }
 
 
 float4 CombineSpecular(VSOUT IN) :COLOR0
 {
+	// float4 color = float(0).xxxx;
 	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
-	float specular = tex2D(TESR_RenderedBuffer, IN.UVCoord).r;
+	float4 light = tex2D(TESR_RenderedBuffer, IN.UVCoord);
 	float luminance = luma(color);
 
-	// scale effect with scene luminance
-	specular = lerp(0.0, specular, luminance) * TESR_SpecularData.x;
-	color += specular * TESR_SunColor * TESR_SpecularData.x;
+	float4 result = color;
 
-	return float4 (color.rgb, 1.0f);
+	// skylight
+	result += light.g * TESR_SkyColor * 0.1 * SkyStrength * saturate(smoothstep(0.4, 0, luminance)); // skylight is more pronounced in darker areas
+
+	// fresnel
+	result += light.b * (color + TESR_FogColor * 0.2) * saturate(luminance * 2) * FresnelStrength; //fresnel scales with the luminance, but reaches full power at half max luminance
+
+	// specular
+	result += lerp(0, light.r * SpecStrength * TESR_SunColor, saturate(invlerp(LumTreshold, 1, luminance))); // specular will boost areas above treshold
+
+	return float4 (result.rgb, 1.0f);
 }
  
+
+
+
 technique
 {
 
@@ -102,6 +128,12 @@ technique
 		VertexShader = compile vs_3_0 FrameVS();
 		PixelShader = compile ps_3_0 BlurRChannel(float2(0.0f, 1.0f), BlurRadius, 1, DrawDistance);
 	}
+
+	// pass
+	// { 
+	// 	VertexShader = compile vs_3_0 FrameVS();
+	// 	PixelShader = compile ps_3_0 BoxBlur();
+	// }
 
 	pass
 	{
