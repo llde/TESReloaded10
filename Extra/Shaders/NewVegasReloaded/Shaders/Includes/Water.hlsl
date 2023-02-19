@@ -151,7 +151,7 @@ float4 getSpecular(float3 surfaceNormal, float3 lightDir, float3 eyeDirection, f
     // phong blinn specular with fresnel modulation
 	float3 halfwayDir = normalize(lightDir + eyeDirection);
     float fresnel = saturate(pow(1 - dot(eyeDirection, surfaceNormal), 5));
-	float specular = float4(pow(shades(halfwayDir, surfaceNormal), 30).xxx * 4, 1) * fresnel;
+	float specular = float4(pow(shades(halfwayDir, surfaceNormal.xyz), 30).xxx * 4, 1) * fresnel;
 
     // float specular = pow(abs(shades(reflect(-eyeDirection, surfaceNormal), lightDir)), VarAmounts.x);
     float scattering = 0;//pow(abs(saturate(dot(surfaceNormal.xz, scatteringConst))), glossiness) * 0.03; 
