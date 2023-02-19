@@ -69,8 +69,8 @@ float4 ComputeNormals(VSOUT IN) :COLOR0
 	float3 down = centerPoint - bottomPoint;
 	float3 up = topPoint - centerPoint;
 
-	float3 hDeriv = he.x < he.y ? left : right;
-	float3 vDeriv = ve.x < ve.y ? down : up;
+	float3 hDeriv = he.x > he.y ? left : right;
+	float3 vDeriv = ve.x > ve.y ? down : up;
 
 	// get view space normal from the cross product of the best derivatives
 	// half3 viewNormal = normalize(cross(hDeriv, vDeriv));
