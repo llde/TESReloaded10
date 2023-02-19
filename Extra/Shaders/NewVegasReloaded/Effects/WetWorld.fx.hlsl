@@ -177,12 +177,14 @@ float4 Wet( VSOUT IN ) : COLOR0
 	// calculate puddle color
 	float4 puddleColor = color * 0.5; // base color is just darkened ground color
 	float4 fresnelColor = TESR_HorizonColor * 0.8;
-	float glossiness = 100;
-	float fresnel = saturate(pow(1 - shade(-eyeDirection, combnom), 5));
-	float specular = saturate(pow(shade(eyeDirection, reflect(TESR_SunDirection.xyz, combnom)), glossiness));
+	float glossiness = 300;
+	float fresnel = pow(1 - dot(-eyeDirection, combnom), 5);
+	
+	float3 halfwayDir = normalize(TESR_SunDirection.xyz - eyeDirection);
+	float specular = pow(shades(combnom, halfwayDir), glossiness);
 
 	puddleColor = lerp(puddleColor, fresnelColor, fresnel);
-	puddleColor += specular * TESR_SunColor * 2;
+	puddleColor += specular * TESR_SunColor * 5;
 	
     return lerp(color, puddleColor, saturate(puddlemask));
 }

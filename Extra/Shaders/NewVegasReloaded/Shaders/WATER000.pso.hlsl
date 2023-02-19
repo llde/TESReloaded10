@@ -17,6 +17,7 @@ float4 TESR_WaterSettings : register(c16); // x: caustic strength, y:depthDarkne
 float4 TESR_GameTime : register(c17);
 float4 TESR_HorizonColor : register(c18);
 float4 TESR_SunDirection : register(c19);
+float4 TESR_ReciprocalResolution : register(c20);
 
 sampler2D ReflectionMap : register(s0);
 sampler2D RefractionMap : register(s1);
@@ -24,17 +25,25 @@ sampler2D NoiseMap : register(s2);
 sampler2D DisplacementMap : register(s3); //unused
 sampler2D DepthMap : register(s4);
 sampler2D TESR_samplerWater : register(s5) < string ResourceName = "Water\water_NRM.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; ADDRESSW = WRAP; MAGFILTER = ANISOTROPIC; MINFILTER = ANISOTROPIC; MIPFILTER = ANISOTROPIC; } ;
+//sampler2D TESR_DepthBuffer : register(s6);
 
 #include "Includes/Helpers.hlsl"
 #include "Includes/Water.hlsl"
+//#include "../Effects/Includes/Depth.hlsl"
 
-PS_OUTPUT main(PS_INPUT IN) {
+PS_OUTPUT main(PS_INPUT IN, float2 PixelPos : VPOS) {
     PS_OUTPUT OUT;
+
+    // float2 UVCoord = (PixelPos+0.5)*TESR_ReciprocalResolution.xy;
+    // float4 worldPos = reconstructWorldPosition(UVCoord);
+    // float3 floorNormal = normalize(cross(ddx(worldPos), ddy(worldPos)));
+
 
     float3 eyeVector = EyePos.xyz - IN.LTEXCOORD_0.xyz; // vector of camera position to point being shaded
     float3 eyeDirection = normalize(eyeVector);         // normalized eye to world vector (for lighting)
     float distance = length(eyeVector.xy);              // surface distance to eye
     float depth = length(eyeVector);                    // depth distance to eye
+
 
     // calculate fog coeffs
     float4 screenPos = getScreenpos(IN);                // point coordinates in screen space for water surface
@@ -59,14 +68,20 @@ PS_OUTPUT main(PS_INPUT IN) {
     refractionPos.y = refractionPos.w - reflectionPos.y;
     float3 refractedDepth = tex2Dproj(DepthMap, refractionPos).rgb * exteriorDepthModifier;
 
+    // float water = max(refractedDepth.y, 0.0000000001) * 4096;
+    // float water = max(waterDepth.y, 0.0000000001) * 4096;
+    // float4 floorNormal = float4(normalize(float4(ddx(water), ddy(water), 1, 1).rgb) + eyeDirection.rgb, 1);
+
     float4 color = tex2Dproj(RefractionMap, refractionPos);
     color = getLightTravel(refractedDepth, ShallowColor, DeepColor, sunLuma, color);
     color = getTurbidityFog(refractedDepth, ShallowColor, sunLuma, color); // fade to full fog to hide LOD seam
-    // color = getDiffuse(surfaceNormal, TESR_SunDirection.xyz, eyeDirection, distance, TESR_HorizonColor, color);
+    color = getDiffuse(surfaceNormal, TESR_SunDirection.xyz, eyeDirection, distance, TESR_HorizonColor, color);
     color = lerp(getDiffuse(surfaceNormal, TESR_SunDirection.xyz, eyeDirection, distance, TESR_HorizonColor, color), ShallowColor,LODfade);
     color = getFresnel(surfaceNormal, eyeDirection, reflection, color);
     color = getSpecular(surfaceNormal, TESR_SunDirection.xyz, eyeDirection, SunColor.rgb, color);
     color = getShoreFade(IN, waterDepth.x, color);
+    // color = float2(tex2D(TESR_DepthBuffer, UVCoord).b ,1).xxxy;
+    // color = float4(UVCoord ,0, 1);
 
     OUT.color_0 = color;
     // OUT.color_0.a = lerp(color.a, 1, LODfade); // fade to full opacity to hide LOD seam
