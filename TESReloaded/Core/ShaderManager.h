@@ -207,6 +207,7 @@ struct ShaderConstants {
 	SharpeningStruct		Sharpening;
 	SpecularStruct			Specular;
 	VolumetricFogStruct		VolumetricFog;
+	D3DXVECTOR4				DebugVar;
 };
 
 struct ShaderValue {

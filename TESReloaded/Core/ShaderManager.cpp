@@ -301,6 +301,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.WetWorld.Coeffs;
 	else if (!strcmp(Name, "TESR_WetWorldData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.WetWorld.Data;
+	else if (!strcmp(Name, "TESR_DebugVar"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.DebugVar;
 	else {
 		Logger::Log("Custom constant found: %s", Name);
 		D3DXVECTOR4 v; v.x = v.y = v.z = v.w = 0.0f;
@@ -1655,6 +1657,10 @@ void ShaderManager::UpdateConstants() {
 		}
 	}
 
+	ShaderConst.DebugVar.x = TheSettingManager->SettingsMain.Develop.DebugVar1;
+	ShaderConst.DebugVar.x = TheSettingManager->SettingsMain.Develop.DebugVar2;
+	ShaderConst.DebugVar.x = TheSettingManager->SettingsMain.Develop.DebugVar3;
+	ShaderConst.DebugVar.x = TheSettingManager->SettingsMain.Develop.DebugVar4;
 }
 
 void ShaderManager::CreateShader(const char* Name) {

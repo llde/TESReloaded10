@@ -225,6 +225,10 @@ struct SettingsMainStruct {
 		UInt8	CompileShaders;  // 1 Compile All, 2 Compile modified or missing only, 3 Compile only in menu
 		UInt8	CompileEffects;
 		bool    DebugMode;       // enables hotkeys to print textures
+		bool    DebugVar1;       // var to use for development
+		bool    DebugVar2;       // var to use for development
+		bool    DebugVar3;       // var to use for development
+		bool    DebugVar4;       // var to use for development
 		UInt8	TraceShaders;
 	};
 
