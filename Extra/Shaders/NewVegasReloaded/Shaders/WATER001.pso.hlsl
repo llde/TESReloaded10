@@ -21,7 +21,8 @@ float4 TESR_WaterSettings : register(c16); // x: caustic strength, y:depthDarkne
 float4 TESR_GameTime : register(c17);
 float4 TESR_HorizonColor : register(c18);
 float4 TESR_SunDirection : register(c19);
-
+float4 TESR_WetWorldData : register(c20);
+float4 TESR_DebugVar1 : register(c2);
 
 sampler2D ReflectionMap : register(s0);
 sampler2D RefractionMap : register(s1);
@@ -30,6 +31,7 @@ sampler2D DisplacementMap : register(s3);
 sampler2D DepthMap : register(s4);
 
 sampler2D TESR_samplerWater : register(s5) < string ResourceName = "Water\watercalm_NRM.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; ADDRESSW = WRAP; MAGFILTER = ANISOTROPIC; MINFILTER = ANISOTROPIC; MIPFILTER = ANISOTROPIC; } ;
+sampler2D TESR_RippleSampler : register(s6) < string ResourceName = "Precipitations\ripples.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 #include "Includes/Helpers.hlsl"
 #include "Includes/Water.hlsl"
@@ -59,6 +61,7 @@ PS_OUTPUT main(PS_INPUT IN, float2 PixelPos : VPOS) {
     depths = saturate((FogParam.x - depths) / FogParam.y); 
 
     float3 surfaceNormal = getWaveTexture(IN, distance).xyz;
+    surfaceNormal = getRipples(IN, TESR_RippleSampler, surfaceNormal, distance, TESR_WetWorldData.x);
 
     float refractionCoeff = (waterDepth.y * depthFog) * ((saturate(distance * 0.002) * (-4 + VarAmounts.w)) + 4);
     float4 reflectionPos = getReflectionSamplePosition(IN, surfaceNormal, refractionCoeff * placedWaterRefractionModifier );

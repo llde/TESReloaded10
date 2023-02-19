@@ -113,10 +113,12 @@ float4 getLightTravel(float3 refractedDepth, float4 ShallowColor, float4 DeepCol
 
 float4 getTurbidityFog(float3 refractedDepth, float4 ShallowColor, float sunLuma, float4 color){
     float turbidity = max(0.00001, TESR_WaterVolume.z); // clamp minimum value to avoid division by 0
-    float fogCoeff = 1 - saturate((FogParam.z - (refractedDepth.x * FogParam.z)) / FogParam.w) * FogColor.a * turbidity;
+    float fogCoeff = 1 - saturate((FogParam.z - (refractedDepth.x * FogParam.z)) / FogParam.w);
     float3 fog = ShallowColor.rgb * sunLuma;
 
-    float3 result = lerp(color.rgb, fog.rgb, saturate(fogCoeff ));
+    float3 result = lerp(color.rgb, fog.rgb, saturate(fogCoeff * FogColor.a * turbidity));
+
+    // return float4(1 - refractedDepth.yyy, 1);
     return float4(result, 1);
 }
 
@@ -151,7 +153,7 @@ float4 getSpecular(float3 surfaceNormal, float3 lightDir, float3 eyeDirection, f
     // phong blinn specular with fresnel modulation
 	float3 halfwayDir = normalize(lightDir + eyeDirection);
     float fresnel = saturate(pow(1 - dot(eyeDirection, surfaceNormal), 5));
-	float specular = float4(pow(shades(halfwayDir, surfaceNormal.xyz), 30).xxx * 4, 1) * fresnel;
+	float specular = pow(shades(halfwayDir, surfaceNormal.xyz), 30) * 4 * fresnel;
 
     // float specular = pow(abs(shades(reflect(-eyeDirection, surfaceNormal), lightDir)), VarAmounts.x);
     float scattering = 0;//pow(abs(saturate(dot(surfaceNormal.xz, scatteringConst))), glossiness) * 0.03; 
@@ -169,4 +171,47 @@ float4 getShoreFade(PS_INPUT IN, float depth, float4 color){
     color.a = 1 - pow(abs(1 - depth), 60) * shoreAnimation;
     // return float2(color.a, 1).xxxy;
     return color;
+}
+
+
+float3 ComputeRipple(sampler2D puddlesSampler, float2 UV, float CurrentTime, float Weight)
+{
+    float PI = 3.14159265;
+
+    float4 Ripple = tex2D(puddlesSampler, UV);
+    Ripple.yz = expand(Ripple.yz); // convert from 0/1 to -1/1 
+
+    float period = frac(Ripple.w + CurrentTime);
+    float TimeFrac = period - 1.0f + Ripple.x;
+    float DropFactor = saturate(0.2f + Weight * 0.8f - period);
+    float FinalFactor = DropFactor * Ripple.x * sin( clamp(TimeFrac * 9.0f, 0.0f, 3.0f) * PI);
+
+    return float3(Ripple.yz * FinalFactor * 0.35f, 1.0f);
+}
+
+
+float3 getRipples(PS_INPUT IN, sampler2D puddlesSampler, float3 surfaceNormal, float distance, float rainCoeff){
+
+    float distanceFade = 1 - saturate(invlerp(0, 3500, distance));
+
+    if (!rainCoeff || !distanceFade) return surfaceNormal;
+
+    // sample and combine rain ripples
+    float4 time = float4(0.96f, 0.97f,  0.98f, 0.99f) * 0.07; // Ripple timing
+
+	float2 rippleUV = IN.LTEXCOORD_7 * 5; // scale coordinates
+	float4 Weights = float4(1, 0.75, 0.5, 0.25) * rainCoeff;
+	Weights = saturate(Weights * 4) * 2 * distanceFade;
+	float3 Ripple1 = ComputeRipple(puddlesSampler, rippleUV + float2( 0.25f,0.0f), time.x * TESR_GameTime.x, Weights.x);
+	float3 Ripple2 = ComputeRipple(puddlesSampler, rippleUV * 1.1 + float2(-0.55f,0.3f), time.y * TESR_GameTime.x, Weights.y);
+	float3 Ripple3 = ComputeRipple(puddlesSampler, rippleUV * 1.3 + float2(0.6f, 0.85f), time.z * TESR_GameTime.x, Weights.z);
+	float3 Ripple4 = ComputeRipple(puddlesSampler, rippleUV * 1.5 + float2(0.5f,-0.75f), time.w * TESR_GameTime.x, Weights.w);
+
+	float4 Z = lerp(1, float4(Ripple1.z, Ripple2.z, Ripple3.z, Ripple4.z), Weights);
+	float3 ripple = float3( Weights.x * Ripple1.xy + Weights.y * Ripple2.xy + Weights.z * Ripple3.xy + Weights.w * Ripple4.xy, Z.x * Z.y * Z.z * Z.w);
+	float3 ripnormal = normalize(ripple);
+    
+    float3 combnom = float3(ripnormal.xy + surfaceNormal.xy, surfaceNormal.z);
+
+    return combnom;
 }
