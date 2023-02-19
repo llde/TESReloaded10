@@ -12,7 +12,7 @@ static const float nearZ = TESR_CameraData.x;
 static const float farZ = TESR_CameraData.y;
 static const float Q = farZ/(farZ - nearZ);
 
-float readDepth(in float2 coord : TEXCOORD0)
+float readDepth(float2 coord)
 {
 	float Depth = tex2D(TESR_DepthBuffer, coord).x;;
     float ViewZ = (-nearZ *Q) / (Depth - Q);

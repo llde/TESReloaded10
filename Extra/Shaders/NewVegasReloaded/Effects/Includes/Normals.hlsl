@@ -1,6 +1,6 @@
 float3 GetNormal( float2 uv)
 {
-	return tex2D (TESR_NormalsBuffer, uv) * 2 - 1;
+	return tex2D (TESR_NormalsBuffer, uv).xyz * 2 - 1;
 }
 
 
