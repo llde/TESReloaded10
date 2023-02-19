@@ -420,6 +420,7 @@ struct SettingsSpecularStruct {
 		float FresnelStrength;
 		float SkyTintStrength;
 		float SpecLumaTreshold;
+		float SkyTintSaturation;
 	};
 
 	struct RainStruct {
@@ -430,6 +431,7 @@ struct SettingsSpecularStruct {
 		float FresnelStrength;
 		float SkyTintStrength;
 		float SpecLumaTreshold;
+		float SkyTintSaturation;
 	};
 
 	ExteriorStruct Exterior;

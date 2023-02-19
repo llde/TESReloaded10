@@ -771,6 +771,7 @@ void SettingManager::LoadSettings() {
 	SettingsSpecular.Exterior.SpecularStrength = GetSettingF("Shaders.Specular.Exterior", "SpecularStrength");
 	SettingsSpecular.Exterior.FresnelStrength = GetSettingF("Shaders.Specular.Exterior", "FresnelStrength");
 	SettingsSpecular.Exterior.SkyTintStrength = GetSettingF("Shaders.Specular.Exterior", "SkyTintStrength");
+	SettingsSpecular.Exterior.SkyTintSaturation = GetSettingF("Shaders.Specular.Exterior", "SkyTintSaturation");
 
 	SettingsSpecular.Rain.SpecLumaTreshold = GetSettingF("Shaders.Specular.Rain", "SpecLumaTreshold");
 	SettingsSpecular.Rain.BlurMultiplier = GetSettingF("Shaders.Specular.Rain", "BlurMultiplier");
@@ -779,6 +780,7 @@ void SettingManager::LoadSettings() {
 	SettingsSpecular.Rain.SpecularStrength = GetSettingF("Shaders.Specular.Rain", "SpecularStrength");
 	SettingsSpecular.Rain.FresnelStrength = GetSettingF("Shaders.Specular.Rain", "FresnelStrength");
 	SettingsSpecular.Rain.SkyTintStrength = GetSettingF("Shaders.Specular.Rain", "SkyTintStrength");
+	SettingsSpecular.Rain.SkyTintSaturation = GetSettingF("Shaders.Specular.Rain", "SkyTintSaturation");
 
 	// Generic exterior shadows settings
 	SettingsShadows.Exteriors.Enabled = GetSettingI("Shaders.ShadowsExteriors.Main", "Enabled");

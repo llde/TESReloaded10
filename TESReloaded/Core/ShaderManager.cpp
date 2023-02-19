@@ -1638,6 +1638,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Specular.EffectStrength.x = lerp(ext->SpecularStrength, rain->SpecularStrength, rainyPercent);
 			ShaderConst.Specular.EffectStrength.y = lerp(ext->SkyTintStrength, rain->SkyTintStrength, rainyPercent);
 			ShaderConst.Specular.EffectStrength.z = lerp(ext->FresnelStrength, rain->FresnelStrength, rainyPercent);
+			ShaderConst.Specular.EffectStrength.w = lerp(ext->SkyTintSaturation, rain->SkyTintSaturation, rainyPercent);
 
 			//Logger::Log("spec luma %f", ShaderConst.Specular.Data.x);
 			//Logger::Log("spec blur %f", ShaderConst.Specular.Data.y);
