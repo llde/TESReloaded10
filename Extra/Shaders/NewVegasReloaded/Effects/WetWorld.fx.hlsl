@@ -156,9 +156,12 @@ float4 Wet( VSOUT IN ) : COLOR0
 	float puddles = tex2D(TESR_RenderedBuffer, ScreenCoordToTexCoord(ortho_pos, 1).xy).r; // puddles, ortho height
 	float ortho = tex2D(TESR_OrthoMapBuffer, ScreenCoordToTexCoord(ortho_pos, 1).xy).r; // puddles, ortho height
 
+	float aboveGround = ortho_pos.z < ortho + thickness;
+	float belowGround = ortho_pos.z > ortho - thickness;
+
 	float puddlemask = lerp(pow(puddles * 2, 3), 0, LODfade); // fade out puddles
 	// puddlemask *= ((ortho_pos.z < ortho + thickness) && (ortho_pos.z > ortho - thickness)); 
-	puddlemask *= (ortho_pos.z > ortho - thickness); 
+	puddlemask *= belowGround; 
 
 	// sample and combine rain ripples
 	float2 rippleUV = worldPos.xy / 160.0f;
@@ -172,7 +175,7 @@ float4 Wet( VSOUT IN ) : COLOR0
 	float4 Z = lerp(1, float4(Ripple1.z, Ripple2.z, Ripple3.z, Ripple4.z), Weights);
 	float3 ripple = float3( Weights.x * Ripple1.xy + Weights.y * Ripple2.xy + Weights.z * Ripple3.xy + Weights.w * Ripple4.xy, Z.x * Z.y * Z.z * Z.w);
 	float3 ripnormal = normalize(ripple);
-	float3 combnom = float3(ripnormal.xy, 1);
+	float3 combnom = float3(ripnormal.xy * aboveGround, 1);
 
 	// calculate puddle color
 	float4 puddleColor = color * 0.5; // base color is just darkened ground color
