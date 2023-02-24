@@ -159,9 +159,12 @@ float4 Wet( VSOUT IN ) : COLOR0
 	float aboveGround = ortho_pos.z < ortho + thickness;
 	float belowGround = ortho_pos.z > ortho - thickness;
 
-	float puddlemask = lerp(pow(puddles * 2, 3), 0, LODfade); // fade out puddles
+	puddles = puddles * 2 * belowGround;
+	float puddlemask = pow(puddles, 3);  // sharpen puddle mask
 	// puddlemask *= ((ortho_pos.z < ortho + thickness) && (ortho_pos.z > ortho - thickness)); 
-	puddlemask *= belowGround; 
+	puddlemask = saturate(puddlemask); 
+
+	// return float4(fullPuddle, puddlemask, puddles, 1);
 
 	// sample and combine rain ripples
 	float2 rippleUV = worldPos.xy / 160.0f;
@@ -175,21 +178,21 @@ float4 Wet( VSOUT IN ) : COLOR0
 	float4 Z = lerp(1, float4(Ripple1.z, Ripple2.z, Ripple3.z, Ripple4.z), Weights);
 	float3 ripple = float3( Weights.x * Ripple1.xy + Weights.y * Ripple2.xy + Weights.z * Ripple3.xy + Weights.w * Ripple4.xy, Z.x * Z.y * Z.z * Z.w);
 	float3 ripnormal = normalize(ripple);
-	float3 combnom = float3(ripnormal.xy * aboveGround, 1);
+	float3 combnom = float3(ripnormal.xy * aboveGround * puddlemask, 1);
 
 	// calculate puddle color
-	float4 puddleColor = color * 0.5; // base color is just darkened ground color
+	float4 puddleColor = color * 0.3; // base color is just darkened ground color
 	float4 fresnelColor = TESR_HorizonColor * 0.8;
 	float glossiness = 300;
 	float fresnel = pow(1 - dot(-eyeDirection, combnom), 5);
 	
 	float3 halfwayDir = normalize(TESR_SunDirection.xyz - eyeDirection);
-	float specular = pow(shades(combnom, halfwayDir), glossiness);
+	float specular = pow(shades(combnom, halfwayDir), glossiness * lerp(2, 5, puddlemask));
 
-	puddleColor = lerp(puddleColor, fresnelColor, fresnel);
-	puddleColor += specular * TESR_SunColor * 5;
+	puddleColor = lerp(puddleColor, fresnelColor, saturate(fresnel * puddlemask));
+	puddleColor += specular * TESR_SunColor * 8;
 	
-    return lerp(color, puddleColor, saturate(puddlemask));
+    return lerp(color, puddleColor, lerp(saturate(puddles), 0, LODfade)); // fade out puddles
 }
 
 
