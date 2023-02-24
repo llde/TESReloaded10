@@ -2004,6 +2004,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	TESObjectCELL* currentCell = Player->parentCell;
 	Sky* WorldSky = Tes->sky;
 	bool isExterior = Player->GetWorldSpace() || Player->parentCell->flags0 & TESObjectCELL::kFlags0_BehaveLikeExterior;
+	bool isUnderwater = Tes->sky->GetIsUnderWater(); /*TODO do this work in interior????*/
 
 	bool pipboyIsOn = InterfaceManager->IsActive(Menu::kMenuType_BigFour);
 	bool VATSIsOn = InterfaceManager->IsActive(Menu::kMenuType_VATS);
@@ -2025,7 +2026,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
 	Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 
-	if (SnowAccumulationEffect->Enabled && currentWorldSpace && ShaderConst.SnowAccumulation.Params.w > 0.0f) {
+	if (SnowAccumulationEffect->Enabled && isExterior && ShaderConst.SnowAccumulation.Params.w > 0.0f) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		SnowAccumulationEffect->SetCT();
 		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
@@ -2035,6 +2036,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		AmbientOcclusionEffect->SetCT();
 		AmbientOcclusionEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
+
 	if (ShadowsExteriorsEffect->Enabled && isExterior && !VATSIsOn && !terminalIsOn) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		ShadowsExteriorsEffect->SetCT();
@@ -2044,12 +2046,12 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		ShadowsInteriorsEffect->SetCT();
 		ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (SpecularEffect->Enabled && isExterior) {
+	if (SpecularEffect->Enabled && isExterior && !terminalIsOn) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		SpecularEffect->SetCT();
 		SpecularEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (WetWorldEffect->Enabled && currentWorldSpace && ShaderConst.WetWorld.Data.z > 0.0f) {
+	if (WetWorldEffect->Enabled && isExterior && ShaderConst.WetWorld.Data.z > 0.0f && !terminalIsOn) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		WetWorldEffect->SetCT();
 		WetWorldEffect->Render(Device, RenderTarget, RenderedSurface, false);
@@ -2064,7 +2066,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		BloomEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
  	bool isCellTransition = currentCell != PreviousCell;
-	if (UnderwaterEffect->Enabled && Tes->sky->GetIsUnderWater() /*TODO do this work in interior????*/) {
+	if (UnderwaterEffect->Enabled && isUnderwater) {
 		UnderwaterEffect->SetCT();
 		UnderwaterEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
@@ -2072,7 +2074,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		if (ShaderConst.WaterLens.Percent == -1.0f) ShaderConst.WaterLens.Percent = 1.0f;
 	}
 
-	if (currentWorldSpace) {
+	if (isExterior && !isUnderwater && !terminalIsOn) {
 		if (RainEffect->Enabled && ShaderConst.Rain.RainData.x > 0.0f) {
 			RainEffect->SetCT();
 			RainEffect->Render(Device, RenderTarget, RenderedSurface, false);
@@ -2081,16 +2083,19 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 			SnowEffect->SetCT();
 			SnowEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
-		if (GodRaysEffect->Enabled) {
-			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-			GodRaysEffect->SetCT();
-			GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
-		}
 	}
+
 	if (VolumetricFogEffect->Enabled && !Tes->sky->GetIsUnderWater() && !pipboyIsOn) {
 		VolumetricFogEffect->SetCT();
 		VolumetricFogEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
+
+	if (GodRaysEffect->Enabled && isExterior) {
+		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+		GodRaysEffect->SetCT();
+		GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
+	}
+
 	if (DepthOfFieldEffect->Enabled && ShaderConst.DepthOfField.Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		DepthOfFieldEffect->SetCT();
