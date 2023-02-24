@@ -1,7 +1,7 @@
 // GodRays full screen shader for Oblivion/Skyrim Reloaded
 
-float4x4 TESR_ViewTransform;
-float4x4 TESR_ProjectionTransform;
+// float4x4 TESR_ViewTransform;
+// float4x4 TESR_ProjectionTransform;
 float4 TESR_ReciprocalResolution;
 float4 TESR_CameraForward;
 float4 TESR_SunDirection;
@@ -11,10 +11,14 @@ float4 TESR_SunAmount;
 float4 TESR_GodRaysRay;
 float4 TESR_GodRaysRayColor;
 float4 TESR_GodRaysData;
+float4 TESR_DebugVar;
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_SourceBuffer : register(s2) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
+
+#include "Includes/Helpers.hlsl"
+#include "Includes/Depth.hlsl"
 
 static const float4 sp = TESR_SunDirection * 999999;
 static const float2 texproj = 0.5f * float2(1.0f, -TESR_ReciprocalResolution.y / TESR_ReciprocalResolution.x) / tan(radians(TESR_ReciprocalResolution.w) * 0.5f);
@@ -23,11 +27,12 @@ static const float2 sunview_v = mul(sp / d, TESR_ViewTransform).xy;
 static const float2 sunview = float2(0.5f, 0.5f) + sunview_v.xy * texproj;
 static const float raspect = 1.0f / TESR_ReciprocalResolution.z;
 
-static const float nearZ = TESR_ProjectionTransform._43 / TESR_ProjectionTransform._33;
-static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
+// static const float nearZ = TESR_ProjectionTransform._43 / TESR_ProjectionTransform._33;
+// static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
 static const float forward = dot(-TESR_SunDirection, TESR_CameraForward);
 static const int ShaftPasses = int(TESR_GodRaysData.x);
  
+
 struct VSOUT {
 	float4 vertPos : POSITION;
 	float2 UVCoord : TEXCOORD0;
@@ -52,15 +57,51 @@ float readDepth01(in float2 coord : TEXCOORD0) {
 	
 }
 
-float4 RayMask(VSOUT IN) : COLOR0 {
+float4 SkyMask(VSOUT IN) : COLOR0 {
 	
-	float3 color = 0.0f;
-	
-	if (forward < 0.0f) {
-		float depth = readDepth01(IN.UVCoord);
-		color = tex2D(TESR_SourceBuffer, IN.UVCoord).rgb * depth * TESR_GodRaysData.y;
-	}
+	float2 uv = IN.UVCoord * 2;
+	clip((uv <= 1) - 1);
+
+	float depth = (readDepth(uv) / farZ) > 0.98;
+	float3 color = tex2D(TESR_SourceBuffer, uv).rgb * depth;
+
 	return float4(color, 1.0f);
+}
+
+
+float4 LightMask(VSOUT IN) : COLOR0 {
+	
+	float2 uv = IN.UVCoord;
+	clip((uv <= 0.5) - 1);
+
+	float3 color;
+	color = tex2D(TESR_RenderedBuffer, IN.UVCoord + float2(-1, -1) * TESR_ReciprocalResolution.xy).rgb;
+	color += tex2D(TESR_RenderedBuffer, IN.UVCoord + float2(-1, 1) * TESR_ReciprocalResolution.xy).rgb;
+	color += tex2D(TESR_RenderedBuffer, IN.UVCoord + float2(1, -1) * TESR_ReciprocalResolution.xy).rgb;
+	color += tex2D(TESR_RenderedBuffer, IN.UVCoord + float2(1, 1) * TESR_ReciprocalResolution.xy).rgb;
+
+	color /= 4;
+
+	float threshold = TESR_DebugVar.y; // 0.15
+	float brightness = luma(color);
+
+	float contribution = max(0.0, brightness - threshold);
+	float nmax = 1;
+	float bloomScale = TESR_DebugVar.z; //0.8
+
+	// contribution *= saturate( contribution * bloomScale );  
+	// contribution = min(contribution, nmax);
+
+// f(x) = ( b*(x-a)^2 ) / x    // a: treshold b: scale
+
+	float bloom = bloomScale * sqr(contribution) / brightness;
+
+	// float bloom = nscale * sqr(max(0, contribution - threshold)) / brightness;
+	// float bloom = bloomScale * max(brightness, 0.00001);
+
+	// return float4(bloom.xxx, 1.0f);
+	return float4(threshold.xxx, 1.0f);
+	// return float4(threshold, bloomScale, bloom, 1.0f);
 }
 
 float4 LightShaft(VSOUT IN) : COLOR0 {
@@ -112,18 +153,30 @@ technique
 	pass
 	{
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 RayMask(); 
-	}
- 
-	pass
-	{
-		VertexShader = compile vs_3_0 FrameVS();
-		Pixelshader = compile ps_3_0 LightShaft(); 
+		PixelShader = compile ps_3_0 SkyMask(); 
 	}
 
 	pass
 	{
 		VertexShader = compile vs_3_0 FrameVS();
-		Pixelshader = compile ps_3_0 SunCombine();
+		PixelShader = compile ps_3_0 LightMask(); 
 	}
+ 
+	// pass
+	// {
+	// 	VertexShader = compile vs_3_0 FrameVS();
+	// 	PixelShader = compile ps_3_0 RayMask(); 
+	// }
+ 
+	// pass
+	// {
+	// 	VertexShader = compile vs_3_0 FrameVS();
+	// 	Pixelshader = compile ps_3_0 LightShaft(); 
+	// }
+
+	// pass
+	// {
+	// 	VertexShader = compile vs_3_0 FrameVS();
+	// 	Pixelshader = compile ps_3_0 SunCombine();
+	// }
 }

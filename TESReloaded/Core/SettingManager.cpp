@@ -523,10 +523,10 @@ void SettingManager::LoadSettings() {
 	SettingsMain.Develop.CompileShaders = GetSettingI("Main.Develop.Main", "CompileShaders");
 	SettingsMain.Develop.CompileEffects = GetSettingI("Main.Develop.Main", "CompileEffects");
 	SettingsMain.Develop.DebugMode = GetSettingI("Main.Develop.Main", "DebugMode");
-	SettingsMain.Develop.DebugVar1 = GetSettingI("Main.Develop.Main", "DebugVar1");
-	SettingsMain.Develop.DebugVar2 = GetSettingI("Main.Develop.Main", "DebugVar2");
-	SettingsMain.Develop.DebugVar3 = GetSettingI("Main.Develop.Main", "DebugVar3");
-	SettingsMain.Develop.DebugVar4 = GetSettingI("Main.Develop.Main", "DebugVar4");
+	SettingsMain.Develop.DebugVar1 = GetSettingF("Main.Develop.Main", "DebugVar1");
+	SettingsMain.Develop.DebugVar2 = GetSettingF("Main.Develop.Main", "DebugVar2");
+	SettingsMain.Develop.DebugVar3 = GetSettingF("Main.Develop.Main", "DebugVar3");
+	SettingsMain.Develop.DebugVar4 = GetSettingF("Main.Develop.Main", "DebugVar4");
 	SettingsMain.Develop.TraceShaders = GetSettingI("Main.Develop.Main", "TraceShaders");
 
 
