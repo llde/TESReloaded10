@@ -1659,9 +1659,9 @@ void ShaderManager::UpdateConstants() {
 	}
 
 	ShaderConst.DebugVar.x = TheSettingManager->SettingsMain.Develop.DebugVar1;
-	ShaderConst.DebugVar.x = TheSettingManager->SettingsMain.Develop.DebugVar2;
-	ShaderConst.DebugVar.x = TheSettingManager->SettingsMain.Develop.DebugVar3;
-	ShaderConst.DebugVar.x = TheSettingManager->SettingsMain.Develop.DebugVar4;
+	ShaderConst.DebugVar.y = TheSettingManager->SettingsMain.Develop.DebugVar2;
+	ShaderConst.DebugVar.z = TheSettingManager->SettingsMain.Develop.DebugVar3;
+	ShaderConst.DebugVar.w = TheSettingManager->SettingsMain.Develop.DebugVar4;
 }
 
 void ShaderManager::CreateShader(const char* Name) {
