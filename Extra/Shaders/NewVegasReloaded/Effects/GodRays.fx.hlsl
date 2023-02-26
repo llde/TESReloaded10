@@ -12,6 +12,7 @@ float4 TESR_GodRaysRay;
 float4 TESR_GodRaysRayColor;
 float4 TESR_GodRaysData;
 float4 TESR_DebugVar;
+float4 TESR_ViewSpaceLightDir;
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
@@ -20,18 +21,11 @@ sampler2D TESR_SourceBuffer : register(s2) = sampler_state { ADDRESSU = CLAMP; A
 #include "Includes/Helpers.hlsl"
 #include "Includes/Depth.hlsl"
 
-static const float4 sp = TESR_SunDirection * 999999;
-static const float2 texproj = 0.5f * float2(1.0f, -TESR_ReciprocalResolution.y / TESR_ReciprocalResolution.x) / tan(radians(TESR_ReciprocalResolution.w) * 0.5f);
-static const float d = dot(TESR_CameraForward, sp);
-static const float2 sunview_v = mul(sp / d, TESR_ViewTransform).xy;
-static const float2 sunview = float2(0.5f, 0.5f) + sunview_v.xy * texproj;
 static const float raspect = 1.0f / TESR_ReciprocalResolution.z;
+static const float samples = 16;
+static const float stepLength = 1/samples;
+static const float scale = 0.5;
 
-// static const float nearZ = TESR_ProjectionTransform._43 / TESR_ProjectionTransform._33;
-// static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_ProjectionTransform._33 - 1.0f);
-static const float forward = dot(-TESR_SunDirection, TESR_CameraForward);
-static const int ShaftPasses = int(TESR_GodRaysData.x);
- 
 
 struct VSOUT {
 	float4 vertPos : POSITION;
@@ -50,16 +44,9 @@ VSOUT FrameVS(VSIN IN) {
 	return OUT;
 }
 
-float readDepth01(in float2 coord : TEXCOORD0) {
-	
-	float posZ = tex2D(TESR_DepthBuffer, coord).x;
-	return (2.0f * nearZ) / (nearZ + farZ - posZ * (farZ - nearZ));
-	
-}
-
 float4 SkyMask(VSOUT IN) : COLOR0 {
 	
-	float2 uv = IN.UVCoord * 2;
+	float2 uv = IN.UVCoord / scale;
 	clip((uv <= 1) - 1);
 
 	float depth = (readDepth(uv) / farZ) > 0.98;
@@ -72,7 +59,7 @@ float4 SkyMask(VSOUT IN) : COLOR0 {
 float4 LightMask(VSOUT IN) : COLOR0 {
 	
 	float2 uv = IN.UVCoord;
-	clip((uv <= 0.5) - 1);
+	clip((uv <= scale) - 1);
 
 	float3 color;
 	color = tex2D(TESR_RenderedBuffer, IN.UVCoord + float2(-1, -1) * TESR_ReciprocalResolution.xy).rgb;
@@ -82,49 +69,50 @@ float4 LightMask(VSOUT IN) : COLOR0 {
 
 	color /= 4;
 
-	float threshold = TESR_DebugVar.y; // 0.15
+	float threshold = TESR_DebugVar.y; // 0.55
 	float brightness = luma(color);
 
 	float contribution = max(0.0, brightness - threshold);
 	float nmax = 1;
 	float bloomScale = TESR_DebugVar.z; //0.8
 
-	// contribution *= saturate( contribution * bloomScale );  
-	// contribution = min(contribution, nmax);
-
-// f(x) = ( b*(x-a)^2 ) / x    // a: treshold b: scale
-
 	float bloom = bloomScale * sqr(contribution) / brightness;
 
-	// float bloom = nscale * sqr(max(0, contribution - threshold)) / brightness;
-	// float bloom = bloomScale * max(brightness, 0.00001);
-
-	// return float4(bloom.xxx, 1.0f);
-	return float4(threshold.xxx, 1.0f);
-	// return float4(threshold, bloomScale, bloom, 1.0f);
+	return float4(bloom * color * 100, 1.0f);
 }
 
-float4 LightShaft(VSOUT IN) : COLOR0 {
-	
-	float2 DeltaTexCoord = IN.UVCoord - sunview.xy;
-	float screendist = length(DeltaTexCoord * float2(1.0f, raspect));
-	DeltaTexCoord /= screendist;
-    DeltaTexCoord *= 0.5f * min(0.3f, screendist) * (1.0f / TESR_GodRaysData.x) * TESR_GodRaysRay.z;
-	float3 Color = tex2D(TESR_RenderedBuffer, IN.UVCoord).rgb;
-	float IlluminationDecay = 1.0f;
-    float2 samplepos = IN.UVCoord;
-	
-	[unroll(100)]
-	for (int i = 0; i < ShaftPasses; i++) {
-		samplepos -= DeltaTexCoord;
-		float3 Sample = tex2D(TESR_RenderedBuffer, samplepos).rgb;
-		Sample *= IlluminationDecay * TESR_GodRaysRay.w;
-		Color += Sample;
-		IlluminationDecay *= TESR_GodRaysRay.y;
+
+float4 RadialBlur(VSOUT IN, uniform float step, uniform float attenuation) : COLOR0 {
+	float2 uv = IN.UVCoord;
+	clip((uv <= scale) - 1);
+	uv /= scale; // restore uv scale to do calculations in [0, 1] space
+
+	// calculate vector from pixel to sun along which we'll sample
+	float2 sunPos = projectPosition(TESR_ViewSpaceLightDir.xyz * farZ).xy;
+	float2 blurDirection = (sunPos.xy - uv) * float2(1.0f, raspect) * TESR_DebugVar.w; // apply aspect ratio correction
+	float distance = length(blurDirection);
+	clip((distance < 1) -1);
+
+	float2 dir = blurDirection/distance;
+	float maxStep = distance/step + 1;
+
+	// sample the light clamped image from the pixel to the sun for the given amount of samples
+	float2 samplePos = uv;
+	float4 color = tex2D(TESR_RenderedBuffer, samplePos * scale);
+	float total = 1;
+	for (float i=1; i <= samples; i++){
+		float length = min(step * i, distance); // clamp sampling vector to the distance from the pixel to the sun
+		samplePos = uv + (dir * length / float2(1, raspect)); // apply aspect ratio correctly
+		float doStep = (i <= maxStep && samplePos > 0 && samplePos < 1); // check if we haven't overshot the sun position or exited the screen
+		
+		color += tex2D(TESR_RenderedBuffer, samplePos * scale) * doStep;
+		total += doStep;
 	}
-	Color *= TESR_GodRaysRay.x / TESR_GodRaysData.x;
-	return float4(Color, 1.0f);
+	color /= total;
+
+	return float4(color.rgb, 1);
 }
+
 
 float3 BlendSoftLight(float3 a, float3 b)
 {
@@ -134,18 +122,17 @@ float3 BlendSoftLight(float3 a, float3 b)
 	return (b < 0.5f) ? c : d;
 }
 
-float4 SunCombine(VSOUT IN) : COLOR0
+float4 Combine(VSOUT IN) : COLOR0
 {
-	float Amount = 1.0f;
-	if (TESR_GodRaysData.w) Amount = (TESR_GameTime.y < 12.00f) ? TESR_SunAmount.x : TESR_SunAmount.z;
-	float4 ori = tex2D(TESR_SourceBuffer, IN.UVCoord);
-	float4 shaft = tex2D(TESR_RenderedBuffer, IN.UVCoord) * TESR_GodRaysData.z * Amount;
-	float3 ray = TESR_SunColor.rgb * TESR_GodRaysRayColor.rgb;
-	shaft.rgb *= (-forward) * ray * saturate(1.0f - ori.rgb);
+	float scale = 0.5;
+	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
+	float2 uv = IN.UVCoord * scale;
+	float4 rays = tex2D(TESR_RenderedBuffer, uv);
 
-	float4 color = ori + shaft;
-	color.rgb = BlendSoftLight(color.rgb, (ray * TESR_GodRaysRayColor.a * Amount + 0.5f));
-	return float4(color.rgb, 1.0f);
+	rays *= TESR_SunColor;
+
+
+	return float4(color.rgb + rays.rgb, 1.0f);
 }
  
 technique
@@ -161,22 +148,22 @@ technique
 		VertexShader = compile vs_3_0 FrameVS();
 		PixelShader = compile ps_3_0 LightMask(); 
 	}
- 
-	// pass
-	// {
-	// 	VertexShader = compile vs_3_0 FrameVS();
-	// 	PixelShader = compile ps_3_0 RayMask(); 
-	// }
- 
-	// pass
-	// {
-	// 	VertexShader = compile vs_3_0 FrameVS();
-	// 	Pixelshader = compile ps_3_0 LightShaft(); 
-	// }
 
-	// pass
-	// {
-	// 	VertexShader = compile vs_3_0 FrameVS();
-	// 	Pixelshader = compile ps_3_0 SunCombine();
-	// }
+	pass
+	{
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 RadialBlur(stepLength, 1); 
+	}
+
+	pass
+	{
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 RadialBlur(stepLength * stepLength, 1); 
+	}
+
+	pass
+	{
+		VertexShader = compile vs_3_0 FrameVS();
+		Pixelshader = compile ps_3_0 Combine();
+	}
 }
