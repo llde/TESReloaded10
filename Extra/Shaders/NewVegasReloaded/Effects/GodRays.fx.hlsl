@@ -71,9 +71,9 @@ float4 LightMask(VSOUT IN) : COLOR0 {
 	color += tex2D(TESR_RenderedBuffer, IN.UVCoord + float2(1, 1) * TESR_ReciprocalResolution.xy).rgb;
 	color /= 4;
 
-	float threshold = lumTreshold; // 0.55
+	float threshold = lumTreshold;
 	float brightness = luma(color);
-	float bloomScale = intensity; //0.8
+	float bloomScale = intensity;
 
 	float bloom = bloomScale * sqr(max(0.0, brightness - threshold)) / brightness;
 
@@ -93,15 +93,17 @@ float4 RadialBlur(VSOUT IN, uniform float step, uniform float fade) : COLOR0 {
 	float distance = length(blurDirection);
 	if (distance > 1 || expand(dot(TESR_ViewSpaceLightDir, float4(0, 0, 1, 1))) < 0) return float4(0, 0, 0, 1);
 
-	float2 dir = blurDirection/distance * stepLengthMult;
-	float maxStep = distance/step + 1;
+	float2 dir = blurDirection/distance;
+
+	float stepSize = step * stepLengthMult;
+	float maxStep = distance/stepSize + 1;
 
 	// sample the light clamped image from the pixel to the sun for the given amount of samples
 	float2 samplePos = uv;
 	float4 color = tex2D(TESR_RenderedBuffer, samplePos * scale);
 	float total = 1;
 	for (float i=1; i <= samples; i++){
-		float length = min(step * i, distance); // clamp sampling vector to the distance from the pixel to the sun
+		float length = min(stepSize * i, distance); // clamp sampling vector to the distance from the pixel to the sun
 		samplePos = uv + (dir * length / float2(1, raspect)); // apply aspect ratio correction
 		float doStep = (i <= maxStep && samplePos > 0 && samplePos < 1); // check if we haven't overshot the sun position or exited the screen
 		
