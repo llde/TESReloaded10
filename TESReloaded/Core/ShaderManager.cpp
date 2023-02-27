@@ -978,6 +978,9 @@ void ShaderManager::UpdateConstants() {
 	ShaderConst.GameTime.y = GameHour; //time in hours
 	ShaderConst.GameTime.z = (float)TheFrameRateManager->Time;
 
+	// get water height based on player position
+	ShaderConst.Water.waterSettings.x = Tes->GetWaterHeight(Player, WorldSceneGraph);
+
 	float updateDelay = 0.01;
 
 	if (currentCell) {
@@ -1212,7 +1215,6 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Water.waveParams.z = sws->waveSpeed;
 			ShaderConst.Water.waveParams.w = sws->reflectivity;
 
-			ShaderConst.Water.waterSettings.x = Tes->GetWaterHeight(Player);
 			ShaderConst.Water.waterSettings.y = sws->depthDarkness;
 
 			ShaderConst.Water.waterVolume.x = sws->causticsStrength * ShaderConst.sunGlare;
@@ -1221,8 +1223,6 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Water.waterVolume.w = sws->causticsStrengthS;
 			
 			ShaderConst.Water.shorelineParams.x = sws->shoreMovement;
-
-
 		}		
 
 		if (WorldSky->GetIsUnderWater()) {
