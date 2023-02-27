@@ -9,6 +9,7 @@ float4 TESR_SunColor;
 float4 TESR_SkyColor;
 float4 TESR_HorizonColor;
 float4 TESR_FogColor;
+float4 TESR_WaterSettings;
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
@@ -56,21 +57,29 @@ float4 specularHighlight( VSOUT IN) : COLOR0
 {
 	float2 coord = IN.UVCoord;
 	float depth = readDepth(coord);
-	// if (origin.z > DrawDistance) return 0.0;
 
 	//reorient our sample kernel along the origin's normal
 	float3 worldNormal = GetWorldNormal(coord);
-	float3 viewRay = normalize(toWorld(IN.UVCoord) * -1);
+
+	float3 positionVector = toWorld(IN.UVCoord);
+	float3 camera_vector = positionVector * depth;
+	float4 world_pos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
+
+	if (world_pos.z < TESR_WaterSettings.x + 0.0001) return float4(0, 0, 0, 1); // no effect on water surface
+
+	float3 viewRay = normalize(positionVector * -1);
 
 	// blinn phong specular
 	float3 halfwayDir = normalize(TESR_SunDirection.xyz + viewRay);
-	float specular = pow(shades(worldNormal, halfwayDir), Glossiness);
-	float skyLight = shades(worldNormal, float3(0, 0, 1));
 
 	// float fresnel = (dot(viewRay, halfwayDir));
 	float fresnel = pow(1 - dot(viewRay, worldNormal), 5);
 	float reflectance = 0.04;
 	fresnel = fresnel + reflectance * (1 - fresnel);
+	fresnel *= compress(dot(viewRay, TESR_SunDirection.xyz)); // scale fresnel with light direction
+
+	float specular = pow(shades(worldNormal, halfwayDir), Glossiness) * (1 + fresnel); // scale specular with fresnel
+	float skyLight = shades(worldNormal, float3(0, 0, 1));
 
 	float3 result = float3(specular, skyLight, fresnel);
 	result = lerp(result, 0.0, smoothstep(0, DrawDistance, depth));
@@ -79,7 +88,7 @@ float4 specularHighlight( VSOUT IN) : COLOR0
 	return float4(result, 1.0);
 }
 
-#define screen(base, blend)  base + blend - base*blend
+#define screen(base, blend)  (base + blend - base*blend)
 
 float4 CombineSpecular(VSOUT IN) :COLOR0
 {
@@ -104,17 +113,14 @@ float4 CombineSpecular(VSOUT IN) :COLOR0
 	result += SkyStrength * light.g * skyColor * 0.1 * saturate(smoothstep(0.4, 0, luminance)) * invLuma; // skylight is more pronounced in darker areas
 
 	// specular
-	result += lerp(0, light.r * SpecStrength * TESR_SunColor * color, saturate(invlerp(LumTreshold * sunLuma, 1, luminance))) * light.b; // specular will boost areas above treshold
+	result += lerp(0, light.r * SpecStrength * TESR_SunColor * color, saturate(invlerp(LumTreshold * sunLuma, 1, luminance))); // specular will boost areas above treshold
 
 	return float4 (result.rgb, 1.0f);
 }
  
 
-
-
 technique
 {
-
 	pass
 	{ 
 		VertexShader = compile vs_3_0 FrameVS();
