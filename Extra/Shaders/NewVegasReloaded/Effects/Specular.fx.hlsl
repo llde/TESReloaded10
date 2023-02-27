@@ -69,17 +69,15 @@ float4 specularHighlight( VSOUT IN) : COLOR0
 
 	float3 viewRay = normalize(positionVector * -1);
 
-	// blinn phong specular
-	float3 halfwayDir = normalize(TESR_SunDirection.xyz + viewRay);
-
-	// float fresnel = (dot(viewRay, halfwayDir));
 	float fresnel = pow(1 - dot(viewRay, worldNormal), 5);
 	float reflectance = 0.04;
 	fresnel = fresnel + reflectance * (1 - fresnel);
-	fresnel *= compress(dot(viewRay, TESR_SunDirection.xyz)); // scale fresnel with light direction
+	fresnel *= compress(dot(viewRay, TESR_SunDirection.xyz * -1)); // scale fresnel with light direction
 
+	// blinn phong specular
+	float3 halfwayDir = normalize(TESR_SunDirection.xyz + viewRay);
 	float specular = pow(shades(worldNormal, halfwayDir), Glossiness) * (1 + fresnel); // scale specular with fresnel
-	float skyLight = shades(worldNormal, float3(0, 0, 1));
+	float skyLight = dot(worldNormal, float3(0, 0, 1));
 
 	float3 result = float3(specular, skyLight, fresnel);
 	result = lerp(result, 0.0, smoothstep(0, DrawDistance, depth));
