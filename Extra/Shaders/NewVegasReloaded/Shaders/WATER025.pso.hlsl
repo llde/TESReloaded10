@@ -21,6 +21,7 @@ float4 TESR_WaterSettings : register(c16); // x: caustic strength, y:depthDarkne
 float4 TESR_GameTime : register(c17);
 float4 TESR_HorizonColor : register(c18);
 float4 TESR_SunDirection : register(c19);
+float4 TESR_WaterShorelineParams : register(c20);
 
 sampler2D ReflectionMap : register(s0);
 sampler2D RefractionMap : register(s1);

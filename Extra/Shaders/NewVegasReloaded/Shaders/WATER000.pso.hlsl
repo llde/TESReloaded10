@@ -19,6 +19,7 @@ float4 TESR_HorizonColor : register(c18);
 float4 TESR_SunDirection : register(c19);
 float4 TESR_ReciprocalResolution : register(c20);
 float4 TESR_WetWorldData : register(c21);
+float4 TESR_WaterShorelineParams : register(c22);
 
 sampler2D ReflectionMap : register(s0);
 sampler2D RefractionMap : register(s1);
@@ -77,11 +78,10 @@ PS_OUTPUT main(PS_INPUT IN, float2 PixelPos : VPOS) {
 
     float4 color = tex2Dproj(RefractionMap, refractionPos);
     color = getLightTravel(refractedDepth, ShallowColor, DeepColor, sunLuma, color);
-    // color = getTurbidityFog(refractedDepth, ShallowColor, sunLuma, color); // fade to full fog to hide LOD seam
     color = lerp(getTurbidityFog(refractedDepth, ShallowColor, sunLuma, color), float4(ShallowColor.rgb * sunLuma, 1), LODfade); // fade to full fog to hide LOD seam
     color = getDiffuse(surfaceNormal, TESR_SunDirection.xyz, eyeDirection, distance, TESR_HorizonColor, color);
     color = getFresnel(surfaceNormal, eyeDirection, reflection, color);
-    color = getSpecular(surfaceNormal, TESR_SunDirection.xyz, eyeDirection, SunColor.rgb, color);
+    color = getSpecular(surfaceNormal, TESR_SunDirection.xyz, eyeDirection, SunColor.rgb * dot(TESR_SunDirection, float3(0, 0, 1)), color);
     color = getShoreFade(IN, waterDepth.x, color);
 
     OUT.color_0 = color;

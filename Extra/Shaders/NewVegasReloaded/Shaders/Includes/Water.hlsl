@@ -69,8 +69,10 @@ float4 getWaveTexture(PS_INPUT IN, float distance) {
     float4 waveTextureLarge = expand(tex2D(TESR_samplerWater, texPos * bigScale * waveWidth + normalize(float2(-3, -2)) * speed));
 
     // combine waves
-    waveTexture = (float4(waveTextureLarge.xy + waveTexture.xy,  waveTextureLarge.z * waveTexture.z, 1));
+    waveTexture = float4(waveTextureLarge.xy + waveTexture.xy,  1, 1);
     waveTexture.xy *= choppiness;
+
+    waveTexture = normalize(waveTexture);
 
     return waveTexture;
 }
@@ -98,7 +100,7 @@ float3 getDisplacement(PS_INPUT IN, float blendRadius, float3 surfaceNormal){
     // sample displacement and mix with the wave texture
     float4 DisplacementNormal = normalize(displacement);
 
-    surfaceNormal = surfaceNormal * 0.5 + 0.5;
+    surfaceNormal = compress(surfaceNormal);
     surfaceNormal = float3(surfaceNormal.xy + DisplacementNormal.xy,  surfaceNormal.z);
     surfaceNormal = expand(surfaceNormal);
     return surfaceNormal;
@@ -128,7 +130,6 @@ float4 getDiffuse(float3 surfaceNormal, float3 lightDir, float3 eyeDirection, fl
     float diffuse = shades(lightDir, surfaceNormal) * verticalityFade * distanceFade; // increase intensity with distance
     float3 result = lerp(color.rgb, diffuseColor.rgb, saturate(diffuse));
 
-    return color;
     return float4(result, 1);
 }
 
@@ -147,28 +148,27 @@ float4 getFresnel(float3 surfaceNormal, float3 eyeDirection, float4 reflection, 
 
 float4 getSpecular(float3 surfaceNormal, float3 lightDir, float3 eyeDirection, float3 specColor, float4 color){
     float2 scatteringConst = {-0.569999993, 0.819999993}; //scattering to simulate water coming through the waves
-    float specularBoost = 8;
+    float specularBoost = 250 ;
     float glossiness = 100;
 
     // phong blinn specular with fresnel modulation
 	float3 halfwayDir = normalize(lightDir + eyeDirection);
     float fresnel = saturate(pow(1 - dot(eyeDirection, surfaceNormal), 5));
-	float specular = pow(shades(halfwayDir, surfaceNormal.xyz), 30) * 4 * fresnel;
+	float specular = pow(shades(halfwayDir, surfaceNormal.xyz), 15) * (fresnel);
 
     // float specular = pow(abs(shades(reflect(-eyeDirection, surfaceNormal), lightDir)), VarAmounts.x);
     float scattering = 0;//pow(abs(saturate(dot(surfaceNormal.xz, scatteringConst))), glossiness) * 0.03; 
-    float3 result = color.rgb + (specular + scattering) * specColor * specularBoost;
+    float3 result = color.rgb + (specular + scattering) * specColor.rgb * specularBoost;
 
     return float4(result, 1);
 }
 
 
 float4 getShoreFade(PS_INPUT IN, float depth, float4 color){
-    color.a = 1 - pow(abs(1 - depth), FresnelRI.y);
     float scale = 20;
-    float speed = 0.3;
+    float speed = TESR_WaterShorelineParams.x;
     float shoreAnimation = sin(IN.LTEXCOORD_1.x/scale - TESR_GameTime.x * speed) * 0.4 + 0.8; //reframe sin() from -1/1 to 0.2/1.2 to ensure some fading happens 
-    color.a = 1 - pow(abs(1 - depth), 60) * shoreAnimation;
+    color.a = 1 - pow(abs(1 - depth), TESR_WaterVolume.y * 10) * shoreAnimation;
     // return float2(color.a, 1).xxxy;
     return color;
 }
