@@ -85,8 +85,8 @@ float4 LightMask(VSOUT IN) : COLOR0 {
 float4 RadialBlur(VSOUT IN, uniform float step) : COLOR0 {
 	float2 uv = IN.UVCoord;
 	clip((uv <= scale) - 1);
-	uv += 0.5 * TESR_ReciprocalResolution;
 	uv /= scale; // restore uv scale to do calculations in [0, 1] space
+	uv += 0.5 * TESR_ReciprocalResolution;
 
 	// calculate vector from pixel to sun along which we'll sample
 	float2 sunPos = projectPosition(TESR_ViewSpaceLightDir.xyz * farZ).xy;
@@ -98,13 +98,13 @@ float4 RadialBlur(VSOUT IN, uniform float step) : COLOR0 {
 	float2 dir = blurDirection/distance;
 
 	float stepSize = step * stepLengthMult;
-	float maxStep = distance/stepSize + 1;
+	float maxStep = distance/stepSize;
 
 	// sample the light clamped image from the pixel to the sun for the given amount of samples
 	float2 samplePos = uv;
-	float4 color = tex2D(TESR_RenderedBuffer, samplePos * scale);
+	float4 color = float4(0, 0, 0, 1);
 	float total = 1;
-	for (float i=1; i <= samples; i++){
+	for (float i=0; i < samples; i++){
 		float length = min(stepSize * i, distance); // clamp sampling vector to the distance from the pixel to the sun
 		samplePos = uv + (dir * length / float2(1, raspect)); // apply aspect ratio correction
 		float doStep = (i <= maxStep && samplePos > 0 && samplePos < 1); // check if we haven't overshot the sun position or exited the screen
