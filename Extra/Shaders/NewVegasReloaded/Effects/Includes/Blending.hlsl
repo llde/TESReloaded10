@@ -32,3 +32,15 @@ float4 BlendMode_Overlay(float4 base, float4 blend)
 
 	return alphaBlend(result, base);
 }
+
+
+float4 BlendMode_SoftLight(float4 base, float4 blend)
+{
+	float4 lowValues = 2.0f * base * blend * (1.0f + base * (1.0f - blend));
+	float4 a_sqrt = sqrt(base);
+	float4 highValues = (base + blend * (a_sqrt - base)) * 2.0f - a_sqrt;
+	float4 result = (blend < 0.5f) ? lowValues : highValues;
+	result.a = blend.a;
+
+	return alphaBlend(result, base);
+}
