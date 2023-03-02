@@ -25,9 +25,10 @@ static const float scale = 0.5;
 
 static const float lumTreshold = TESR_GodRaysData.y;
 static const float multiplier = TESR_GodRaysData.z;
-static const float glareReduction = TESR_GodRaysRay.z;
 static const float intensity = TESR_GodRaysRay.x;
 static const float stepLengthMult = TESR_GodRaysRay.y;
+static const float glareReduction = TESR_GodRaysRay.z;
+static const float godrayCurve = TESR_GodRaysRay.w;
 
 
 struct VSOUT {
@@ -71,7 +72,7 @@ float4 LightMask(VSOUT IN) : COLOR0 {
 	color += tex2D(TESR_RenderedBuffer, IN.UVCoord + float2(1, 1) * TESR_ReciprocalResolution.xy).rgb;
 	color /= 4;
 
-	float threshold = lumTreshold;
+	float threshold = lumTreshold * luma(TESR_SunColor); // scaling the luma treshold with sun intensity
 	float brightness = luma(color);
 	float bloomScale = intensity;
 
@@ -81,9 +82,10 @@ float4 LightMask(VSOUT IN) : COLOR0 {
 }
 
 
-float4 RadialBlur(VSOUT IN, uniform float step, uniform float fade) : COLOR0 {
+float4 RadialBlur(VSOUT IN, uniform float step) : COLOR0 {
 	float2 uv = IN.UVCoord;
 	clip((uv <= scale) - 1);
+	uv += 0.5 * TESR_ReciprocalResolution;
 	uv /= scale; // restore uv scale to do calculations in [0, 1] space
 
 	// calculate vector from pixel to sun along which we'll sample
@@ -112,14 +114,6 @@ float4 RadialBlur(VSOUT IN, uniform float step, uniform float fade) : COLOR0 {
 	}
 	color /= total;
 
-	// attentuate intensity with distance from sun to fade the edges and reduce sunglare only on second pass
-	float heightAttenuation = max(0.3, (1 - dot(TESR_SunDirection.xyz, float3(0, 0, 1))));
-	float glareAttenuation = max(0.2, pow(saturate(distance), glareReduction));
-	float attenuation = pow (saturate(1 - distance), 2) * glareAttenuation * heightAttenuation;
-	color = lerp(color, color * attenuation * 2, fade);
-
-	// return attenuation.xxxx;
-
 	return float4(color.rgb, 1);
 }
 
@@ -128,9 +122,28 @@ float4 Combine(VSOUT IN) : COLOR0
 {
 	float scale = 0.5;
 	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
-	float2 uv = IN.UVCoord * scale;
+	float2 uv = IN.UVCoord;
+
+	// calculate vector from pixel to sun along which we'll sample
+	float2 sunPos = projectPosition(TESR_ViewSpaceLightDir.xyz * farZ).xy;
+	float2 blurDirection = (sunPos.xy - uv) * float2(1.0f, raspect); // apply aspect ratio correction
+	float distance = length(blurDirection);
+	uv *= scale;
+
 	float4 rays = tex2D(TESR_RenderedBuffer, uv);
-	rays.rgb *=  multiplier * lerp(TESR_SunColor.rgb, TESR_GodRaysRayColor.rgb, TESR_GodRaysRayColor.w);
+
+	// attentuate intensity with distance from sun to fade the edges and reduce sunglare only on second pass
+	float heightAttenuation = lerp(0.2, 1, (1 - dot(TESR_SunDirection.xyz, float3(0, 0, 1))));
+	float glareAttenuation = max(0.2, pow(saturate(distance), glareReduction));
+	float attenuation = saturate(1 - distance) * glareAttenuation * heightAttenuation * 2;
+
+	rays = pow(rays, godrayCurve);
+	rays = rays * attenuation;
+
+	rays.rgb *= multiplier * lerp(TESR_SunColor.rgb, TESR_GodRaysRayColor.rgb, TESR_GodRaysRayColor.w);
+
+
+	rays = lerp(rays, float4(0.0, 0.0, 0.0, 1), attenuation);
 
 	return float4(color.rgb + rays.rgb, 1.0f);
 }
@@ -152,19 +165,19 @@ technique
 	pass
 	{
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 RadialBlur(stepLength, 0); 
+		PixelShader = compile ps_3_0 RadialBlur(stepLength); 
 	}
 
 	pass
 	{
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 RadialBlur(stepLength * stepLength, 0); 
+		PixelShader = compile ps_3_0 RadialBlur(stepLength * stepLength); 
 	}
 
 	pass
 	{
 		VertexShader = compile vs_3_0 FrameVS();
-		PixelShader = compile ps_3_0 RadialBlur(stepLength * stepLength * stepLength, 1); 
+		PixelShader = compile ps_3_0 RadialBlur(stepLength * stepLength * stepLength); 
 	}
 
 	pass
