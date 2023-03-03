@@ -1154,10 +1154,6 @@ void ShaderManager::UpdateConstants() {
 		ShaderConst.fogData.z = ShaderConst.sunGlare;
 		ShaderConst.fogData.w = WorldSky->fogPower;
 
-		ShaderConst.fogData.x = WorldSky->atmosphere->fogProperty->fStartDistance;
-		ShaderConst.fogData.y = WorldSky->atmosphere->fogProperty->fEndDistance;
-		ShaderConst.fogData.z = ShaderConst.sunGlare;
-		ShaderConst.fogData.w = WorldSky->atmosphere->fogProperty->fPower;
 
 		ShaderConst.fogDistance.x = ShaderConst.fogData.x;
 		ShaderConst.fogDistance.y = ShaderConst.fogData.y;
@@ -1180,7 +1176,7 @@ void ShaderManager::UpdateConstants() {
 		if (TheSettingManager->SettingsMain.Shaders.Water || TheSettingManager->SettingsMain.Effects.Underwater) {
 			RGBA* rgba = NULL;
 			SettingsWaterStruct* sws = NULL;
-			TESWaterForm* currentWater = Tes->GetWaterForm();
+			TESWaterForm* currentWater = currentCell->GetWaterForm();
 			
 			if (currentWater) {
 				UInt32 WaterType = currentWater->GetWaterType();
