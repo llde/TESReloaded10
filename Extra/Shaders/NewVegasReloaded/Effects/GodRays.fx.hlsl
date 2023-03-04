@@ -135,7 +135,7 @@ float4 Combine(VSOUT IN) : COLOR0
 	// attentuate intensity with distance from sun to fade the edges and reduce sunglare only on second pass
 	float heightAttenuation = lerp(0.2, 1, (1 - dot(TESR_SunDirection.xyz, float3(0, 0, 1))));
 	float glareAttenuation = max(0.2, pow(saturate(distance), glareReduction));
-	float attenuation = saturate(1 - distance) * glareAttenuation * heightAttenuation * 2;
+	float attenuation = saturate(pow(1 - distance, 1.5)) * glareAttenuation * heightAttenuation * 2;
 
 	rays = pow(rays, godrayCurve);
 	rays = rays * attenuation;
