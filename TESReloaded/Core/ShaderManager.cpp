@@ -1111,17 +1111,12 @@ void ShaderManager::UpdateConstants() {
 			}
 		}
 
-//				if (ShaderConst.pWeather == NULL || weatherPercent == 1.0f) ShaderConst.pWeather = currentWeather;
-
-//				ShaderConst.oldsunGlare = ShaderConst.pWeather->GetSunGlare();
-
 		if (currentWeather) {
-			ShaderConst.sunGlare = currentWeather->GetSunGlare() / 255.0f; //lerp(ShaderConst.oldsunGlare, currentWeather->GetSunGlare(), weatherPercent) / 255.0f;
+			ShaderConst.sunGlare = currentWeather->GetSunGlare() / 255.0f;
 		}
 		else {
 			ShaderConst.sunGlare = 0.5f;
 		}
-
 		ShaderConst.windSpeed = WorldSky->windSpeed;
 
 		ShaderConst.fogColor.x = WorldSky->fogColor.r;
@@ -1137,7 +1132,7 @@ void ShaderManager::UpdateConstants() {
 		ShaderConst.sunColor.x = WorldSky->sunDirectional.r;
 		ShaderConst.sunColor.y = WorldSky->sunDirectional.g;
 		ShaderConst.sunColor.z = WorldSky->sunDirectional.b;
-		ShaderConst.sunColor.w = 1.0f;
+		ShaderConst.sunColor.w = ShaderConst.sunGlare;
 
 		ShaderConst.sunAmbient.x = WorldSky->sunAmbient.r;
 		ShaderConst.sunAmbient.y = WorldSky->sunAmbient.g;
@@ -1225,6 +1220,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.BloodLens.Percent = 0.0f;
 			ShaderConst.WaterLens.Percent = -1.0f;
 			ShaderConst.Animators.WaterLensAnimator.switched = true;
+			ShaderConst.Animators.WaterLensAnimator.Start(0.0, 0);
 		}
 
 		if (TheSettingManager->SettingsMain.Effects.WaterLens) {
