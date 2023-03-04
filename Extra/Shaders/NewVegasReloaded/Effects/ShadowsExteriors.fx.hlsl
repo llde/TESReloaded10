@@ -228,8 +228,8 @@ float4 ScreenSpaceShadow(VSOUT IN) : COLOR0
 	float3 pos = reconstructPosition(uv) ; 
 
 	float bias = 0.0;
+	if (pos.z > SSS_MAXDEPTH) return float4 (1.0f, 1.0, 1.0, 1.0); // early out for 
 
-	if (pos.z > SSS_MAXDEPTH) return float4 (1.0f, 1.0, 1.0, 1.0);
 	
 	float occlusion = 0.0;
 	for (float i = 1; i < SSS_STEPNUM/2; i++){
@@ -274,6 +274,8 @@ float4 Shadow(VSOUT IN) : COLOR0
 	float3 camera_vector = toWorld(IN.UVCoord) * depth;
 	float4 world_pos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
 
+	if (TESR_CameraPosition.z < TESR_WaterSettings.x && world_pos.z < TESR_WaterSettings.x + 2 && world_pos.z > TESR_WaterSettings.x - 2) return float4 (1.0f, 1.0, 1.0, 1.0);
+
 	float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 
 	Shadow = lerp(1, saturate(GetLightAmount(pos, depth)), TESR_ShadowFade.y); //turn off shadow maps if settings disabled
@@ -305,18 +307,7 @@ float4 Shadow(VSOUT IN) : COLOR0
 }
 
 
-float4 CombineShadow( VSOUT IN ) : COLOR0 
-{
-	// combine Shadow pass and source using an overlay mode + alpha blending
-	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
-	color.a = 1.0f;
-	float shadow = 1.0f - tex2D(TESR_RenderedBuffer, IN.UVCoord).r;
-	float4 shadowColor = float4(color.rgb, shadow);
-
-	return BlendMode_Overlay(color, Desaturate(shadowColor));
-}
-
-float4 SimpleCombineShadow (VSOUT IN) : COLOR0 
+float4 CombineShadow (VSOUT IN) : COLOR0 
 {
 	// old style multiply blending (for testing)
 	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
@@ -353,7 +344,7 @@ technique {
 
 	pass {
 		VertexShader = compile vs_3_0 FrameVS();
-	 	PixelShader = compile ps_3_0 SimpleCombineShadow();
+	 	PixelShader = compile ps_3_0 CombineShadow();
 	}
 
 }
