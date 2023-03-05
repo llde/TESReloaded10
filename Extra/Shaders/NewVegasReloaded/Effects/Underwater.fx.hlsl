@@ -22,10 +22,10 @@ sampler2D TESR_WavesSampler : register(s2) < string ResourceName = "Water\water_
 sampler2D TESR_NormalsBuffer : register(s3) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
 
 static const float frame = TESR_GameTime.z * TESR_WaveParams.z * 1.5;
-static const float4x4 ditherMat = { 0.0588, 0.5294, 0.1765, 0.6471,
-									0.7647, 0.2941, 0.8824, 0.4118,
-									0.2353, 0.7059, 0.1176, 0.5882,
-									0.9412, 0.4706, 0.8235, 0.3259 };
+static const float4x4 ditherMat = {{0.0588, 0.5294, 0.1765, 0.6471},
+									{0.7647, 0.2941, 0.8824, 0.4118},
+									{0.2353, 0.7059, 0.1176, 0.5882},
+									{0.9412, 0.4706, 0.8235, 0.3259}};
 
 static const float causticsStrength = TESR_WaterVolume.x;
 static const float shoreFactor = TESR_WaterVolume.y;
@@ -64,6 +64,8 @@ float4 getSkyColor(float3 eyeDirection){
     return float4(skyColor, 1);
 }
 
+
+
 float4 getWaveTexture(float2 uv) {
     float2 texPos = uv;
 
@@ -80,8 +82,11 @@ float4 getWaveTexture(float2 uv) {
     waveTexture.xy *= choppiness;
 
     waveTexture = normalize(waveTexture);
-
     return waveTexture;
+}
+
+float getCaustics(float2 uv){
+	return pow(1 - shade(getWaveTexture(uv * 0.0005).xyz, float3(0, 0, 1)), 10 * TESR_DebugVar.x) * 100000 * causticsStrength;
 }
 
 
@@ -121,7 +126,7 @@ float4 Water( VSOUT IN ) : COLOR0 {
 	float depthFade = smoothstep(800, 0, waterDepth);
 	float distanceFade = smoothstep(6000, 0, fogDepth);
 
-	float caustics = pow(1 - shade(getWaveTexture(worldPos.xy * 0.0005).xyz, up), 10 * TESR_DebugVar.x) * 100000 * causticsStrength; // x: 0.9
+	float caustics = getCaustics(worldPos.xy); // x: 0.9
 	// float caustics = smoothstep(0.34, 0.5, 1 - shade(getWaveTexture(worldPos.xy * 0.01).xyz, up)); // x: 0.9
 	// color = caustics;
 	color += caustics * TESR_SunColor * depthFade * floorAngle * distanceFade * sunLuma; //y: 0.30
@@ -132,7 +137,8 @@ float4 Water( VSOUT IN ) : COLOR0 {
 	color = lerp(color, fogColor, saturate(pow(linearFog, 10))); // lod hiding
 
 	// reduce banding
-	color += ditherMat[ (IN.UVCoord.x * TESR_ReciprocalResolution.x)%4 ][ (IN.UVCoord.y * TESR_ReciprocalResolution.y)%4 ] / 255;
+	float2 uv = IN.UVCoord.xy / TESR_ReciprocalResolution.xy;
+	color += ditherMat[ (uv.x)%4 ][ (uv.y)%4 ] / 255;
     return float4(color, 1);
 	
 }
@@ -152,7 +158,10 @@ technique
 		VertexShader = compile vs_3_0 FrameVS();
 		PixelShader = compile ps_3_0 Water();
 	}
-	
-		PixelShader = compile ps_3_0 WaterDistortion();
-	}	
+
+	// pass
+	// {
+	// 	VertexShader = compile vs_3_0 FrameVS();
+	// 	PixelShader = compile ps_3_0 WaterDistortion();
+	// }	
 }
