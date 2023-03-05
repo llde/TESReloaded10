@@ -20,6 +20,7 @@ sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP;
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_WavesSampler : register(s2) < string ResourceName = "Water\water_NRM.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; ADDRESSW = WRAP; MAGFILTER = ANISOTROPIC; MINFILTER = ANISOTROPIC; MIPFILTER = ANISOTROPIC; } ;
 sampler2D TESR_NormalsBuffer : register(s3) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
+sampler2D TESR_BlueNoiseSampler : register(s4) < string ResourceName = "Effects\bluenoise256.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
 
 static const float frame = TESR_GameTime.z * TESR_WaveParams.z * 1.5;
 static const float4x4 ditherMat = {{0.0588, 0.5294, 0.1765, 0.6471},
@@ -34,6 +35,7 @@ static const float3 extCoeff = TESR_WaterCoefficients.xyz;// * turbidity;
 static const float scattCoeff = TESR_WaterCoefficients.w;// * turbidity;
 static const float waveWidth = TESR_WaveParams.y;
 static const float depthDarkness = TESR_WaterSettings.y;
+static const float3 up = float3(0, 0, 1);
 
 #include "Includes/Helpers.hlsl"
 #include "Includes/Depth.hlsl"
@@ -58,13 +60,16 @@ VSOUT FrameVS(VSIN IN) {
 }
 
 
+float3 random(float2 seed)
+{
+	return tex2D(TESR_BlueNoiseSampler, (seed/256 + 0.5) / TESR_ReciprocalResolution.xy).xyz;
+}
+
 float4 getSkyColor(float3 eyeDirection){
     float3 skyColor = lerp(TESR_HorizonColor, TESR_SkyColor, pow(shade(eyeDirection, float3(0, 0, 1)), 0.5));
     skyColor += TESR_SunColor.rgb * pow(shades(eyeDirection, TESR_SunDirection.xyz), 12);
     return float4(skyColor, 1);
 }
-
-
 
 float4 getWaveTexture(float2 uv) {
     float2 texPos = uv;
@@ -85,8 +90,11 @@ float4 getWaveTexture(float2 uv) {
     return waveTexture;
 }
 
-float getCaustics(float2 uv){
-	return pow(1 - shade(getWaveTexture(uv * 0.0005).xyz, float3(0, 0, 1)), 10 * TESR_DebugVar.x) * 100000 * causticsStrength;
+float getCaustics(float3 pos){
+	float depth = TESR_WaterSettings.z - pos.z;
+	pos += (depth/TESR_SunDirection.z) * TESR_SunDirection.xyz; // we go to the surface in the direction of the sun to sample
+
+	return pow(1 - shade(getWaveTexture(pos.xy * 0.0005).xyz, up), 10) * 100000 * causticsStrength;
 }
 
 
@@ -100,7 +108,6 @@ float4 Water( VSOUT IN ) : COLOR0 {
 	float waterDepth = TESR_WaterSettings.x - worldPos.z; 
 	float sunLuma = luma(TESR_SunColor);
 	float3 floorNormal = GetWorldNormal(IN.UVCoord);
-	float3 up = float3(0, 0, 1);
 
 	float3 color = tex2D(TESR_RenderedBuffer, IN.UVCoord).rgb;
 
@@ -121,20 +128,33 @@ float4 Water( VSOUT IN ) : COLOR0 {
 	float3 scattering = pow(invlerp(TESR_FogData.x, TESR_FogData.y, fogDepth).xxx, TESR_FogData.w * fogColor * scattCoeff); // lerp colors at different speed
 	float linearFog = saturate(invlerp(TESR_FogData.x, TESR_FogData.y, fogDepth));
 
-
 	float floorAngle = (smoothstep(0.5,1, dot(floorNormal, up)) + smoothstep(0.8,1, dot(floorNormal, TESR_SunDirection.xyz))) / 2;
 	float depthFade = smoothstep(800, 0, waterDepth);
 	float distanceFade = smoothstep(6000, 0, fogDepth);
 
-	float caustics = getCaustics(worldPos.xy); // x: 0.9
-	// float caustics = smoothstep(0.34, 0.5, 1 - shade(getWaveTexture(worldPos.xy * 0.01).xyz, up)); // x: 0.9
-	// color = caustics;
+	float caustics = getCaustics(worldPos); // x: 0.9
 	color += caustics * TESR_SunColor * depthFade * floorAngle * distanceFade * sunLuma; //y: 0.30
 
 	// blend fog layers colors
 	color *= lerp(1, TESR_WaterDeepColor, fogAmount); // surface light absorption
 	color = lerp(color, fogColor * scattering, linearFog); // scattering absorption
 	color = lerp(color, fogColor, saturate(pow(linearFog, 10))); // lod hiding
+
+	// volumetric god rays
+	float godraysMaxDistance = 1000;
+	float3 godrayDepthVector = (eyeVector * min(fogDepth, godraysMaxDistance));
+	float3 samplingEnd = TESR_CameraPosition.xyz + godrayDepthVector;
+	float3 step = godrayDepthVector / 50;
+
+	[unroll]
+	for (int i=1; i<32; i++){
+		float3 samplingVector = step * lerp(0.8, 1, random(IN.UVCoord + TESR_ReciprocalResolution.xy * i)) * i;
+		float3 samplingUV = samplingEnd - samplingVector;
+		float samplingDepthFade = smoothstep(500, 0, TESR_WaterSettings.x - samplingUV.z);
+		float distance = length(samplingVector);
+		float samplingDistanceFade = saturate(invlerp(godraysMaxDistance, 0, distance));
+		color += getCaustics(samplingUV) * lerp(fogColor, TESR_SunColor, samplingDistanceFade) * sunLuma * 0.008 * samplingDepthFade * samplingDistanceFade;
+	}
 
 	// reduce banding
 	float2 uv = IN.UVCoord.xy / TESR_ReciprocalResolution.xy;
@@ -159,9 +179,9 @@ technique
 		PixelShader = compile ps_3_0 Water();
 	}
 
-	// pass
-	// {
-	// 	VertexShader = compile vs_3_0 FrameVS();
-	// 	PixelShader = compile ps_3_0 WaterDistortion();
-	// }	
+	pass
+	{
+		VertexShader = compile vs_3_0 FrameVS();
+		PixelShader = compile ps_3_0 WaterDistortion();
+	}	
 }
