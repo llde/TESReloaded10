@@ -23,7 +23,7 @@ float4 TESR_ReciprocalResolution : register(c21);
 float4 TESR_WetWorldData : register(c22);
 float4 TESR_WaterShorelineParams : register(c23);
 float4 TESR_SunColor : register(c24);
-float4 TESR_DebugVar : register(c25);
+float4 TESR_CameraPosition : register(c25);
 
 sampler2D ReflectionMap : register(s0);
 sampler2D RefractionMap : register(s1);
@@ -70,16 +70,15 @@ PS_OUTPUT main(PS_INPUT IN) {
     float4 refractionPos = getReflectionSamplePosition(IN, surfaceNormal, exteriorRefractionModifier);
     refractionPos.y = refractionPos.w - refractionPos.y;
 
-    // float4 color = tex2Dproj(RefractionMap, refractionPos);
-    // float4 refractionColor = lerp(TESR_SkyColor, TESR_SunColor, pow(shades(eyeDirection, -TESR_SunDirection), 3));
-    // color = color * refractionColor * 2;
+    float4 sky = skyColor(eyeDirection);
+    float depth = TESR_WaterSettings.x - TESR_CameraPosition.z;
+    float4 refractions = tex2Dproj(RefractionMap, refractionPos) * smoothstep(200, 0, depth) + sky;
 
-    float4 color = skyColor(eyeDirection);
-    color = getFresnelBelowWater(surfaceNormal, eyeDirection, (color * 0.3) + ShallowColor * sunLuma, color);
-    color +=  2 * pow(dot(surfaceNormal, eyeDirection), 2) * (color); // highlight
+    float4 color = sky;
+    color = getFresnelBelowWater(surfaceNormal, eyeDirection, (color * 0.3) + (ShallowColor+sky) / 2 * sunLuma, color);
+    color +=  2 * pow(dot(surfaceNormal, eyeDirection), 2) * (refractions); // highlight
 
     OUT.color_0 = float4(color.rgb, 1);
-    // OUT.color_0.a = lerp(color.a, 1, LODfade); // fade to full opacity to hide LOD seam
     return OUT;
 };
 
