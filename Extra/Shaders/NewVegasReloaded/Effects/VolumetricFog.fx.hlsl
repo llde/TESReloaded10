@@ -69,9 +69,10 @@ float4 VolumetricFog(VSOUT IN) : COLOR0 {
     float height = reconstructWorldPosition(IN.UVCoord).z;
     float depth = readDepth(IN.UVCoord);
 	float3 eyeVector = normalize(toWorld(IN.UVCoord));
+	float fogDepth = length(eyeVector * depth);
 
 	// quadratic fog based on linear distance in fog range with fog power
-	float distance = saturate(invLerp(TESR_FogData.x, TESR_FogData.y, depth));
+	float distance = saturate(invLerp(TESR_FogData.x, TESR_FogData.y, fogDepth));
 	float fogAmount = saturate(pow(distance, TESR_FogData.w) * FogStrength);
 	fogAmount = fogAmount * saturate(exp( - height/MaxFogHeight)); // fade with height
 
