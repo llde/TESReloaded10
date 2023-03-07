@@ -385,7 +385,8 @@ ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 	else if (!memcmp(Name, "GRASS", 5)) {
 		if (!TheSettingManager->SettingsMain.Shaders.Grass) return false;
 	}
-	else if (!memcmp(Name, "HDR", 3)) {
+	else if (!memcmp(Name, "HDR", 3) || !memcmp(Name, "ISHDR", 5)) {
+		// load tonemapping shaders, with different names between New vegas and Oblivion
 		if (!TheSettingManager->SettingsMain.Shaders.HDR) return false;
 	}
 	else if (!memcmp(Name, "PAR", 3)) {
