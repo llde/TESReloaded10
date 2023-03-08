@@ -51,6 +51,25 @@ float4 BoxBlur (VSOUT IN) :COLOR0
 	return color /= 9;
 }
 
+float4 Blur(VSOUT IN, uniform float2 OffsetMask, uniform float blurRadius, uniform float scale) : COLOR0
+{
+	// blur using a gaussian blur
+	float WeightSum = 0.114725602f;
+	float2 uv = IN.UVCoord;
+	float4 color = tex2D(TESR_RenderedBuffer, uv).r * WeightSum;
+	clip ((uv <= scale) - 1);
+
+    for (int i = 0; i < cKernelSize; i++)
+    {
+		float2 uvOff = (BlurOffsets[i] * OffsetMask) * blurRadius;
+		float isValid = ((uv.x + uvOff.x) < scale) && ((uv.y + uvOff.y) < scale); 
+		color += BlurWeights[i] * tex2D(TESR_RenderedBuffer, uv + uvOff) * isValid;
+		WeightSum += BlurWeights[i] * isValid;
+    }
+	color /= WeightSum;
+    return color;
+}
+
 
 // perform depth aware 12 taps blur along the direction of the offsetmask
 float4 BlurRChannel(VSOUT IN, uniform float2 OffsetMask, uniform float blurRadius,uniform float depthDrop,uniform float endFade) : COLOR0
