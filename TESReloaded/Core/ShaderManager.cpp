@@ -1055,9 +1055,9 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.ShadowFade.y = TheSettingManager->SettingsShadows.Interiors.Enabled;
 		}
 
-			//Logger::Log("exterior");
+		//Logger::Log("exterior");
 
-				// calculating fog color/fog amount based on sun amount
+		// calculating fog color/fog amount based on sun amount
 		ShaderConst.SunDir.w = 1.0f;
 		if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.y && ShaderConst.GameTime.y <= ShaderConst.SunTiming.z) {
 			// Day time
@@ -1419,7 +1419,7 @@ void ShaderManager::UpdateConstants() {
 				ShaderConst.AmbientOcclusion.AOData.z = sas->ClampStrength;
 				ShaderConst.AmbientOcclusion.AOData.w = sas->Range;
 				ShaderConst.AmbientOcclusion.Data.x = sas->AngleBias;
-				ShaderConst.AmbientOcclusion.Data.y = sas->LumThreshold * ShaderConst.SunAmount.y;
+				ShaderConst.AmbientOcclusion.Data.y = sas->LumThreshold;
 				ShaderConst.AmbientOcclusion.Data.z = sas->BlurDropThreshold;
 				ShaderConst.AmbientOcclusion.Data.w = sas->BlurRadiusMultiplier;
 			}
@@ -1998,6 +1998,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	Sky* WorldSky = Tes->sky;
 	bool isExterior = Player->GetWorldSpace() || Player->parentCell->flags0 & TESObjectCELL::kFlags0_BehaveLikeExterior;
 	bool isUnderwater = Tes->sky->GetIsUnderWater(); /*TODO do this work in interior????*/
+	bool isDaytime = (ShaderConst.GameTime.y >= ShaderConst.SunTiming.x && ShaderConst.GameTime.y <= ShaderConst.SunTiming.w); // gametime is between sunrise start and sunset end
 
 	bool pipboyIsOn = InterfaceManager->IsActive(Menu::kMenuType_BigFour);
 	bool VATSIsOn = InterfaceManager->IsActive(Menu::kMenuType_VATS);
@@ -2083,7 +2084,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		VolumetricFogEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 
-	if (GodRaysEffect->Enabled && isExterior) {
+	if (GodRaysEffect->Enabled && isExterior && isDaytime) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		GodRaysEffect->SetCT();
 		GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);

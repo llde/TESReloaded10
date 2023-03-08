@@ -10,6 +10,7 @@ float4 TESR_GodRaysData; // x: passes amount, y: luminance, z:multiplier, w: tim
 float4 TESR_DebugVar;
 float4 TESR_ViewSpaceLightDir; // view space light vector
 float4 TESR_SunDirection; // worldspace sun vector
+float4 TESR_ShadowFade; // attenuation factor of sunsets/sunrises and moon phases
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
@@ -53,8 +54,11 @@ float4 SkyMask(VSOUT IN) : COLOR0 {
 	float2 uv = IN.UVCoord / scale;
 	clip((uv <= 1) - 1);
 
-	float depth = (readDepth(uv) / farZ) > 0.98;
-	float3 color = tex2D(TESR_SourceBuffer, uv).rgb * depth;
+	float depth = (readDepth(uv) / farZ) > 0.98; //only pixels belonging to the sky will register
+	float3 sunGlare = pow(dot(TESR_ViewSpaceLightDir, normalize(reconstructPosition(uv))), 18) * 500; // fake sunglare computed from light direction
+	float sunSetFade = 1 - TESR_ShadowFade.x; //grows to 1 at the height of sunset
+	float3 color = (1 - saturate(tex2D(TESR_SourceBuffer, uv).rgb) +  sunGlare * TESR_SunColor) * depth * sunSetFade;
+	// float3 color = sunGlare ;
 
 	return float4(color, 1.0f);
 }
@@ -134,7 +138,7 @@ float4 Combine(VSOUT IN) : COLOR0
 
 	// attentuate intensity with distance from sun to fade the edges and reduce sunglare only on second pass
 	float heightAttenuation = lerp(0.2, 1, (1 - dot(TESR_SunDirection.xyz, float3(0, 0, 1))));
-	float glareAttenuation = max(0.2, pow(saturate(distance), glareReduction));
+	float glareAttenuation = max(0.3, pow(saturate(distance), glareReduction));
 	float attenuation = saturate(pow(1 - distance, 1.5)) * glareAttenuation * heightAttenuation * 2;
 
 	rays = pow(rays, godrayCurve);
@@ -143,7 +147,7 @@ float4 Combine(VSOUT IN) : COLOR0
 	rays.rgb *= multiplier * lerp(TESR_SunColor.rgb, TESR_GodRaysRayColor.rgb, TESR_GodRaysRayColor.w);
 
 
-	rays = lerp(rays, float4(0.0, 0.0, 0.0, 1), attenuation);
+	rays = lerp(rays, float4(0.0, 0.0, 0.0, 1), saturate(attenuation));
 
 	return float4(color.rgb + rays.rgb, 1.0f);
 }

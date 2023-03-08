@@ -10,6 +10,7 @@ float4 TESR_SkyColor;
 float4 TESR_HorizonColor;
 float4 TESR_FogColor;
 float4 TESR_WaterSettings;
+float4 TESR_ShadowFade; // attenuation factor of sunsets/sunrises and moon phases
 
 sampler2D TESR_RenderedBuffer : register(s0) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_DepthBuffer : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
@@ -97,6 +98,7 @@ float4 CombineSpecular(VSOUT IN) :COLOR0
 	float luminance = luma(color);
 	float sunLuma = luma (TESR_SunColor);
 	float invLuma = 1 - sunLuma;
+	float sunSetFade = 1 - TESR_ShadowFade.x;
 
 	float4 result = color;
 
@@ -105,10 +107,10 @@ float4 CombineSpecular(VSOUT IN) :COLOR0
 	skyColor = lerp(Desaturate(skyColor), skyColor, SkySaturation);
 
 	// fresnel
-	result += light.b * color * saturate(luminance * 2) * FresnelStrength * invLuma; //fresnel scales with the luminance, but reaches full power at half max luminance
+	result += light.b * color * saturate(luminance * 2) * FresnelStrength * invLuma * sunSetFade; //fresnel scales with the luminance, but reaches full power at half max luminance
 
 	// return skyColor;
-	result += SkyStrength * light.g * skyColor * 0.1 * saturate(smoothstep(0.4, 0, luminance)) * invLuma; // skylight is more pronounced in darker areas
+	result += SkyStrength * light.g * skyColor * 0.1 * saturate(smoothstep(0.4, 0, luminance)) * invLuma * sunSetFade; // skylight is more pronounced in darker areas
 
 	// specular
 	result += lerp(0, light.r * SpecStrength * TESR_SunColor * color, saturate(invlerp(LumTreshold * sunLuma, 1, luminance))); // specular will boost areas above treshold
