@@ -1999,6 +1999,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	bool isExterior = Player->GetWorldSpace() || Player->parentCell->flags0 & TESObjectCELL::kFlags0_BehaveLikeExterior;
 	bool isUnderwater = Tes->sky->GetIsUnderWater(); /*TODO do this work in interior????*/
 	bool isDaytime = (ShaderConst.GameTime.y >= ShaderConst.SunTiming.x && ShaderConst.GameTime.y <= ShaderConst.SunTiming.w); // gametime is between sunrise start and sunset end
+	bool isCellTransition = currentCell != PreviousCell;
 
 	bool pipboyIsOn = InterfaceManager->IsActive(Menu::kMenuType_BigFour);
 	bool VATSIsOn = InterfaceManager->IsActive(Menu::kMenuType_VATS);
@@ -2059,7 +2060,6 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		BloomEffect->SetCT();
 		BloomEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
- 	bool isCellTransition = currentCell != PreviousCell;
 	if (UnderwaterEffect->Enabled && isUnderwater) {
 		UnderwaterEffect->SetCT();
 		UnderwaterEffect->Render(Device, RenderTarget, RenderedSurface, false);
@@ -2079,12 +2079,12 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		}
 	}
 
-	if (VolumetricFogEffect->Enabled && !Tes->sky->GetIsUnderWater() && !pipboyIsOn) {
+	if (VolumetricFogEffect->Enabled && !isUnderwater && !pipboyIsOn) {
 		VolumetricFogEffect->SetCT();
 		VolumetricFogEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 
-	if (GodRaysEffect->Enabled && isExterior && isDaytime) {
+	if (GodRaysEffect->Enabled && isExterior && isDaytime && !isUnderwater) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		GodRaysEffect->SetCT();
 		GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
