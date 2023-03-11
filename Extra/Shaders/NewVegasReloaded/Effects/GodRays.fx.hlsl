@@ -55,9 +55,9 @@ float4 SkyMask(VSOUT IN) : COLOR0 {
 	clip((uv <= 1) - 1);
 
 	float depth = (readDepth(uv) / farZ) > 0.98; //only pixels belonging to the sky will register
-	float3 sunGlare = pow(dot(TESR_ViewSpaceLightDir, normalize(reconstructPosition(uv))), 18) * 500; // fake sunglare computed from light direction
+	float3 sunGlare = pows(dot(TESR_ViewSpaceLightDir.rgb, normalize(reconstructPosition(uv))), 18) * 500; // fake sunglare computed from light direction
 	float sunSetFade = 1 - TESR_ShadowFade.x; //grows to 1 at the height of sunset
-	float3 color = (1 - saturate(tex2D(TESR_SourceBuffer, uv).rgb) +  sunGlare * TESR_SunColor) * depth * sunSetFade;
+	float3 color = (1 - saturate(tex2D(TESR_SourceBuffer, uv).rgb) +  sunGlare * TESR_SunColor.rgb) * depth * sunSetFade;
 	// float3 color = sunGlare ;
 
 	return float4(color, 1.0f);
@@ -69,6 +69,7 @@ float4 LightMask(VSOUT IN) : COLOR0 {
 	float2 uv = IN.UVCoord;
 	clip((uv <= scale) - 1);
 
+	// quick average lum with 4 samples at corner pixels
 	float3 color;
 	color = tex2D(TESR_RenderedBuffer, IN.UVCoord + float2(-1, -1) * TESR_ReciprocalResolution.xy).rgb;
 	color += tex2D(TESR_RenderedBuffer, IN.UVCoord + float2(-1, 1) * TESR_ReciprocalResolution.xy).rgb;
@@ -76,7 +77,7 @@ float4 LightMask(VSOUT IN) : COLOR0 {
 	color += tex2D(TESR_RenderedBuffer, IN.UVCoord + float2(1, 1) * TESR_ReciprocalResolution.xy).rgb;
 	color /= 4;
 
-	float threshold = lumTreshold * luma(TESR_SunColor); // scaling the luma treshold with sun intensity
+	float threshold = lumTreshold * luma(TESR_SunColor.rgb); // scaling the luma treshold with sun intensity
 	float brightness = luma(color);
 	float bloomScale = intensity;
 
@@ -90,7 +91,7 @@ float4 RadialBlur(VSOUT IN, uniform float step) : COLOR0 {
 	float2 uv = IN.UVCoord;
 	clip((uv <= scale) - 1);
 	uv /= scale; // restore uv scale to do calculations in [0, 1] space
-	uv += 0.5 * TESR_ReciprocalResolution;
+	uv += 0.5 * TESR_ReciprocalResolution.xy;
 
 	// calculate vector from pixel to sun along which we'll sample
 	float2 sunPos = projectPosition(TESR_ViewSpaceLightDir.xyz * farZ).xy;
@@ -138,10 +139,10 @@ float4 Combine(VSOUT IN) : COLOR0
 
 	// attentuate intensity with distance from sun to fade the edges and reduce sunglare only on second pass
 	float heightAttenuation = lerp(0.2, 1, (1 - dot(TESR_SunDirection.xyz, float3(0, 0, 1))));
-	float glareAttenuation = max(0.3, pow(saturate(distance), glareReduction));
-	float attenuation = saturate(pow(1 - distance, 1.5)) * glareAttenuation * heightAttenuation * 2;
+	float glareAttenuation = max(0.3, pows(saturate(distance), glareReduction));
+	float attenuation = saturate(pows(1 - distance, 1.5)) * glareAttenuation * heightAttenuation * 2;
 
-	rays = pow(rays, godrayCurve);
+	rays = pows(rays, godrayCurve); // increase response curve to extract more definition from godray pass
 	rays = rays * attenuation;
 
 	rays.rgb *= multiplier * lerp(TESR_SunColor.rgb, TESR_GodRaysRayColor.rgb, TESR_GodRaysRayColor.w);

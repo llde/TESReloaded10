@@ -8,3 +8,5 @@
 #define	weight(v)           dot(v, 1)
 #define	sqr(v)              ((v) * (v))
 #define blendnormals(a, b)  float3(a.xy + b.xy, a.z)
+#define rand(s)             (frac(sin(dot(s, float2(12.9898, 78.233))) * 43758.5453)) // pseudo random from https://gist.github.com/keijiro/ee7bc388272548396870
+#define pows(a, b)          (pow(abs(a), b)) // no more pow/abs warning!

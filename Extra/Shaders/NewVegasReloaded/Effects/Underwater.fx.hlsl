@@ -1,4 +1,5 @@
 // Underwater fullscreen shader for Oblivion Reloaded
+#include "Includes/Helpers.hlsl"
 
 float4 TESR_ReciprocalResolution;
 float4 TESR_SunDirection;
@@ -38,6 +39,7 @@ static const float scattCoeff = TESR_WaterCoefficients.w;// * turbidity;
 static const float waveWidth = TESR_WaveParams.y;
 static const float depthDarkness = TESR_WaterSettings.y;
 static const float3 up = float3(0, 0, 1);
+static const float sunLuma = luma(TESR_SunColor.rgb);
 
 struct VSOUT {
 	float4 vertPos : POSITION;
@@ -56,7 +58,6 @@ VSOUT FrameVS(VSIN IN) {
 	return OUT;
 }
 
-#include "Includes/Helpers.hlsl"
 #include "Includes/Depth.hlsl"
 #include "Includes/Normals.hlsl"
 #include "Includes/Blur.hlsl"
@@ -67,10 +68,10 @@ float3 random(float2 seed)
 }
 
 // lerp between sky colors to recreate the sky for refractions as vanilla buffer is tinted
-float4 getSkyColor(float3 eyeDirection){
-    float3 skyColor = lerp(TESR_HorizonColor, TESR_SkyColor, pow(shade(eyeDirection, float3(0, 0, 1)), 0.5));
-    skyColor += TESR_SunColor.rgb * pow(shades(eyeDirection, TESR_SunDirection.xyz), 12);
-    return float4(skyColor, 1);
+float3 getSkyColor(float3 eyeDirection){
+    float3 skyColor = lerp(TESR_HorizonColor.rgb, TESR_SkyColor.rgb, pow(shade(eyeDirection, float3(0, 0, 1)), 0.5));
+    skyColor += TESR_SunColor.rgb * pows(shades(eyeDirection, TESR_SunDirection.xyz), 12);
+    return skyColor;
 }
 
 float4 getWaveTexture(float2 uv) {
@@ -99,8 +100,8 @@ float getCaustics(float3 pos){
     float speed = TESR_GameTime.x * 0.01 * TESR_WaveParams.z;
 	float scale = 0.002;
 
-	float layer1 = tex2D(TESR_CausticsSampler, pos.xy * scale  + speed* normalize(float3( -1.2, - 2.5, 0)));
-	float layer2 = tex2D(TESR_CausticsSampler, pos.xy * scale * 1.2  + speed * normalize(float3(0.5, 2, 0)));
+	float layer1 = tex2D(TESR_CausticsSampler, pos.xy * scale  + speed * normalize(float2(-1.2, - 2.5))).r;
+	float layer2 = tex2D(TESR_CausticsSampler, pos.xy * scale * 1.2  + speed * normalize(float2(0.5, 2))).r;
 
 	return pow(min(layer1, layer2), 2) * causticsStrength * 10;
 	// return pow(1 - shade(getWaveTexture(pos.xy * 0.0005).xyz, up), 10) * 100000 * causticsStrength;
@@ -116,13 +117,12 @@ float4 Godrays( VSOUT IN) : COLOR0 {
 
     float3 eyeVector = toWorld(uv);
 	float depth = length(readDepth(uv) * eyeVector);
-	float sunLuma = luma(TESR_SunColor);
 	
 	float godraysMaxDistance = 1000;
 	float stepSize = godraysMaxDistance / 50;
 	float3 step = eyeVector * stepSize;
 
-	float color = float4(0, 0, 0, 0);
+	float4 color = float4(0, 0, 0, 0);
 	
 	float3 samplingUV = TESR_CameraPosition.xyz;
 	[unroll]
@@ -131,7 +131,7 @@ float4 Godrays( VSOUT IN) : COLOR0 {
 		float distance = stepSize * i;
 		float samplingDepthFade = smoothstep(800, 0, TESR_WaterSettings.x - samplingUV.z);
 		float samplingDistanceFade = 1 - distance/godraysMaxDistance;
-		float3 rayColor = lerp(float3(0, 0, 0), float3(1, 1, 1), samplingDistanceFade) * sunLuma * 0.06;
+		float4 rayColor = lerp(float4(0, 0, 0, 1), float4(1, 1, 1, 1), samplingDistanceFade) * sunLuma * 0.06;
 		color += getCaustics(samplingUV) * rayColor * samplingDepthFade * samplingDistanceFade * (distance < depth);
 	}
 
@@ -147,7 +147,6 @@ float4 Water( VSOUT IN ) : COLOR0 {
 	float3 eyePos = TESR_WaterSettings.x - TESR_CameraPosition.xyz;
 	float fogDepth = length(eyeVector * depth); // a depth measure that's at the same distance from the camera at all angles
 	float waterDepth = TESR_WaterSettings.x - worldPos.z; 
-	float sunLuma = luma(TESR_SunColor);
 	float3 floorNormal = GetWorldNormal(IN.UVCoord);
 
 	// float3 blurredColor = tex2D(TESR_RenderedBuffer, IN.UVCoord/2 + 1).rgb;
@@ -167,7 +166,7 @@ float4 Water( VSOUT IN ) : COLOR0 {
 
 	float3 fogColor = lerp(TESR_WaterDeepColor.rgb, TESR_WaterShallowColor.rgb + skyColor * 0.2, verticalFade); // mix in some sky color into shallow fog
 	fogColor *= sunLuma * (0.4 + (1 - 0.4) * sunDirFade) * extCoeff; //scale fog brightness with sunluma/sun direction and apply user setting modifiers
-	float3 scattering = pow(invlerp(TESR_FogData.x, TESR_FogData.y, fogDepth).xxx, TESR_FogData.w * fogColor * scattCoeff); // lerp colors at different speed
+	float3 scattering = pows(invlerp(TESR_FogData.x, TESR_FogData.y, fogDepth).xxx, TESR_FogData.w * fogColor * scattCoeff); // lerp colors at different speed
 	float linearFog = saturate(invlerp(TESR_FogData.x, TESR_FogData.y, fogDepth));
 
 	// fading parameters for caustics and god rays
@@ -176,15 +175,15 @@ float4 Water( VSOUT IN ) : COLOR0 {
 	float distanceFade = smoothstep(6000, 0, fogDepth);
 
 	float caustics = getCaustics(worldPos);
-	color += caustics * TESR_SunColor * depthFade * floorAngle * distanceFade * sunLuma;
+	color += caustics * TESR_SunColor.rgb * depthFade * floorAngle * distanceFade * sunLuma;
 
 	// blend fog layers colors
-	color *= lerp(1, TESR_WaterDeepColor, fogAmount); // surface light absorption
+	color *= lerp(1, TESR_WaterDeepColor.rgb, fogAmount); // surface light absorption
 	color = lerp(color, fogColor * scattering, linearFog); // scattering absorption
 	color = lerp(color, fogColor, saturate(pow(linearFog, 10))); // lod hiding
 
 	// blend in godrays
-	color += tex2D(TESR_RenderedBuffer, IN.UVCoord / 2).r * TESR_FogColor;
+	color += tex2D(TESR_RenderedBuffer, IN.UVCoord / 2).r * TESR_FogColor.rgb;
 
 	// reduce banding
 	float2 uv = IN.UVCoord.xy / TESR_ReciprocalResolution.xy;

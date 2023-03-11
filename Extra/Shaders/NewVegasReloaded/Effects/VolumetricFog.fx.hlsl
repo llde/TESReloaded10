@@ -77,7 +77,7 @@ float4 VolumetricFog(VSOUT IN) : COLOR0 {
 	fogAmount = fogAmount * saturate(exp( - height/MaxFogHeight)); // fade with height
 
 	// calculate color
-	float3 fogColor  = lerp(TESR_HorizonColor, TESR_FogColor, saturate(1/ (1 + distance))); // fade color between fog to horizon based on depth
+	float3 fogColor  = lerp(TESR_HorizonColor, TESR_FogColor, saturate(1/ (1 + distance))).rgb; // fade color between fog to horizon based on depth
 	float sunAmount = pow(saturate(dot(eyeVector, TESR_SunDirection.xyz)), SunExponent) * (TESR_FogData.z * SunGlareCoeff); //sun influence
 	fogColor = fogColor + TESR_SunColor.rgb * sunAmount; // add sun color to the fog
 

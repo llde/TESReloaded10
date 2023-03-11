@@ -80,7 +80,7 @@ float linstep(float low, float high, float t)
 	return clamp((t - low)/(high-low), 0.0f, 1.0f);
 }
 
-float4 ChebyshevUpperBound(float2 moments, float distance)
+float ChebyshevUpperBound(float2 moments, float distance)
 {
 	// get traditional shadow value
 	float p = (moments.x > distance); //0: in shadow, 1: in light
@@ -149,7 +149,7 @@ float GetLightAmountValue(sampler2D shadowBuffer, float4x4 lightTransform, float
 	return dot(shadows, shadowMode);
 }
 
-float4 GetLightAmount(float4 coord, float depth)
+float GetLightAmount(float4 coord, float depth)
 {
 	float blendArea = 0.8;
 	float shadow;
