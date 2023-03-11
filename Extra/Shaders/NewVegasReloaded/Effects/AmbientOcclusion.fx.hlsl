@@ -130,7 +130,7 @@ float4 SSAO(VSOUT IN, uniform float2 OffsetMask) : COLOR0
 	
 	occlusion = 1.0 - occlusion/kernelSize * AOstrength;
 
-	float fogColor = luma(TESR_FogColor);
+	float fogColor = luma(TESR_FogColor.rgb);
 	float darkness = clamp(lerp(occlusion, fogColor, fogCoeff(origin.z)), occlusion, 1.0);
 
 	darkness = lerp(darkness, 1.0, saturate(invlerp(startFade, endFade, origin.z))) * color.x;

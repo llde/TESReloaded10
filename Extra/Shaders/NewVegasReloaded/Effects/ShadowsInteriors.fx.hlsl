@@ -111,7 +111,7 @@ float GetLightAmount(samplerCUBE ShadowCubeMapBuffer, float4 WorldPos, float4 Li
 
 	// return GetLightAmountValue(ShadowCubeMapBuffer, LightDir, Distance);
 	// float atten = saturate(1/(Distance * Distance)) * 0.5;
-	float diffuse = dot(LightDir, normal);
+	float diffuse = dot(LightDir, normal.xyz);
 
 	LightAmount = GetLightAmountValue(ShadowCubeMapBuffer, LightUV, Distance) * diffuse * atten;
 	// LightAmount = lerp(1, GetLightAmountValue(ShadowCubeMapBuffer, LightDir, Distance) * atten, attenuation.w);

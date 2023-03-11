@@ -95,8 +95,8 @@ float4 CombineSpecular(VSOUT IN) :COLOR0
 	float depth = smoothstep(0, farZ / 4, readDepth(IN.UVCoord));
 	float4 color = tex2D(TESR_SourceBuffer, IN.UVCoord);
 	float4 light = tex2D(TESR_RenderedBuffer, IN.UVCoord);
-	float luminance = luma(color);
-	float sunLuma = luma (TESR_SunColor);
+	float luminance = luma(color.rgb);
+	float sunLuma = luma(TESR_SunColor.rgb);
 	float invLuma = 1 - sunLuma;
 	float sunSetFade = 1 - TESR_ShadowFade.x;
 

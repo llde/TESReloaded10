@@ -112,7 +112,7 @@ float4 RadialBlur(VSOUT IN, uniform float step) : COLOR0 {
 	for (float i=0; i < samples; i++){
 		float length = min(stepSize * i, distance); // clamp sampling vector to the distance from the pixel to the sun
 		samplePos = uv + (dir * length / float2(1, raspect)); // apply aspect ratio correction
-		float doStep = (i <= maxStep && samplePos > 0 && samplePos < 1); // check if we haven't overshot the sun position or exited the screen
+		float doStep = (i <= maxStep && samplePos.x > 0 && samplePos.y > 0 && samplePos.x < 1 && samplePos.y < 1); // check if we haven't overshot the sun position or exited the screen
 		
 		color += tex2D(TESR_RenderedBuffer, samplePos * scale) * doStep;
 		total += doStep;
