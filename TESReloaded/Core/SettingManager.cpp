@@ -464,6 +464,7 @@ void SettingManager::LoadSettings() {
 	SettingsMain.Effects.Specular = GetSettingI("Shaders.Specular.Status", "Enabled");
 	SettingsMain.Effects.Extra = GetSettingI("Shaders.ExtraEffects.Status", "Enabled");
 
+
 	strcpy(SettingsMain.Menu.TextFont, GetSettingS("Main.Menu.Style", "TextFont", Value));
 	SettingsMain.Menu.TextSize = GetSettingI("Main.Menu.Style", "TextSize");
 	strcpy(SettingsMain.Menu.TextFontStatus, GetSettingS("Main.Menu.Style", "TextFontStatus", Value));
@@ -617,12 +618,14 @@ void SettingManager::LoadSettings() {
 	SettingsBloomInteriors.MiddleGray = GetSettingF("Shaders.Bloom.Interiors", "MiddleGray");
 	SettingsBloomInteriors.WhiteCutOff = GetSettingF("Shaders.Bloom.Interiors", "WhiteCutOff");
 
-
 	SettingsCinema.Mode = GetSettingI("Shaders.Cinema.Main", "Mode");
 	SettingsCinema.AspectRatio = GetSettingF("Shaders.Cinema.Main", "AspectRatio");
 	SettingsCinema.VignetteRadius = GetSettingF("Shaders.Cinema.Main", "VignetteRadius");
 	SettingsCinema.VignetteDarkness = GetSettingF("Shaders.Cinema.Main", "VignetteDarkness");
-
+	SettingsCinema.OverlayStrength = GetSettingF("Shaders.Cinema.Main", "OverlayStrength");
+	SettingsCinema.DirtLensAmount = GetSettingF("Shaders.Cinema.Main", "DirtLensAmount");
+	SettingsCinema.FilmGrainAmount = GetSettingF("Shaders.Cinema.Main", "FilmGrainAmount");
+	SettingsCinema.ChromaticAberration = GetSettingF("Shaders.Cinema.Main", "ChromaticAberration");
 
 	Config.FillSections(&List, "Shaders.Coloring");
 	for (StringList::iterator Iter = List.begin(); Iter != List.end(); ++Iter) {

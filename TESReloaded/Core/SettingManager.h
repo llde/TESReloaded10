@@ -475,6 +475,10 @@ struct SettingsCinemaStruct {
 	float AspectRatio;
 	float VignetteRadius;
 	float VignetteDarkness;
+	float OverlayStrength;
+	float DirtLensAmount;
+	float FilmGrainAmount;
+	float ChromaticAberration;
 };
 
 struct SettingsBloomStruct {

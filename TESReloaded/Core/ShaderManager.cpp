@@ -261,6 +261,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Bloom.BloomValues;
 	else if (!strcmp(Name, "TESR_CinemaData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Cinema.Data;
+	else if (!strcmp(Name, "TESR_CinemaSettings"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Cinema.Settings;
 	else if (!strcmp(Name, "TESR_ColoringColorCurve"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Coloring.ColorCurve;
 	else if (!strcmp(Name, "TESR_ColoringEffectGamma"))
@@ -1411,7 +1413,7 @@ void ShaderManager::UpdateConstants() {
 		if (TheSettingManager->SettingsMain.Effects.AmbientOcclusion) {
 			SettingsAmbientOcclusionStruct* sas = &TheSettingManager->SettingsAmbientOcclusionExteriors;
 
-			if (!currentWorldSpace) sas = &TheSettingManager->SettingsAmbientOcclusionInteriors;
+			if (!isExterior) sas = &TheSettingManager->SettingsAmbientOcclusionInteriors;
 			ShaderConst.AmbientOcclusion.Enabled = sas->Enabled;
 			if (ShaderConst.AmbientOcclusion.Enabled) {
 				ShaderConst.AmbientOcclusion.AOData.x = sas->Samples;
@@ -1428,7 +1430,7 @@ void ShaderManager::UpdateConstants() {
 		if (TheSettingManager->SettingsMain.Effects.Bloom) {
 			SettingsBloomStruct* sbs = &TheSettingManager->SettingsBloomExteriors;
 
-			if (!currentWorldSpace) sbs = &TheSettingManager->SettingsBloomInteriors;
+			if (!isExterior) sbs = &TheSettingManager->SettingsBloomInteriors;
 			ShaderConst.Bloom.BloomData.x = sbs->Luminance;
 			ShaderConst.Bloom.BloomData.y = sbs->MiddleGray;
 			ShaderConst.Bloom.BloomData.z = sbs->WhiteCutOff;
@@ -1441,7 +1443,7 @@ void ShaderManager::UpdateConstants() {
 		if (TheSettingManager->SettingsMain.Effects.Coloring) {
 			SettingsColoringStruct* scs = TheSettingManager->GetSettingsColoring(currentCell->GetEditorName());
 
-			if (!scs && currentWorldSpace) scs = TheSettingManager->GetSettingsColoring(currentWorldSpace->GetEditorName());
+			if (!scs && isExterior) scs = TheSettingManager->GetSettingsColoring(currentWorldSpace->GetEditorName());
 			if (!scs) scs = TheSettingManager->GetSettingsColoring("Default");
 			ShaderConst.Coloring.Data.x = scs->Strength;
 			ShaderConst.Coloring.Data.y = scs->BaseGamma;
@@ -1513,17 +1515,20 @@ void ShaderManager::UpdateConstants() {
 				sds = &TheSettingManager->SettingsDepthOfFieldThirdPersonView;
 			else
 				sds = &TheSettingManager->SettingsDepthOfFieldFirstPersonView;
-			if (sds->Mode == 1) {
-				if (isDialog || isPersuasion) sds->Enabled = false;
-			}
-			else if (sds->Mode == 2) {
-				if (!isDialog) sds->Enabled = false;
-			}
-			else if (sds->Mode == 3) {
-				if (!isPersuasion) sds->Enabled = false;
-			}
-			else if (sds->Mode == 4) {
-				if (!isDialog && !isPersuasion) sds->Enabled = false;
+			switch (sds->Mode){
+				case 1:
+					if (isDialog || isPersuasion) sds->Enabled = false;
+					break;
+				case 2:
+					if (!isDialog) sds->Enabled = false;
+					break;
+				case 3:
+					if (!isPersuasion) sds->Enabled = false;
+					break;
+				case 4:
+					if (!isDialog && !isPersuasion) sds->Enabled = false;
+				default:
+					sds->Enabled = false;
 			}
 			if (ShaderConst.DepthOfField.Enabled = sds->Enabled) {
 				ShaderConst.DepthOfField.Blur.x = sds->DistantBlur;
@@ -1542,24 +1547,33 @@ void ShaderManager::UpdateConstants() {
 
 			ShaderConst.Cinema.Data.x = TheSettingManager->SettingsCinema.AspectRatio;
 			ShaderConst.Cinema.Data.y = TheSettingManager->SettingsCinema.VignetteRadius;
-			if (Mode == 1) {
-				if (isDialog || isPersuasion) Mode = -1;
-			}
-			else if (Mode == 2) {
-				if (!isDialog) Mode = -1;
-			}
-			else if (Mode == 3) {
-				if (!isPersuasion) Mode = -1;
-			}
-			else if (Mode == 4) {
-				if (!isDialog && !isPersuasion) Mode = -1;
+			switch (Mode) {
+				case 1:
+					if (isDialog || isPersuasion) Mode = -1; // disabled during dialog an persuation menus
+					break;
+				case 2:
+					if (!isDialog) Mode = -1;
+					break;
+				case 3:
+					if (!isPersuasion) Mode = -1;
+					break;
+				case 4:
+					if (!isDialog && !isPersuasion) Mode = -1;
+					break;
+				default:
+					break;
 			}
 			if (Mode == -1) {
-				ShaderConst.Cinema.Data.x = 0.0f;
+				ShaderConst.Cinema.Data.x = TheShaderManager->ShaderConst.ReciprocalResolution.z; // set cinema aspect ratio to native ar
 				ShaderConst.Cinema.Data.y = 0.0f;
 			}
 			ShaderConst.Cinema.Data.z = TheSettingManager->SettingsCinema.VignetteDarkness;
+			ShaderConst.Cinema.Data.w = TheSettingManager->SettingsCinema.OverlayStrength;
+			ShaderConst.Cinema.Settings.x = TheSettingManager->SettingsCinema.DirtLensAmount;
+			ShaderConst.Cinema.Settings.y = TheSettingManager->SettingsCinema.FilmGrainAmount;
+			ShaderConst.Cinema.Settings.z = TheSettingManager->SettingsCinema.ChromaticAberration;
 		}
+
 
 		if (TheSettingManager->SettingsMain.Effects.MotionBlur) {
 			SettingsMotionBlurStruct* sms = NULL;
@@ -1616,10 +1630,6 @@ void ShaderManager::UpdateConstants() {
 
 		if (TheSettingManager->SettingsMain.Effects.Specular) {
 			float rainyPercent = ShaderConst.Animators.RainAnimator.GetValue();
-			//Logger::Log("==================================");
-
-			//Logger::Log("rain percent %f", rainyPercent);
-
 			SettingsSpecularStruct::ExteriorStruct* ext = &TheSettingManager->SettingsSpecular.Exterior;
 			SettingsSpecularStruct::RainStruct* rain = &TheSettingManager->SettingsSpecular.Rain;
 
@@ -1632,14 +1642,6 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Specular.EffectStrength.y = lerp(ext->SkyTintStrength, rain->SkyTintStrength, rainyPercent);
 			ShaderConst.Specular.EffectStrength.z = lerp(ext->FresnelStrength, rain->FresnelStrength, rainyPercent);
 			ShaderConst.Specular.EffectStrength.w = lerp(ext->SkyTintSaturation, rain->SkyTintSaturation, rainyPercent);
-
-			//Logger::Log("spec luma %f", ShaderConst.Specular.Data.x);
-			//Logger::Log("spec blur %f", ShaderConst.Specular.Data.y);
-			//Logger::Log("spec glos %f", ShaderConst.Specular.Data.z);
-			//Logger::Log("spec fade %f", ShaderConst.Specular.Data.w);
-			//Logger::Log("spec spec %f", ShaderConst.Specular.EffectStrength.x);
-			//Logger::Log("spec fres %f", ShaderConst.Specular.EffectStrength.y);
-			//Logger::Log("spec skyt %f", ShaderConst.Specular.EffectStrength.z);
 		}
 
 		if (TheSettingManager->SettingsMain.Effects.VolumetricFog) {

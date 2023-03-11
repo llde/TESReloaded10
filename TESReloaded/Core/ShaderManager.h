@@ -106,6 +106,7 @@ struct ShaderConstants {
 	};
 	struct CinemaStruct {
 		D3DXVECTOR4		Data;
+		D3DXVECTOR4		Settings;
 	};
 	struct BloomStruct {
 		D3DXVECTOR4		BloomData;
