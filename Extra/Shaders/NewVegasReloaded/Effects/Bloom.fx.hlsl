@@ -101,7 +101,7 @@ float4 BlurPass(VSOUT IN, uniform float2 OffsetMask) : COLOR0
 
 float4 CombinePass(VSOUT IN) : COLOR0
 {
-	float3 bloomColor = tex2D(TESR_RenderedBuffer, IN.UVCoord).rgb;
+	float3 bloomColor = saturate(tex2D(TESR_RenderedBuffer, IN.UVCoord).rgb);
 	float3 originalColor = tex2D(TESR_SourceBuffer, IN.UVCoord).rgb;
 	
 	bloomColor = AdjustSaturation(bloomColor, TESR_BloomValues.z) * TESR_BloomValues.x;
