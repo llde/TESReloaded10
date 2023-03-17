@@ -19,7 +19,7 @@ float4 TESR_LightPosition7;
 float4 TESR_ReciprocalResolution;
 float4 TESR_ViewSpaceLightDir;
 float4 TESR_ScreenSpaceLightDir;
-float4 TESR_WaterSettings;
+float4 TESR_WaterSettings; //x: water height in the cell, y: water depth darkness, z: is camera underwater
 float4 TESR_ShadowData; // x: quality, y: darkness, z: nearmap resolution, w: farmap resolution
 float4 TESR_ShadowScreenSpaceData; // x: Enabled, y: blurRadius, z: renderDistance
 float4 TESR_SunAmount;
@@ -278,7 +278,7 @@ float4 Shadow(VSOUT IN) : COLOR0
 	float world_normal = GetWorldNormal(IN.UVCoord);
 
 	// early out for underwater surface (if camera is underwater and surface to shade is close to water level with normal pointing downward)
-	if (TESR_CameraPosition.z < TESR_WaterSettings.x && world_pos.z < TESR_WaterSettings.x + 2 && world_pos.z > TESR_WaterSettings.x - 2 && dot(world_normal, float3(0, 0, -1)) > 0.999) return float4 (1.0f, 1.0, 1.0, 1.0);
+	// if (TESR_WaterSettings.z && world_pos.z < TESR_WaterSettings.x + 2 && world_pos.z > TESR_WaterSettings.x - 2 && dot(world_normal, float3(0, 0, -1)) > 0.999) return float4 (1.0f, 1.0, 1.0, 1.0);
 
 	float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 

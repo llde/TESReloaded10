@@ -66,7 +66,7 @@ float4 specularHighlight( VSOUT IN) : COLOR0
 	float3 camera_vector = positionVector * depth;
 	float4 world_pos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
 
-	if (world_pos.z < TESR_WaterSettings.x + 0.0001) return float4(0, 0, 0, 1); // no effect on water surface
+	if (world_pos.z < TESR_WaterSettings.x + 2 && world_pos.z > TESR_WaterSettings.x - 2 && dot(worldNormal, float3(0, 0, 1))> 0.999) return float4(0, 0, 0, 1); // no effect on water surface
 
 	float3 viewRay = normalize(positionVector * -1);
 
