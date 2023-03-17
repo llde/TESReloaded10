@@ -958,6 +958,7 @@ void ShaderManager::UpdateConstants() {
 
 	// context variables
 	bool isExterior = Player->GetWorldSpace() || Player->parentCell->flags0 & TESObjectCELL::kFlags0_BehaveLikeExterior;
+	bool isUnderwater = WorldSky->GetIsUnderWater();
 	bool isDialog = InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog);
 	bool isPersuasion = InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion);
 
@@ -983,6 +984,7 @@ void ShaderManager::UpdateConstants() {
 
 	// get water height based on player position
 	ShaderConst.Water.waterSettings.x = Tes->GetWaterHeight(Player, WorldSceneGraph);
+	ShaderConst.Water.waterSettings.z = isUnderwater;
 
 	float updateDelay = 0.01;
 
@@ -1219,7 +1221,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Water.shorelineParams.x = sws->shoreMovement;
 		}		
 
-		if (WorldSky->GetIsUnderWater()) {
+		if (isUnderwater) {
 			ShaderConst.BloodLens.Percent = 0.0f;
 			ShaderConst.WaterLens.Percent = -1.0f;
 			ShaderConst.Animators.WaterLensAnimator.switched = true;
@@ -1228,7 +1230,7 @@ void ShaderManager::UpdateConstants() {
 
 		if (TheSettingManager->SettingsMain.Effects.WaterLens) {
 
-			if (!WorldSky->GetIsUnderWater() && ShaderConst.Animators.WaterLensAnimator.switched == true) {
+			if (!isUnderwater && ShaderConst.Animators.WaterLensAnimator.switched == true) {
 				ShaderConst.Animators.WaterLensAnimator.switched = false;
 				// start the waterlens effect and animate it fading
 				ShaderConst.WaterLens.Time.x = TheSettingManager->SettingsWaterLens.TimeMultA;
@@ -1572,7 +1574,7 @@ void ShaderManager::UpdateConstants() {
 			}
 			ShaderConst.Cinema.Data.z = TheSettingManager->SettingsCinema.VignetteDarkness;
 			ShaderConst.Cinema.Data.w = TheSettingManager->SettingsCinema.OverlayStrength;
-			ShaderConst.Cinema.Settings.x = TheSettingManager->SettingsCinema.DirtLensAmount;
+			ShaderConst.Cinema.Settings.x = isUnderwater?0:TheSettingManager->SettingsCinema.DirtLensAmount; // disable dirt lens underwater
 			ShaderConst.Cinema.Settings.y = TheSettingManager->SettingsCinema.FilmGrainAmount;
 			ShaderConst.Cinema.Settings.z = TheSettingManager->SettingsCinema.ChromaticAberration;
 		}
