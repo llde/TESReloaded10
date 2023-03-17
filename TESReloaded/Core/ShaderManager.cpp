@@ -1515,22 +1515,25 @@ void ShaderManager::UpdateConstants() {
 				sds = &TheSettingManager->SettingsDepthOfFieldThirdPersonView;
 			else
 				sds = &TheSettingManager->SettingsDepthOfFieldFirstPersonView;
+
+			bool dofActive = sds->Enabled;
 			switch (sds->Mode){
 				case 1:
-					if (isDialog || isPersuasion) sds->Enabled = false;
+					if (isDialog || isPersuasion) dofActive = false;
 					break;
 				case 2:
-					if (!isDialog) sds->Enabled = false;
+					if (!isDialog) dofActive = false;
 					break;
 				case 3:
-					if (!isPersuasion) sds->Enabled = false;
+					if (!isPersuasion) dofActive = false;
 					break;
 				case 4:
-					if (!isDialog && !isPersuasion) sds->Enabled = false;
+					if (!isDialog && !isPersuasion) dofActive = false;
 				default:
-					sds->Enabled = false;
+					break;
 			}
-			if (ShaderConst.DepthOfField.Enabled = sds->Enabled) {
+
+			if (ShaderConst.DepthOfField.Enabled = dofActive) {
 				ShaderConst.DepthOfField.Blur.x = sds->DistantBlur;
 				ShaderConst.DepthOfField.Blur.y = sds->DistantBlurStartRange;
 				ShaderConst.DepthOfField.Blur.z = sds->DistantBlurEndRange;
@@ -1574,49 +1577,42 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Cinema.Settings.z = TheSettingManager->SettingsCinema.ChromaticAberration;
 		}
 
+		// camera/position change data
+		SettingsMotionBlurStruct* sms = NULL;
 
-		if (TheSettingManager->SettingsMain.Effects.MotionBlur) {
-			SettingsMotionBlurStruct* sms = NULL;
+		if (IsThirdPersonView)
+			sms = &TheSettingManager->SettingsMotionBlurThirdPersonView;
+		else
+			sms = &TheSettingManager->SettingsMotionBlurFirstPersonView;
+		float AngleZ = D3DXToDegree(Player->rot.z);
+		float AngleX = D3DXToDegree(Player->rot.x);
+		float fMotionBlurAmtX = ShaderConst.MotionBlur.oldAngleZ - AngleZ;
+		float fMotionBlurAmtY = ShaderConst.MotionBlur.oldAngleX - AngleX;
+		float fBlurDistScratchpad = fMotionBlurAmtX + 360.0f;
+		float fBlurDistScratchpad2 = (AngleZ - ShaderConst.MotionBlur.oldAngleZ + 360.0f) * -1.0f;
 
-			if (IsThirdPersonView)
-				sms = &TheSettingManager->SettingsMotionBlurThirdPersonView;
-			else
-				sms = &TheSettingManager->SettingsMotionBlurFirstPersonView;
-			float AngleZ = D3DXToDegree(Player->rot.z);
-			float AngleX = D3DXToDegree(Player->rot.x);
-			float fMotionBlurAmtX = ShaderConst.MotionBlur.oldAngleZ - AngleZ;
-			float fMotionBlurAmtY = ShaderConst.MotionBlur.oldAngleX - AngleX;
-			float fBlurDistScratchpad = fMotionBlurAmtX + 360.0f;
-			float fBlurDistScratchpad2 = (AngleZ - ShaderConst.MotionBlur.oldAngleZ + 360.0f) * -1.0f;
+		if (abs(fMotionBlurAmtX) > abs(fBlurDistScratchpad))
+			fMotionBlurAmtX = fBlurDistScratchpad;
+		else if (abs(fMotionBlurAmtX) > abs(fBlurDistScratchpad2))
+			fMotionBlurAmtX = fBlurDistScratchpad2;
 
-			if (abs(fMotionBlurAmtX) > abs(fBlurDistScratchpad))
-				fMotionBlurAmtX = fBlurDistScratchpad;
-			else if (abs(fMotionBlurAmtX) > abs(fBlurDistScratchpad2))
-				fMotionBlurAmtX = fBlurDistScratchpad2;
-
-			if (pow(fMotionBlurAmtX, 2) + pow(fMotionBlurAmtY, 2) < sms->BlurCutOff) {
-				fMotionBlurAmtX = 0.0f;
-				fMotionBlurAmtY = 0.0f;
-			}
-
-			if (sms->Enabled) {
-				ShaderConst.MotionBlur.Data.x = (ShaderConst.MotionBlur.oldoldAmountX + ShaderConst.MotionBlur.oldAmountX + fMotionBlurAmtX) / 3.0f;
-				ShaderConst.MotionBlur.Data.y = (ShaderConst.MotionBlur.oldoldAmountY + ShaderConst.MotionBlur.oldAmountY + fMotionBlurAmtY) / 3.0f;
-			}
-			else {
-				ShaderConst.MotionBlur.Data.x = 0.0f;
-				ShaderConst.MotionBlur.Data.y = 0.0f;
-			}
-			ShaderConst.MotionBlur.oldAngleZ = AngleZ;
-			ShaderConst.MotionBlur.oldAngleX = AngleX;
-			ShaderConst.MotionBlur.oldoldAmountX = ShaderConst.MotionBlur.oldAmountX;
-			ShaderConst.MotionBlur.oldoldAmountY = ShaderConst.MotionBlur.oldAmountY;
-			ShaderConst.MotionBlur.oldAmountX = fMotionBlurAmtX;
-			ShaderConst.MotionBlur.oldAmountY = fMotionBlurAmtY;
-			ShaderConst.MotionBlur.BlurParams.x = sms->GaussianWeight;
-			ShaderConst.MotionBlur.BlurParams.y = sms->BlurScale;
-			ShaderConst.MotionBlur.BlurParams.z = sms->BlurOffsetMax;
+		if (pow(fMotionBlurAmtX, 2) + pow(fMotionBlurAmtY, 2) < sms->BlurCutOff) {
+			fMotionBlurAmtX = 0.0f;
+			fMotionBlurAmtY = 0.0f;
 		}
+
+		ShaderConst.MotionBlur.Data.x = (ShaderConst.MotionBlur.oldoldAmountX + ShaderConst.MotionBlur.oldAmountX + fMotionBlurAmtX) / 3.0f;
+		ShaderConst.MotionBlur.Data.y = (ShaderConst.MotionBlur.oldoldAmountY + ShaderConst.MotionBlur.oldAmountY + fMotionBlurAmtY) / 3.0f;
+		ShaderConst.MotionBlur.oldAngleZ = AngleZ;
+		ShaderConst.MotionBlur.oldAngleX = AngleX;
+		ShaderConst.MotionBlur.oldoldAmountX = ShaderConst.MotionBlur.oldAmountX;
+		ShaderConst.MotionBlur.oldoldAmountY = ShaderConst.MotionBlur.oldAmountY;
+		ShaderConst.MotionBlur.oldAmountX = fMotionBlurAmtX;
+		ShaderConst.MotionBlur.oldAmountY = fMotionBlurAmtY;
+		ShaderConst.MotionBlur.BlurParams.x = sms->GaussianWeight;
+		ShaderConst.MotionBlur.BlurParams.y = sms->BlurScale;
+		ShaderConst.MotionBlur.BlurParams.z = sms->BlurOffsetMax;
+
 
 		if (TheSettingManager->SettingsMain.Effects.Sharpening) {
 			ShaderConst.Sharpening.Data.x = TheSettingManager->SettingsSharpening.Strength;
@@ -2023,36 +2019,79 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
 	Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 
-	if (SnowAccumulationEffect->Enabled && isExterior && ShaderConst.SnowAccumulation.Params.w > 0.0f) {
-		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-		SnowAccumulationEffect->SetCT();
-		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	if (ShaderConst.AmbientOcclusion.Enabled && !terminalIsOn) {
-		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-		AmbientOcclusionEffect->SetCT();
-		AmbientOcclusionEffect->Render(Device, RenderTarget, RenderedSurface, false);
+	if (!terminalIsOn) {
+		// disable these effects during terminal/lockpicking sequences because they bleed through the overlay
+
+		// Snow must be rendered first so other effects appear on top
+		if (SnowAccumulationEffect->Enabled && ShaderConst.SnowAccumulation.Params.w > 0.0f && isExterior && !isUnderwater) {
+			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+			SnowAccumulationEffect->SetCT();
+			SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
+		}
+
+		if (ShaderConst.AmbientOcclusion.Enabled) {
+			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+			AmbientOcclusionEffect->SetCT();
+			AmbientOcclusionEffect->Render(Device, RenderTarget, RenderedSurface, false);
+		}
+
+		// Disable shadows during VATS
+		if (!VATSIsOn) {
+			if (isExterior && ShadowsExteriorsEffect->Enabled) {
+				Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+				ShadowsExteriorsEffect->SetCT();
+				ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
+			}
+			else if (!isExterior && ShadowsInteriorsEffect->Enabled) {
+				Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+				ShadowsInteriorsEffect->SetCT();
+				ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
+			}
+		}
+
+		if (isUnderwater) {
+			// underwater only effects
+			if (UnderwaterEffect->Enabled && isUnderwater) {
+				UnderwaterEffect->SetCT();
+				UnderwaterEffect->Render(Device, RenderTarget, RenderedSurface, false);
+			}
+		}
+		else {
+			if (isExterior) {
+				if (SpecularEffect->Enabled) {
+					Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+					SpecularEffect->SetCT();
+					SpecularEffect->Render(Device, RenderTarget, RenderedSurface, false);
+				}
+				if (WetWorldEffect->Enabled && ShaderConst.WetWorld.Data.z > 0.0f) {
+					Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+					WetWorldEffect->SetCT();
+					WetWorldEffect->Render(Device, RenderTarget, RenderedSurface, false);
+				}
+				if (RainEffect->Enabled && ShaderConst.Rain.RainData.x > 0.0f) {
+					RainEffect->SetCT();
+					RainEffect->Render(Device, RenderTarget, RenderedSurface, false);
+				}
+				if (SnowEffect->Enabled && ShaderConst.Snow.SnowData.x > 0.0f) {
+					SnowEffect->SetCT();
+					SnowEffect->Render(Device, RenderTarget, RenderedSurface, false);
+				}
+			}
+
+			if (VolumetricFogEffect->Enabled && !pipboyIsOn) {
+				VolumetricFogEffect->SetCT();
+				VolumetricFogEffect->Render(Device, RenderTarget, RenderedSurface, false);
+			}
+
+			if (GodRaysEffect->Enabled && isExterior && isDaytime) {
+				Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+				GodRaysEffect->SetCT();
+				GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
+			}
+		}
 	}
 
-	if (ShadowsExteriorsEffect->Enabled && isExterior && !VATSIsOn && !terminalIsOn) {
-		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-		ShadowsExteriorsEffect->SetCT();
-		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}else if (ShadowsInteriorsEffect->Enabled && !VATSIsOn && !terminalIsOn) {
-		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-		ShadowsInteriorsEffect->SetCT();
-		ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	if (SpecularEffect->Enabled && isExterior && !terminalIsOn) {
-		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-		SpecularEffect->SetCT();
-		SpecularEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	if (WetWorldEffect->Enabled && isExterior && ShaderConst.WetWorld.Data.z > 0.0f && !terminalIsOn) {
-		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-		WetWorldEffect->SetCT();
-		WetWorldEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
+	// screenspace coloring/blurring effects get rendered last
 	if (ColoringEffect->Enabled) {
 		ColoringEffect->SetCT();
 		ColoringEffect->Render(Device, RenderTarget, RenderedSurface, false);
@@ -2062,41 +2101,17 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		BloomEffect->SetCT();
 		BloomEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (UnderwaterEffect->Enabled && isUnderwater) {
-		UnderwaterEffect->SetCT();
-		UnderwaterEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	else {
-		if (ShaderConst.WaterLens.Percent == -1.0f) ShaderConst.WaterLens.Percent = 1.0f;
-	}
-
-	if (isExterior && !isUnderwater && !terminalIsOn) {
-		if (RainEffect->Enabled && ShaderConst.Rain.RainData.x > 0.0f) {
-			RainEffect->SetCT();
-			RainEffect->Render(Device, RenderTarget, RenderedSurface, false);
-		}
-		if (SnowEffect->Enabled && ShaderConst.Snow.SnowData.x > 0.0f) {
-			SnowEffect->SetCT();
-			SnowEffect->Render(Device, RenderTarget, RenderedSurface, false);
-		}
-	}
-
-	if (VolumetricFogEffect->Enabled && !isUnderwater && !pipboyIsOn) {
-		VolumetricFogEffect->SetCT();
-		VolumetricFogEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-
-	if (GodRaysEffect->Enabled && isExterior && isDaytime && !isUnderwater) {
-		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-		GodRaysEffect->SetCT();
-		GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-
 	if (DepthOfFieldEffect->Enabled && ShaderConst.DepthOfField.Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		DepthOfFieldEffect->SetCT();
 		DepthOfFieldEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
+	if (MotionBlurEffect->Enabled && (ShaderConst.MotionBlur.Data.x || ShaderConst.MotionBlur.Data.y)) {
+		MotionBlurEffect->SetCT();
+		MotionBlurEffect->Render(Device, RenderTarget, RenderedSurface, false);
+	}
+
+	// lens effects
 	if (BloodLensEffect->Enabled && ShaderConst.BloodLens.Percent > 0.0f) {
 		BloodLensEffect->SetCT();
 		BloodLensEffect->Render(Device, RenderTarget, RenderedSurface, false);
@@ -2104,10 +2119,6 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	if (WaterLensEffect->Enabled && ShaderConst.WaterLens.Percent > 0.0f) {
 		WaterLensEffect->SetCT();
 		WaterLensEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	if (MotionBlurEffect->Enabled && (ShaderConst.MotionBlur.Data.x || ShaderConst.MotionBlur.Data.y)) {
-		MotionBlurEffect->SetCT();
-		MotionBlurEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 	if (LowHFEffect->Enabled && ShaderConst.LowHF.Data.x) {
 		LowHFEffect->SetCT();
@@ -2126,6 +2137,8 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 			}
 		}
 	}
+
+	// cinema effect gets rendered very last because of vignetting/letterboxing
 	if (CinemaEffect->Enabled && (ShaderConst.Cinema.Data.x != 0.0f || ShaderConst.Cinema.Data.y != 0.0f)) {
 		CinemaEffect->SetCT();
 		CinemaEffect->Render(Device, RenderTarget, RenderedSurface, false);
