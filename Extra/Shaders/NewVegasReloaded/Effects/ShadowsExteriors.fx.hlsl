@@ -38,6 +38,7 @@ sampler2D TESR_ShadowMapBufferFar : register(s4) = sampler_state { ADDRESSU = CL
 sampler2D TESR_ShadowMapBufferLod : register(s5) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = ANISOTROPIC; MIPFILTER = LINEAR; };
 sampler2D TESR_SourceBuffer : register(s6) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 sampler2D TESR_NoiseSampler : register(s7) < string ResourceName = "Effects\bluenoise256.dds"; > = sampler_state { ADDRESSU = WRAP; ADDRESSV = WRAP; MAGFILTER = NONE; MINFILTER = NONE; MIPFILTER = NONE; };
+sampler2D TESR_NormalsBuffer : register(s8) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };;
 
 
 static const float DARKNESS = 1-TESR_ShadowData.y;
@@ -65,6 +66,7 @@ struct VSIN
 #include "Includes/Depth.hlsl"
 #include "Includes/Blur.hlsl"
 #include "Includes/Blending.hlsl"
+#include "Includes/Normals.hlsl"
 
 VSOUT FrameVS(VSIN IN)
 {
@@ -273,8 +275,10 @@ float4 Shadow(VSOUT IN) : COLOR0
 	float depth = readDepth(IN.UVCoord);
 	float3 camera_vector = toWorld(IN.UVCoord) * depth;
 	float4 world_pos = float4(TESR_CameraPosition.xyz + camera_vector, 1.0f);
+	float world_normal = GetWorldNormal(IN.UVCoord);
 
-	if (TESR_CameraPosition.z < TESR_WaterSettings.x && world_pos.z < TESR_WaterSettings.x + 2 && world_pos.z > TESR_WaterSettings.x - 2) return float4 (1.0f, 1.0, 1.0, 1.0);
+	// early out for underwater surface (if camera is underwater and surface to shade is close to water level with normal pointing downward)
+	if (TESR_CameraPosition.z < TESR_WaterSettings.x && world_pos.z < TESR_WaterSettings.x + 2 && world_pos.z > TESR_WaterSettings.x - 2 && dot(world_normal, float3(0, 0, -1)) > 0.999) return float4 (1.0f, 1.0, 1.0, 1.0);
 
 	float4 pos = mul(world_pos, TESR_WorldViewProjectionTransform);
 
@@ -302,7 +306,7 @@ float4 Shadow(VSOUT IN) : COLOR0
 	// brighten shadow value from 0 to darkness from config value
 	Shadow = lerp(darkness, 1.0f, Shadow);
 
-	Shadow * (world_pos.z < TESR_WaterSettings.x); // cancel shadow value if under water
+	// Shadow * (world_pos.z < TESR_WaterSettings.x); // cancel shadow value if under water
 	return float4(Shadow, Shadow, Shadow, 1.0f);
 }
 
