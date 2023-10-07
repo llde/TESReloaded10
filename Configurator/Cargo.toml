@@ -2,11 +2,18 @@
 name = "Configurator"
 version = "0.1.0"
 edition = "2021"
+#build = "build1.rs"
 
+[lib]
+crate-type = ["cdylib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 serde = { version = "*", features = ["derive"]}
+serde-deserialize-over = "*"
 toml = "*"
 libc = "*"
 memchr = "*"
+hex-serde-util = "*"
+[build-dependencies]
+cbindgen = "0.25.0"

@@ -1,22 +1,43 @@
+
 use std::ffi::CString;
-use crate::sys_string::SysString;
+use crate::sys_string::{SysString,SysVec};
 use serde::{Serialize, Deserialize};
+use serde_deserialize_over::DeserializeOver;
+
 type UInt16 = u16;
 type UInt32 = u32;
 type UInt8 = u8;
-#[allow(non_snake_case)]
+type ExcludedFormsList = SysVec;
+type Vec = u32;
+
 
 /*Configuration for the Main Configuration file*/
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug)]
 #[repr(C)]
+#[allow(non_snake_case)]
 pub struct Config{
+	#[deserialize_over]
     Main : MainStruct,
+	#[deserialize_over]
     Develop : DevelopStruct,
+	#[deserialize_over]
     FlyCam : FlyCamStruct,
+	#[deserialize_over]
+    SleepingMode : SleepingModeStruct,
+	#[deserialize_over]
     LowHFSound : LowHFSoundStruct,
+	#[deserialize_over]
     Shaders : ShadersStruct,
+	#[deserialize_over]
     Effects : EffectsStruct,
-    Menu : MenuStruct
+	#[deserialize_over]
+    Menu : MenuStruct,
+	#[deserialize_over]
+	ShadowsForm : ShadowFormsStruct,
+	#[deserialize_over]
+    ShadowsExterior : ShadowsExteriorStruct,
+	#[deserialize_over]
+    ShadowsInterior : ShadowsInteriorStruct
 }
 
 impl Config{
@@ -25,20 +46,27 @@ impl Config{
             Main : MainStruct::new(),
             Develop : DevelopStruct::new(),
             FlyCam : FlyCamStruct::new(),
+            SleepingMode : SleepingModeStruct::new(),
             LowHFSound : LowHFSoundStruct::new(),
             Shaders : ShadersStruct::new(),
             Effects : EffectsStruct::new(),
-            Menu : MenuStruct::new()
+            Menu : MenuStruct::new(),
+            ShadowsForm : ShadowFormsStruct::new(),
+            ShadowsExterior: ShadowsExteriorStruct::new(),
+            ShadowsInterior: ShadowsInteriorStruct::new(),
         }
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug)]
 #[repr(C)]
+#[allow(non_snake_case)]
 pub struct MainStruct {
     RemoveUnderwater : bool,
     RemovePrecipitations : bool,
+	RemoveFogPass : bool,
     MemoryTextureManagement : bool,
+	GrassMode : bool,
     ReplaceIntro : bool,
     AnisotropicFilter : UInt8,
     ScreenshotKey : UInt16,
@@ -51,6 +79,8 @@ impl MainStruct{
             RemoveUnderwater : true,
             RemovePrecipitations : true,
             MemoryTextureManagement : true,
+			RemoveFogPass : false,
+			GrassMode : true,
             ReplaceIntro : true,
             AnisotropicFilter : 4,
             ScreenshotKey : 87,
@@ -59,8 +89,9 @@ impl MainStruct{
     }
 }
 /*Some settings are related to OR only, while CameraMode will be removed from NVR*/
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug)]
 #[repr(C)]
+#[allow(non_snake_case)]
 pub	struct DevelopStruct {
     CompileShaders : UInt8,  // 1 Compile All, 2 Compile modified or missing only, 3 Compile only in menu
     CompileEffects : UInt8,
@@ -80,8 +111,9 @@ impl DevelopStruct{
 
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug)]
 #[repr(C)]
+#[allow(non_snake_case)]
 pub	struct LowHFSoundStruct {
     HealthEnabled : bool,  // 1 Compile All, 2 Compile modified or missing only, 3 Compile only in menu
     FatigueEnabled : bool,
@@ -98,8 +130,9 @@ impl LowHFSoundStruct{
         }
     }
 }
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug)]
 #[repr(C)]
+#[allow(non_snake_case)]
 pub	struct FlyCamStruct {
     Enabled : bool,
     ScrollMultiplier : f32,
@@ -119,8 +152,9 @@ impl FlyCamStruct{
         }
     }
 }
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug)]
 #[repr(C)]
+#[allow(non_snake_case)]
 pub struct ShadersStruct {
     Blood : bool,
     Grass : bool,
@@ -148,8 +182,9 @@ impl ShadersStruct{
         }
     }
 }
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug)]
 #[repr(C)]
+#[allow(non_snake_case)]
 struct EffectsStruct {
     AmbientOcclusion : bool,
     BloodLens : bool,
@@ -202,8 +237,9 @@ impl EffectsStruct{
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug)]
 #[repr(C)]
+#[allow(non_snake_case)]
 pub struct MenuStruct {
     TextFont : SysString,
     TextFontStatus : SysString,
@@ -239,6 +275,93 @@ impl MenuStruct{
             KeySubtract : 74,
             KeySave : 28,
             KeyEditing : 156
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver)]
+#[allow(non_snake_case)]
+pub struct SleepingModeStruct{
+    Enabled : bool,
+    Mode : UInt8
+}
+impl SleepingModeStruct{
+    pub fn new() -> SleepingModeStruct{
+        SleepingModeStruct{
+            Enabled: false,
+            Mode: 0,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver)]
+#[allow(non_snake_case)]
+pub struct ShadowFormsStruct {
+	Activators : bool,
+	Actors : bool,
+	Apparatus: bool,
+	Books : bool,
+	Containers : bool,
+	Doors : bool,
+	Furniture : bool,
+	Misc : bool,
+	Statics : bool,
+	Terrain : bool,
+	Trees : bool,
+	Lod : bool, 
+	MinRadius : f32,
+	ExcludeForms : ExcludedFormsList
+}
+
+impl ShadowFormsStruct {
+	pub fn new() ->ShadowFormsStruct{
+		ShadowFormsStruct {
+			Activators: true, Actors: true , Apparatus: true, Books: true, Containers: true, Doors: true, Furniture: true, Misc: true, Statics: true, Terrain: true, Trees: true, Lod: false, MinRadius: 20.0, ExcludeForms : SysVec::new()
+			
+		}
+	}
+}
+
+#[repr(C)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver)]
+#[allow(non_snake_case)]
+pub struct ShadowsExteriorStruct{
+    ShadowMapResolution : UInt32,
+    ShadowMapRadius : f32,
+    ShadowMapFarPlane : f32,
+    BlurShadowMap : bool,
+}
+/*Other Shadows Related settings will be in the Shader configuration
+TODO what about cascade specific settings??
+ */
+impl ShadowsExteriorStruct{
+    pub fn new() -> ShadowsExteriorStruct{
+        ShadowsExteriorStruct{
+            ShadowMapResolution: 2048,
+            ShadowMapRadius: 8000.0,
+            ShadowMapFarPlane: 32768.0,
+            BlurShadowMap: false,
+        }
+    }
+}
+
+
+#[repr(C)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver)]
+#[allow(non_snake_case)]
+pub struct ShadowsInteriorStruct{
+    ShadowCubeMapResolution : UInt32,
+    LightPoints : UInt8,
+    TorchesCastShadows : bool,
+}
+impl ShadowsInteriorStruct {
+    pub fn new() -> ShadowsInteriorStruct {
+        ShadowsInteriorStruct {
+            ShadowCubeMapResolution: 2048,
+            LightPoints: 4,
+            TorchesCastShadows: true,
         }
     }
 }

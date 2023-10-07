@@ -1,10 +1,96 @@
 use fmt::Formatter;
+use serde::ser::SerializeSeq;
 use std::ffi::{c_void, CStr, CString};
 use std::ops::Deref;
 use std::{fmt, ptr};
 use serde::de::{Deserializer, Error, Unexpected, Visitor};
 use serde::de::Deserialize;
 use serde::{Serialize, Serializer};
+use hex_serde_util::{HexU32PrefixUpper};
+#[repr(C)]
+#[derive(Debug)]
+pub struct SysVec{
+	cont : *const u32,
+	len : usize,
+	vec : Vec<u32>
+}
+
+impl SysVec{
+	pub fn new() -> SysVec {
+		SysVec {cont : ptr::null(), len : 0, vec : Vec::new() }
+	}
+	pub fn new_from(cont : Vec<u32> ) -> SysVec {
+		SysVec {cont : cont.as_ptr(), len : cont.len(), vec : cont }
+	}
+
+}
+
+
+impl <'de> Deserialize<'de> for SysVec {
+    fn deserialize<D>(deserializer: D) -> Result<SysVec, D::Error>
+        where D: Deserializer<'de>
+    {
+		return deserializer.deserialize_seq(SeqVisitor);
+		
+    }
+}
+impl Serialize for SysVec {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: Serializer
+    {
+		
+		let mut seq = serializer.serialize_seq(Some(self.len))?;
+		for el in &self.vec{
+			let pref : HexU32PrefixUpper = (*el).into();
+			seq.serialize_element(&pref)?;
+		}
+		seq.end()
+    }
+}
+
+struct SeqVisitor;
+impl <'de> Visitor<'de> for SeqVisitor {
+    type Value = SysVec;
+
+    fn expecting(&self, formatter: &mut Formatter) -> fmt::Result {
+        formatter.write_str("a sequence")
+    }
+
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::SeqAccess<'de>,
+    {
+		let mut vec : Vec<u32> = Vec::new();
+		loop{
+			let next = seq.next_element::<HexU32PrefixUpper>();
+			
+			match next {
+			    Ok(inner) => {
+					match inner {
+						Some(inn) => {
+							let value = *inn; 
+							vec.push(value);
+						}
+						None => {
+							break;
+						}
+					}
+				}
+			    Err(_) =>{
+					println!("NOOPE! {:?}", next);
+					continue;
+				},
+			}
+			
+		}
+		if vec.len() == 0 {
+			Ok(SysVec::new())
+		}
+		else{ 
+			Ok(SysVec::new_from(vec))	
+	    }    
+	}
+}
 
 #[derive(Debug)]
 pub struct NulError(pub usize, pub Vec<u8>);
@@ -23,7 +109,7 @@ TODO create a FFI API for SysString manipulations
 #[repr(C)]
 #[derive(Debug)]
 pub struct SysString{
-     data : *mut i8,
+     data : *mut libc::c_char,
      length: usize,
      capacity : usize,
 }
@@ -119,6 +205,8 @@ impl Serialize for SysString {
         serializer.serialize_str(&s)
     }
 }
+
+unsafe impl Sync for SysString{}
 
 struct SysStringVisitor;
 impl <'de> Visitor<'de> for SysStringVisitor {
