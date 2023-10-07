@@ -2,7 +2,7 @@
 name = "Configurator"
 version = "0.1.0"
 edition = "2021"
-#build = "build1.rs"
+build = "build1.rs"
 
 [lib]
 crate-type = ["cdylib"]
