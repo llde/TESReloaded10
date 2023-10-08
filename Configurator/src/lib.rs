@@ -10,11 +10,11 @@ pub mod shader_config;
 pub mod cfile;
 
 use std::ffi::{CString, CStr};
-#[allow(non_snake_case)]
 use std::ffi::c_char;
 use std::path::{Path};
 use std::ffi::OsString;
 use std::fs::File;
+use std::io;
 
 use std::{fs, ptr};
 use std::io::{Read, Write};
@@ -22,19 +22,23 @@ use cfile::CFile;
 use sys_string::SysString;
 use std::os::windows::ffi::OsStringExt;
 use std::slice::from_raw_parts;
-use crate::ConfigurationError::{Deserialization, FileError};
-use crate::main_config::Config;
-use serde::Deserialize;
+use serde::{Serialize,Deserialize};
 use toml::de::Deserializer;
 use serde_deserialize_over::DeserializeOver;
+
+use crate::ConfigurationError::{Deserialization, FileError};
+use crate::main_config::Config;
+use crate::effect_config::Effects;
 #[derive(Debug)]
 pub enum ConfigurationError{
 	Deserialization,
-	FileError
+	FileError(io::Error)
 }
 //TODO separation between games
 
 pub static mut CONFIG : Option<Config> = None;
+pub static mut EFFECTS : Option<Effects> = None;
+
 pub static mut LOGGER : Option<CFile> = None;
 
 pub fn log<S: AsRef<str>>(message : S) -> () {
@@ -44,21 +48,21 @@ pub fn log<S: AsRef<str>>(message : S) -> () {
 	log.write(message.as_ref().as_bytes());
 }
 
-pub fn read_file<T : AsRef<Path> >(file : T) -> Result<(Config, bool) ,ConfigurationError> {
+pub fn read_config_from_file<'a, T : AsRef<Path>, C >(file : T) -> Result<(C, bool) ,ConfigurationError> where C : Deserialize<'a> + DeserializeOver<'a> + Default{
 	let file_res  = File::open(&file);
 	let mut cont = String::new();
 	match file_res {
 		Err(err) => {
 			log(format!("Cannot open Configuration file {:#?}  {}",file.as_ref(),err));
-			Err(FileError)
+			Err(FileError(err))
 		},
 		Ok(mut file) =>{
 			match file.read_to_string(&mut cont){
 				Ok(_) => {
-					match Config::deserialize(Deserializer::new(&cont)){
+					match C::deserialize(Deserializer::new(&cont)){
 				        Ok(config) => Ok((config, true)),
 				        Err(_) => {
-							let mut config = Config::new();
+							let mut config = C::default();
 							match config.deserialize_over(Deserializer::new(&cont)){
 								Err(err) =>{
 									log(format!("Cannot Parse Configuration {}",err));
@@ -71,19 +75,18 @@ pub fn read_file<T : AsRef<Path> >(file : T) -> Result<(Config, bool) ,Configura
 				},
 				Err(err) => {
 					log(format!("Cannot Read Configuration content {}",err));
-					Err(FileError)
+					Err(FileError(err))
 				}
 			}
 		}
 	}
 }
 
-pub fn  write_file<T : AsRef<Path> >(file : T){
-	let main = Config::new();
+pub fn  write_config_to_file<T : AsRef<Path>, C>(file : T, config : C) where C : Serialize{
     let file = File::create(file);
 	match file {
 		Ok(mut file) => {
-			let toml = toml::to_string(&main).unwrap();
+			let toml = toml::to_string(&config).unwrap();
 		    match file.write_all(toml.as_ref()){
 				Ok(_) => {},
 				Err(err) => {
@@ -107,23 +110,77 @@ pub extern "C" fn getConfiguration() -> *mut Config {
 		}
 	}
 }
+#[no_mangle]
+pub extern "C" fn getEffectsConfiguration() -> *mut Effects {
+	unsafe{
+		match EFFECTS.as_mut() {
+			None => ptr::null_mut(),
+			Some(mutref) => mutref as *mut Effects
+		}
+	}
+}
+
+
+pub fn load_config<'a, P : AsRef<Path>, C> (path : P) -> C where C : Deserialize<'a> + DeserializeOver<'a> + Default + Serialize{
+	let config_res = read_config_from_file(&path);
+	let mut backup_file = false;
+	let config = match config_res{
+	    Ok(conf) => {
+			if conf.1 == false{
+				log("Partial or partially invalid configuration found. Maybe older version?");
+				backup_file = true;
+			} 
+			conf
+		},
+	    Err(err) => match err{
+	        Deserialization => {
+				backup_file = true;
+				(C::default(),false)
+			},
+	        FileError(err) => { 
+				match err.kind() {
+					io::ErrorKind::NotFound => {
+						backup_file = false;
+						(C::default(),false)
+					}
+				    _ => {
+						backup_file = true;
+						(C::default(),false)
+					}
+				}
+			}
+	    }
+	};
+	if config.1 == false {
+		if backup_file {
+			let path_back = path.as_ref().with_extension("ini.bak");
+			log(format!("Backup Configuration file to {:?}", path_back));
+			let res = std::fs::rename(&path, path_back);
+			if res.is_err() {
+				log("Failed to move file")
+			}
+		}
+		write_config_to_file(path, &config.0);
+	}
+	config.0
+}
 
 
 #[no_mangle]
-pub extern "C" fn LoadConfiguration(path : *const libc::wchar_t) -> (){
-	let len = unsafe{libc::wcslen(path)};
-	let slice = unsafe{from_raw_parts(path, len) };
-	let widePath =  OsString::from_wide(slice);
-	
-	let config = read_file(widePath).unwrap();
-	if config.1 == false {
-		log("Not full validated configuration. Different version found")
-	}
+pub extern "C" fn LoadConfiguration() -> (){
+	let path_main = "./Data/OBSE/Plugins/OblivionReloaded.ini";
+	let path_effect = "./Data/Shaders/OblivionReloaded/Effects/Effects.ini";
+	let path_effect = "./Data/Shaders/OblivionReloaded/Effects/Shaders.ini";	
+	let config : Config = load_config(path_main);
+	let effects : Effects = load_config(path_effect);
 	unsafe{
-		CONFIG.replace(config.0);
+		CONFIG.replace(config);
+		EFFECTS.replace(effects);
 	}
 	log("Configuration File Loaded");
 }
+
+
 
 #[repr(C)]
 #[derive(Debug)]
@@ -149,10 +206,6 @@ pub extern "C" fn SetLogFile(file: *mut libc::FILE) -> Errors {
 mod tests {
     use super::*;
 
-    #[test]
-    fn it_writes() {
-//        write_file("./test.ini");
-	}
 	#[test]
 	fn it_reads() {
 		let p = CString::new("./test.log").expect("Ok");
@@ -161,7 +214,9 @@ mod tests {
 		let f = unsafe { libc::fopen(p.as_ptr(), m.as_ptr()) }; 
 		let a = SetLogFile(f);
 
-		let conf = read_file("./test.ini").expect("Error with deserialization");
+		let conf : Config = load_config("./test.ini");
 		println!("{:?}", conf);
+		let effconf : Effects = load_config("./effect.ini");
+
 	}
 }

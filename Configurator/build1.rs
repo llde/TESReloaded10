@@ -13,11 +13,12 @@ fn main() {
         .display()
         .to_string();
 
-    cbindgen::Builder::new()
+    match cbindgen::Builder::new()
       .with_crate(crate_dir).with_namespace("ffi").with_cpp_compat(true).with_include("SettingsStructureCommon.h")
-      .generate()
-      .expect("Unable to generate bindings")
-      .write_to_file(output_file);
+      .generate(){
+          Ok(bindings) =>{ bindings.write_to_file(output_file);},
+          Err(_) => println!("Unable to generate proper bindings"),
+	   };
 }
  
 fn target_dir() -> PathBuf {

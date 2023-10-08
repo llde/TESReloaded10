@@ -29,11 +29,12 @@ impl From<*mut libc::FILE>  for CFile {
 
 impl Write for CFile {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+		let string = CString::new(buf).unwrap_or(CString::new("Cannot log statement").unwrap());
 		let bytes =  unsafe{
-			libc::fprintf(self.file, buf.as_ptr() as *const i8)
+			libc::fprintf(self.file, string.as_ptr() as *const i8)
 		};
 		unsafe {
-			libc::fputc(b'\n'.into(), self.file);
+			libc::fputc(b'\n'.into(),self.file);
 		}
 		if bytes <= 0 {
 			Err(Error::last_os_error())

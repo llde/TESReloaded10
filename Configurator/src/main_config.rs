@@ -40,20 +40,20 @@ pub struct Config{
     ShadowsInterior : ShadowsInteriorStruct
 }
 
-impl Config{
-    pub fn new() -> Config{
+impl Default for Config{
+    fn default() -> Config{
         Config{
-            Main : MainStruct::new(),
-            Develop : DevelopStruct::new(),
-            FlyCam : FlyCamStruct::new(),
-            SleepingMode : SleepingModeStruct::new(),
-            LowHFSound : LowHFSoundStruct::new(),
-            Shaders : ShadersStruct::new(),
-            Effects : EffectsStruct::new(),
-            Menu : MenuStruct::new(),
-            ShadowsForm : ShadowFormsStruct::new(),
-            ShadowsExterior: ShadowsExteriorStruct::new(),
-            ShadowsInterior: ShadowsInteriorStruct::new(),
+            Main : MainStruct::default(),
+            Develop : DevelopStruct::default(),
+            FlyCam : FlyCamStruct::default(),
+            SleepingMode : SleepingModeStruct::default(),
+            LowHFSound : LowHFSoundStruct::default(),
+            Shaders : ShadersStruct::default(),
+            Effects : EffectsStruct::default(),
+            Menu : MenuStruct::default(),
+            ShadowsForm : ShadowFormsStruct::default(),
+            ShadowsExterior: ShadowsExteriorStruct::default(),
+            ShadowsInterior: ShadowsInteriorStruct::default(),
         }
     }
 }
@@ -73,8 +73,8 @@ pub struct MainStruct {
     FarPlaneDistance : f32,
 }
 
-impl MainStruct{
-    pub fn new() -> MainStruct{
+impl Default for MainStruct{
+    fn default() -> Self{
         MainStruct{
             RemoveUnderwater : true,
             RemovePrecipitations : true,
@@ -99,8 +99,8 @@ pub	struct DevelopStruct {
     TraceShaders : UInt8,
 }
 
-impl DevelopStruct{
-    pub fn new() -> DevelopStruct{
+impl Default for DevelopStruct{
+    fn default() -> Self{
         DevelopStruct{
             CompileShaders : 2,
             CompileEffects : 2,
@@ -120,8 +120,9 @@ pub	struct LowHFSoundStruct {
     HealthCoeff : f32,       // enables hotkeys to print textures
     FatigueCoeff : f32,
 }
-impl LowHFSoundStruct{
-    pub fn new() -> LowHFSoundStruct{
+
+impl Default for LowHFSoundStruct{
+    fn default() -> Self{
         LowHFSoundStruct{
             HealthEnabled : true,
             FatigueEnabled : true,
@@ -141,8 +142,8 @@ pub	struct FlyCamStruct {
     StepValue : f32
 }
 
-impl FlyCamStruct{
-    pub fn new() -> FlyCamStruct{
+impl Default for FlyCamStruct{
+    fn default() -> Self{
         FlyCamStruct{
             Enabled : true,
             ScrollMultiplier : 2.0,
@@ -167,8 +168,8 @@ pub struct ShadersStruct {
     Extra : bool,
 }
 
-impl ShadersStruct{
-    pub fn new() -> ShadersStruct{
+impl Default for ShadersStruct{
+    fn default() -> Self{
         ShadersStruct{
             Blood : false,
             Grass : false,
@@ -209,8 +210,8 @@ struct EffectsStruct {
     Extra : bool,
 }
 
-impl EffectsStruct{
-    pub fn new() -> EffectsStruct{
+impl Default for EffectsStruct{
+    fn default() -> Self{
         EffectsStruct{
             AmbientOcclusion : true,
             BloodLens : true,
@@ -257,8 +258,9 @@ pub struct MenuStruct {
     KeySave : UInt8,
     KeyEditing : UInt8
 }
-impl MenuStruct{
-    pub fn new() -> MenuStruct{
+
+impl Default for MenuStruct{
+    fn default() -> Self{
         MenuStruct {
             TextFont : CString::new("Calibri").unwrap().into(),
             TextFontStatus : CString::new("Consolas").unwrap().into(),
@@ -286,8 +288,9 @@ pub struct SleepingModeStruct{
     Enabled : bool,
     Mode : UInt8
 }
-impl SleepingModeStruct{
-    pub fn new() -> SleepingModeStruct{
+
+impl Default for SleepingModeStruct{
+    fn default() -> Self{
         SleepingModeStruct{
             Enabled: false,
             Mode: 0,
@@ -315,8 +318,8 @@ pub struct ShadowFormsStruct {
 	ExcludeForms : ExcludedFormsList
 }
 
-impl ShadowFormsStruct {
-	pub fn new() ->ShadowFormsStruct{
+impl Default for ShadowFormsStruct{
+    fn default() -> Self{
 		ShadowFormsStruct {
 			Activators: true, Actors: true , Apparatus: true, Books: true, Containers: true, Doors: true, Furniture: true, Misc: true, Statics: true, Terrain: true, Trees: true, Lod: false, MinRadius: 20.0, ExcludeForms : SysVec::new()
 			
@@ -336,8 +339,9 @@ pub struct ShadowsExteriorStruct{
 /*Other Shadows Related settings will be in the Shader configuration
 TODO what about cascade specific settings??
  */
-impl ShadowsExteriorStruct{
-    pub fn new() -> ShadowsExteriorStruct{
+
+impl Default for ShadowsExteriorStruct{
+    fn default() -> Self{
         ShadowsExteriorStruct{
             ShadowMapResolution: 2048,
             ShadowMapRadius: 8000.0,
@@ -356,8 +360,9 @@ pub struct ShadowsInteriorStruct{
     LightPoints : UInt8,
     TorchesCastShadows : bool,
 }
-impl ShadowsInteriorStruct {
-    pub fn new() -> ShadowsInteriorStruct {
+
+impl Default for ShadowsInteriorStruct{
+    fn default() -> Self{
         ShadowsInteriorStruct {
             ShadowCubeMapResolution: 2048,
             LightPoints: 4,
