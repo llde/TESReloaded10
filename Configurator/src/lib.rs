@@ -29,6 +29,8 @@ use serde_deserialize_over::DeserializeOver;
 use crate::ConfigurationError::{Deserialization, FileError};
 use crate::main_config::Config;
 use crate::effect_config::Effects;
+use crate::shader_config::Shaders;
+
 #[derive(Debug)]
 pub enum ConfigurationError{
 	Deserialization,
@@ -38,6 +40,7 @@ pub enum ConfigurationError{
 
 pub static mut CONFIG : Option<Config> = None;
 pub static mut EFFECTS : Option<Effects> = None;
+pub static mut SHADERS : Option<Shaders> = None;
 
 pub static mut LOGGER : Option<CFile> = None;
 
@@ -110,6 +113,7 @@ pub extern "C" fn getConfiguration() -> *mut Config {
 		}
 	}
 }
+
 #[no_mangle]
 pub extern "C" fn getEffectsConfiguration() -> *mut Effects {
 	unsafe{
@@ -120,6 +124,15 @@ pub extern "C" fn getEffectsConfiguration() -> *mut Effects {
 	}
 }
 
+#[no_mangle]
+pub extern "C" fn getShadersConfiguration() -> *mut Shaders {
+	unsafe{
+		match SHADERS.as_mut() {
+			None => ptr::null_mut(),
+			Some(mutref) => mutref as *mut Shaders
+		}
+	}
+}
 
 pub fn load_config<'a, P : AsRef<Path>, C> (path : P) -> C where C : Deserialize<'a> + DeserializeOver<'a> + Default + Serialize{
 	let config_res = read_config_from_file(&path);
@@ -170,12 +183,15 @@ pub fn load_config<'a, P : AsRef<Path>, C> (path : P) -> C where C : Deserialize
 pub extern "C" fn LoadConfiguration() -> (){
 	let path_main = "./Data/OBSE/Plugins/OblivionReloaded.ini";
 	let path_effect = "./Data/Shaders/OblivionReloaded/Effects/Effects.ini";
-	let path_effect = "./Data/Shaders/OblivionReloaded/Effects/Shaders.ini";	
+	let path_shader = "./Data/Shaders/OblivionReloaded/Effects/Shaders.ini";	
 	let config : Config = load_config(path_main);
 	let effects : Effects = load_config(path_effect);
+	let shaders : Shaders = load_config(path_shader);
+
 	unsafe{
 		CONFIG.replace(config);
 		EFFECTS.replace(effects);
+		SHADERS.replace(shaders);
 	}
 	log("Configuration File Loaded");
 }
@@ -217,6 +233,7 @@ mod tests {
 		let conf : Config = load_config("./test.ini");
 		println!("{:?}", conf);
 		let effconf : Effects = load_config("./effect.ini");
+		let shaderconf : Shaders = load_config("./shader.ini");
 
 	}
 }

@@ -315,13 +315,14 @@ pub struct ShadowFormsStruct {
 	Trees : bool,
 	Lod : bool, 
 	MinRadius : f32,
+	Alpha : bool,
 	ExcludeForms : ExcludedFormsList
 }
 
 impl Default for ShadowFormsStruct{
     fn default() -> Self{
 		ShadowFormsStruct {
-			Activators: true, Actors: true , Apparatus: true, Books: true, Containers: true, Doors: true, Furniture: true, Misc: true, Statics: true, Terrain: true, Trees: true, Lod: false, MinRadius: 20.0, ExcludeForms : SysVec::new()
+			Activators: true, Actors: true , Apparatus: true, Books: true, Containers: true, Doors: true, Furniture: true, Misc: true, Statics: true, Terrain: true, Trees: true, Lod: false, MinRadius: 20.0, Alpha : true, ExcludeForms : SysVec::new()
 			
 		}
 	}
@@ -331,10 +332,12 @@ impl Default for ShadowFormsStruct{
 #[derive(Debug,Serialize,Deserialize,DeserializeOver)]
 #[allow(non_snake_case)]
 pub struct ShadowsExteriorStruct{
+	Enabled : bool,
+	ShadowMode : UInt8,
     ShadowMapResolution : UInt32,
     ShadowMapRadius : f32,
     ShadowMapFarPlane : f32,
-    BlurShadowMap : bool,
+    BlurShadowMaps : bool,
 }
 /*Other Shadows Related settings will be in the Shader configuration
 TODO what about cascade specific settings??
@@ -343,10 +346,12 @@ TODO what about cascade specific settings??
 impl Default for ShadowsExteriorStruct{
     fn default() -> Self{
         ShadowsExteriorStruct{
+			Enabled : true,
+			ShadowMode : 1,
             ShadowMapResolution: 2048,
             ShadowMapRadius: 8000.0,
             ShadowMapFarPlane: 32768.0,
-            BlurShadowMap: false,
+            BlurShadowMaps: true,
         }
     }
 }
@@ -354,19 +359,24 @@ impl Default for ShadowsExteriorStruct{
 
 #[repr(C)]
 #[derive(Debug,Serialize,Deserialize,DeserializeOver)]
-#[allow(non_snake_case)]
 pub struct ShadowsInteriorStruct{
+	Enabled : bool,
+	ShadowMode : UInt8,
     ShadowCubeMapResolution : UInt32,
     LightPoints : UInt8,
     TorchesCastShadows : bool,
+	LightRadiusMult : f32
 }
 
 impl Default for ShadowsInteriorStruct{
     fn default() -> Self{
         ShadowsInteriorStruct {
+			Enabled : true,
+			ShadowMode : 1,
             ShadowCubeMapResolution: 2048,
             LightPoints: 4,
             TorchesCastShadows: true,
+			LightRadiusMult : 1.0
         }
     }
 }
