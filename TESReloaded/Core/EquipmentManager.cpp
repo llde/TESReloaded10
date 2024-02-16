@@ -15,8 +15,8 @@ void EquipmentManager::Initialize() {
 }
 
 void EquipmentManager::LoadForms() {
-
-	if (TheSettingManager->SettingsMain.EquipmentMode.Enabled) {
+#ifdef EXPERIMENTAL_FEATURE
+	if (TheSettingManager->Config->EquipmentMode.Enabled) {
 		OnBackAnim = (TESIdleForm*)DataHandler->CreateForm(TESForm::FormType::kFormType_Idle);
 		OnBackAnim->GenerateID(0x22F);
 		OnBackAnim->flags = 0;
@@ -24,11 +24,11 @@ void EquipmentManager::LoadForms() {
 		OnBackAnim->animFlags = TESIdleForm::AnimFlag::kAnimFlag_SpecialIdle;
 		DataHandler->AddData(OnBackAnim);
 	}
-
+#endif
 }
 
 void EquipmentManager::SetRotationPosition(NiAVObject* Object, PositionRotationType Type, UInt8 SitSleepState) {
-
+#ifdef EXPERIMENTAL_FEATURE
 	NiPoint3 RotationZero = { 0.0f, 0.0f, 0.0f };
 	NiPoint3 PositionZero = { 0.0f, 0.0f, 0.0f };
     if(Object == nullptr) return;
@@ -43,59 +43,59 @@ void EquipmentManager::SetRotationPosition(NiAVObject* Object, PositionRotationT
 			Position = &PositionZero;
 			break;
 		case EquipmentManager::Shield:
-			Rotation = &TheSettingManager->SettingsMain.EquipmentMode.ShieldOnBackRot;
-			Position = &TheSettingManager->SettingsMain.EquipmentMode.ShieldOnBackPos;
+			Rotation = &TheSettingManager->Config->EquipmentMode.ShieldOnBackRot;
+			Position = &TheSettingManager->Config->EquipmentMode.ShieldOnBackPos;
 			break;
 		case EquipmentManager::Weapon:
 			if (SitSleepState < 3 || SitSleepState > 5) {
-				Rotation = &TheSettingManager->SettingsMain.EquipmentMode.WeaponOnBackRot;
-				Position = &TheSettingManager->SettingsMain.EquipmentMode.WeaponOnBackPos;
+				Rotation = &TheSettingManager->Config->EquipmentMode.WeaponOnBackRot;
+				Position = &TheSettingManager->Config->EquipmentMode.WeaponOnBackPos;
 			}
 			else {
-				Rotation = &TheSettingManager->SettingsMain.MountedCombat.WeaponOnBackRot;
-				Position = &TheSettingManager->SettingsMain.MountedCombat.WeaponOnBackPos;
+				Rotation = &TheSettingManager->Config->MountedCombat.WeaponOnBackRot;
+				Position = &TheSettingManager->Config->MountedCombat.WeaponOnBackPos;
 			}
 			break;
 		case EquipmentManager::TwoHandWeapon:
 			if (SitSleepState < 3 || SitSleepState > 5) {
-				Rotation = &TheSettingManager->SettingsMain.EquipmentMode.TwoHandWeaponOnBackRot;
-				Position = &TheSettingManager->SettingsMain.EquipmentMode.TwoHandWeaponOnBackPos;
+				Rotation = &TheSettingManager->Config->EquipmentMode.TwoHandWeaponOnBackRot;
+				Position = &TheSettingManager->Config->EquipmentMode.TwoHandWeaponOnBackPos;
 			}
 			else {
-				Rotation = &TheSettingManager->SettingsMain.MountedCombat.TwoHandWeaponOnBackRot;
-				Position = &TheSettingManager->SettingsMain.MountedCombat.TwoHandWeaponOnBackPos;
+				Rotation = &TheSettingManager->Config->MountedCombat.TwoHandWeaponOnBackRot;
+				Position = &TheSettingManager->Config->MountedCombat.TwoHandWeaponOnBackPos;
 			}
 			break;
 		case EquipmentManager::Staff:
 			if (SitSleepState < 3 || SitSleepState > 5) {
-				Rotation = &TheSettingManager->SettingsMain.EquipmentMode.StaffOnBackRot;
-				Position = &TheSettingManager->SettingsMain.EquipmentMode.StaffOnBackPos;
+				Rotation = &TheSettingManager->Config->EquipmentMode.StaffOnBackRot;
+				Position = &TheSettingManager->Config->EquipmentMode.StaffOnBackPos;
 			}
 			else {
-				Rotation = &TheSettingManager->SettingsMain.MountedCombat.StaffOnBackRot;
-				Position = &TheSettingManager->SettingsMain.MountedCombat.StaffOnBackPos;
+				Rotation = &TheSettingManager->Config->MountedCombat.StaffOnBackRot;
+				Position = &TheSettingManager->Config->MountedCombat.StaffOnBackPos;
 			}
 			break;
 		case EquipmentManager::Bow:
 			if (SitSleepState < 3 || SitSleepState > 5) {
-				Rotation = &TheSettingManager->SettingsMain.EquipmentMode.BowOnBackRot;
-				Position = &TheSettingManager->SettingsMain.EquipmentMode.BowOnBackPos;
+				Rotation = &TheSettingManager->Config->EquipmentMode.BowOnBackRot;
+				Position = &TheSettingManager->Config->EquipmentMode.BowOnBackPos;
 			}
 			else {
-				Rotation = &TheSettingManager->SettingsMain.MountedCombat.BowOnBackRot;
-				Position = &TheSettingManager->SettingsMain.MountedCombat.BowOnBackPos;
+				Rotation = &TheSettingManager->Config->MountedCombat.BowOnBackRot;
+				Position = &TheSettingManager->Config->MountedCombat.BowOnBackPos;
 			}
 			break;
 		case EquipmentManager::Light:
-			Rotation = &TheSettingManager->SettingsMain.EquipmentMode.TorchOnBeltRot;
-			Position = &TheSettingManager->SettingsMain.EquipmentMode.TorchOnBeltPos;
+			Rotation = &TheSettingManager->Config->EquipmentMode.TorchOnBeltRot;
+			Position = &TheSettingManager->Config->EquipmentMode.TorchOnBeltPos;
 			break;
 	}
 	m->GenerateRotationMatrixZXY(Rotation, 1);
 	v->x = Position->x;
 	v->y = Position->y;
 	v->z = Position->z;
-
+#endif
 }
 
 void EquipmentManager::SetTorchLight(Actor* Act, NiAVObject* Torch, UInt8 Enable) {

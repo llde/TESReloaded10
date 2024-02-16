@@ -1,15 +1,8 @@
 
 use std::ffi::CString;
-use crate::sys_string::{SysString,SysVec};
+use crate::sys_string::{SysString};
 use serde::{Serialize, Deserialize};
 use serde_deserialize_over::DeserializeOver;
-
-type UInt16 = u16;
-type UInt32 = u32;
-type UInt8 = u8;
-type ExcludedFormsList = SysVec;
-type Vec = u32;
-
 
 /*Configuration for the Main Configuration file*/
 #[derive(Serialize, Deserialize,DeserializeOver, Debug)]
@@ -68,8 +61,8 @@ pub struct MainStruct {
     MemoryTextureManagement : bool,
 	GrassMode : bool,
     ReplaceIntro : bool,
-    AnisotropicFilter : UInt8,
-    ScreenshotKey : UInt16,
+    AnisotropicFilter : u8,
+    ScreenshotKey : u32,
     FarPlaneDistance : f32,
 }
 
@@ -93,10 +86,10 @@ impl Default for MainStruct{
 #[repr(C)]
 #[allow(non_snake_case)]
 pub	struct DevelopStruct {
-    CompileShaders : UInt8,  // 1 Compile All, 2 Compile modified or missing only, 3 Compile only in menu
-    CompileEffects : UInt8,
+    CompileShaders : u8,  // 1 Compile All, 2 Compile modified or missing only, 3 Compile only in menu
+    CompileEffects : u8,
     DebugMode : bool,       // enables hotkeys to print textures
-    TraceShaders : UInt8,
+    TraceShaders : u8,
 }
 
 impl Default for DevelopStruct{
@@ -137,8 +130,8 @@ impl Default for LowHFSoundStruct{
 pub	struct FlyCamStruct {
     Enabled : bool,
     ScrollMultiplier : f32,
-    KeyAdd : UInt16,
-    KeySubtract : UInt16,
+    KeyAdd : u16,
+    KeySubtract : u16,
     StepValue : f32
 }
 
@@ -244,19 +237,23 @@ impl Default for EffectsStruct{
 pub struct MenuStruct {
     TextFont : SysString,
     TextFontStatus : SysString,
-    TextSize : UInt8,
-    TextSizeStatus : UInt8,
-    KeyEnable : UInt8,
-    KeyUp : UInt8,
-    KeyDown : UInt8,
-    KeyLeft : UInt8,
-    KeyRight : UInt8,
-    KeyPageUp : UInt8,
-    KeyPageDown : UInt8,
-    KeyAdd : UInt8,
-    KeySubtract : UInt8,
-    KeySave : UInt8,
-    KeyEditing : UInt8
+    TextSize : u8,
+    TextSizeStatus : u8,
+	TextColorNormal : [u8; 3],
+	TextShadowColorNormal : [u8;3],
+	TextColorSelected : [u8; 3],
+	TextShadowColorSelected : [u8 ; 3],
+    KeyEnable : u8,
+    KeyUp : u8,
+    KeyDown : u8,
+    KeyLeft : u8,
+    KeyRight : u8,
+    KeyPageUp : u8,
+    KeyPageDown : u8,
+    KeyAdd : u8,
+    KeySubtract : u8,
+    KeySave : u8,
+    KeyEditing : u8
 }
 
 impl Default for MenuStruct{
@@ -266,6 +263,10 @@ impl Default for MenuStruct{
             TextFontStatus : CString::new("Consolas").unwrap().into(),
             TextSize : 22,
             TextSizeStatus : 12,
+			TextColorNormal : [240,200,80],
+			TextShadowColorNormal : [50,50,50],
+			TextColorSelected : [255,255,255],
+			TextShadowColorSelected : [50,50,50],
             KeyEnable : 24,
             KeyUp : 200,
             KeyDown : 208,
@@ -286,7 +287,7 @@ impl Default for MenuStruct{
 #[allow(non_snake_case)]
 pub struct SleepingModeStruct{
     Enabled : bool,
-    Mode : UInt8
+    Mode : u8
 }
 
 impl Default for SleepingModeStruct{
@@ -316,13 +317,12 @@ pub struct ShadowFormsStruct {
 	Lod : bool, 
 	MinRadius : f32,
 	Alpha : bool,
-	ExcludeForms : ExcludedFormsList
 }
 
 impl Default for ShadowFormsStruct{
     fn default() -> Self{
 		ShadowFormsStruct {
-			Activators: true, Actors: true , Apparatus: true, Books: true, Containers: true, Doors: true, Furniture: true, Misc: true, Statics: true, Terrain: true, Trees: true, Lod: false, MinRadius: 20.0, Alpha : true, ExcludeForms : SysVec::new()
+			Activators: true, Actors: true , Apparatus: true, Books: true, Containers: true, Doors: true, Furniture: true, Misc: true, Statics: true, Terrain: true, Trees: true, Lod: false, MinRadius: 20.0, Alpha : true
 			
 		}
 	}
@@ -333,8 +333,8 @@ impl Default for ShadowFormsStruct{
 #[allow(non_snake_case)]
 pub struct ShadowsExteriorStruct{
 	Enabled : bool,
-	ShadowMode : UInt8,
-    ShadowMapResolution : UInt32,
+	ShadowMode : u8,
+    ShadowMapResolution : u32,
     ShadowMapRadius : f32,
     ShadowMapFarPlane : f32,
     BlurShadowMaps : bool,
@@ -359,11 +359,12 @@ impl Default for ShadowsExteriorStruct{
 
 #[repr(C)]
 #[derive(Debug,Serialize,Deserialize,DeserializeOver)]
+#[allow(non_snake_case)]
 pub struct ShadowsInteriorStruct{
 	Enabled : bool,
-	ShadowMode : UInt8,
-    ShadowCubeMapResolution : UInt32,
-    LightPoints : UInt8,
+	ShadowMode : u8,
+    ShadowCubeMapResolution : u32,
+    LightPoints : u8,
     TorchesCastShadows : bool,
 	LightRadiusMult : f32
 }

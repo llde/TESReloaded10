@@ -4,7 +4,7 @@ void AttachHooks() {
 
 	HMODULE Module = NULL;
 	char Filename[MAX_PATH];
-	SettingsMainStruct* SettingsMain = &TheSettingManager->SettingsMain;
+	ffi::Config* SettingsMain = TheSettingManager->Config;
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
@@ -45,8 +45,12 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)GetAnimGroupSequenceSingle,	&GetAnimGroupSequenceSingleHook);
 	DetourAttach(&(PVOID&)GetAnimGroupSequenceMultiple,	&GetAnimGroupSequenceMultipleHook);
 	DetourAttach(&(PVOID&)NewAnimSequenceMultiple,		&NewAnimSequenceMultipleHook);
+#ifdef EXPERIMENTAL_FEATURE
 	if (SettingsMain->IKFoot.Enabled) DetourAttach(&(PVOID&)ApplyActorAnimData, &ApplyActorAnimDataHook);
+#endif
 	DetourAttach(&(PVOID&)LoadAnimGroup,				&LoadAnimGroupHook);
+#ifdef EXPERIMENTAL_FEATURE
+
  	if(SettingsMain->CameraMode.Enabled){
 		DetourAttach(&(PVOID&)ToggleCamera,					&ToggleCameraHook);
 		DetourAttach(&(PVOID&)ToggleBody,					&ToggleBodyHook);
@@ -75,6 +79,7 @@ void AttachHooks() {
 		DetourAttach(&(PVOID&)HideEquipment,				&HideEquipmentHook);
 		DetourAttach(&(PVOID&)SaveGame,						&SaveGameHook);
 	}
+#endif
 	if (SettingsMain->SleepingMode.Enabled) {
 		DetourAttach(&(PVOID&)RemoveWornItems,				&RemoveWornItemsHook);
 		DetourAttach(&(PVOID&)ServeSentence,				&ServeSentenceHook);
@@ -139,7 +144,7 @@ void AttachHooks() {
 //	SafeWriteJump(Jumpers::WaterHeightMap::Hook,				(UInt32)WaterHeightMapHook);
 	SafeWriteJump(Jumpers::EndProcess::Hook,					(UInt32)EndProcessHook);
     
-    if(SettingsMain->Main.SkipFog) 	SafeWriteJump(Jumpers::SkipFogPass::Hook, (UInt32)SkipFogPassHook); 
+    if(SettingsMain->Main.RemoveFogPass) 	SafeWriteJump(Jumpers::SkipFogPass::Hook, (UInt32)SkipFogPassHook);
 
 	SafeWriteJump(0x00553EAC, 0x00553EB2); // Patches the use of Lighting30Shader only for the hair
 	SafeWriteJump(0x007D1BC4, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
@@ -171,7 +176,7 @@ void AttachHooks() {
 	}
 
 	if (SettingsMain->Main.RemovePrecipitations) SafeWriteJump(0x00543167, 0x00543176);
-
+#ifdef EXPERIMENTAL_FEATURE
 	if (SettingsMain->FrameRate.SmartControl) SafeWriteJump(Jumpers::UpdateTimeInfo::Hook, (UInt32)UpdateTimeInfoHook);
 
 	if (SettingsMain->FrameRate.SmartBackgroundProcess) {
@@ -198,8 +203,9 @@ void AttachHooks() {
 		SafeWriteJump(Jumpers::Occlusion::MaterialPropertyHook, (UInt32)MaterialPropertyHook);
 		SafeWriteJump(Jumpers::Occlusion::CoordinateJackHook, (UInt32)CoordinateJackHook);
 	}
+#endif
 	SafeWriteJump(Jumpers::Occlusion::ObjectCullHook, (UInt32)ObjectCullHook);
-	
+#ifdef EXPERIMENTAL_FEATURE	
 	if (SettingsMain->Main.MemoryHeapManagement) {
 		GetCurrentDirectoryA(MAX_PATH, Filename);
 		strcat(Filename, FastMMFile);
@@ -214,12 +220,12 @@ void AttachHooks() {
 		SafeWriteCall(0x00401495, (UInt32)Mem.Free);
 		SafeWriteJump(Jumpers::Memory::MemReallocHook, (UInt32)MemReallocHook);
 	}
-
+#endif
 	if (SettingsMain->Main.MemoryTextureManagement){
         SafeWriteCall(Jumpers::Memory::CreateTextureFromFileInMemory, (UInt32)CreateTextureFromFileInMemory);
     }
-	if (SettingsMain->GrassMode.Enabled) SafeWriteJump(Jumpers::UpdateGrass::Hook, (UInt32)UpdateGrassHook);
-
+	if (SettingsMain->Main.GrassMode) SafeWriteJump(Jumpers::UpdateGrass::Hook, (UInt32)UpdateGrassHook);
+#ifdef EXPERIMENTAL_FEATURE	
 	if (SettingsMain->CameraMode.Enabled) {
 		SafeWriteJump(Jumpers::Camera::UpdateCameraHook,		(UInt32)UpdateCameraHook);
 		SafeWriteJump(Jumpers::Camera::SwitchCameraHook,		(UInt32)SwitchCameraHook);
@@ -259,13 +265,13 @@ void AttachHooks() {
 			SafeWrite16(0x005F4FEF, 0xC031); // Enables stagger animation when mounting
 		}
 	}
-
+#endif
 	if (SettingsMain->SleepingMode.Enabled) {
 		SafeWriteJump(0x004AEA1C, 0x004AEAEE); // Enables the Player to get into the bed
 		SafeWriteJump(0x004AE961, 0x004AEAEE); // Enables the Player to get into the bed when in prison
 		SafeWriteJump(0x00672BFF, 0x00672C18); // Enables the rest key when in prison
 	}
-
+#ifdef EXPERIMENTAL_FEATURE
 	if (SettingsMain->Dodge.Enabled) {
 		SafeWrite8(0x00672A17, SettingsMain->Dodge.AcrobaticsLevel);
 		if (SettingsMain->Dodge.DoubleTap) {
@@ -274,7 +280,7 @@ void AttachHooks() {
 			SafeWriteJump(Jumpers::Dodge::DoubleTapHook,	(UInt32)DoubleTapHook);
 		}
 	}
-
+#endif
 	if (SettingsMain->FlyCam.Enabled) {
 		SafeWriteJump(Jumpers::FlyCam::UpdateForwardFlyCamHook,		(UInt32)UpdateForwardFlyCamHook);
 		SafeWriteJump(Jumpers::FlyCam::UpdateBackwardFlyCamHook,	(UInt32)UpdateBackwardFlyCamHook);

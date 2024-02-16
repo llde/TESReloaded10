@@ -96,10 +96,10 @@ void TextureManager::Initialize() {
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	UInt32 Width = TheRenderManager->width;
 	UInt32 Height = TheRenderManager->height;
-	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
-	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
+	ffi::ShadowsExteriorStruct* ShadowsExteriors = &TheSettingManager->Config->ShadowsExterior;
+	ffi::ShadowsInteriorStruct* ShadowsInteriors = &TheSettingManager->Config->ShadowsInterior;
 	UINT ShadowMapSize = 0;
-	UINT ShadowCubeMapSize = ShadowsInteriors->ShadowCubeMapSize;
+	UINT ShadowCubeMapSize = ShadowsInteriors->ShadowCubeMapResolution;
 	
 	TheTextureManager->SourceTexture = NULL;
 	TheTextureManager->SourceSurface = NULL;
@@ -117,8 +117,10 @@ void TextureManager::Initialize() {
 		// create one texture per Exterior ShadowMap type
 		float multiple = i == ShadowManager::ShadowMapTypeEnum::MapLod ? 2.0f : 1.0f; // double the size of lod map only
 		ShadowMapSize = ShadowsExteriors->ShadowMapResolution * multiple;
-		
-		Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_G32R32F, D3DPOOL_DEFAULT, &TheTextureManager->ShadowMapTexture[i], NULL);
+		Logger::Log("%u  %u", ShadowMapSize, ShadowsExteriors->ShadowMode);
+		if (FAILED(Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_G32R32F, D3DPOOL_DEFAULT, &TheTextureManager->ShadowMapTexture[i], NULL))) {
+			Logger::Log("Cannot create texture");
+		}
 		TheTextureManager->ShadowMapTexture[i]->GetSurfaceLevel(0, &TheTextureManager->ShadowMapSurface[i]);
 		Device->CreateDepthStencilSurface(ShadowMapSize, ShadowMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &TheTextureManager->ShadowMapDepthSurface[i], NULL);
         if (i != TheShadowManager->ShadowMapTypeEnum::MapOrtho){ //Don't blur orthomap

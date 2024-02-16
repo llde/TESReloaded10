@@ -14,7 +14,7 @@ public:
 	void					ManageDistantStatic();
 	void					ManageDistantStatic(NiAVObject* Object, float MaxBoundSize);
 	void					RenderDistantStatic(NiAVObject* Object);
-	void					RenderOcclusionMap(SettingsMainStruct::OcclusionCullingStruct* OcclusionCulling);
+	void					RenderOcclusionMap(ffi::ShadowsExteriorStruct* OcclusionCulling);
 	void					PerformOcclusionCulling();
 	
 	ShaderRecordVertex*		OcclusionMapVertex;

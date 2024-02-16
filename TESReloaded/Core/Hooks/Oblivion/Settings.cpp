@@ -9,11 +9,11 @@ bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, GameSett
 		Setting->iValue = 0;
 	else if (!strcmp(Setting->Name, "bFull Screen:Display"))
 		TheSettingManager->SetWindowedMode(Setting->iValue);
-	else if (!strcmp(Setting->Name, "SIntroSequence:General") && TheSettingManager->SettingsMain.Main.ReplaceIntro)
+	else if (!strcmp(Setting->Name, "SIntroSequence:General") && TheSettingManager->Config->Main.ReplaceIntro)
 		Setting->pValue = (char*)IntroMovie;
-	else if (!strcmp(Setting->Name, "SMainMenuMovie:General") && TheSettingManager->SettingsMain.Main.ReplaceIntro)
+	else if (!strcmp(Setting->Name, "SMainMenuMovie:General") && TheSettingManager->Config->Main.ReplaceIntro)
 		Setting->pValue = (char*)MainMenuMovie;
-	else if ((!strcmp(Setting->Name, "SMainMenuMusic:General") || !strcmp(Setting->Name, "STitleMusic:Loading")) && TheSettingManager->SettingsMain.Main.ReplaceIntro)
+	else if ((!strcmp(Setting->Name, "SMainMenuMusic:General") || !strcmp(Setting->Name, "STitleMusic:Loading")) && TheSettingManager->Config->Main.ReplaceIntro)
 		Setting->pValue = (char*)MainMenuMusic;
 	else if (!strcmp(Setting->Name, "bDoCanopyShadowPass:Display") || !strcmp(Setting->Name, "bDoActorShadows:Display") || !strcmp(Setting->Name, "iActorShadowCountExt:Display") || !strcmp(Setting->Name, "iActorShadowCountInt:Display"))
 		Setting->iValue = 0;
@@ -21,11 +21,13 @@ bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, GameSett
 		Setting->iValue = 1;
 	else if (!strcmp(Setting->Name, "bUseBlurShader:BlurShader"))
 		Setting->iValue = 0;
-	else if (!strcmp(Setting->Name, "iPostProcessMilliseconds:BackgroundLoad") && TheSettingManager->SettingsMain.FrameRate.SmartBackgroundProcess)
-		Setting->iValue = TheSettingManager->SettingsMain.FrameRate.BackgroundThreadPriority;
-	else if (!strcmp(Setting->Name, "iPostProcessMillisecondsLoadingQueuedPriority:BackgroundLoad") && TheSettingManager->SettingsMain.FrameRate.SmartBackgroundProcess)
-		Setting->iValue = TheSettingManager->SettingsMain.FrameRate.BackgroundThreadPriority;
-    else if(TheSettingManager->SettingsMain.Shaders.Water){
+#ifdef EXPERIMENTAL_FEATURE
+	else if (!strcmp(Setting->Name, "iPostProcessMilliseconds:BackgroundLoad") && TheSettingManager->Config->FrameRate.SmartBackgroundProcess)
+		Setting->iValue = TheSettingManager->Config->FrameRate.BackgroundThreadPriority;
+	else if (!strcmp(Setting->Name, "iPostProcessMillisecondsLoadingQueuedPriority:BackgroundLoad") && TheSettingManager->Config->FrameRate.SmartBackgroundProcess)
+		Setting->iValue = TheSettingManager->Config->FrameRate.BackgroundThreadPriority;
+#endif
+    else if(TheSettingManager->Config->Shaders.Water){
         if (!strcmp(Setting->Name, "bUseWaterDepth:Water"))
             Setting->iValue = 0; 
         else if (!strcmp(Setting->Name, "bUseWaterDisplacements:Water"))  //TODO ENB require 0. WHY?

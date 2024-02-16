@@ -1,5 +1,6 @@
 #define WaitForDebugger 0
 #define HookDevice 0
+#undef EXPERIMENTAL_FEATURE
 
 #include "Hooks/Oblivion/Hooks.h"
 #include "Device/Hook.h"

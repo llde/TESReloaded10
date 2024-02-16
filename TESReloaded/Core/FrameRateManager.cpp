@@ -10,7 +10,10 @@ void FrameRateManager::Initialize() {
 	TheFrameRateManager->LastTime = 0.0;
 	TheFrameRateManager->ElapsedTime = 0.0;
 	TheFrameRateManager->LastPerformance = 0.0;
-	TheFrameRateManager->SmartControlMPF = 1000.0 / TheSettingManager->SettingsMain.FrameRate.SmartControlFPS;
+#ifdef EXPERIMENTAL_FEATURE
+
+	TheFrameRateManager->SmartControlMPF = 1000.0 / TheSettingManager->Config->FrameRate.SmartControlFPS;
+#endif
 	QueryPerformanceFrequency(&Frequency); TheFrameRateManager->PerformanceFrequency = Frequency.QuadPart;
 	QueryPerformanceCounter(&PerformanceCounter); TheFrameRateManager->PerformanceCounterStart = PerformanceCounter.QuadPart;
 
@@ -45,7 +48,9 @@ void FrameRateManager::PerformSync() {
 	*Pointers::Generic::MPF = NMPF;
 	if (FrameTime < SmartControlMPF) Sleep(SmartControlMPF - FrameTime);
 	LastPerformance = GetPerformance();
-	NMPF = (float)(FrameTime + TheSettingManager->SettingsMain.FrameRate.FlowControl + (LastPerformance - CurrentPerformance));
+#ifdef EXPERIMENTAL_FEATURE
+	NMPF = (float)(FrameTime + TheSettingManager->Config->FrameRate.FlowControl + (LastPerformance - CurrentPerformance));
+#endif
 	if (NMPF >= 10.0f && NMPF <= 120.0f) *Pointers::Generic::MPF = NMPF;
 	
 }

@@ -126,7 +126,7 @@ AnimSequenceMultiple* __fastcall NewAnimSequenceMultipleHook(AnimSequenceMultipl
 
 void(__thiscall* ApplyActorAnimData)(ActorAnimData*) = (void(__thiscall*)(ActorAnimData*))Hooks::ApplyActorAnimData;
 void __fastcall ApplyActorAnimDataHook(ActorAnimData* This, UInt32 edx) {
-	
+#ifdef EXPERIMENTAL_FEATURE	
 	const float RayDistance = 50.0f;
 	const float Thigh = 50.0f;
 
@@ -146,7 +146,7 @@ void __fastcall ApplyActorAnimDataHook(ActorAnimData* This, UInt32 edx) {
 	float Height = 0.0f;
 	float Angle = 0.0f;
 	HighProcess* Process = (HighProcess*)Player->process;
-	SettingsMainStruct::IKFootStruct* IKFoot = &TheSettingManager->SettingsMain.IKFoot;
+	SettingsMainStruct::IKFootStruct* IKFoot = &TheSettingManager->Config->IKFoot;
 	UInt8 AnimGroup = TESAnimGroup::AnimGroup::kAnimGroup_Idle;
 
 	(*ApplyActorAnimData)(This);
@@ -207,7 +207,7 @@ void __fastcall ApplyActorAnimDataHook(ActorAnimData* This, UInt32 edx) {
 			}
 		}
 	}
-
+#endif
 }
 
 TESAnimGroup* (__cdecl* LoadAnimGroup)(NiControllerSequence*, char*) = (TESAnimGroup * (__cdecl*)(NiControllerSequence*, char*))Hooks::LoadAnimGroup;

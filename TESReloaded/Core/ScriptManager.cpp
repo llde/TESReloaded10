@@ -19,7 +19,7 @@ void LowHSoundScript::Run() {
 
 			if (Player->IsAlive()) {
 				if (HealthCoeff) {
-					if (ElapsedTime == -1.0f && HealthCoeff >= TheSettingManager->SettingsMain.LowHFSound.HealthCoeff) {
+					if (ElapsedTime == -1.0f && HealthCoeff >= TheSettingManager->Config->LowHFSound.HealthCoeff) {
 						Global->GetSound()->Play(HeartSlow);
 						ElapsedTime = 0.0f;
 					}
@@ -50,7 +50,7 @@ void LowFSoundScript::Run() {
 
 			if (Player->IsAlive()) {
 				if (FatigueCoeff) {
-					if (ElapsedTime == -1.0f && FatigueCoeff >= TheSettingManager->SettingsMain.LowHFSound.FatigueCoeff) {
+					if (ElapsedTime == -1.0f && FatigueCoeff >= TheSettingManager->Config->LowHFSound.FatigueCoeff) {
 						if (Player->IsFemale()) {
 							Global->GetSound()->Play(BreathingF);
 							BreathingTime = 8.0f;
@@ -75,21 +75,21 @@ void LowFSoundScript::Run() {
 PurgerScript::PurgerScript() { }
 
 void PurgerScript::Run() {
-
+#ifdef   EXPERIMENTAL_FEATURE
 	if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
-		int PurgerTime = TheSettingManager->SettingsMain.Purger.Time;
-		bool PurgerKeyPressed = Global->OnKeyDown(TheSettingManager->SettingsMain.Purger.Key);
+		int PurgerTime = TheSettingManager->Config->Purger.Time;
+		bool PurgerKeyPressed = Global->OnKeyDown(TheSettingManager->Config->Purger.Key);
 
 		if (PurgerTime || PurgerKeyPressed) {
 			ElapsedTime += TheFrameRateManager->ElapsedTime;
 			if (ElapsedTime >= PurgerTime || PurgerKeyPressed) {
-				if (TheSettingManager->SettingsMain.Purger.PurgeCells) { Tes->PurgeCells(); Global->PurgeModels(); }
-				if (TheSettingManager->SettingsMain.Purger.PurgeTextures) { TheRenderManager->device->EvictManagedResources(); }
+				if (TheSettingManager->Config->Purger.PurgeCells) { Tes->PurgeCells(); Global->PurgeModels(); }
+				if (TheSettingManager->Config->Purger.PurgeTextures) { TheRenderManager->device->EvictManagedResources(); }
 				ElapsedTime = 0.0f;
 			}
 		}
 	}
-
+#endif
 }
 
 GravityScript::GravityScript() { }
@@ -97,9 +97,9 @@ GravityScript::GravityScript() { }
 void GravityScript::Run() {
 
 	TESObjectCELL* CurrentCell = Player->parentCell;
-
-	if (CurrentCell) CurrentCell->GetHavokWorld()->gravity.z = -17.0f * TheSettingManager->SettingsMain.Gravity.Value;
-
+#ifdef EXPERIMENTAL_FEATURE
+	if (CurrentCell) CurrentCell->GetHavokWorld()->gravity.z = -17.0f * TheSettingManager->Config->Gravity.Value;
+#endif
 }
 
 void EquipmentSetupChoice() {
@@ -125,12 +125,14 @@ void EquipmentSetupScript::Run() {
 
 	if (ConfigStep == None && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None)) {
 		StepType CurrentStep = GetCurrentEquipmentType();
+#ifdef EXPERIMENTAL_FEATURE
 		if (CurrentStep != GameStep) {
-			if (CurrentStep == Normal || CurrentStep == Combat || (TheSettingManager->SettingsMain.EquipmentMode.SleepingEquipment && CurrentStep == Sleeping) || (TheSettingManager->SettingsMain.EquipmentMode.SwimmingEquipment && CurrentStep == Swimming)) {
+			if (CurrentStep == Normal || CurrentStep == Combat || (TheSettingManager->Config->EquipmentMode.SleepingEquipment && CurrentStep == Sleeping) || (TheSettingManager->Config->EquipmentMode.SwimmingEquipment && CurrentStep == Swimming)) {
 				EquipItems(GameStep, CurrentStep);
 				GameStep = CurrentStep;
 			}
 		}
+#endif
 	}
 	else if (ConfigStep == Request) {
 		if (GameStep == EquipmentSetupScript::StepType::Normal && !CombatState) {
@@ -150,7 +152,7 @@ void EquipmentSetupScript::Run() {
 }
 
 void EquipmentSetupScript::EquipItems(StepType From, StepType To) {
-
+#ifdef EXPERIMENTAL_FEATURE
 	HighProcessEx* Process = (HighProcessEx*)Player->process;
 	InventoryChanges::Data* InventoryChangesData = Player->extraDataList.GetInventoryChangesData();
 	TList<InventoryChanges::EntryData>* EntryDataList = NULL;
@@ -193,16 +195,16 @@ void EquipmentSetupScript::EquipItems(StepType From, StepType To) {
 		Process->LeftEquippingState = HighProcessEx::State::StateNone;
 	}
 	Player->UpdateInventory();
-
+#endif
 }
 
 EquipmentSetupScript::StepType EquipmentSetupScript::GetCurrentEquipmentType() {
 
 	UInt8 SitSleepState = Player->GetSitSleepState();
 	StepType CurrentStep = Normal;
-	
+#ifdef EXPERIMENTAL_FEATURE
 	if (CombatState) CurrentStep = Combat;
-	if (Global->OnKeyDown(TheSettingManager->SettingsMain.EquipmentMode.CombatEquipmentKey)) {
+	if (Global->OnKeyDown(TheSettingManager->Config->EquipmentMode.CombatEquipmentKey)) {
 		if (CombatState) CurrentStep = Normal; else CurrentStep = Combat;
 		CombatState = !CombatState;
 	}
@@ -219,6 +221,7 @@ EquipmentSetupScript::StepType EquipmentSetupScript::GetCurrentEquipmentType() {
 		ElapsedTime += TheFrameRateManager->ElapsedTime;
 		CurrentStep = Swimming;
 	}
+#endif
 	return CurrentStep;
 
 }
@@ -228,16 +231,17 @@ void ScriptManager::Initialize() {
 	Logger::Log("Starting the script manager...");
 	TheScriptManager = new ScriptManager();
 	
-	SettingsMainStruct* MainStruct = &TheSettingManager->SettingsMain;
+	ffi::Config* MainStruct = TheSettingManager->Config;
 
 	if (MainStruct->Effects.LowHF) {
 		if (MainStruct->LowHFSound.HealthEnabled) TheScriptManager->LowHSound = new LowHSoundScript();
 		if (MainStruct->LowHFSound.FatigueEnabled) TheScriptManager->LowFSound = new LowFSoundScript();
 	}
+#ifdef EXPERIMENTAL_FEATURE
 	if (MainStruct->Purger.Enabled) TheScriptManager->Purger = new PurgerScript();
 	if (MainStruct->Gravity.Enabled) TheScriptManager->Gravity = new GravityScript();
 	if (MainStruct->EquipmentMode.Enabled) TheScriptManager->EquipmentSetup = new EquipmentSetupScript();
-
+#endif
 }
 
 void ScriptManager::LoadForms() {

@@ -13,9 +13,12 @@ void CameraManager::Initialize() {
 }
 
 bool CameraManager::IsFirstPerson() {
+#ifdef EXPERIMENTAL_FEATURE
 
-	return TheSettingManager->SettingsMain.CameraMode.Enabled ? FirstPersonView : Player->IsFirstPerson();
-
+	return TheSettingManager->Config->CameraMode.Enabled ? FirstPersonView : Player->IsFirstPerson();
+#else
+	return Player->IsFirstPerson();
+#endif
 }
 
 bool CameraManager::IsVanity() {
@@ -37,8 +40,8 @@ void CameraManager::ResetCamera() {
 }
 
 void CameraManager::SetSceneGraph() {
-	
-	SettingsMainStruct::CameraModeStruct* CameraMode = &TheSettingManager->SettingsMain.CameraMode;
+#ifdef EXPERIMENTAL_FEATURE
+	SettingsMainStruct::CameraModeStruct* CameraMode = &TheSettingManager->Config->CameraMode;
 	float FoV = CameraMode->FoV;
 	
 	if (CameraMode->Enabled) {
@@ -48,6 +51,7 @@ void CameraManager::SetSceneGraph() {
 			Player->SetFoV(FoV);
 		}
 	}
+#endif
 	TheShaderManager->ShaderConst.ReciprocalResolution.w = Player->GetFoV(false);
 
 }

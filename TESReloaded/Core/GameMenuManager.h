@@ -15,7 +15,7 @@ public:
 	UInt32										SelectedRow[4];
 	UInt32										SelectedColumn;
 	char										EditingValue[20];
-	SettingManager::Configuration::ConfigNode	SelectedNode;
+//	SettingManager::Configuration::ConfigNode	SelectedNode;
 	ID3DXFont*									FontSelected;
 	ID3DXFont*									FontNormal;
 	ID3DXFont*									FontStatus;

@@ -31,5 +31,5 @@ class DWNode : public NiNode {
 public:
 	static void		Create();
 	static DWNode*	Get();
-	static void		AddNode(char* Name, NiAVObject* Child0, NiAVObject* Child1);
+	static void		AddNode(const char* Name, NiAVObject* Child0, NiAVObject* Child1);
 };

@@ -29,6 +29,9 @@ void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRenderedTex
 extern void* (__thiscall* ShowDetectorWindow)(DetectorWindow*, HWND, HINSTANCE, NiNode*, char*, int, int, int, int);
 void* __fastcall ShowDetectorWindowHook(DetectorWindow* This, UInt32 edx, HWND Handle, HINSTANCE Instance, NiNode* RootNode, char* FormCaption, int X, int Y, int Width, int Height);
 
+extern int (__thiscall* WaterManager_4E8EC0)(WaterManager*);
+int __fastcall WaterManager_4E8EC0Hook(WaterManager* This);
+
 void RenderInterfaceHook();
 void SetTileShaderConstantsHook();
 void DetectorWindowCreateTreeViewHook();

@@ -7,7 +7,7 @@ void __cdecl ShowSleepWaitMenuHook(bool IsSleeping) {
 	
 	bool Rest = false;
 	UInt8 SitSleepState = Player->GetSitSleepState();
-	UInt8 Mode = TheSettingManager->SettingsMain.SleepingMode.Mode;
+	UInt8 Mode = TheSettingManager->Config->SleepingMode.Mode;
 
 	if (SitSleepState == HighProcess::SitSleep::kSitSleep_None && Mode == 0)
 		Rest = true;

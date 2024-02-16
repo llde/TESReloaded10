@@ -28,13 +28,16 @@ void __fastcall SetDialogCameraHook(PlayerCharacter* This, UInt32 edx, Actor* Ac
 
 void (__thiscall* UpdateCameraCollisions)(PlayerCharacter*, NiPoint3*, NiPoint3*, UInt8) = (void (__thiscall*)(PlayerCharacter*, NiPoint3*, NiPoint3*, UInt8))Hooks::UpdateCameraCollisions;
 void __fastcall UpdateCameraCollisionsHook(PlayerCharacter* This, UInt32 edx, NiPoint3* CameraPosition, NiPoint3* PlayerPosition, UInt8 CameraChasing) {
-	
-	SettingsMainStruct::CameraModeStruct* CameraMode = &TheSettingManager->SettingsMain.CameraMode;
-	UInt8 Crosshair = TheSettingManager->SettingsMain.CameraMode.Crosshair;
+#ifdef EXPERIMENTAL_FEATURE	
+	SettingsMainStruct::CameraModeStruct* CameraMode = &TheSettingManager->Config->CameraMode;
+	UInt8 Crosshair = TheSettingManager->Config->CameraMode.Crosshair;
+#endif
 	UInt8 DisableFading = Player->DisableFading;
 	UInt8 SitSleepState = Player->GetSitSleepState();
 
 	if (SitSleepState >= HighProcess::kSitSleep_SleepingIn && SitSleepState <= HighProcess::kSitSleep_SleepingOut) Player->DisableFading = 1;
+#ifdef EXPERIMENTAL_FEATURE	
+
 	if (!TheCameraManager->IsFirstPerson()) {
 		CameraChasing = !CameraMode->ChasingThird;
 	}
@@ -42,8 +45,11 @@ void __fastcall UpdateCameraCollisionsHook(PlayerCharacter* This, UInt32 edx, Ni
 		Player->DisableFading = 1;
 		CameraChasing = !CameraMode->ChasingFirst;
 	}
+#endif
 	(*UpdateCameraCollisions)(This, CameraPosition, PlayerPosition, CameraChasing);
 	Player->DisableFading = DisableFading;
+#ifdef EXPERIMENTAL_FEATURE	
+
 	if (Crosshair == 0) {
 		if (!TheCameraManager->IsFirstPerson()) InterfaceManager->SetCrosshair(0); else InterfaceManager->SetCrosshair(1);
 	}
@@ -58,7 +64,7 @@ void __fastcall UpdateCameraCollisionsHook(PlayerCharacter* This, UInt32 edx, Ni
 				InterfaceManager->SetCrosshair(0);
 		}
 	}
-
+#endif
 }
 
 void (__thiscall* SetAimingZoom)(PlayerCharacter*, float) = (void (__thiscall*)(PlayerCharacter*, float))Hooks::SetAimingZoom;
@@ -74,7 +80,9 @@ void __fastcall SetAimingZoomHook(PlayerCharacter* This, UInt32 edx, float Arg1)
 static void UpdateCamera(NiAVObject* CameraNode, NiPoint3* LocalPosition) {
 	
 	PlayerCharacterEx* PlayerEx = (PlayerCharacterEx*)Player;
-	SettingsMainStruct::CameraModeStruct* CameraMode = &TheSettingManager->SettingsMain.CameraMode;
+#ifdef EXPERIMENTAL_FEATURE	
+	SettingsMainStruct::CameraModeStruct* CameraMode = &TheSettingManager->Config->CameraMode;
+#endif
 	NiMatrix33* CameraRotation = &CameraNode->m_localTransform.rot;
 	NiPoint3* CameraPosition = &CameraNode->m_localTransform.pos;
 	UInt8 SitSleepState = Player->GetSitSleepState();
@@ -125,7 +133,11 @@ static void UpdateCamera(NiAVObject* CameraNode, NiPoint3* LocalPosition) {
 	}
 	else if (InterfaceManager->IsActive(Menu::MenuType::kMenuType_Dialog) || InterfaceManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) {
 		HighProcess* DialogTargetProcess = (HighProcess*)TheCameraManager->DialogTarget->process;
+#ifdef EXPERIMENTAL_FEATURE	
 		Offset = { CameraMode->DialogOffset.z * Player->scale, CameraMode->DialogOffset.y * Player->scale, CameraMode->DialogOffset.x * Player->scale };
+#else 
+		Offset = {0 ,0 ,0};
+#endif
 		Offset = Process->animData->nHead->m_worldTransform.rot * Offset;
 		CameraPosition->x = HeadPosition->x + Offset.x;
 		CameraPosition->y = HeadPosition->y + Offset.y;
@@ -139,12 +151,16 @@ static void UpdateCamera(NiAVObject* CameraNode, NiPoint3* LocalPosition) {
 	}
 	else if (TheCameraManager->IsFirstPerson() && !TheCameraManager->IsVanity()) {
 		if (SitSleepState != HighProcess::kSitSleep_SittingIn && SitSleepState != HighProcess::kSitSleep_SittingOut) {
+#ifdef EXPERIMENTAL_FEATURE	
 			Offset = { CameraMode->Offset.z * Player->scale, CameraMode->Offset.y * Player->scale, CameraMode->Offset.x * Player->scale };
 			if (Player->IsAiming() && Player->ActorSkinInfo->WeaponForm->weaponType == TESObjectWEAP::WeaponType::kWeapType_Bow) {
 				Offset.x = CameraMode->AimingOffset.z * Player->scale;
 				Offset.y = CameraMode->AimingOffset.y * Player->scale;
 				Offset.z = CameraMode->AimingOffset.x * Player->scale;
 			}
+#else
+			Offset = { 0 };
+#endif
 			Offset = Process->animData->nHead->m_worldTransform.rot * Offset;
 			CameraPosition->x = HeadPosition->x + Offset.x;
 			CameraPosition->y = HeadPosition->y + Offset.y;

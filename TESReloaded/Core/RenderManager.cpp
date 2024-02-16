@@ -234,7 +234,7 @@ void RenderManager::Initialize() {
 		Logger::Log("NVIDIA detected: NVAPI supported.");
 	else
 		Logger::Log("ERROR: Cannot initialize the render manager. Graphics device not supported.");
-	if (TheSettingManager->SettingsMain.Main.AnisotropicFilter >= 2) device->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, TheSettingManager->SettingsMain.Main.AnisotropicFilter);
+	if (TheSettingManager->Config->Main.AnisotropicFilter >= 2) device->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, TheSettingManager->Config->Main.AnisotropicFilter);
 	BackBuffer = CreateHDRRenderTarget();
 }
 
@@ -314,7 +314,7 @@ void RenderManager::ResolveDepthBuffer() {
 }
 
 void RenderManager::CheckAndTakeScreenShot(IDirect3DSurface9* RenderTarget){
-	if (Global->OnKeyDown(TheSettingManager->SettingsMain.Main.ScreenshotKey)) {
+	if (Global->OnKeyDown(TheSettingManager->Config->Main.ScreenshotKey)) {
 		char Filename[MAX_PATH];
 		char Name[80];
 		time_t CurrentTime = time(NULL);
@@ -423,7 +423,7 @@ DWNode* DWNode::Get() {
 
 }
 
-void DWNode::AddNode(char* Name, NiAVObject* Child0, NiAVObject* Child1) {
+void DWNode::AddNode(const char* Name, NiAVObject* Child0, NiAVObject* Child1) {
 
 	NiNode* Node = (NiNode*)Pointers::Functions::MemoryAlloc(sizeof(NiNode)); Node->New(2);
 

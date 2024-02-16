@@ -3,13 +3,15 @@
 void (__thiscall* Render)(Main*, BSRenderedTexture*) = (void (__thiscall*)(Main*, BSRenderedTexture*))Hooks::Render;
 void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* RenderedTexture) {
 	
-	SettingsMainStruct* SettingsMain = &TheSettingManager->SettingsMain;
+	ffi::Config* SettingsMain = TheSettingManager->Config;
 	
 	TheFrameRateManager->UpdatePerformance();
 	TheCameraManager->SetSceneGraph();
 	TheShaderManager->UpdateConstants();
+#ifdef EXPERIMENTAL_FEATURE 
 	if (SettingsMain->CullingProcess.EnableCulling) TheOcclusionManager->ManageDistantStatic();
 	if (SettingsMain->OcclusionCulling.Enabled) TheOcclusionManager->PerformOcclusionCulling();
+#endif
 	if(TheRenderManager->BackBuffer) TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->defaultRTGroup->RenderTargets[1]->data->Surface;
 	if (SettingsMain->Develop.TraceShaders && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None) && Global->OnKeyDown(SettingsMain->Develop.TraceShaders) && DWNode::Get() == NULL) DWNode::Create();
 	(*Render)(This, RenderedTexture);
@@ -40,7 +42,7 @@ void __fastcall WaterHeightMapRenderHook(WaterShaderHeightMap* This, UInt32 edx,
 	NiRenderTargetGroup* TargetGroup = NULL;
 	NiViewport Viewport = { 0.0f, 1.0f, 1.0f, 0.0f };
 	
-	if (TheSettingManager->SettingsMain.Shaders.Water) { //TODO separate option. Currently the LOD and the Near water have a noticeable seam when coming closer with tfc. Lava LOD is darker then near Lava
+	if (TheSettingManager->Config->Shaders.Water) { //TODO separate option. Currently the LOD and the Near water have a noticeable seam when coming closer with tfc. Lava LOD is darker then near Lava
 		ShaderHeightMap->Unk090 = 1.0f;
 		ShaderHeightMap->Unk094 = 1.0f;
 		ShaderHeightMap->Unk098 = 0.5f / 256.0f;
@@ -63,7 +65,7 @@ float __fastcall FarPlaneHook(SceneGraph* This, UInt32 edx) {
 	
 	float r = (*FarPlane)(This);
 
-	if (TheSettingManager->SettingsMain.Main.FarPlaneDistance && r == 283840.0f) r = TheSettingManager->SettingsMain.Main.FarPlaneDistance;
+	if (TheSettingManager->Config->Main.FarPlaneDistance && r == 283840.0f) r = TheSettingManager->Config->Main.FarPlaneDistance;
 	return r;
 
 }
@@ -85,7 +87,7 @@ UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiGeometry
         /*This was 1.0. This code is supposed to make the shader render the fog color on objects, however it lack depth, causing a "washed out" effect. 
          Also not all shaders consider this Toggle, so there are only some objects that are rnedered that way.
 		 Using 0 it render the normal (non-fog) color, and in case use the volumetric fog shader to render the fog effect. */
-		if(TheSettingManager->SettingsMain.Main.SkipFog) Toggles->y = 0.0f; 
+		if(TheSettingManager->Config->Main.RemoveFogPass) Toggles->y = 0.0f; 
 		if (DWNode::Get()) {
 			char Name[256];
 			sprintf(Name, "Pass %i %s, %s (%s %s)", PassIndex, Pointers::Functions::GetPassDescription(PassIndex), Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
@@ -119,7 +121,7 @@ HRESULT __fastcall SetSamplerStateHook(NiDX9RenderState* This, UInt32 edx, UInt3
 	UInt16* TypeMap = (UInt16*)0x00B427B0;
 	HRESULT r = D3D_OK;
 
-	if (TheSettingManager->SettingsMain.Main.AnisotropicFilter >= 2) {
+	if (TheSettingManager->Config->Main.AnisotropicFilter >= 2) {
 		if (Type == D3DSAMP_MAGFILTER) {
 			if (Value != D3DTEXF_NONE && Value != D3DTEXF_POINT) Value = D3DTEXF_LINEAR;
 		}
@@ -164,13 +166,14 @@ void __fastcall WaterCullingProcessHook(TESWaterCullingProcess* This, UInt32 edx
 	NiPoint2 BoundSize;
 	float BoundBox = 0.0f;
 	void* VFT = *(void**)Object;
-	
-	if (VFT == Pointers::VirtualTables::BSFadeNode && TheSettingManager->SettingsMain.CullingProcess.EnableReflectionCulling) {
+#ifdef EXPERIMENTAL_FEATURE	
+	if (VFT == Pointers::VirtualTables::BSFadeNode && TheSettingManager->Config->CullingProcess.EnableReflectionCulling) {
 		NiBound* Bound = Object->GetWorldBound();
 		TheRenderManager->GetScreenSpaceBoundSize(&BoundSize, Bound);
 		BoundBox = (BoundSize.x * 100.f) * (BoundSize.y * 100.0f);
-		if (BoundBox < TheSettingManager->SettingsMain.CullingProcess.CullMinSizeReflection || Object->m_worldTransform.pos.z + Bound->Radius < TheShaderManager->ShaderConst.Water.waterSettings.x) return;
+		if (BoundBox < TheSettingManager->Config->CullingProcess.CullMinSizeReflection || Object->m_worldTransform.pos.z + Bound->Radius < TheShaderManager->ShaderConst.Water.waterSettings.x) return;
 	}
+#endif
 	(*WaterCullingProcess)(This, Object);
 
 }
@@ -189,9 +192,11 @@ NiPixelData* __cdecl SaveGameScreenshotHook(int* pWidth, int* pHeight) {
 
 void (__cdecl* RenderObject)(NiCamera*, NiNode*, NiCullingProcess*, NiVisibleArray*) = (void (__cdecl*)(NiCamera*, NiNode*, NiCullingProcess*, NiVisibleArray*))Hooks::RenderObject;
 void __cdecl RenderObjectHook(NiCamera* Camera, NiNode* Object, NiCullingProcess* CullingProcess, NiVisibleArray* VisibleArray) {
-	
-	bool CameraMode = TheSettingManager->SettingsMain.CameraMode.Enabled;
-
+#ifdef EXPERIMENTAL_FEATURE	
+	bool CameraMode = TheSettingManager->Config->CameraMode.Enabled;
+#else
+	bool CameraMode = false;
+#endif
 	RenderObject(Camera, Object, CullingProcess, VisibleArray);
 	if (Object == WorldSceneGraph && (CameraMode || !TheCameraManager->IsFirstPerson())) {
 		TheRenderManager->ResolveDepthBuffer();
@@ -249,8 +254,8 @@ __declspec(naked) void SkipFogPassHook() {
 
 }
 
-void* (__thiscall* ShowDetectorWindow)(DetectorWindow*, HWND, HINSTANCE, NiNode*, char*, int, int, int, int) = (void* (__thiscall*)(DetectorWindow*, HWND, HINSTANCE, NiNode*, char*, int, int, int, int))::Hooks::ShowDetectorWindow;
-void* __fastcall ShowDetectorWindowHook(DetectorWindow* This, UInt32 edx, HWND Handle, HINSTANCE Instance, NiNode* RootNode, char* FormCaption, int X, int Y, int Width, int Height) {
+void* (__thiscall* ShowDetectorWindow)(DetectorWindow*, HWND, HINSTANCE, NiNode*, const char*, int, int, int, int) = (void* (__thiscall*)(DetectorWindow*, HWND, HINSTANCE, NiNode*, const char*, int, int, int, int))::Hooks::ShowDetectorWindow;
+void* __fastcall ShowDetectorWindowHook(DetectorWindow* This, UInt32 edx, HWND Handle, HINSTANCE Instance, NiNode* RootNode, const char* FormCaption, int X, int Y, int Width, int Height) {
 	
 	NiAVObject* Object = NULL;
 	void* r = NULL;

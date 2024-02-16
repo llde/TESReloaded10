@@ -14,7 +14,7 @@ __declspec(naked) void RenderShadowMapHook() {
 
 static void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* LightPoint) {
 	
-	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
+	ffi::ShadowsInteriorStruct *ShadowsInteriors = &TheSettingManager->Config->ShadowsInterior;
 
 	if (Light->lightFlags & TESObjectLIGH::LightFlags::kLightFlags_CanCarry) {
 		LightPoint->CastShadows = ShadowsInteriors->TorchesCastShadows;

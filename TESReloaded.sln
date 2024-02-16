@@ -1,6 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.32106.194
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -23,7 +22,6 @@ Global
 		{D4DDA734-7E93-4581-8F82-32BB738F69FE}.Debug|x86.ActiveCfg = Debug|Win32
 		{D4DDA734-7E93-4581-8F82-32BB738F69FE}.Release|x86.ActiveCfg = Release|Win32
 		{202EAF20-2D42-4CBC-9E44-A9677A70B586}.Debug|x86.ActiveCfg = Debug|Win32
-		{202EAF20-2D42-4CBC-9E44-A9677A70B586}.Debug|x86.Build.0 = Debug|Win32
 		{202EAF20-2D42-4CBC-9E44-A9677A70B586}.Release|x86.ActiveCfg = Release|Win32
 		{202EAF20-2D42-4CBC-9E44-A9677A70B586}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection

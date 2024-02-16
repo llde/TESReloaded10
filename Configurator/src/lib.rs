@@ -1,13 +1,15 @@
-#![feature(vec_into_raw_parts)]
+#![feature(vec_into_raw_parts,const_trait_impl)]
 
 extern crate  memchr;
 extern crate alloc;
+extern crate winapi;
 
 pub mod sys_string;
 pub mod main_config;
 pub mod effect_config;
 pub mod shader_config;
 pub mod cfile;
+pub mod menu;
 
 use std::ffi::{CString, CStr};
 use std::ffi::c_char;
@@ -19,17 +21,24 @@ use std::io;
 use std::{fs, ptr};
 use std::io::{Read, Write};
 use cfile::CFile;
+use menu::CreateFontRender;
 use sys_string::SysString;
 use std::os::windows::ffi::OsStringExt;
 use std::slice::from_raw_parts;
 use serde::{Serialize,Deserialize};
 use toml::de::Deserializer;
+use toml::Table;
+
 use serde_deserialize_over::DeserializeOver;
+
+use winapi::shared::d3d9::LPDIRECT3DDEVICE9;
 
 use crate::ConfigurationError::{Deserialization, FileError};
 use crate::main_config::Config;
 use crate::effect_config::Effects;
 use crate::shader_config::Shaders;
+use crate::menu::MENU_STATE;
+use crate::menu::MenuMove;
 
 #[derive(Debug)]
 pub enum ConfigurationError{
@@ -41,6 +50,11 @@ pub enum ConfigurationError{
 pub static mut CONFIG : Option<Config> = None;
 pub static mut EFFECTS : Option<Effects> = None;
 pub static mut SHADERS : Option<Shaders> = None;
+
+pub static mut CONFIG_TABLE : Option<Table> = None;
+pub static mut SHADERS_TABLE : Option<Table> = None;
+pub static mut EFFECTS_TABLE : Option<Table> = None;
+
 
 pub static mut LOGGER : Option<CFile> = None;
 
@@ -109,7 +123,9 @@ pub extern "C" fn getConfiguration() -> *mut Config {
 	unsafe{
 		match CONFIG.as_mut() {
 			None => ptr::null_mut(),
-			Some(mutref) => mutref as *mut Config
+			Some(mutref) => {
+				mutref as *mut Config
+			}
 		}
 	}
 }
@@ -129,7 +145,9 @@ pub extern "C" fn getShadersConfiguration() -> *mut Shaders {
 	unsafe{
 		match SHADERS.as_mut() {
 			None => ptr::null_mut(),
-			Some(mutref) => mutref as *mut Shaders
+			Some(mutref) => 
+				mutref as *mut Shaders
+				
 		}
 	}
 }
@@ -183,26 +201,99 @@ pub fn load_config<'a, P : AsRef<Path>, C> (path : P) -> C where C : Deserialize
 pub extern "C" fn LoadConfiguration() -> (){
 	let path_main = "./Data/OBSE/Plugins/OblivionReloaded.ini";
 	let path_effect = "./Data/Shaders/OblivionReloaded/Effects/Effects.ini";
-	let path_shader = "./Data/Shaders/OblivionReloaded/Effects/Shaders.ini";	
+	let path_shader = "./Data/Shaders/OblivionReloaded/Shaders/Shaders.ini";	
 	let config : Config = load_config(path_main);
 	let effects : Effects = load_config(path_effect);
 	let shaders : Shaders = load_config(path_shader);
+	let config_table = Table::try_from(&config).unwrap();
+	let shader_table = Table::try_from(&shaders).unwrap();
+	let effect_table = Table::try_from(&effects).unwrap();
 
 	unsafe{
 		CONFIG.replace(config);
 		EFFECTS.replace(effects);
 		SHADERS.replace(shaders);
+		CONFIG_TABLE.replace(config_table);
+		SHADERS_TABLE.replace(shader_table);
+		EFFECTS_TABLE.replace(effect_table);
 	}
+
 	log("Configuration File Loaded");
 }
 
 
+#[no_mangle]
+pub extern "C" fn CreateFontRenderer(device: LPDIRECT3DDEVICE9){
+	CreateFontRender(device);
+}
+
+#[no_mangle]
+pub extern "C" fn WriteVersionString(width: i32, height : i32, string : *const i8){
+	menu::WriteVersionString(width, height, string);
+}
+
+#[no_mangle]
+pub extern "C" fn RenderConfigurationMenu(width: i32, height : i32){ menu::RenderMenu(width, height );}
+
+#[no_mangle]
+pub extern "C" fn MoveActiveNode(mov : MoveCursor){
+	let moveconv = match mov {
+		MoveCursor::Up => MenuMove::Up,
+		MoveCursor::Down => MenuMove::Down,
+		MoveCursor::Left => MenuMove::Left,
+		MoveCursor::Right => MenuMove::Right
+	};
+	unsafe {
+		MENU_STATE.move_menu_active_field(moveconv);
+	}
+}
+
+#[no_mangle]
+pub extern "C" fn EditActiveSetting(mov : menu::OperationSetting, callback: unsafe extern "C" fn(*const libc::c_char)){
+	match menu::ChangeCurrentSetting(mov){
+		Some(ref field_modified) => {
+			let switch = CString::new(field_modified.to_owned()).unwrap();
+			unsafe {
+				callback(switch.as_ptr());
+			}
+		},
+		None => {}
+	}
+}
+
+#[no_mangle]
+pub extern "C" fn SaveConfigurations(){
+	let path_main = "./Data/OBSE/Plugins/OblivionReloaded.ini";
+	let path_effect = "./Data/Shaders/OblivionReloaded/Effects/Effects.ini";
+	let path_shader = "./Data/Shaders/OblivionReloaded/Shaders/Shaders.ini";	
+	unsafe{
+		write_config_to_file(CONFIG, path_main);
+		write_config_to_file(SHADERS, path_shader);
+		write_config_to_file(EFFECTS, path_effect);
+	}
+}
+
+#[no_mangle]
+pub extern  "C" fn EnterEditorMode(){
+	
+}
+
+#[no_mangle]
+pub extern "C" fn IsEditorMode() {
+	
+}
 
 #[repr(C)]
 #[derive(Debug)]
 pub enum Errors {
 	None,
 	InvalidLog
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub enum MoveCursor{
+	Up,Down,Left,Right
 }
 
 #[no_mangle]

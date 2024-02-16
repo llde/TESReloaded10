@@ -65,6 +65,9 @@
     <ClInclude Include="..\TESReloaded\Core\SettingManager.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\SettingStructure.h">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\ShaderManager.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -202,6 +205,9 @@
     </ClInclude>
     <ClInclude Include="..\TESReloaded\Core\Hooks\SleepingCommon.h">
       <Filter>Core\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\SettingsStructureCommon.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,13 +1,13 @@
 #define DEBUGOC 0
 
 void OcclusionManager::Initialize() {
-	
 	Logger::Log("Starting the occlusion manager...");
 	TheOcclusionManager = new OcclusionManager();
-	
+#ifdef EXPERIMENTAL_FEATURE	
+
 	IDirect3DDevice9* Device = TheRenderManager->device;
-	UINT OcclusionMapSizeX = TheRenderManager->width / TheSettingManager->SettingsMain.OcclusionCulling.OcclusionMapRatio;
-	UINT OcclusionMapSizeY = TheRenderManager->height / TheSettingManager->SettingsMain.OcclusionCulling.OcclusionMapRatio;
+	UINT OcclusionMapSizeX = TheRenderManager->width / TheSettingManager->Config->OcclusionCulling.OcclusionMapRatio;
+	UINT OcclusionMapSizeY = TheRenderManager->height / TheSettingManager->Config->OcclusionCulling.OcclusionMapRatio;
 #if !DEBUGOC	
 	char* VertexShaderName = "OcclusionMap.vso";
 	char* PixelShaderName = "OcclusionMap.pso";
@@ -27,9 +27,8 @@ void OcclusionManager::Initialize() {
 	TheOcclusionManager->OcclusionMapTexture->GetSurfaceLevel(0, &TheOcclusionManager->OcclusionMapSurface);
 	Device->CreateDepthStencilSurface(OcclusionMapSizeX, OcclusionMapSizeY, D3DFMT_D16, D3DMULTISAMPLE_NONE, 0, true, &TheOcclusionManager->OcclusionMapDepthSurface, NULL);
 	TheOcclusionManager->OcclusionMapViewPort = { 0, 0, OcclusionMapSizeX, OcclusionMapSizeY, 0.0f, 1.0f };
-
+#endif
 }
-
 bool OcclusionManager::InFrustum(NiNode* Node) {
 	
 	NiCullingProcess* Process = WorldSceneGraph->cullingProcess;
@@ -53,7 +52,7 @@ bool OcclusionManager::InFrustum(NiNode* Node) {
 	return Result;
 
 }
-
+#ifdef EXPERIMENTAL_FEATURE
 TESObjectREFR* OcclusionManager::GetRef(TESObjectREFR* Ref) {
 	
 	TESObjectREFR* R = NULL;
@@ -209,7 +208,7 @@ void OcclusionManager::Render(NiGeometry* Geo) {
 
 	TheRenderManager->CreateD3DMatrix(&WorldMatrix, &Geo->m_worldTransform);
 	D3DXMatrixMultiplyTranspose(&TheShaderManager->ShaderConst.OcclusionMap.OcclusionWorldViewProj, &WorldMatrix, &TheRenderManager->ViewProjMatrix);
-	if (TheSettingManager->SettingsMain.Develop.DebugMode) {
+	if (TheSettingManager->Config->Develop.DebugMode) {
 		BSShaderProperty* ShaderProperty = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
 		if (ShaderProperty) {
 			if (ShaderProperty->IsLightingProperty()) {
@@ -271,7 +270,7 @@ void OcclusionManager::ManageDistantStatic(NiAVObject* Object, float MaxBoundSiz
 			}
 		}
 		else if (VFT == Pointers::VirtualTables::BSFadeNode) {
-			if (!TheSettingManager->SettingsMain.OcclusionCulling.OccludedDistantStaticIC && !memcmp(Object->m_pcName + 18, "ImperialCity", 12)) return;
+			if (!TheSettingManager->Config->OcclusionCulling.OccludedDistantStaticIC && !memcmp(Object->m_pcName + 18, "ImperialCity", 12)) return;
 			NiBound* Bound = Object->GetWorldBound();
 			TheRenderManager->GetScreenSpaceBoundSize(&BoundSize, Bound);
 			BoundBox = (BoundSize.x * 100.f) * (BoundSize.y * 100.0f);
@@ -285,7 +284,7 @@ void OcclusionManager::ManageDistantStatic(NiAVObject* Object, float MaxBoundSiz
 }
 void OcclusionManager::ManageDistantStatic() {
 	NiNode* DistantRefLOD = *(NiNode**)0x00B34424;
-	SettingsMainStruct::CullingProcessStruct* CullingProcess = &TheSettingManager->SettingsMain.CullingProcess;
+	SettingsMainStruct::CullingProcessStruct* CullingProcess = &TheSettingManager->Config->CullingProcess;
 	if (Player->GetWorldSpace() && !Player->isMovingToNewSpace && DistantRefLOD) {
 		for (int i = 1; i < DistantRefLOD->m_children.end; i++) {
 			NiNode* ChildNode = (NiNode*)DistantRefLOD->m_children.data[i];
@@ -314,8 +313,8 @@ void OcclusionManager::RenderDistantStatic(NiAVObject* Object) {
 
 }
 
-void OcclusionManager::RenderOcclusionMap(SettingsMainStruct::OcclusionCullingStruct* OcclusionCulling) {
-	
+void OcclusionManager::RenderOcclusionMap(ffi::ShadowsExteriorStruct* OcclusionCulling) {
+#ifdef EXPERIMENTAL_FEATURE
 	NiNode* WaterRoot = *(NiNode**)0x00B35230;
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
@@ -359,7 +358,7 @@ void OcclusionManager::RenderOcclusionMap(SettingsMainStruct::OcclusionCullingSt
 		}
 	}
 
-	if (TheSettingManager->SettingsMain.Develop.DebugMode) {
+	if (TheSettingManager->config->Develop.DebugMode) {
 		NiNode* DistantRefLOD = *(NiNode**)0x00B34424;
 		for (int i = 1; i < DistantRefLOD->m_children.end; i++) {
 			NiNode* ChildNode = (NiNode*)DistantRefLOD->m_children.data[i];
@@ -388,18 +387,18 @@ void OcclusionManager::RenderOcclusionMap(SettingsMainStruct::OcclusionCullingSt
 		}
 	}
 
-	if (TheSettingManager->SettingsMain.Develop.DebugMode) {
+	if (TheSettingManager->config->Develop.DebugMode) {
 		RenderState->SetRenderState(D3DRS_COLORWRITEENABLE, D3DZB_TRUE, RenderStateArgs);
 	}
 	Device->EndScene();
-
+#endif
 }
 
 void OcclusionManager::PerformOcclusionCulling() {
-	
+#ifdef EXPERIMENTAL_FEATURE
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	IDirect3DSurface9* DepthSurface = NULL;
-	SettingsMainStruct::OcclusionCullingStruct* OcclusionCulling = &TheSettingManager->SettingsMain.OcclusionCulling;
+	SettingsMainStruct::OcclusionCullingStruct* OcclusionCulling = &TheSettingManager->Config->OcclusionCulling;
 
 	if (Player->GetWorldSpace() && !Player->isMovingToNewSpace) {
 		Device->GetDepthStencilSurface(&DepthSurface);
@@ -408,7 +407,10 @@ void OcclusionManager::PerformOcclusionCulling() {
 		Device->SetDepthStencilSurface(DepthSurface);
 	}
 
-	if (TheSettingManager->SettingsMain.Develop.DebugMode) {
+	if (TheSettingManager->config->Develop.DebugMode) {
 		if (Global->OnKeyDown(26)) D3DXSaveSurfaceToFileA(".\\Test\\occlusionmap.jpg", D3DXIFF_JPG, OcclusionMapSurface, NULL, NULL);
 	}
+#endif
 }
+
+#endif

@@ -187,7 +187,8 @@ int __fastcall ProcessActionHook(Character* This, UInt32 edx, float Arg1, float 
 				}
 			}
 		}
-		if (This == Player && LightData && Process->OnBackState == HighProcessEx::State::In && Global->OnKeyDown(TheSettingManager->SettingsMain.EquipmentMode.TorchKey)) {
+#ifdef EXPERIMENTAL_FEATURE
+		if (This == Player && LightData && Process->OnBackState == HighProcessEx::State::In && Global->OnKeyDown(TheSettingManager->Config->EquipmentMode.TorchKey)) {
 			NiNode* BeltNode = (NiNode*)This->niNode->GetObjectByName(BeltNodeName);
 			NiNode* TorchNode = This->ActorSkinInfo->TorchNode;
 			NiAVObject* Object = NULL;
@@ -230,6 +231,7 @@ int __fastcall ProcessActionHook(Character* This, UInt32 edx, float Arg1, float 
 				Process->OnBeltState = HighProcessEx::State::In;
 			}
 		}
+#endif
 	}
 	return (*ProcessAction)(This, Arg1, Arg2);
 
@@ -247,15 +249,19 @@ UInt8 __fastcall ProcessControlAttackHook(PlayerCharacter* This, UInt32 edx) {
 				TheEquipmentManager->LeftTime = 0.0f;
 			else
 				TheEquipmentManager->LeftTime += TheFrameRateManager->ElapsedTime;
-			if (TheEquipmentManager->LeftTime < TheSettingManager->SettingsMain.EquipmentMode.DualBlockDelay) Global->SetControlState(6, 0, 0);
+#ifdef EXPERIMENTAL_FEATURE
+			if (TheEquipmentManager->LeftTime < TheSettingManager->Config->EquipmentMode.DualBlockDelay) Global->SetControlState(6, 0, 0);
+#endif
 		}
 		else if (TheEquipmentManager->LeftTime >= 0.0f) {
-			if (TheEquipmentManager->LeftTime < TheSettingManager->SettingsMain.EquipmentMode.DualBlockDelay) {
+#ifdef EXPERIMENTAL_FEATURE
+			if (TheEquipmentManager->LeftTime < TheSettingManager->Config->EquipmentMode.DualBlockDelay) {
 				TheEquipmentManager->SetAnimGroup(Process, 20, 2, "Characters\\_Male\\OnehandAttackLeft_OR_dual_left.kf");
 				TheEquipmentManager->SetAnimGroup(Process, 21, 2, "Characters\\_Male\\OnehandAttackRight_OR_dual_left.kf");
 				Process->LeftAnimState = HighProcessEx::State::In;
 				Global->SetControlState(4, 0x80, 0);
 			}
+#endif
 			TheEquipmentManager->LeftTime = -1.0f;
 		}
 	}

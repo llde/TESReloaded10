@@ -48,13 +48,16 @@ static void DoubleTap(UInt16 PressedDirection) {
 				DoubleTapTime = -1.0f;
 			}
 		}
-		if (DoubleTapTime > TheSettingManager->SettingsMain.Dodge.DoubleTapTime) {
+#ifdef EXPERIMENTAL_FEATURE
+		if (DoubleTapTime > TheSettingManager->Config->Dodge.DoubleTapTime) {
 			DoubleTapStep = 0;
 			DoubleTapTime = -1.0f;
 		}
+#endif
 	}
 	else if (DoubleTapTime >= 0.0f) {
-		if (DoubleTapTime < TheSettingManager->SettingsMain.Dodge.DoubleTapTime) {
+#ifdef EXPERIMENTAL_FEATURE
+		if (DoubleTapTime < TheSettingManager->Config->Dodge.DoubleTapTime) {
 			DoubleTapTime += TheFrameRateManager->ElapsedTime;
 			if (DoubleTapStep == 0) DoubleTapStep = 1;
 		}
@@ -62,6 +65,7 @@ static void DoubleTap(UInt16 PressedDirection) {
 			DoubleTapTime = -1.0f;
 			DoubleTapStep = 0;
 		}
+#endif
 	}
 
 }
@@ -73,6 +77,7 @@ __declspec(naked) void DoubleTapHook() {
 		pushad
 		mov		eax, [esp + 0x34]
 		push	eax
+		call	DoubleTap
 		call	DoubleTap
 		add		esp, 4
 		popad

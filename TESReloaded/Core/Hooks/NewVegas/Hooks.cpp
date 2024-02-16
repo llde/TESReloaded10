@@ -27,6 +27,7 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)SetShaders,					&SetShadersHook);
 	DetourAttach(&(PVOID&)SetSamplerState,				&SetSamplerStateHook);
 	DetourAttach(&(PVOID&)RenderReflections,			&RenderReflectionsHook);
+	DetourAttach(&(PVOID&)WaterManager_4E8EC0,			&WaterManager_4E8EC0Hook);
 	DetourAttach(&(PVOID&)RenderPipboy,					&RenderPipboyHook);
 	DetourAttach(&(PVOID&)ShowDetectorWindow,			&ShowDetectorWindowHook);
 	DetourAttach(&(PVOID&)LoadForm,						&LoadFormHook);

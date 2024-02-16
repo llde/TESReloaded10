@@ -3585,7 +3585,7 @@ public:
 		UInt8			pad1B;		// 1B
 	};
 	
-	Tile::Value* Tile::GetValueByType(UInt32 valueType) {
+	Tile::Value* GetValueByType(UInt32 valueType) {
 
 		for (NiTList<Value>::Entry* node = valueList.start; node; node = node->next) {
 			if (node->data && node->data->id == valueType) return node->data;
@@ -3594,7 +3594,7 @@ public:
 
 	}
 
-	bool Tile::GetFloatValue(UInt32 valueType, float* out) {
+	bool GetFloatValue(UInt32 valueType, float* out) {
 
 		Value* val = GetValueByType(valueType);
 

@@ -298,16 +298,17 @@ void CommandManager::PluginCommands::GetWeatherName(double* result) {
 }
 
 void CommandManager::PluginCommands::GetSetting(double* result, const char* Section, const char* Key) {
-
+#ifdef EXPERIMENTAL_FEATURE
 	*result = TheSettingManager->GetSettingF(Section, Key);
-
+#endif
 }
 
 void CommandManager::PluginCommands::SetSetting(double* result, const char* Section, const char* Key, float Value) {
-	
+#ifdef EXPERIMENTAL_FEATURE
+
 	TheSettingManager->SetSetting(Section, Key, Value);
 	*result = 1; 
-
+#endif
 }
 
 void CommandManager::PluginCommands::CameraTranslate(double* result, TESObjectREFR* Ref, NiPoint3* Value) {

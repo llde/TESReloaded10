@@ -11,9 +11,11 @@ crate-type = ["cdylib"]
 [dependencies]
 serde = { version = "*", features = ["derive"]}
 serde-deserialize-over = "*"
-toml = "*"
+toml = { version="*", features = ["preserve_order"] }
 libc = "*"
 memchr = "*"
 hex-serde-util = "*"
+once_cell = "*"
+winapi = { version = "0.3", features = ["std", "d3d9", "d3d9types", "wtypes", "wtypesbase", "winuser"] }
 [build-dependencies]
 cbindgen = "0.25.0"

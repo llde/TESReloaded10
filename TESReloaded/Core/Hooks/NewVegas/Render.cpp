@@ -69,6 +69,19 @@ void __fastcall RenderFirstPersonHook(Main* This, UInt32 edx, NiDX9Renderer* Ren
 
 }
 
+int (__thiscall* WaterManager_4E8EC0)(WaterManager*) = (int (__thiscall*)(WaterManager*)) 0x004E8EC0;
+int __fastcall WaterManager_4E8EC0Hook(WaterManager* This){
+  //  DList<WaterGroup*>* list = &This->unk3C;
+    //Logger::Log("Count %d", list->count); /*How many object can this old?*/
+    
+//    WaterGroup* wat =  list->first->data;
+ //   Logger::Log("%0X", wat);
+
+    int res = (*WaterManager_4E8EC0)(This);
+    
+    return res;
+}
+
 void (__thiscall* RenderReflections)(WaterManager*, NiCamera*, ShadowSceneNode*) = (void (__thiscall*)(WaterManager*, NiCamera*, ShadowSceneNode*))Hooks::RenderReflections;
 void __fastcall RenderReflectionsHook(WaterManager* This, UInt32 edx, NiCamera* Camera, ShadowSceneNode* SceneNode) {
 	
@@ -80,6 +93,73 @@ void __fastcall RenderReflectionsHook(WaterManager* This, UInt32 edx, NiCamera* 
 	(*RenderReflections)(This, Camera, SceneNode);
 	ShadowData->x = ShadowDataBackup;
 	if (DWNode::Get()) DWNode::AddNode("END REFLECTIONS RENDERING", NULL, NULL);
+/*    
+    DList<WaterGroup>* list = &This->unk3C;
+    Logger::Log("Count %d", list->count); /*How many object can this old?*/
+    /*
+    WaterGroup* wat =  list->first->data;
+    Logger::Log("%0X", wat);
+    WaterGroup* lod = This->waterLOD;
+    Logger::Log("WAT");
+    Logger::Log("%0X", wat->object54);
+    Logger::Log("%0X", wat->object58);
+    Logger::Log("%0X", wat->object94);
+    Logger::Log("%0X", wat->object98);
+    Logger::Log("%0X", wat->objectA4);
+    Logger::Log("%0X", wat->objectA8);
+    Logger::Log("LOD");
+    Logger::Log("%0X", lod->object54);
+    Logger::Log("%0X", lod->object58);
+    Logger::Log("%0X", lod->object94);
+    Logger::Log("%0X", lod->object98);
+    Logger::Log("%0X", lod->objectA4);
+    Logger::Log("%0X", lod->objectA8);
+
+    if(wat == NULL) return;
+    for(PropertyNode* next = wat->propertyList.first; next; next = next->next){
+        NiProperty* prop = next->data;
+        if(!prop) continue;
+        if(prop->GetPropertyType() == NiProperty::PropertyType::kType_Shade){
+            WaterShaderProperty* property = (WaterShaderProperty*)prop;
+            if(TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)){
+                if(property->reflections) D3DXSaveSurfaceToFileA(".\\Test\\reflections.jpg", D3DXIFF_JPG, property->reflections->RenderedTexture->buffer->data->Surface, NULL, NULL);
+                if(property->refractions) D3DXSaveSurfaceToFileA(".\\Test\\refractions.jpg", D3DXIFF_JPG, property->refractions->RenderedTexture->buffer->data->Surface, NULL, NULL);
+                if(property->depth) D3DXSaveSurfaceToFileA(".\\Test\\depth.jpg", D3DXIFF_JPG, property->depth->RenderedTexture->buffer->data->Surface, NULL, NULL);
+                if(property->noDepth) D3DXSaveSurfaceToFileA(".\\Test\\noDepth.jpg", D3DXIFF_JPG, property->noDepth->RenderedTexture->buffer->data->Surface, NULL, NULL);
+                if(property->noiseTexture) D3DXSaveTextureToFileA(".\\Test\\noiseTexture.jpg", D3DXIFF_JPG, property->noiseTexture->rendererData->dTexture, NULL);
+            }
+            break;
+        }
+    }
+        */
+    BSRenderedTexture** boh = (BSRenderedTexture**) 0x011C7C2C; /*BOH*/
+    if (*boh  && TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)) {
+        D3DXSaveSurfaceToFileA(".\\Test\\011C7C2C.jpg", D3DXIFF_JPG, (*boh)->RenderedTexture->buffer->data->Surface, NULL, NULL);
+
+    }
+    
+    boh = (BSRenderedTexture**) 0x011C7AD4; /*Relfections*/
+    if (*boh  && TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)) {
+        D3DXSaveSurfaceToFileA(".\\Test\\011C7AD4.jpg", D3DXIFF_JPG, (*boh)->RenderedTexture->buffer->data->Surface, NULL, NULL);
+
+    }
+    
+    boh = (BSRenderedTexture**) 0x011C7B68; /*Depth*/
+    if (*boh  && TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)) {
+        D3DXSaveSurfaceToFileA(".\\Test\\011C7B68.jpg", D3DXIFF_JPG, (*boh)->RenderedTexture->buffer->data->Surface, NULL, NULL);
+
+    }
+    boh = (BSRenderedTexture**) 0x011C7B64; /*dispalcmeent*/
+    if (*boh  && TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)) {
+        D3DXSaveSurfaceToFileA(".\\Test\\011C7B64.jpg", D3DXIFF_JPG, (*boh)->RenderedTexture->buffer->data->Surface, NULL, NULL);
+
+    }
+    
+    boh = (BSRenderedTexture**) 0x011C7B44;
+    if (*boh  && TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)) {
+        D3DXSaveSurfaceToFileA(".\\Test\\011C7B44.jpg", D3DXIFF_JPG, (*boh)->RenderedTexture->buffer->data->Surface, NULL, NULL);
+
+    }
 }
 
 void (__thiscall* RenderPipboy)(Main*, NiGeometry*, NiDX9Renderer*) = (void (__thiscall*)(Main*, NiGeometry*, NiDX9Renderer*))Hooks::RenderPipboy;
