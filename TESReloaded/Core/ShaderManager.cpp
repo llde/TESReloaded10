@@ -845,9 +845,25 @@ void ShaderManager::UpdateConstants() {
 		if (lastGameTime != ShaderConst.GameTime.y) {
 			// update Sun position
 			float deltaz = ShaderConst.SunDir.z;
-			ShaderConst.SunDir.x = Tes->directionalLight->direction.x * -1;
-			ShaderConst.SunDir.y = Tes->directionalLight->direction.y * -1;
-			ShaderConst.SunDir.z = Tes->directionalLight->direction.z * -1;
+			if (TheSettingManager->Config->Main.TestDirectionLight) {
+				NiVector4 light = { Tes->directionalLight->direction.x, Tes->directionalLight->direction.y, Tes->directionalLight->direction.z , 0.0f };
+				light.Normalize();
+				ShaderConst.SunDir.x = light.x * -1;
+				ShaderConst.SunDir.y = light.y * -1;
+				ShaderConst.SunDir.z = light.z * -1;
+			}
+			else {
+				ShaderConst.SunDir.x = SunRoot->m_localTransform.pos.x;
+				ShaderConst.SunDir.y = SunRoot->m_localTransform.pos.y;
+				ShaderConst.SunDir.z = SunRoot->m_localTransform.pos.z;
+				((NiVector4*)&ShaderConst.SunDir)->Normalize();
+				if (ShaderConst.GameTime.y > ShaderConst.SunTiming.w || ShaderConst.GameTime.y < ShaderConst.SunTiming.x)
+					ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
+				else if (ShaderConst.GameTime.y > ShaderConst.SunTiming.z && fabs(deltaz) - ShaderConst.SunDir.z <= 0.0f)
+					ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
+				else if (ShaderConst.GameTime.y < ShaderConst.SunTiming.y && fabs(deltaz) - ShaderConst.SunDir.z >= 0.0f)
+					ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
+			}
 
 			// expose the light vector in view space for screen space lighting
 			D3DXVec4Transform(&ShaderConst.ScreenSpaceLightDir, &ShaderConst.SunDir, &TheRenderManager->ViewMatrix);

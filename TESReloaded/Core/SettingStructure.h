@@ -34,6 +34,7 @@ struct MainStruct {
   uint8_t AnisotropicFilter;
   uint32_t ScreenshotKey;
   float FarPlaneDistance;
+  bool TestDirectionLight;
 };
 
 struct DevelopStruct {
