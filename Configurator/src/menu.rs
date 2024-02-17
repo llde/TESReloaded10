@@ -478,7 +478,7 @@ pub fn ChangeCurrentSetting(op : OperationSetting) -> Option<String> {
 		let tab : &mut Value = if tabled.is_table(){ tabled.as_table_mut().unwrap().get_mut(third).unwrap() } else {tabled};
 		let modified = match tab {
 		    Value::Integer(ref mut cont) => { if op == OperationSetting::Add { *cont += 1 } else { *cont -= 1 }; true},
-		    Value::Float(ref mut cont) => {if op == OperationSetting::Add { *cont += 0.01 } else { *cont -= 0.01 }; true},
+		    Value::Float(ref mut cont) => {if op == OperationSetting::Add { *cont += 0.1 } else { *cont -= 0.1 }; true},
 		    Value::Boolean(ref mut cont) => { *cont = !*cont; true },
 		    _ => {false},
 		};

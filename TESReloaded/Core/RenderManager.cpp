@@ -328,9 +328,13 @@ void RenderManager::CheckAndTakeScreenShot(IDirect3DSurface9* RenderTarget){
 		D3DXSaveSurfaceToFileA(Filename, D3DXIFF_JPG, RenderTarget, NULL, NULL);
 		InterfaceManager->ShowMessage("Screenshot taken!");
 	}
-/*	if (Global->OnKeyDown(0x17)) {
+	if (Global->OnKeyDown(0x17) && TheSettingManager->Config->Develop.DebugMode) {
 		char Filename[MAX_PATH];
 		char Filename2[MAX_PATH];
+		char Filename3[MAX_PATH];
+		char Filename4[MAX_PATH];
+		char Filename5[MAX_PATH];
+		char Filename6[MAX_PATH];
 
 		char Name[80];
 		time_t CurrentTime = time(NULL);
@@ -341,13 +345,14 @@ void RenderManager::CheckAndTakeScreenShot(IDirect3DSurface9* RenderTarget){
 		strftime(Name, 80, "\\%Y%m%d %H.%M.%S", localtime(&CurrentTime));
 		strcat(Filename, Name);
         strcpy(Filename2, Filename);
+
 		strcat(Filename,  "D.jpg");
 		strcat(Filename2, "R.jpg");
-        Logger::Log("%s   %s", Filename, Filename2);
-		D3DXSaveTextureToFileA(Filename, D3DXIFF_JPG, TheTextureManager->BaseHeightMapB, NULL);
+		D3DXSaveTextureToFileA(Filename, D3DXIFF_JPG, TheTextureManager->WaterHeightMapB, NULL);
 		D3DXSaveTextureToFileA(Filename2, D3DXIFF_JPG, TheTextureManager->WaterReflectionMapB, NULL);
+
 		InterfaceManager->ShowMessage("Textures taken!");
-	} */
+	}
 
 }
 

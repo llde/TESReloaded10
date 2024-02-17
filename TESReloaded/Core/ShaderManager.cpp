@@ -329,7 +329,7 @@ ShaderRecord* ShaderRecord::LoadShader(const char* Name, const char* SubPath) {
 				Function = Shader->GetBufferPointer();
 				FileBinary.read((char*)Function, Size);
 				FileBinary.close();
-				D3DXGetShaderConstantTable((const DWORD*)Function, &ConstantTable);
+				D3DXGetShaderConstantTableEx((const DWORD*)Function, D3DXCONSTTABLE_LARGEADDRESSAWARE,&ConstantTable);
 			}
 			else {
 				Logger::Log("ERROR: Shader %s not found. Try to enable the CompileShader option to recompile the shaders.", FileNameBinary);
@@ -416,9 +416,11 @@ void ShaderRecord::SetCT() {
 	if (HasDepthBuffer) TheRenderManager->ResolveDepthBuffer();
 	for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
 		Value = &TextureShaderValues[c];
-		if (Value->Texture->Texture) TheRenderManager->renderState->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
-		for (int i = 1; i < SamplerStatesMax; i++) {
-			TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
+		if (Value->Texture->Texture) {
+			TheRenderManager->renderState->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
+			for (int i = 1; i < SamplerStatesMax; i++) {
+				TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
+			}
 		}
 	}
 	for (UInt32 c = 0; c < FloatShaderValuesCount; c++) {
@@ -490,6 +492,8 @@ void EffectRecord::DisposeEffect(){
 	FloatShaderValues = nullptr;
 	if (TextureShaderValues) free(TextureShaderValues);
 	TextureShaderValues = nullptr;
+	FloatShaderValuesCount = 0;
+	TextureShaderValuesCount = 0;
 	Enabled = false;
 }
 
@@ -593,8 +597,8 @@ void EffectRecord::CreateCT(ID3DXBuffer* ShaderSource, ID3DXConstantTable* Const
 		if ((ConstantDesc.Class == D3DXPC_VECTOR || ConstantDesc.Class == D3DXPC_MATRIX_ROWS) && !memcmp(ConstantDesc.Name, "TESR_", 5)) FloatShaderValuesCount += 1;
 		if (ConstantDesc.Class == D3DXPC_OBJECT && ConstantDesc.Type >= D3DXPT_SAMPLER && ConstantDesc.Type <= D3DXPT_SAMPLERCUBE && !memcmp(ConstantDesc.Name, "TESR_", 5)) TextureShaderValuesCount += 1;
 	}
-	if (FloatShaderValuesCount) FloatShaderValues = (ShaderValue*)malloc(FloatShaderValuesCount * sizeof(ShaderValue));
-	if (TextureShaderValuesCount) TextureShaderValues = (ShaderValue*)malloc(TextureShaderValuesCount * sizeof(ShaderValue));
+	if (FloatShaderValuesCount) FloatShaderValues = (ShaderValue*)calloc(FloatShaderValuesCount, sizeof(ShaderValue));
+	if (TextureShaderValuesCount) TextureShaderValues = (ShaderValue*)calloc(TextureShaderValuesCount, sizeof(ShaderValue));
 	for (UINT c = 0; c < ConstantTableDesc.Parameters; c++) {
 		Handle = Effect->GetParameter(NULL, c);
 		Effect->GetParameterDesc(Handle, &ConstantDesc);
@@ -630,9 +634,11 @@ void EffectRecord::SetCT() {
 	if (!Enabled || Effect == nullptr) return;
 	for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
 		Value = &TextureShaderValues[c];
-		if (Value->Texture->Texture) TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
-		for (int i = 1; i < SamplerStatesMax; i++) {
-			TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
+		if (Value->Texture->Texture) { //Don't set the states if texture cannot be bound beocuse it's null
+			TheRenderManager->renderState->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
+			for (int i = 1; i < SamplerStatesMax; i++) {
+				TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
+			}
 		}
 	}
 	for (UInt32 c = 0; c < FloatShaderValuesCount; c++) {
