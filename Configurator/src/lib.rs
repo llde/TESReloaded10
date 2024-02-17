@@ -267,9 +267,9 @@ pub extern "C" fn SaveConfigurations(){
 	let path_effect = "./Data/Shaders/OblivionReloaded/Effects/Effects.ini";
 	let path_shader = "./Data/Shaders/OblivionReloaded/Shaders/Shaders.ini";	
 	unsafe{
-		write_config_to_file(CONFIG, path_main);
-		write_config_to_file(SHADERS, path_shader);
-		write_config_to_file(EFFECTS, path_effect);
+		write_config_to_file(path_main, CONFIG.as_ref().unwrap());
+		write_config_to_file(path_shader, SHADERS.as_ref().unwrap());
+		write_config_to_file(path_effect, EFFECTS.as_ref().unwrap());
 	}
 }
 
