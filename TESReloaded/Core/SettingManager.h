@@ -10,6 +10,6 @@ public:
 	ffi::Shaders*					Shaders;
 	void LoadSettings();
 	bool GetMenuShaderEnabled(const char* Name);
-
+	void SetGame(ffi::Game game);
 	static void Initialize();
 };

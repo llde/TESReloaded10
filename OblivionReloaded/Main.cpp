@@ -33,6 +33,7 @@ extern "C" {
 		if (!Interface->IsEditor) {
 			PluginVersion::CreateVersionString();
 			SettingManager::Initialize();
+			TheSettingManager->SetGame(ffi::Game::Oblivion);
 			TheSettingManager->LoadSettings();
 			AttachHooks();
 		}

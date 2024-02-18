@@ -12,6 +12,11 @@ enum class Errors {
   InvalidLog,
 };
 
+enum class Game {
+  Oblivion,
+  NewVegas,
+};
+
 enum class MoveCursor {
   Up,
   Down,
@@ -465,6 +470,8 @@ struct Shaders {
 };
 
 extern "C" {
+
+void SetGame(Game game);
 
 Config *getConfiguration();
 

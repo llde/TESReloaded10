@@ -55,6 +55,13 @@ pub static mut CONFIG_TABLE : Option<Table> = None;
 pub static mut SHADERS_TABLE : Option<Table> = None;
 pub static mut EFFECTS_TABLE : Option<Table> = None;
 
+#[repr(C)]
+#[derive(Debug)]
+pub enum Game{
+	Oblivion,NewVegas
+}
+
+pub static mut GAME : Option<Game> = None;
 
 pub static mut LOGGER : Option<CFile> = None;
 
@@ -116,6 +123,11 @@ pub fn  write_config_to_file<T : AsRef<Path>, C>(file : T, config : C) where C :
 			log(format!("Cannot Create Configuration file {}", err));
 		}
 	}
+}
+
+#[no_mangle]
+pub extern "C" fn SetGame(game : Game){
+	unsafe { GAME.replace(game); }
 }
 
 #[no_mangle]
@@ -199,9 +211,18 @@ pub fn load_config<'a, P : AsRef<Path>, C> (path : P) -> C where C : Deserialize
 
 #[no_mangle]
 pub extern "C" fn LoadConfiguration() -> (){
-	let path_main = "./Data/OBSE/Plugins/OblivionReloaded.ini";
-	let path_effect = "./Data/Shaders/OblivionReloaded/Effects/Effects.ini";
-	let path_shader = "./Data/Shaders/OblivionReloaded/Shaders/Shaders.ini";	
+	let path_main = match unsafe { GAME.as_ref().unwrap() } {
+	    Game::Oblivion => "./Data/OBSE/Plugins/OblivionReloaded.ini",
+	    Game::NewVegas => "./Data/NVSE/Plugins/NewVegasReloaded.ini",
+	};
+	
+	let base_shader = match unsafe { GAME.as_ref().unwrap() } {
+	    Game::Oblivion => "./Data/Shaders/OblivionReloaded",
+	    Game::NewVegas => "./Data/Shaders/NewVegasReloaded",
+	}.to_owned();
+
+	let path_effect = base_shader.clone() + "/Effects/Effects.ini";
+	let path_shader = base_shader + "/Shaders/Shaders.ini";	
 	let config : Config = load_config(path_main);
 	let effects : Effects = load_config(path_effect);
 	let shaders : Shaders = load_config(path_shader);
@@ -263,9 +284,18 @@ pub extern "C" fn EditActiveSetting(mov : menu::OperationSetting, callback: unsa
 
 #[no_mangle]
 pub extern "C" fn SaveConfigurations(){
-	let path_main = "./Data/OBSE/Plugins/OblivionReloaded.ini";
-	let path_effect = "./Data/Shaders/OblivionReloaded/Effects/Effects.ini";
-	let path_shader = "./Data/Shaders/OblivionReloaded/Shaders/Shaders.ini";	
+	let path_main = match unsafe { GAME.as_ref().unwrap() } {
+	    Game::Oblivion => "./Data/OBSE/Plugins/OblivionReloaded.ini",
+	    Game::NewVegas => "./Data/NVSE/Plugins/NewVegasReloaded.ini",
+	};
+	
+	let base_shader = match unsafe { GAME.as_ref().unwrap() } {
+	    Game::Oblivion => "./Data/Shaders/OblivionReloaded",
+	    Game::NewVegas => "./Data/Shaders/NewVegasReloaded",
+	}.to_owned();
+
+	let path_effect = base_shader.clone() + "/Effects/Effects.ini";
+	let path_shader = base_shader + "/Shaders/Shaders.ini";	
 	unsafe{
 		write_config_to_file(path_main, CONFIG.as_ref().unwrap());
 		write_config_to_file(path_shader, SHADERS.as_ref().unwrap());

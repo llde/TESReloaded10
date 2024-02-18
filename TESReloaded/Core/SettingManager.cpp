@@ -79,3 +79,7 @@ void SettingManager::Initialize()
 	TheSettingManager = new SettingManager();
 	ffi::SetLogFile(Logger::LogFile);
 }
+
+void SettingManager::SetGame(ffi::Game game) {
+	ffi::SetGame(game);
+}
