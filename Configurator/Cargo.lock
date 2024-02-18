@@ -10,9 +10,11 @@ dependencies = [
  "hex-serde-util",
  "libc",
  "memchr",
+ "once_cell",
  "serde",
  "serde-deserialize-over",
  "toml 0.8.2",
+ "winapi",
 ]
 
 [[package]]
@@ -429,6 +431,7 @@ version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "185d8ab0dfbb35cf1399a6344d8484209c088f75f8f68230da55d48d95d43e3d"
 dependencies = [
+ "indexmap 2.0.2",
  "serde",
  "serde_spanned",
  "toml_datetime",
