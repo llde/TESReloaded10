@@ -434,7 +434,7 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, ff
 
 	float ar = h / w;
 
-	//Logger::Log("fov %f   %f   %f", WorldSceneGraph->cameraFOV, Player->GetFoV(false), Player->GetFoV(true));
+	Logger::Log("fov %f   %f   %f", WorldSceneGraph->cameraFOV, Player->GetFoV(false), Player->GetFoV(true));
 	float fov = TheRenderManager->FOVData.z;
 	float fovY = TheRenderManager->FOVData.w;
 

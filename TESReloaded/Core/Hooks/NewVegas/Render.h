@@ -26,8 +26,8 @@ float __fastcall GetWaterHeightLODHook(TESWorldSpace* This, UInt32 edx);
 extern void(__cdecl* ProcessImageSpaceShaders)(NiDX9Renderer*, BSRenderedTexture*, BSRenderedTexture*);
 void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRenderedTexture* RenderedTexture1, BSRenderedTexture* RenderedTexture2);
 
-extern void* (__thiscall* ShowDetectorWindow)(DetectorWindow*, HWND, HINSTANCE, NiNode*, char*, int, int, int, int);
-void* __fastcall ShowDetectorWindowHook(DetectorWindow* This, UInt32 edx, HWND Handle, HINSTANCE Instance, NiNode* RootNode, char* FormCaption, int X, int Y, int Width, int Height);
+extern void* (__thiscall* ShowDetectorWindow)(DetectorWindow*, HWND, HINSTANCE, NiNode*, const char*, int, int, int, int);
+void* __fastcall ShowDetectorWindowHook(DetectorWindow* This, UInt32 edx, HWND Handle, HINSTANCE Instance, NiNode* RootNode, const char* FormCaption, int X, int Y, int Width, int Height);
 
 extern int (__thiscall* WaterManager_4E8EC0)(WaterManager*);
 int __fastcall WaterManager_4E8EC0Hook(WaterManager* This);

@@ -10,7 +10,7 @@
 static const char* IntroMovie = "NVRGameStudios.bik";
 static const char* MainMenuMovie = "\\Data\\Video\\NVRMainMenu.bik";
 static const char* MainMenuMusic = "NVRMainMenu";
-static char* TitleMenu = "New Vegas Reloaded - Settings";
+static const char* TitleMenu = "New Vegas Reloaded - Settings";
 
 // to review
 static const char* WeatherColorTypes[TESWeather::kNumColorTypes] = { "SkyUpper", "Fog", "CloudsLower", "Ambient", "Sunlight", "Sun", "Stars", "SkyLower", "Horizon", "CloudsUpper" };

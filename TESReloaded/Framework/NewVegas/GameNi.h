@@ -76,7 +76,7 @@ assert(sizeof(NiPoint2) == 0x008);
 
 class NiPoint3 {
 public:
-	float NiPoint3::operator * (const NiPoint3 pt) const { return x * pt.x + y * pt.y + z * pt.z; }
+	float operator * (const NiPoint3 pt) const { return x * pt.x + y * pt.y + z * pt.z; }
 
 	void GetLookAt(NiPoint3* LookAt, NiPoint3* Rotation);
 
@@ -99,14 +99,14 @@ assert(sizeof(NiVector4) == 0x010);
 
 class NiMatrix33 {
 public:
-	NiPoint3 NiMatrix33::operator * (const NiPoint3 pt) const {
+	NiPoint3 operator * (const NiPoint3 pt) const {
 		return {
 			data[0][0] * pt.x + data[0][1] * pt.y + data[0][2] * pt.z,
 			data[1][0] * pt.x + data[1][1] * pt.y + data[1][2] * pt.z,
 			data[2][0] * pt.x + data[2][1] * pt.y + data[2][2] * pt.z
 		};
 	}
-	NiMatrix33 NiMatrix33::operator * (const NiMatrix33 mat) const {
+	NiMatrix33 operator * (const NiMatrix33 mat) const {
 		NiMatrix33 prd;
 
 		prd.data[0][0] =

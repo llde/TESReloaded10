@@ -7,7 +7,7 @@ static float Scroll = 0.0f;
 void (__thiscall* UpdateFlyCam)(PlayerCharacter*) = (void (__thiscall*)(PlayerCharacter*))Hooks::UpdateFlyCam;
 void __fastcall UpdateFlyCamHook(PlayerCharacter* This, UInt32 edx) {
 	
-	SettingsMainStruct::FlyCamStruct* FlyCam = &TheSettingManager->SettingsMain.FlyCam;
+	ffi::FlyCamStruct* FlyCam = &TheSettingManager->Config->FlyCam;
 	float ScrollMultiplier = FlyCam->ScrollMultiplier;
 
 	if (Global->OnKeyDown(FlyCam->KeyAdd)) FlyCam->ScrollMultiplier += FlyCam->StepValue;

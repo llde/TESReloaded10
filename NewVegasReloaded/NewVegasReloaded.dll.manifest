@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+	<assemblyIdentity
+	  name="NewVegasReloaded"
+	/>
+	<dependency>
+	  <dependentAssembly>
+	    <assemblyIdentity type="win32" name="Configurator" version="11.0"   processorArchitecture="x86" language="*" />
+	  </dependentAssembly>
+	</dependency>
+</assembly> 

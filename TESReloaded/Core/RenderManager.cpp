@@ -331,10 +331,6 @@ void RenderManager::CheckAndTakeScreenShot(IDirect3DSurface9* RenderTarget){
 	if (Global->OnKeyDown(0x17) && TheSettingManager->Config->Develop.DebugMode) {
 		char Filename[MAX_PATH];
 		char Filename2[MAX_PATH];
-		char Filename3[MAX_PATH];
-		char Filename4[MAX_PATH];
-		char Filename5[MAX_PATH];
-		char Filename6[MAX_PATH];
 
 		char Name[80];
 		time_t CurrentTime = time(NULL);

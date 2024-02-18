@@ -2,7 +2,7 @@
 
 void AttachHooks() {
 	
-	SettingsMainStruct* SettingsMain = &TheSettingManager->SettingsMain;
+	ffi::MainStruct* SettingsMain = &TheSettingManager->Config->Main;
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
@@ -32,7 +32,7 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)ShowDetectorWindow,			&ShowDetectorWindowHook);
 	DetourAttach(&(PVOID&)LoadForm,						&LoadFormHook);
 	DetourAttach(&(PVOID&)GetWaterHeightLOD, &GetWaterHeightLODHook);
-	if (SettingsMain->FlyCam.Enabled) DetourAttach(&(PVOID&)UpdateFlyCam, &UpdateFlyCamHook);
+	if (TheSettingManager->Config->FlyCam.Enabled) DetourAttach(&(PVOID&)UpdateFlyCam, &UpdateFlyCamHook);
 	DetourTransactionCommit();
 	
 	
@@ -73,14 +73,14 @@ void AttachHooks() {
 		SafeWriteCall(Jumpers::MultiBoundWaterHeight::Fix2, (UInt32)MultiBoundWaterHeightFix);
 	//}
 
-	if (TheSettingManager->SettingsMain.Main.ReplaceIntro) SafeWriteJump(Jumpers::SetTileShaderConstants::Hook, (UInt32)SetTileShaderConstantsHook);
+	if (TheSettingManager->Config->Main.ReplaceIntro) SafeWriteJump(Jumpers::SetTileShaderConstants::Hook, (UInt32)SetTileShaderConstantsHook);
 	
-	if (TheSettingManager->SettingsMain.Main.RemovePrecipitations) {
+	if (TheSettingManager->Config->Main.RemovePrecipitations) {
 		SafeWriteJump(0x0063AFC4, 0x0063AFD8);
 		SafeWriteJump(0x0063A5CB, 0x0063A5DE);
 	}
 	
-	if (SettingsMain->FlyCam.Enabled) {
+	if (TheSettingManager->Config->FlyCam.Enabled) {
 		SafeWriteJump(Jumpers::FlyCam::UpdateForwardFlyCamHook, (UInt32)UpdateForwardFlyCamHook);
 		SafeWriteJump(Jumpers::FlyCam::UpdateBackwardFlyCamHook, (UInt32)UpdateBackwardFlyCamHook);
 		SafeWriteJump(Jumpers::FlyCam::UpdateRightFlyCamHook, (UInt32)UpdateRightFlyCamHook);

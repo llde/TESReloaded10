@@ -9,11 +9,11 @@ bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, GameSett
 		Setting->iValue = 0;
 	else if (!strcmp(Setting->Name, "bFull Screen:Display"))
 		TheSettingManager->SetWindowedMode(Setting->iValue);
-	else if (!strcmp(Setting->Name, "SIntroSequence:General") && TheSettingManager->SettingsMain.Main.ReplaceIntro)
+	else if (!strcmp(Setting->Name, "SIntroSequence:General") && TheSettingManager->Config->Main.ReplaceIntro)
 		Setting->pValue = (char*)IntroMovie;
-	else if (!strcmp(Setting->Name, "SMainMenuMovie:General") && TheSettingManager->SettingsMain.Main.ReplaceIntro)
+	else if (!strcmp(Setting->Name, "SMainMenuMovie:General") && TheSettingManager->Config->Main.ReplaceIntro)
 		Setting->pValue = (char*)MainMenuMovie;
-	else if ((!strcmp(Setting->Name, "SMainMenuMusic:General") || !strcmp(Setting->Name, "STitleMusic:Loading")) && TheSettingManager->SettingsMain.Main.ReplaceIntro)
+	else if ((!strcmp(Setting->Name, "SMainMenuMusic:General") || !strcmp(Setting->Name, "STitleMusic:Loading")) && TheSettingManager->Config->Main.ReplaceIntro)
 		Setting->pValue = (char*)MainMenuMusic;
 	else if (!strcmp(Setting->Name, "bDoCanopyShadowPass:Display") || !strcmp(Setting->Name, "bDoActorShadows:Display") || !strcmp(Setting->Name, "iActorShadowCountExt:Display") || !strcmp(Setting->Name, "iActorShadowCountInt:Display"))
 		Setting->iValue = 0;

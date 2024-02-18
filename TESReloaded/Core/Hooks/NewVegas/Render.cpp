@@ -3,7 +3,7 @@
 void (__thiscall* Render)(Main*, BSRenderedTexture*, int, int) = (void (__thiscall*)(Main*, BSRenderedTexture*, int, int))Hooks::Render;
 void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* RenderedTexture, int Arg2, int Arg3) {
 	
-	SettingsMainStruct* SettingsMain = &TheSettingManager->SettingsMain;
+	ffi::Config* SettingsMain = TheSettingManager->Config;
 
 	TheFrameRateManager->UpdatePerformance();
 	TheCameraManager->SetSceneGraph();
@@ -24,7 +24,7 @@ void __fastcall SetShadersHook(BSShader* This, UInt32 edx, UInt32 PassIndex) {
 	if (VertexShader && PixelShader) {
 		VertexShader->SetupShader(TheRenderManager->renderState->GetVertexShader());
 		PixelShader->SetupShader(TheRenderManager->renderState->GetPixelShader());
-		if (TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)) {
+		if (TheSettingManager->Config->Develop.DebugMode && Global->OnKeyDown(0x17)) {
 			char Name[256];
 			sprintf(Name, "Pass %i %s, %s (%s %s)", PassIndex, Pointers::Functions::GetPassDescription(PassIndex), Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
 			if (VertexShader->ShaderHandle == VertexShader->ShaderHandleBackup) strcat(Name, " - Vertex: vanilla");
@@ -133,30 +133,30 @@ void __fastcall RenderReflectionsHook(WaterManager* This, UInt32 edx, NiCamera* 
     }
         */
     BSRenderedTexture** boh = (BSRenderedTexture**) 0x011C7C2C; /*BOH*/
-    if (*boh  && TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)) {
+    if (*boh  && TheSettingManager->Config->Develop.DebugMode && Global->OnKeyDown(0x17)) {
         D3DXSaveSurfaceToFileA(".\\Test\\011C7C2C.jpg", D3DXIFF_JPG, (*boh)->RenderedTexture->buffer->data->Surface, NULL, NULL);
 
     }
     
     boh = (BSRenderedTexture**) 0x011C7AD4; /*Relfections*/
-    if (*boh  && TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)) {
+    if (*boh  && TheSettingManager->Config->Develop.DebugMode && Global->OnKeyDown(0x17)) {
         D3DXSaveSurfaceToFileA(".\\Test\\011C7AD4.jpg", D3DXIFF_JPG, (*boh)->RenderedTexture->buffer->data->Surface, NULL, NULL);
 
     }
     
     boh = (BSRenderedTexture**) 0x011C7B68; /*Depth*/
-    if (*boh  && TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)) {
+    if (*boh  && TheSettingManager->Config->Develop.DebugMode && Global->OnKeyDown(0x17)) {
         D3DXSaveSurfaceToFileA(".\\Test\\011C7B68.jpg", D3DXIFF_JPG, (*boh)->RenderedTexture->buffer->data->Surface, NULL, NULL);
 
     }
     boh = (BSRenderedTexture**) 0x011C7B64; /*dispalcmeent*/
-    if (*boh  && TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)) {
+    if (*boh  && TheSettingManager->Config->Develop.DebugMode && Global->OnKeyDown(0x17)) {
         D3DXSaveSurfaceToFileA(".\\Test\\011C7B64.jpg", D3DXIFF_JPG, (*boh)->RenderedTexture->buffer->data->Surface, NULL, NULL);
 
     }
     
     boh = (BSRenderedTexture**) 0x011C7B44;
-    if (*boh  && TheSettingManager->SettingsMain.Develop.DebugMode && Global->OnKeyDown(0x17)) {
+    if (*boh  && TheSettingManager->Config->Develop.DebugMode && Global->OnKeyDown(0x17)) {
         D3DXSaveSurfaceToFileA(".\\Test\\011C7B44.jpg", D3DXIFF_JPG, (*boh)->RenderedTexture->buffer->data->Surface, NULL, NULL);
 
     }
@@ -192,7 +192,7 @@ void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRenderedTex
 
 static void RenderMainMenuMovie() {
 
-	if (TheSettingManager->SettingsMain.Main.ReplaceIntro && InterfaceManager->IsActive(Menu::MenuType::kMenuType_Main))
+	if (TheSettingManager->Config->Main.ReplaceIntro && InterfaceManager->IsActive(Menu::MenuType::kMenuType_Main))
 		TheBinkManager->Render(MainMenuMovie);
 	else
 		TheBinkManager->Close();
@@ -245,8 +245,8 @@ float MultiBoundWaterHeightFix() {
 
 }
 
-void* (__thiscall* ShowDetectorWindow)(DetectorWindow*, HWND, HINSTANCE, NiNode*, char*, int, int, int, int) = (void* (__thiscall*)(DetectorWindow*, HWND, HINSTANCE, NiNode*, char*, int, int, int, int))::Hooks::ShowDetectorWindow;
-void* __fastcall ShowDetectorWindowHook(DetectorWindow* This, UInt32 edx, HWND Handle, HINSTANCE Instance, NiNode* RootNode, char* FormCaption, int X, int Y, int Width, int Height) {
+void* (__thiscall* ShowDetectorWindow)(DetectorWindow*, HWND, HINSTANCE, NiNode*, const char*, int, int, int, int) = (void* (__thiscall*)(DetectorWindow*, HWND, HINSTANCE, NiNode*, const char*, int, int, int, int))::Hooks::ShowDetectorWindow;
+void* __fastcall ShowDetectorWindowHook(DetectorWindow* This, UInt32 edx, HWND Handle, HINSTANCE Instance, NiNode* RootNode, const char* FormCaption, int X, int Y, int Width, int Height) {
 	
 	NiAVObject* Object = NULL;
 	void* r = NULL;

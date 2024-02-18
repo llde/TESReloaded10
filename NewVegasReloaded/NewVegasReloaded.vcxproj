@@ -55,6 +55,7 @@
     <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)$(ProjectName)\$(Configuration)\</OutDir>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -68,14 +69,22 @@
       </PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)TESReloaded\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>$(SolutionDir)TESReloaded\Framework\NewVegas\Framework.h</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <EnableModules>true</EnableModules>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
-      <AdditionalDependencies>dxguid.lib;version.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Nvidia\x86\nvapi.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Bink\binkw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dxguid.lib;version.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Nvidia\x86\nvapi.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Bink\binkw32.lib;$(SolutionDir)Configurator\target\release\Configurator.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Manifest>
+      <AssemblyIdentity>NewVegasReloaded</AssemblyIdentity>
+      <AdditionalManifestFiles>$(MSBuildProjectDirectory)/NewVegasReloaded.dll.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -91,6 +100,12 @@
       </PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)TESReloaded\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>$(SolutionDir)TESReloaded\Framework\NewVegas\Framework.h</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <EnableModules>true</EnableModules>
+      <ConformanceMode>false</ConformanceMode>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -99,8 +114,13 @@
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
-      <AdditionalDependencies>dxguid.lib;version.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Nvidia\x86\nvapi.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Bink\binkw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dxguid.lib;version.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Nvidia\x86\nvapi.lib;$(SolutionDir)TESReloaded\Framework\Common\Lib\Bink\binkw32.lib;$(SolutionDir)Configurator\target\release\Configurator.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Manifest>
+      <AssemblyIdentity>NewVegasReloaded</AssemblyIdentity>
+      <EnableDpiAwareness>true</EnableDpiAwareness>
+      <AdditionalManifestFiles>$(MSBuildProjectDirectory)/NewVegasReloaded.dll.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\TESReloaded\Core\BinkManager.h" />
