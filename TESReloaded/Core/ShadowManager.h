@@ -4,6 +4,9 @@ class ShadowManager { // Never disposed
 public:
 	static void Initialize();
     
+#define ShadowMapsNumber ShadowMapTypeEnum::MapOrtho +1
+#define BlurShadowMaps  ShadowMapTypeEnum::MapOrtho
+	
 	enum ShadowMapTypeEnum {
 		MapNear = 0,
 		MapMiddle = 1,
@@ -45,8 +48,8 @@ public:
 
     ShaderRecordVertex*		ShadowMapVertex;
 	ShaderRecordPixel*		ShadowMapPixel;
-	D3DVIEWPORT9			ShadowMapViewPort[5];
-	D3DXPLANE				ShadowMapFrustum[5][6];
+	D3DVIEWPORT9			ShadowMapViewPort[ShadowMapsNumber];
+	D3DXPLANE				ShadowMapFrustum[ShadowMapsNumber][6];
 	NiVector4				BillboardRight;
 	NiVector4				BillboardUp;
 	ShaderRecordVertex*		ShadowCubeMapVertex;
@@ -56,12 +59,12 @@ public:
 
     ShaderRecordVertex*		ShadowMapBlurVertex;
 	ShaderRecordPixel*		ShadowMapBlurPixel;
-    IDirect3DVertexBuffer9* BlurShadowVertex[4];
-    float                   ShadowMapInverseResolution[5];
-	float					ShadowMapRadius[ShadowMapTypeEnum::MapOrtho];
-	ShadowMapFeatures		ShadowMapsFeatures[ShadowMapTypeEnum::MapOrtho];
+    IDirect3DVertexBuffer9* BlurShadowVertex[BlurShadowMaps];
+    float                   ShadowMapInverseResolution[ShadowMapsNumber];
+	float					ShadowMapRadius[ShadowMapsNumber];
+	ShadowMapFeatures		ShadowMapsFeatures[ShadowMapsNumber];
 	D3DVIEWPORT9			ShadowCubeMapViewPort;
-	NiPointLight*			ShadowCubeMapLights[4];
+	NiPointLight*			ShadowCubeMapLights[BlurShadowMaps];
 	ShaderRecordVertex*		CurrentVertex;
 	ShaderRecordPixel*		CurrentPixel;
 	bool					AlphaEnabled;
