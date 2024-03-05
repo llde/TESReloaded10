@@ -28,7 +28,8 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Name) {
 	IDirect3DTexture9* Tex = NULL;
 	IDirect3DVolumeTexture9* TexV = NULL;
 	IDirect3DCubeTexture9* TexC = NULL;
-
+	bool res = true;
+	NiDX9SourceTextureData* texture;
 	switch (Type) {
 		case PlanarBuffer:
 			D3DXCreateTextureFromFileA(TheRenderManager->device, Name, &Tex);
@@ -44,6 +45,11 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Name) {
 			D3DXCreateCubeTextureFromFileA(TheRenderManager->device, Name, &TexC);
 			if (TexC == NULL) return false;
 			Texture = TexC;
+/*			texture = (NiDX9SourceTextureData*)Pointers::Functions::MemoryAlloc(sizeof(NiDX9SourceTextureData));
+
+			new (texture) NiDX9SourceTextureData(TheRenderManager);
+			res = texture->LoadTexture(Name, TheRenderManager);
+			if(res == true) Texture = texture->dTexture;*/
 			break;
 		case SourceBuffer:
 			Texture = TheTextureManager->SourceTexture;
@@ -84,7 +90,7 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Name) {
         default:
             return false; //Texture is invalid or not assigned here.
 	}
-	return true;
+	return res;
 
 }
 

@@ -305,7 +305,6 @@ void ShadowManager::Render(NiGeometry* Geo) {
 			BSShaderProperty* ShaderProperty = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
 			if (!ShaderProperty || !ShaderProperty->IsLightingProperty()) return;
 			BSShaderPPLightingProperty* lightProperty = (BSShaderPPLightingProperty*)ShaderProperty;
-			if(lightProperty->refractionPower != 0.0f) Logger::Log("%f", lightProperty->refractionPower); 
 			/*Only seen 0.0 or 0.208. IS the structure actually corrrect?*/
 			if (lightProperty->refractionPower >= 0.1f) return; //Configure,also check for actors, they are skinned
 			if (AlphaEnabled) {

@@ -11,7 +11,7 @@ extern "C" {
 
 		Info->InfoVersion = PluginInfo::kInfoVersion;
 		Info->Name = "OblivionReloaded";
-		Info->Version = 10;
+		Info->Version = 11;
 		return true;
 
 	}
