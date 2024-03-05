@@ -1,3 +1,5 @@
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 use serde::Deserialize;
 use winapi::shared::guiddef::{GUID, IID};
 use winapi::shared::minwindef::{BOOL, BYTE, DWORD, FLOAT, INT, UINT};
@@ -477,10 +479,20 @@ pub fn ChangeCurrentSetting(op : OperationSetting) -> Option<String> {
 		let tabled = configtable.get_mut(first).unwrap().as_table_mut().unwrap().get_mut(second).unwrap();
 		let tab : &mut Value = if tabled.is_table(){ tabled.as_table_mut().unwrap().get_mut(third).unwrap() } else {tabled};
 		let modified = match tab {
-		    Value::Integer(ref mut cont) => { if op == OperationSetting::Add { *cont += 1 } else { *cont -= 1 }; true},
-		    Value::Float(ref mut cont) => {if op == OperationSetting::Add { *cont += 0.1 } else { *cont -= 0.1 }; true},
+			//TODO, this rely on a custom version of the toml crate with custom Value discriminants. We can implement it directly as it's only a serialization between struct and table with no TOML accessor
+			// But for now it seems good enough, not that it break actual TOML serialization and deserialization
+		    Value::Integer(ref mut cont) => { if op == OperationSetting::Add { *cont = cont.saturating_add(1) } else { *cont = cont.saturating_sub(1) }; true},
+		    Value::UInteger(ref mut cont) => { if op == OperationSetting::Add { *cont = cont.saturating_add(1) } else { *cont = cont.saturating_sub(1) }; true},
+		    Value::Int(ref mut cont) => { if op == OperationSetting::Add { *cont = cont.saturating_add(1) } else { *cont = cont.saturating_sub(1) }; true},
+		    Value::UInt(ref mut cont) => { if op == OperationSetting::Add { *cont = cont.saturating_add(1) } else { *cont = cont.saturating_sub(1) }; true},
+		    Value::Short(ref mut cont) => { if op == OperationSetting::Add { *cont = cont.saturating_add(1) } else { *cont = cont.saturating_sub(1) }; true},
+		    Value::UShort(ref mut cont) => { if op == OperationSetting::Add { *cont = cont.saturating_add(1) } else { *cont = cont.saturating_sub(1) }; true},
+		    Value::Byte(ref mut cont) => { if op == OperationSetting::Add { *cont = cont.saturating_add(1) } else { *cont = cont.saturating_sub(1) }; true},
+		    Value::UByte(ref mut cont) => { if op == OperationSetting::Add { *cont = cont.saturating_add(1) } else { *cont = cont.saturating_sub(1) }; true},
+		    Value::Float(ref mut cont) => {  if op == OperationSetting::Add { *cont += 0.1 } else { *cont -= 0.1 };  true},
+		    Value::Float32(ref mut cont) => {if op == OperationSetting::Add { *cont += 0.1f32 } else { *cont -= 0.1f32 }; true},
 		    Value::Boolean(ref mut cont) => { *cont = !*cont; true },
-		    _ => {false},
+		    _ => {log(format!("{:?}", tab)); false},
 		};
 		if modified {
 			unsafe{
