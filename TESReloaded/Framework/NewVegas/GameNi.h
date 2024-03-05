@@ -1745,15 +1745,9 @@ assert(sizeof(BSShaderLightingProperty) == 0x7C);
 class BSShaderPPLightingProperty : public BSShaderLightingProperty {
 public:
 	UInt32		Unk07C;	// 07C
-	UInt32		Unk080;	// 080
-	float		Unk084;	// 084
-	float		Unk088;	// 088
-	float		Unk08C;	// 08C
-	float		Unk090;	// 090
-	float		Unk094;	// 094
-	float		Unk098;	// 098
-	float		Unk09C;	// 09C
-	float		Unk0A0;	// 0A0
+	float       fMorphDistance;
+	NiColorAlpha    kHairTint;
+	NiVector4    kLandBlendParams; //NiPoint4
 	UInt32		Unk0A4;	// 0A4
 	UInt16		numLandscapeTextures;	// 0A8
 	UInt8		pad0A8[2];
@@ -1770,14 +1764,15 @@ public:
 	UInt32		Unk0E0;	// 0E0
 	UInt32		Unk0E4;	// 0E4
 	UInt32		Unk0E8;	// 0E8
-	UInt32		Unk0EC;	// 0EC
-	UInt32		Unk0F0;	// 0F0
+	float       refractionPower; //0EC
+	UInt32      refractionPeriod; //0F0
 	UInt32		Unk0F4;	// 0F4
 	UInt32		Unk0F8;	// 0F8
 	UInt32		Unk0FC;	// 0FC
 	UInt32		Unk100;	// 100
 };
 assert(sizeof(BSShaderPPLightingProperty) == 0x104);
+assert(offsetof(BSShaderPPLightingProperty, kHairTint) == 0x84 );
 
 class SpeedTreeShaderLightingProperty : public BSShaderLightingProperty {
 public:

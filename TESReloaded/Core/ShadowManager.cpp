@@ -175,27 +175,6 @@ TESObjectREFR* ShadowManager::GetRef(TESObjectREFR* Ref, ffi::ShadowFormsStruct*
 
 }
 
-void ShadowManager::RenderExterior(NiAVObject* Object, float MinRadius) {
-	
-	if (Object) {
-		float Radius = Object->GetWorldBoundRadius();
-		if (!(Object->m_flags & NiAVObject::kFlag_AppCulled) && Radius >= MinRadius && Object->m_worldTransform.pos.z + Radius > TheShaderManager->ShaderConst.Water.waterSettings.x) {
-			void* VFT = *(void**)Object;
-			if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode || VFT == Pointers::VirtualTables::BSTreeNode) {
-				if (VFT == Pointers::VirtualTables::BSFadeNode && ((BSFadeNode*)Object)->FadeAlpha < 0.75f) return;
-				NiNode* Node = (NiNode*)Object;
-				for (int i = 0; i < Node->m_children.numObjs; i++) {
-					RenderExterior(Node->m_children.data[i], MinRadius);
-				}
-			}
-			else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
-				RenderGeometry((NiGeometry*)Object);
-			}
-		}
-	}
-
-}
-
 void ShadowManager::RenderInterior(NiAVObject* Object, float MinRadius) {
 	
 	if (Object) {
@@ -217,10 +196,13 @@ void ShadowManager::RenderInterior(NiAVObject* Object, float MinRadius) {
 }
 
 void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType) {
-
-	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
+	float Radius = Object->GetWorldBoundRadius();
+	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled) && Radius >= this->ShadowMapsFeatures[ShadowMapType].MinRadius) {
 		void* VFT = *(void**)Object;
-		if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode ||  VFT == Pointers::VirtualTables::BSMultiBoundNode ) {
+		if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode 
+				|| VFT == Pointers::VirtualTables::BSTreeNode || VFT == Pointers::VirtualTables::BSMultiBoundNode  
+				|| VFT == Pointers::VirtualTables::NiBillBoardNode) {
+			if (VFT == Pointers::VirtualTables::BSFadeNode && ((BSFadeNode*)Object)->FadeAlpha < 0.75f) return;
 			NiNode* Node = (NiNode*)Object;
 			if (InFrustum(ShadowMapType, Node)) {
 				for (int i = 0; i < Node->m_children.numObjs; i++) {
@@ -228,12 +210,12 @@ void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMa
 				}
 			}
 		}
-		else if ((VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
+		else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
 			RenderGeometry((NiGeometry*)Object);
 		}
-        //else {
-        //   Logger::Log("Unknown %0X", VFT);                
-        //}
+        else if (VFT != Pointers::VirtualTables::NiPointLight /*TODO attenuaton map?Test for the affecedNode list*/ && VFT != Pointers::VirtualTables::NiParticleSystem) {
+           Logger::Log("Unknown %0X", VFT);                
+        }
 	}
 
 }
@@ -322,10 +304,14 @@ void ShadowManager::Render(NiGeometry* Geo) {
 		else {
 			BSShaderProperty* ShaderProperty = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
 			if (!ShaderProperty || !ShaderProperty->IsLightingProperty()) return;
+			BSShaderPPLightingProperty* lightProperty = (BSShaderPPLightingProperty*)ShaderProperty;
+			if(lightProperty->refractionPower != 0.0f) Logger::Log("%f", lightProperty->refractionPower); 
+			/*Only seen 0.0 or 0.208. IS the structure actually corrrect?*/
+			if (lightProperty->refractionPower >= 0.1f) return; //Configure,also check for actors, they are skinned
 			if (AlphaEnabled) {
 				NiAlphaProperty* AProp = (NiAlphaProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Alpha);
 				if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) {
-					if (NiTexture* Texture = *((BSShaderPPLightingProperty*)ShaderProperty)->textures[0]) {
+					if (NiTexture* Texture = *(lightProperty->textures[0])) {
 						TheShaderManager->ShaderConst.Shadow.Data.y = 1.0f; // Alpha Control
 						RenderState->SetTexture(0, Texture->rendererData->dTexture);
 						RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
@@ -359,12 +345,32 @@ void ShadowManager::Render(NiGeometry* Geo) {
 	}
 	else {
 		TheShaderManager->ShaderConst.Shadow.Data.x = 1.0f;
+		BSShaderProperty* ShaderProperty = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
+		if (ShaderProperty && ShaderProperty->IsLightingProperty()) {
+			BSShaderPPLightingProperty* lightProperty = (BSShaderPPLightingProperty*)ShaderProperty;
+			if (lightProperty->refractionPower >= 0.1f) return; //Configure,also check for actors, they are skinned
+			if (AlphaEnabled) {
+				NiAlphaProperty* AProp = (NiAlphaProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Alpha);
+				if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) {
+					if (NiTexture* Texture = *(lightProperty->textures[0])) {
+						TheShaderManager->ShaderConst.Shadow.Data.y = 1.0f; // Alpha Control
+						RenderState->SetTexture(0, Texture->rendererData->dTexture);
+						RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
+						RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
+						RenderState->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT, false);
+						RenderState->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT, false);
+						RenderState->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT, false);
+					}
+				}
+			}
+		}
 		NiSkinPartition* SkinPartition = SkinInstance->SkinPartition;
 		D3DPRIMITIVETYPE PrimitiveType = (SkinPartition->Partitions[0].Strips == 0) ? D3DPT_TRIANGLELIST : D3DPT_TRIANGLESTRIP;
 		TheRenderManager->CalculateBoneMatrixes(SkinInstance, &Geo->m_worldTransform);
 		if (SkinInstance->SkinToWorldWorldToSkin) memcpy(&TheShaderManager->ShaderConst.ShadowMap.ShadowWorld, SkinInstance->SkinToWorldWorldToSkin, 0x40);
 		for (UInt32 p = 0; p < SkinPartition->PartitionsCount; p++) {
             if (!SkinInstance->IsPartitionEnabled(p)) continue;
+
 			StartIndex = 0;
 			StartRegister = 9;
 			NiSkinPartition::Partition* Partition = &SkinPartition->Partitions[p];
@@ -509,11 +515,6 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, ffi::Shadow
 	BillboardRight = { View._11, View._21, View._31, 0.0f };
 	BillboardUp = { View._12, View._22, View._32, 0.0f };
 	SetFrustum(ShadowMapType, &ShadowMap->ShadowViewProj);
-    /*for (int i = 1; i < 4; i++){
-        IDirect3DSurface9* targ= nullptr;
-        Device->GetRenderTarget(i , &targ);
-        Logger::Log("%u  : %08X", i, targ );
-    }*/
     if(ShadowsExteriors->BlurShadowMaps || ShadowMapType == MapOrtho){
         Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurface[ShadowMapType]);
     }
@@ -535,22 +536,22 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, ffi::Shadow
 		Device->BeginScene();
 		for (UInt32 i = 0; i < CellArraySize; i++) {
 			if (TESObjectCELL* Cell = CellArray->GetCell(i)) {
-				if (Forms->Terrain) {
-					NiNode* CellNode = Cell->GetNode();
-		//			if (ShadowsExteriors->Forms[ShadowMapType].Lod) RenderLod(Tes->landLOD, ShadowMapType); //Render terrain LOD
-					NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[2]; //0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker
-                    for (int i = 0; i < TerrainNode->m_children.numObjs; i++){
-                        RenderTerrain(TerrainNode->m_children.data[i], ShadowMapType);                            
-                    }
+				NiNode* CellNode = Cell->GetNode();
+	//			if (ShadowsExteriors->Forms[ShadowMapType].Lod) RenderLod(Tes->landLOD, ShadowMapType); //Render terrain LOD
+				for (UInt32 i = 0; i < CellNode->m_children.numObjs; i++) {
+					//For NewVegas: 0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker
+					//Not valid for Oblivion.
+					NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[i]; 
+					RenderTerrain(TerrainNode, ShadowMapType);
 				}
-				TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
+				/*TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
 				while (Entry) {
 					if (TESObjectREFR* Ref = GetRef(Entry->item, Forms)) {
 						NiNode* RefNode = Ref->GetNode();
-						if (InFrustum(ShadowMapType, RefNode)) RenderExterior(RefNode, MinRadius);
+						if (InFrustum(ShadowMapType, RefNode)) RenderTerrain(RefNode, ShadowMapType);
 					}
 					Entry = Entry->next;
-				}
+				}*/
 			}
 		}
 		Device->EndScene();
@@ -791,6 +792,9 @@ void ShadowManager::RenderShadowMaps() {
 			D3DXSaveSurfaceToFileA(".\\Test\\shadowmap1B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[1], NULL, NULL);
 			D3DXSaveSurfaceToFileA(".\\Test\\shadowmap2B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[2], NULL, NULL);
 	//		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap3B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[3], NULL, NULL);
+			for (size_t i = 0; i < 256; i++) {
+					Logger::Log("Different state between iterations: State %u is %0X", i, RenderState->RenderStateSettings[i].CurrentValue);
+			}
 
 			InterfaceManager->ShowMessage("Textures taken!");
 		}

@@ -4139,6 +4139,9 @@ namespace Pointers {
 		static const void* NiTriShape			= (void*)0x00A7ED5C;
 		static const void* NiTriStrips			= (void*)0x00A7F27C;
 		static const void* bhkCollisionObject	= (void*)0x00A55FCC;
+		static const void* NiPointLight			= (void*)0x00A43044;
+		static const void* NiBillBoardNode		= (void*)0x00A45134;
+		static const void* NiParticleSystem		= (void*)0x00A85B0C;
 		static const void* BSMultiBoundNode     = (void*)0x00000000;  //Not present
 	}
 	namespace Settings {
