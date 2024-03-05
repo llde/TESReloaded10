@@ -75,11 +75,11 @@ impl Default for MainStruct{
             MemoryTextureManagement : true,
 			RemoveFogPass : false,
 			GrassMode : true,
-            ReplaceIntro : true,
+            ReplaceIntro : false,
             AnisotropicFilter : 4,
             ScreenshotKey : 87,
             FarPlaneDistance : 283840.0,
-			TestDirectionLight  :false 
+			TestDirectionLight : false 
         }
     }
 }
@@ -324,7 +324,7 @@ pub struct ShadowFormsStruct {
 impl Default for ShadowFormsStruct{
     fn default() -> Self{
 		ShadowFormsStruct {
-			Activators: true, Actors: true , Apparatus: true, Books: true, Containers: true, Doors: true, Furniture: true, Misc: true, Statics: true, Terrain: true, Trees: true, Lod: false, MinRadius: 20.0, Alpha : true
+			Activators: true, Actors: true , Apparatus: true, Books: true, Containers: true, Doors: true, Furniture: true, Misc: true, Statics: true, Terrain: true, Trees: true, Lod: false, MinRadius: 10.0, Alpha : true
 			
 		}
 	}
@@ -374,7 +374,7 @@ pub struct ShadowsInteriorStruct{
 impl Default for ShadowsInteriorStruct{
     fn default() -> Self{
         ShadowsInteriorStruct {
-			Enabled : true,
+			Enabled : false,
 			ShadowMode : 1,
             ShadowCubeMapResolution: 2048,
             LightPoints: 4,

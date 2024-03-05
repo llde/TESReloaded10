@@ -50,7 +50,7 @@ pub struct ShadowsInteriorShaderStruct{
 
 impl Default for ShadowsInteriorShaderStruct{
     fn default() -> Self {
-        Self{Quality : 1, Darkness : 0.1}
+        Self{Quality : 2, Darkness : 0.4}
     }
 }
 #[repr(C)]
