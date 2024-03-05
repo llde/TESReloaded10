@@ -876,6 +876,16 @@ public:
 	UInt32					LevelsSkipped;		// 70
 	UInt32					SourceRevID;		// 74
 	UInt32					PalRevID;			// 78
+	//TODO use the NiSourceTexture instead. Passing a null NiTexture parent doesn't seem a smart choice
+	NiDX9SourceTextureData(NiDX9Renderer* renderer){
+		memset(this, 0, sizeof(NiDX9SourceTextureData));
+		ThisCall(0x007738E0, this, nullptr, renderer);
+		*((UInt32**) this) = (UInt32*)0x00A883C4;   //NiDX9SourceTextureData VTBL
+	}
+	bool LoadTexture(const char* src, NiDX9Renderer* renderer){
+		UInt32 formatPrefs  = 0; /*If the pointer contain 4, deallocate in case of errors, at the beginning, don't treat DXTn trextures???? */ 
+		return ThisCall(0x00760DA0 , this, src, renderer, &formatPrefs);
+	}
 };
 assert(sizeof(NiDX9SourceTextureData) == 0x07C);
 
