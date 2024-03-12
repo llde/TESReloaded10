@@ -37,7 +37,7 @@ pub struct ShadowsExteriorShaderStruct{
 
 impl Default for ShadowsExteriorShaderStruct{
     fn default() -> Self {
-        Self{Quality : 2, Darkness : 0.1, NightMinDarkness : 0.8}
+        Self{Quality : 2, Darkness : 0.4, NightMinDarkness : 0.8}
     }
 }
 #[repr(C)]

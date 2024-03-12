@@ -11,6 +11,8 @@ use serde_deserialize_over::DeserializeOver;
 pub struct Config{
 	#[deserialize_over]
     Main : MainStruct,
+    #[deserialize_over]
+    WaterEngine: WaterEngine,
 	#[deserialize_over]
     Develop : DevelopStruct,
 	#[deserialize_over]
@@ -37,6 +39,7 @@ impl Default for Config{
     fn default() -> Config{
         Config{
             Main : MainStruct::default(),
+            WaterEngine : WaterEngine::default(),
             Develop : DevelopStruct::default(),
             FlyCam : FlyCamStruct::default(),
             SleepingMode : SleepingModeStruct::default(),
@@ -166,13 +169,13 @@ pub struct ShadersStruct {
 impl Default for ShadersStruct{
     fn default() -> Self{
         ShadersStruct{
-            Blood : false,
+            Blood : true,
             Grass : false,
-            HDR : false,
-            NightEye : false,
-            POM : false,
-            Skin : false,
-            Terrain : false,
+            HDR : true,
+            NightEye : true,
+            POM : true,
+            Skin : true,
+            Terrain : true,
             Water : true,
             Extra : true,
         }
@@ -208,12 +211,12 @@ struct EffectsStruct {
 impl Default for EffectsStruct{
     fn default() -> Self{
         EffectsStruct{
-            AmbientOcclusion : true,
+            AmbientOcclusion : false,
             BloodLens : true,
             Bloom : true,
             Cinema : true,
             Coloring : true,
-            DepthOfField : true,
+            DepthOfField : false,
             GodRays : true,
             LowHF : true,
             MotionBlur : false,
@@ -226,7 +229,7 @@ impl Default for EffectsStruct{
             WetWorld : true,
             VolumetricFog : false,
             ShadowsExteriors : true,
-            ShadowsInteriors : true,
+            ShadowsInteriors : false,
             Specular : true,
             Extra : true,
         }
@@ -380,6 +383,24 @@ impl Default for ShadowsInteriorStruct{
             LightPoints: 4,
             TorchesCastShadows: true,
 			LightRadiusMult : 1.0
+        }
+    }
+}
+
+
+#[repr(C)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver)]
+#[allow(non_snake_case)]
+pub struct WaterEngine{
+    ReflectionMapSize : u16,
+    SetAtmoshpere : bool,
+}
+
+impl Default for WaterEngine{
+    fn default() -> Self{
+        WaterEngine{
+            ReflectionMapSize : 512,
+            SetAtmoshpere : false
         }
     }
 }
