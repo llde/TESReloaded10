@@ -1,8 +1,7 @@
 extern crate cbindgen;
-
+extern crate embed_resource;
 use std::env;
 use std::path::PathBuf;
-
 
 fn main() {
     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -19,6 +18,9 @@ fn main() {
           Ok(bindings) =>{ bindings.write_to_file(output_file);},
           Err(_) => println!("Unable to generate proper bindings"),
 	   };
+
+    embed_resource::compile("Configurator.rc", embed_resource::NONE);
+
 }
  
 fn target_dir() -> PathBuf {
