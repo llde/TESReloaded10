@@ -1397,7 +1397,7 @@ public:
 	virtual void						 func_10(float u1);															// 10
 	virtual void						 func_11(float u1, float u2);												// 11
 	virtual BOOL						 GetLeftHanded();															// 12
-	virtual void						 func_13(BOOL u1);															// 13
+	virtual void						 SetLeftHanded(BOOL u1);															// 13
 	virtual void						 func_14(UInt32 u1);														// 14
 	virtual void						 InitializeRenderStates();													// 15
 	virtual void						 BackUpAllStates();															// 16
