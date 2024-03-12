@@ -21,3 +21,4 @@ rust_decimal = "1.34.3"
 rust_decimal_macros = "1.34.2"
 [build-dependencies]
 cbindgen = "0.25.0"
+embed-resource = "*"
