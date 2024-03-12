@@ -42,6 +42,11 @@ struct MainStruct {
   bool TestDirectionLight;
 };
 
+struct WaterEngine {
+  uint16_t ReflectionMapSize;
+  bool SetAtmoshpere;
+};
+
 struct DevelopStruct {
   uint8_t CompileShaders;
   uint8_t CompileEffects;
@@ -171,6 +176,7 @@ struct ShadowsInteriorStruct {
 
 struct Config {
   MainStruct Main;
+  WaterEngine WaterEngine;
   DevelopStruct Develop;
   FlyCamStruct FlyCam;
   SleepingModeStruct SleepingMode;

@@ -3263,7 +3263,7 @@ public:
 	UInt8			unk100;							// 100
 	UInt8			unk101[3];						// 101
 
-	bool GetIsUnderWater() { return this->flags & Sky::kSkyFlag_IsUnderwater; }
+	bool GetIsUnderWater() { return *((bool*)0x00B3521C); }
 };
 assert(sizeof(Sky) == 0x104);
 

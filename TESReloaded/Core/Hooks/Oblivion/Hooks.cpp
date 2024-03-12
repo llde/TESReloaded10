@@ -1,5 +1,43 @@
 #include "Hooks.h"
 
+HRESULT(__thiscall* RemoveTexture)(NiDX9RenderState*, UInt32 ) = (HRESULT(__thiscall*)(NiDX9RenderState*, UInt32))0x0077B2C0;
+HRESULT _fastcall RemoveTextureH(NiDX9RenderState* state, UInt32 edx, UInt32 sampler) {
+
+	return D3D_OK;
+}
+
+HRESULT(__thiscall* SetTexture)(NiDX9RenderState*, UInt32, IDirect3DBaseTexture9*) = (HRESULT(__thiscall*)(NiDX9RenderState*, UInt32, IDirect3DBaseTexture9*))0x0077B280;
+HRESULT _fastcall SetTextureH(NiDX9RenderState* state, UInt32 edx, UInt32 sampler, IDirect3DBaseTexture9* tex) {
+	if (tex == nullptr) return  D3D_OK;
+	return (*SetTexture)(state, sampler, tex);
+}
+
+void(__cdecl* SetNameThread)(int, const char*) = (void(__cdecl*)(int, const char*)) 0x00747830;
+void __cdecl NameThread(int threadID, const char* name) {
+
+}
+
+static const UInt32 kRetU = 0x0053B175;
+static const UInt32 kRet = 0x0053B20C;
+static const UInt32 SceneGraph_GetChildNiAvNodeVtbl = 0x005645B0;
+void __declspec(naked) SetAtmosphereUnderwater() {
+	__asm {
+		pushad
+	}
+	if (TheSettingManager->Config->WaterEngine.SetAtmoshpere) {
+		__asm {
+			popad 
+			jmp [kRetU]
+		}
+	}
+	else {
+		__asm {
+			popad
+			jmp[kRet]
+		}
+	}
+}
+
 void AttachHooks() {
 
 	HMODULE Module = NULL;
@@ -8,6 +46,10 @@ void AttachHooks() {
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
+	DetourAttach(&(PVOID&)RemoveTexture, &RemoveTextureH);
+	DetourAttach(&(PVOID&)SetTexture, &SetTextureH);
+	DetourAttach(&(PVOID&)SetNameThread, &NameThread);
+
 	DetourAttach(&(PVOID&)ReadSetting,					&ReadSettingHook);
 	DetourAttach(&(PVOID&)WriteSetting,					&WriteSettingHook);
 	DetourAttach(&(PVOID&)LoadGame,						&LoadGameHook);
@@ -37,18 +79,18 @@ void AttachHooks() {
 	DetourAttach(&(PVOID&)RenderObject,					&RenderObjectHook);
 	DetourAttach(&(PVOID&)LoadForm,						&LoadFormHook);
 	DetourAttach(&(PVOID&)RunScript,					&RunScriptHook);
-	DetourAttach(&(PVOID&)NewActorAnimData,				&NewActorAnimDataHook);
-	DetourAttach(&(PVOID&)DisposeActorAnimData,			&DisposeActorAnimDataHook);
-	DetourAttach(&(PVOID&)AddAnimation,					&AddAnimationHook);
-	DetourAttach(&(PVOID&)AddSingle,					&AddSingleHook);
-	DetourAttach(&(PVOID&)AddMultiple,					&AddMultipleHook);
-	DetourAttach(&(PVOID&)GetAnimGroupSequenceSingle,	&GetAnimGroupSequenceSingleHook);
-	DetourAttach(&(PVOID&)GetAnimGroupSequenceMultiple,	&GetAnimGroupSequenceMultipleHook);
-	DetourAttach(&(PVOID&)NewAnimSequenceMultiple,		&NewAnimSequenceMultipleHook);
 #ifdef EXPERIMENTAL_FEATURE
+	DetourAttach(&(PVOID&)NewActorAnimData, &NewActorAnimDataHook);
+	DetourAttach(&(PVOID&)DisposeActorAnimData, &DisposeActorAnimDataHook);
+	DetourAttach(&(PVOID&)AddAnimation, &AddAnimationHook);
+	DetourAttach(&(PVOID&)AddSingle, &AddSingleHook);
+	DetourAttach(&(PVOID&)AddMultiple, &AddMultipleHook);
+	DetourAttach(&(PVOID&)GetAnimGroupSequenceSingle, &GetAnimGroupSequenceSingleHook);
+	DetourAttach(&(PVOID&)GetAnimGroupSequenceMultiple, &GetAnimGroupSequenceMultipleHook);
+	DetourAttach(&(PVOID&)NewAnimSequenceMultiple, &NewAnimSequenceMultipleHook);
+	DetourAttach(&(PVOID&)LoadAnimGroup, &LoadAnimGroupHook);
 	if (SettingsMain->IKFoot.Enabled) DetourAttach(&(PVOID&)ApplyActorAnimData, &ApplyActorAnimDataHook);
 #endif
-	DetourAttach(&(PVOID&)LoadAnimGroup,				&LoadAnimGroupHook);
 #ifdef EXPERIMENTAL_FEATURE
 
  	if(SettingsMain->CameraMode.Enabled){
@@ -96,20 +138,23 @@ void AttachHooks() {
 	SafeWrite8(0x008023A1,	sizeof(NiD3DPixelShaderEx));
 	SafeWrite8(0x00448843,	sizeof(TESRegionEx));
 	SafeWrite8(0x004A2EFF,	sizeof(TESRegionEx));
-	SafeWrite8(0x00474140,	sizeof(AnimSequenceSingleEx));
-	SafeWrite8(0x004741C0,	sizeof(AnimSequenceMultipleEx));
-	SafeWrite8(0x00564523,	sizeof(bhkCollisionObjectEx));
-	SafeWrite8(0x0089E983,	sizeof(bhkCollisionObjectEx));
-	SafeWrite8(0x0089EA16,	sizeof(bhkCollisionObjectEx));
 	SafeWrite32(0x0076BD75, sizeof(RenderManager));
+	SafeWrite32(0x00406775, sizeof(PlayerCharacterEx));
+	SafeWrite32(0x0046451E, sizeof(PlayerCharacterEx));
+#ifdef EXPERIMENTAL_FEATURES
 	SafeWrite32(0x004486ED, sizeof(TESWeatherEx));
 	SafeWrite32(0x0044CBE3, sizeof(TESWeatherEx));
+
+	SafeWrite8(0x00564523, sizeof(bhkCollisionObjectEx));
+	SafeWrite8(0x0089E983, sizeof(bhkCollisionObjectEx));
+	SafeWrite8(0x0089EA16, sizeof(bhkCollisionObjectEx));
+
+	SafeWrite8(0x00474140, sizeof(AnimSequenceSingleEx));
+	SafeWrite8(0x004741C0, sizeof(AnimSequenceMultipleEx));
 	SafeWrite32(0x004E3814, sizeof(ActorAnimDataEx));
 	SafeWrite32(0x004E3ADD, sizeof(ActorAnimDataEx));
 	SafeWrite32(0x00667E23, sizeof(ActorAnimDataEx));
 	SafeWrite32(0x00669258, sizeof(ActorAnimDataEx));
-	SafeWrite32(0x00406775, sizeof(PlayerCharacterEx));
-	SafeWrite32(0x0046451E, sizeof(PlayerCharacterEx));
 	SafeWrite32(0x005FA47C, sizeof(HighProcessEx));
 	SafeWrite32(0x00607582, sizeof(HighProcessEx));
 	SafeWrite32(0x0060791A, sizeof(HighProcessEx));
@@ -122,12 +167,21 @@ void AttachHooks() {
 	SafeWrite32(0x0069F2F2, sizeof(HighProcessEx));
 	SafeWrite32(0x0069F3D4, sizeof(HighProcessEx));
 
+	SafeWriteJump(Jumpers::NewAnimSequenceSingle::Hook, (UInt32)NewAnimSequenceSingleHook);
+	SafeWriteJump(Jumpers::RemoveSequence::Hook, (UInt32)RemoveSequenceHook);
+
+#endif // EXPERIMENTAL_FEATURES
+
 	SafeWrite8(0x00A38280, 0x5A); // Fixes the "purple water bug"
-	SafeWrite32(0x0049BFAF, 512); // Constructor
-	SafeWrite32(0x007C1045, 512); // RenderedSurface
-	SafeWrite32(0x007C104F, 512); // RenderedSurface
-	SafeWrite32(0x007C10F9, 512); // RenderedSurface
-	SafeWrite32(0x007C1103, 512); // RenderedSurface
+	SafeWrite32(0x0049BFAF, SettingsMain->WaterEngine.ReflectionMapSize); // Constructor
+	SafeWrite32(0x007C1045, SettingsMain->WaterEngine.ReflectionMapSize); // RenderedSurface
+	SafeWrite32(0x007C104F, SettingsMain->WaterEngine.ReflectionMapSize); // RenderedSurface
+	SafeWrite32(0x007C10F9, SettingsMain->WaterEngine.ReflectionMapSize); // RenderedSurface
+	SafeWrite32(0x007C1103, SettingsMain->WaterEngine.ReflectionMapSize); // RenderedSurface
+
+	SafeWrite8(0x0049EBAC, 0); // Avoids to change the shader for the skydome when underwaterb (avoid using Fade shaders)
+	SafeWriteJump(0x0053B11F, (UInt32)SetAtmosphereUnderwater); // Avoids to change atmosphere colors when underwater
+	SafeWriteJump(0x00542F63, 0x00542FC1); // Avoids to remove the sun over the scene when underwater
 
 	SafeWriteJump(Jumpers::DetectorWindow::CreateTreeViewHook,	(UInt32)DetectorWindowCreateTreeViewHook);
 	SafeWriteJump(Jumpers::DetectorWindow::DumpAttributesHook,	(UInt32)DetectorWindowDumpAttributesHook);
@@ -137,8 +191,6 @@ void AttachHooks() {
 	SafeWriteJump(Jumpers::SetRegionEditorName::Hook,			(UInt32)SetRegionEditorNameHook);
 	SafeWriteJump(Jumpers::SetWeatherEditorName::Hook,			(UInt32)SetWeatherEditorNameHook);
 	SafeWriteJump(Jumpers::HitEvent::Hook,						(UInt32)HitEventHook);
-	SafeWriteJump(Jumpers::NewAnimSequenceSingle::Hook,			(UInt32)NewAnimSequenceSingleHook);
-	SafeWriteJump(Jumpers::RemoveSequence::Hook,				(UInt32)RemoveSequenceHook);
 	SafeWriteJump(Jumpers::Shadows::RenderShadowMapHook,		(UInt32)RenderShadowMapHook);
 	SafeWriteJump(Jumpers::Shadows::AddCastShadowFlagHook,		(UInt32)AddCastShadowFlagHook);
 //	SafeWriteJump(Jumpers::WaterHeightMap::Hook,				(UInt32)WaterHeightMapHook);
@@ -162,13 +214,8 @@ void AttachHooks() {
 	SafeWrite8(0x0040CE11, 0); // Stops to clear the depth buffer when rendering the 1st person node
     SafeWriteNop(0x00498968, 2); // Stops Disabling refraction shaders when MSAA, Non detection path
     SafeWriteJump(0x004988D8, 0x0049896A);// Stops Disabling refraction shaders when MSAA, AMD Path
-    
-	if (SettingsMain->Shaders.Water) {
-		*Pointers::ShaderParams::WaterHighResolution = 1;
-		SafeWrite8(0x0049EBAC, 0); // Avoids to change the shader for the skydome when underwater
-		SafeWriteJump(0x0053B16F, 0x0053B20C); // Avoids to change atmosphere colors when underwater
-		SafeWriteJump(0x00542F63, 0x00542FC1); // Avoids to remove the sun over the scene when underwater
-	}
+ 
+	*Pointers::ShaderParams::WaterHighResolution = 1;
 
 	if (SettingsMain->Main.AnisotropicFilter >= 2) {
 		SafeWrite8(0x007BE1D3, SettingsMain->Main.AnisotropicFilter);
