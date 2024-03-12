@@ -126,10 +126,12 @@
   <ItemGroup>
     <ClInclude Include="..\TESReloaded\Core\CameraManager.h" />
     <ClInclude Include="..\TESReloaded\Core\CommandManager.h" />
+    <ClInclude Include="..\TESReloaded\Core\DebugManager.h" />
     <ClInclude Include="..\TESReloaded\Core\Device\Device.h" />
     <ClInclude Include="..\TESReloaded\Core\Device\Hook.h" />
     <ClInclude Include="..\TESReloaded\Core\EquipmentManager.h" />
     <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h" />
+    <ClCompile Include="..\TESReloaded\Core\DebugManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\Hooks\FormsCommon.cpp" />
     <ClCompile Include="..\TESReloaded\Core\Hooks\GameCommon.cpp" />
     <ClCompile Include="..\TESReloaded\Core\Hooks\Oblivion\Animation.cpp" />

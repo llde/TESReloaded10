@@ -20,6 +20,7 @@ class OcclusionManager; extern OcclusionManager*	TheOcclusionManager;
 class EquipmentManager; extern EquipmentManager*	TheEquipmentManager;
 class ScriptManager;	extern ScriptManager*		TheScriptManager;
 class CameraManager;	extern CameraManager*		TheCameraManager;
+class DebugManager;     extern DebugManager*		TheDebugManager;
 
 class Main;					extern Main*					Global;
 class TES;					extern TES*						Tes;
@@ -43,5 +44,6 @@ class ShadowSceneNode;		extern ShadowSceneNode*			SceneNode;
 #include "ShadowManager.h"
 #include "OcclusionManager.h"
 #include "CameraManager.h"
+#include "DebugManager.h"
 
 void InitializeManagers();

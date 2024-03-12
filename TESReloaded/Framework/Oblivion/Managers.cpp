@@ -13,6 +13,7 @@ OcclusionManager*	TheOcclusionManager = NULL;
 EquipmentManager*	TheEquipmentManager = NULL;
 ScriptManager*		TheScriptManager = NULL;
 CameraManager*		TheCameraManager = NULL;
+DebugManager*		TheDebugManager = nullptr;
 
 Main*					Global			 = NULL;
 TES*					Tes				 = NULL;
@@ -35,5 +36,4 @@ void InitializeManagers() {
 	EquipmentManager::Initialize();
 	ScriptManager::Initialize();
 	CameraManager::Initialize();
-
 }

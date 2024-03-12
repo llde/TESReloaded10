@@ -209,6 +209,9 @@
     <ClInclude Include="..\TESReloaded\Core\SettingsStructureCommon.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\DebugManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TESReloaded\Core\CameraManager.cpp">
@@ -351,6 +354,9 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\Hooks\Script.cpp">
       <Filter>Core\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\DebugManager.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

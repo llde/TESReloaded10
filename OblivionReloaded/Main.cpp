@@ -22,9 +22,9 @@ extern "C" {
 	#if WaitForDebugger
 		while (!IsDebuggerPresent()) Sleep(10);
 	#endif
-	#if HookDevice
+#endif
+#if HookDevice
 		AttachDeviceHooks();
-	#endif
 #endif
 
 		Logger::Initialize("OblivionReloaded.log");
@@ -35,6 +35,7 @@ extern "C" {
 			SettingManager::Initialize();
 			TheSettingManager->SetGame(ffi::Game::Oblivion);
 			TheSettingManager->LoadSettings();
+			DebugManager::Initialize(Interface);
 			AttachHooks();
 		}
 		else {
