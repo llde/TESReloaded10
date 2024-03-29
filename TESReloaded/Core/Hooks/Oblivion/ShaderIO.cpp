@@ -41,7 +41,7 @@ void __cdecl SetShaderPackageHook(int Arg1, int Arg2, UInt8 Force1XShaders, int 
 	
 	UInt32* ShaderPackage = (UInt32*)0x00B42F48;
 	UInt32* ShaderPackageMax = (UInt32*)0x00B42D74;
-
+	Logger::Log("%u %u %u %u %s %u", Arg1,Arg2,Force1XShaders,Arg4, GraphicsName, Arg6);
 	SetShaderPackage(Arg1, Arg2, Force1XShaders, Arg4, GraphicsName, Arg6);
 	*ShaderPackage = 7;
 	*ShaderPackageMax = 7;

@@ -216,7 +216,8 @@ void AttachHooks() {
 	SafeWriteJump(0x00497D5A, 0x00497D63); // Unlocks antialising bar if HDR is enabled (video menu)
 	SafeWriteJump(0x005DF8E9, 0x005DF983); // Skips antialising deactivation changing HDR (video menu)
 	SafeWriteJump(0x006738B1, 0x00673935); // Cancels the fPlayerDeathReloadTime
- 
+	SafeWrite8(0x0040CE11, 0); // Stops to clear the depth buffer when rendering the 1st person node
+
 	*Pointers::ShaderParams::WaterHighResolution = 1;
 
 	if (SettingsMain->Main.AnisotropicFilter >= 2) {
