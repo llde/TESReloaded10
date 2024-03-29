@@ -4,7 +4,10 @@ NiD3DVertexShader* (__thiscall* CreateVertexShader)(BSShader*, char*, char*, cha
 NiD3DVertexShader* __fastcall CreateVertexShaderHook(BSShader* This, UInt32 edx, char* FileName, char* Arg2, char* ShaderType, char* ShaderName, UInt32 Arg5, UInt32 Arg6) {
 
 	NiD3DVertexShaderEx* VertexShader = (NiD3DVertexShaderEx*)(*CreateVertexShader)(This, FileName, Arg2, ShaderType, ShaderName, Arg5, Arg6);
-
+	if (!VertexShader) {
+		Logger::Log("[WARNING] Vertex Shader %s failed to load. This is caused by mods modifying shaderpackages by OBMM.", ShaderName);
+		return VertexShader;
+	}
 	VertexShader->ShaderProg = NULL;
 	VertexShader->ShaderProgE = NULL;
 	VertexShader->ShaderProgI = NULL;
@@ -19,7 +22,10 @@ NiD3DPixelShader* (__thiscall* CreatePixelShader)(BSShader*, char*, char*, char*
 NiD3DPixelShader* __fastcall CreatePixelShaderHook(BSShader* This, UInt32 edx, char* FileName, char* Arg2, char* ShaderType, char* ShaderName, UInt32 Arg5, UInt32 Arg6) {
 
 	NiD3DPixelShaderEx* PixelShader = (NiD3DPixelShaderEx*)(*CreatePixelShader)(This, FileName, Arg2, ShaderType, ShaderName, Arg5, Arg6);
-
+	if (!PixelShader) {
+		Logger::Log("[WARNING] Pixel Shader %s failed to load. This is caused by mods modifying shaderpackages by OBMM.", ShaderName);
+		return PixelShader;
+	}
 	PixelShader->ShaderProg = NULL;
 	PixelShader->ShaderProgE = NULL;
 	PixelShader->ShaderProgI = NULL;

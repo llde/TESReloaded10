@@ -22,7 +22,7 @@ void EquipmentManager::LoadForms() {
 		OnBackAnim->flags = 0;
 		OnBackAnim->SetFile("Characters\\_Male\\IdleAnims\\oronbackanim.kf");
 		OnBackAnim->animFlags = TESIdleForm::AnimFlag::kAnimFlag_SpecialIdle;
-		DataHandler->AddData(OnBackAnim);
+		DataHandler->AddDagta(OnBackAnim);
 	}
 #endif
 }

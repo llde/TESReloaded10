@@ -19,11 +19,12 @@ void __cdecl NameThread(int threadID, const char* name) {
 
 static const UInt32 kRetU = 0x0053B175;
 static const UInt32 kRet = 0x0053B20C;
-static const UInt32 SceneGraph_GetChildNiAvNodeVtbl = 0x005645B0;
 void __declspec(naked) SetAtmosphereUnderwater() {
 	__asm {
 		pushad
 	}
+//	Logger::Log("%u", Tes->sky->unk0DC);
+//	Tes->sky->unk0DC = 0;
 	if (TheSettingManager->Config->WaterEngine.SetAtmoshpere) {
 		__asm {
 			popad 
@@ -43,7 +44,6 @@ void AttachHooks() {
 	HMODULE Module = NULL;
 	char Filename[MAX_PATH];
 	ffi::Config* SettingsMain = TheSettingManager->Config;
-
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&(PVOID&)RemoveTexture, &RemoveTextureH);
@@ -141,9 +141,10 @@ void AttachHooks() {
 	SafeWrite32(0x0076BD75, sizeof(RenderManager));
 	SafeWrite32(0x00406775, sizeof(PlayerCharacterEx));
 	SafeWrite32(0x0046451E, sizeof(PlayerCharacterEx));
-#ifdef EXPERIMENTAL_FEATURES
 	SafeWrite32(0x004486ED, sizeof(TESWeatherEx));
 	SafeWrite32(0x0044CBE3, sizeof(TESWeatherEx));
+
+#ifdef EXPERIMENTAL_FEATURES
 
 	SafeWrite8(0x00564523, sizeof(bhkCollisionObjectEx));
 	SafeWrite8(0x0089E983, sizeof(bhkCollisionObjectEx));
@@ -180,8 +181,13 @@ void AttachHooks() {
 	SafeWrite32(0x007C1103, SettingsMain->WaterEngine.ReflectionMapSize); // RenderedSurface
 
 	SafeWrite8(0x0049EBAC, 0); // Avoids to change the shader for the skydome when underwaterb (avoid using Fade shaders)
-	SafeWriteJump(0x0053B11F, (UInt32)SetAtmosphereUnderwater); // Avoids to change atmosphere colors when underwater
-	SafeWriteJump(0x00542F63, 0x00542FC1); // Avoids to remove the sun over the scene when underwater
+	SafeWriteJump(0x0053B11F, (UInt32)SetAtmosphereUnderwater); // Avoids to change atmosphere colors when underwater. 
+	if(SettingsMain->Main.RemoveUnderwater) SafeWriteJump(0x00542F63, 0x00542FC1); // Avoids to remove the sun over the scene when underwater. Prevent rendering the vanilla underwater fog. Actually turn the Sky green
+	if (!SettingsMain->Main.RemoveUnderwater) 
+		Logger::Log("[WARNING] RemoveUnderwater=false is incompatible with showing the Sun when underwater. Vanilla Sun behaviour restored. ");
+	if (!SettingsMain->Main.RemoveUnderwater && SettingsMain->Main.RemoveFogPass)
+		Logger::Log("[WARNING] RemoveUnderwater=false and RemoveFogPass=true are incompatible. Disabling RemoveFogPass. Could experience visual problems");
+
 
 	SafeWriteJump(Jumpers::DetectorWindow::CreateTreeViewHook,	(UInt32)DetectorWindowCreateTreeViewHook);
 	SafeWriteJump(Jumpers::DetectorWindow::DumpAttributesHook,	(UInt32)DetectorWindowDumpAttributesHook);
@@ -195,8 +201,8 @@ void AttachHooks() {
 	SafeWriteJump(Jumpers::Shadows::AddCastShadowFlagHook,		(UInt32)AddCastShadowFlagHook);
 //	SafeWriteJump(Jumpers::WaterHeightMap::Hook,				(UInt32)WaterHeightMapHook);
 	SafeWriteJump(Jumpers::EndProcess::Hook,					(UInt32)EndProcessHook);
-    
-    if(SettingsMain->Main.RemoveFogPass) 	SafeWriteJump(Jumpers::SkipFogPass::Hook, (UInt32)SkipFogPassHook);
+    /*RemoveUnderwater must be true for this hook to not cause glitches*/
+    if(SettingsMain->Main.RemoveFogPass && SettingsMain->Main.RemoveUnderwater) 	SafeWriteJump(Jumpers::SkipFogPass::Hook, (UInt32)SkipFogPassHook);
 
 	SafeWriteJump(0x00553EAC, 0x00553EB2); // Patches the use of Lighting30Shader only for the hair
 	SafeWriteJump(0x007D1BC4, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
@@ -205,15 +211,11 @@ void AttachHooks() {
 	SafeWriteJump(0x0049C8CB, 0x0049C931); // Avoids to manage the cells culling for reflections
 	SafeWriteJump(0x004965A8, 0x0049660F); // Skip the scale in the detector window
 	SafeWriteJump(0x0049849A, 0x004984A0); // Skips antialiasing deactivation if HDR is enabled on the D3DDevice
-	SafeWriteJump(0x004984BD, 0x004984CD); // Skips antialiasing deactivation if AllowScreenshot is enabled
 	SafeWriteJump(0x005DEE60, 0x005DEE68); // Skips antialiasing deactivation if HDR is enabled on loading the video menu
 	SafeWriteJump(0x005DF69E, 0x005DF755); // Skips HDR deactivation changing antialising (video menu)
 	SafeWriteJump(0x00497D5A, 0x00497D63); // Unlocks antialising bar if HDR is enabled (video menu)
 	SafeWriteJump(0x005DF8E9, 0x005DF983); // Skips antialising deactivation changing HDR (video menu)
 	SafeWriteJump(0x006738B1, 0x00673935); // Cancels the fPlayerDeathReloadTime
-	SafeWrite8(0x0040CE11, 0); // Stops to clear the depth buffer when rendering the 1st person node
-    SafeWriteNop(0x00498968, 2); // Stops Disabling refraction shaders when MSAA, Non detection path
-    SafeWriteJump(0x004988D8, 0x0049896A);// Stops Disabling refraction shaders when MSAA, AMD Path
  
 	*Pointers::ShaderParams::WaterHighResolution = 1;
 
@@ -280,7 +282,6 @@ void AttachHooks() {
 		SafeWriteJump(Jumpers::Camera::HeadTrackingHook,		(UInt32)HeadTrackingHook);
 		SafeWriteJump(Jumpers::Camera::SpineTrackingHook,		(UInt32)SpineTrackingHook);
 		SafeWriteJump(Jumpers::Camera::SetReticleOffsetHook,	(UInt32)SetReticleOffsetHook);
-		SafeWriteJump(0x0066B769, 0x0066B795); // Does not lower the player Z axis value (fixes the bug of the camera on feet after resurrection)
 		SafeWriteJump(0x00666704, 0x0066672D); // Enables the zoom with the bow
 	}
 

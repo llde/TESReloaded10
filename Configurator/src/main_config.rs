@@ -400,7 +400,7 @@ impl Default for WaterEngine{
     fn default() -> Self{
         WaterEngine{
             ReflectionMapSize : 512,
-            SetAtmoshpere : false
+            SetAtmoshpere : false,
         }
     }
 }

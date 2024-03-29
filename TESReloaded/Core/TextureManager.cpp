@@ -123,7 +123,6 @@ void TextureManager::Initialize() {
 		// create one texture per Exterior ShadowMap type
 		float multiple = i == ShadowManager::ShadowMapTypeEnum::MapLod ? 2.0f : 1.0f; // double the size of lod map only
 		ShadowMapSize = ShadowsExteriors->ShadowMapResolution * multiple;
-		Logger::Log("%u  %u", ShadowMapSize, ShadowsExteriors->ShadowMode);
 		if (FAILED(Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_G32R32F, D3DPOOL_DEFAULT, &TheTextureManager->ShadowMapTexture[i], NULL))) {
 			Logger::Log("Cannot create texture");
 		}

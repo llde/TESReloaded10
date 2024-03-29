@@ -1,4 +1,5 @@
 #pragma once
+#include "GameNi.h"
 
 class DetectorWindow;
 class INISettingCollection;
@@ -1021,10 +1022,9 @@ assert(sizeof(TESWeather) == 0x148);
 
 class TESWeatherEx : public TESWeather {
 public:
-	ColorData	colorsb[kNumColorTypes];
 	char		EditorName[40];
 };
-assert(sizeof(TESWeatherEx) == 0x210);
+assert(sizeof(TESWeatherEx) == 0x170);
 
 class TESClimate : public TESForm {
 public:
@@ -3145,8 +3145,8 @@ assert(sizeof(Stars) == 0x010);
 
 class Clouds : public SkyObject {
 public:
-	UInt32			unk08;					// 08
-	UInt32			unk0C;					// 0C
+	NiNode*			unk08;					// 08
+	NiNode*			unk0C;					// 0C
 	UInt32			unk10;					// 10
 	UInt32			unk14;					// 14
 };
@@ -4130,6 +4130,8 @@ namespace Pointers {
 		static char* (__cdecl* GetPassDescription)(UInt32) = (char* (__cdecl*)(UInt32))0x007B4920;
 		static void  (__cdecl* BeginRendering)(UInt32, NiRenderTargetGroup*) = (void (__cdecl*)(UInt32, NiRenderTargetGroup*))0x007D7280;
 		static void  (* EndRendering)() = (void (*)())0x007D72D0;
+		static NiSourceTexture* (__cdecl* TextureLoadByFilename)(const char*, NiTexture::FormatPrefs*, bool) = (NiSourceTexture* (__cdecl*)(const char*, NiTexture::FormatPrefs*, bool))0x00701E00;
+
 	}
 	namespace VirtualTables {
 		static const void* NiNode				= (void*)0x00A7E38C;

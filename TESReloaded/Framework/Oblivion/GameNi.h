@@ -295,6 +295,9 @@ public:
 	virtual Entry*	AllocateEntry();
 	virtual void	Free(Entry* entry);
 
+	void FreeAllNodes() {
+		ThisCall(0x00573880, this);
+	}
 	Entry*	start;		// 004
 	Entry*	end;		// 008
 	UInt32	numItems;	// 00C
@@ -947,13 +950,18 @@ public:
 
 	UInt8			unk030;				// 030 - is static?
 	UInt8			unk031[3];			// 031
-	void*			unk034;				// 034
+	const char*		unk034;				// 034 PArtial name maybe?
 	const char*		fileName;			// 038
 	NiPixelData*	pixelData;			// 03C
 	UInt8			loadDirectToRender;	// 040
 	UInt8			persistRenderData;	// 041
 	UInt8			pad042[2];			// 042
 	void*			unk044;				// 044
+
+	NiSourceTexture() {
+		memset(this, 0, sizeof(NiSourceTexture));
+		ThisCall(0x00701CD0, this);
+	}
 };
 assert(sizeof(NiSourceTexture) == 0x048);
 
@@ -2047,6 +2055,23 @@ public:
 	UInt32						refID;		// 098
 };
 assert(sizeof(BSShaderLightingProperty) == 0x09C);
+
+class WaterShaderProperty : public BSShaderProperty {
+public:
+	UInt32	unk06C;		// 06C
+	UInt8	unk070;		// 070
+	UInt8	unk071;		// 071
+	UInt8	unk072;		// 072
+	UInt8	pad073;		// 073
+	UInt32	unk074;		// 074
+	UInt32	unk078;		// 078
+	float	unk07C;		// 07C - init'd to 1
+	float	unk080;		// 080
+	UInt8	unk084;		// 084
+	UInt8	unk085;		// 085
+	UInt8	pad086[2];	// 086
+};
+assert(sizeof(WaterShaderProperty) == 0x088);
 
 class BSShaderPPLightingProperty : public BSShaderLightingProperty {
 public:
