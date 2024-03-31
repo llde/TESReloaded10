@@ -3939,7 +3939,16 @@ public:
 		kFlags_HasHardware3D = 1 << 2,
 	};
 
-	void					Play(TESSound* Sound) { TESGameSound* GameSound = (TESGameSound*)ThisCall(0x006AE0A0, this, Sound->refID, 0x101, 0); ThisCall(0x006B7190, GameSound, 0); ThisCall(0x006B73E0, GameSound); }
+	void  Play(TESSound* Sound) {
+		TESGameSound* GameSound = (TESGameSound*)ThisCall(0x006AE0A0, this, Sound->refID, 0x101, 0);
+		if (GameSound) {
+			ThisCall(0x006B7190, GameSound, 0);
+			ThisCall(0x006B73E0, GameSound);
+		}
+		else {
+			Logger::Log("[ERROR] Missing sound file %s", Sound->soundFile);
+		}
+	}
 	
 	UInt32					unk000;						// 000
 	UInt32					unk004;						// 004
