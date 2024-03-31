@@ -6,14 +6,11 @@
 float4 AmbientColor : register(c1);
 float4 PSLightColor[4] : register(c2);
 float4 Toggles : register(c7);
-float4 TESR_ShadowData : register(c8);
 float4 TESR_ParallaxData : register(c9);
 
 sampler2D BaseMap : register(s0);
 sampler2D NormalMap : register(s1);
 sampler2D AttenuationMap : register(s5);
-sampler2D TESR_ShadowMapBufferNear : register(s6) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-sampler2D TESR_ShadowMapBufferFar : register(s7) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 // Registers:
 //
@@ -36,9 +33,7 @@ struct VS_INPUT {
     float3 texcoord_1 : TEXCOORD1_centroid;
     float3 texcoord_2 : TEXCOORD2_centroid;
     float4 texcoord_4 : TEXCOORD4;
-	float4 texcoord_5 : TEXCOORD5;
     float3 texcoord_6 : TEXCOORD6_centroid;
-	float4 texcoord_7 : TEXCOORD7;
     float3 LCOLOR_0 : COLOR0;
     float4 LCOLOR_1 : COLOR1;
 };
@@ -48,7 +43,6 @@ struct VS_OUTPUT {
 };
 
 #include "..\Includes\PAR.hlsl"
-#include "..\Includes\Shadow.hlsl"
 
 VS_OUTPUT main(VS_INPUT IN) {
     VS_OUTPUT OUT;
@@ -77,7 +71,7 @@ VS_OUTPUT main(VS_INPUT IN) {
     q4.xyz = normalize(expand(noxel3.xyz));
     q5.xyz = saturate((1 - att0.x) - att1.x) * (shades(q4.xyz, normalize(IN.texcoord_2.xyz)) * PSLightColor[1].rgb);
     q8.xyz = (Toggles.x <= 0.0 ? r0.xyz : (r0.xyz * IN.LCOLOR_0.xyz));
-    q6.xyz = (GetLightAmount(IN.texcoord_5, IN.texcoord_7) * shades(q4.xyz, IN.texcoord_1.xyz) * PSLightColor[0].rgb + q5.xyz) + AmbientColor.rgb;
+    q6.xyz = (shades(q4.xyz, IN.texcoord_1.xyz) * PSLightColor[0].rgb + q5.xyz) + AmbientColor.rgb;
     q9.xyz = max(q6.xyz, 0) * q8.xyz;
     q10.xyz = (Toggles.y <= 0.0 ? q9.xyz : ((IN.LCOLOR_1.w * (IN.LCOLOR_1.xyz - q9.xyz)) + q9.xyz));
     OUT.color_0.a = AmbientColor.a;

@@ -8,15 +8,11 @@ float4 PSLightColor[4] : register(c2);
 float4 Toggles : register(c7);
 float4 TESR_SkinData : register(c8);
 float4 TESR_SkinColor : register(c9);
-float4 TESR_ShadowData : register(c10);
-float4 TESR_ShadowLightPosition[4] : register(c11);
-float4 TESR_ShadowCubeMapBlend : register(c15);
 
 sampler2D BaseMap : register(s0);
 sampler2D NormalMap : register(s1);
 sampler2D FaceGenMap0 : register(s2);
 sampler2D FaceGenMap1 : register(s3);
-samplerCUBE TESR_ShadowCubeMapBuffer0 : register(s8) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 // Registers:
 //
@@ -38,7 +34,6 @@ struct VS_INPUT {
     float2 BaseUV : TEXCOORD0;
     float3 texcoord_1 : TEXCOORD1_centroid;
     float3 texcoord_6 : TEXCOORD6_centroid;
-	float4 texcoord_7 : TEXCOORD7;
     float3 LCOLOR_0 : COLOR0;
     float4 LCOLOR_1 : COLOR1;
 };
@@ -48,7 +43,6 @@ struct VS_OUTPUT {
 };
 
 #include "..\Includes\Skin.hlsl"
-#include "..\Includes\ShadowCube.hlsl"
 
 VS_OUTPUT main(VS_INPUT IN) {
     VS_OUTPUT OUT;
@@ -73,9 +67,6 @@ VS_OUTPUT main(VS_INPUT IN) {
     float4 r2;
     float3 r3;
 	float3 camera;
-	float Shadow = 1.0f;
-	
-	if (TESR_ShadowLightPosition[0].w) Shadow *= GetLightAmountSkin(TESR_ShadowCubeMapBuffer0, IN.texcoord_7, TESR_ShadowLightPosition[0], TESR_ShadowCubeMapBlend.x);
     noxel1.xyz = tex2D(NormalMap, IN.BaseUV.xy).xyz;
     r2.xyzw = tex2D(FaceGenMap1, IN.BaseUV.xy);
     r1.xyzw = tex2D(FaceGenMap0, IN.BaseUV.xy);
@@ -88,7 +79,7 @@ VS_OUTPUT main(VS_INPUT IN) {
     r3.xyz = ((q4.x * sqr(q4.x)) * PSLightColor[0].rgb) * 0.5;
 	q6.xyz = shade(q2.xyz, IN.texcoord_1.xyz) * PSLightColor[0].rgb + r3.xyz;
 	
-	q6.xyz = Shadow * Skin(q6, PSLightColor[0].rgb, camera, IN.texcoord_1, q2) + AmbientColor.rgb;
+	q6.xyz = Skin(q6, PSLightColor[0].rgb, camera, IN.texcoord_1, q2) + AmbientColor.rgb;
 	
     q8.xyz = max(q6.xyz, 0) * q0.xyz;
     q9.xyz = (Toggles.y <= 0.0 ? q8.xyz : ((IN.LCOLOR_1.w * (IN.LCOLOR_1.xyz - q8.xyz)) + q8.xyz));

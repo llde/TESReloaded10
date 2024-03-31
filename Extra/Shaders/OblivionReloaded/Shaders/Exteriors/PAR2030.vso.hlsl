@@ -6,7 +6,6 @@
 row_major float4x4 ModelViewProj : register(c0);
 float3 LightDirection[3] : register(c13);
 float4 EyePosition : register(c25);
-row_major float4x4 TESR_ShadowCameraToLightTransform[2] : register(c34);
 
 // Registers:
 //
@@ -36,9 +35,7 @@ struct VS_OUTPUT {
     float2 texcoord_0 : TEXCOORD0;
     float3 texcoord_1 : TEXCOORD1;
     float3 texcoord_3 : TEXCOORD3;
-	float4 texcoord_5 : TEXCOORD5;
     float3 texcoord_6 : TEXCOORD6;
-	float4 texcoord_7 : TEXCOORD7;
 };
 
 // Code:
@@ -62,8 +59,6 @@ VS_OUTPUT main(VS_INPUT IN) {
     OUT.texcoord_3.xyz = normalize(mul(float3x3(IN.LTANGENT.xyz, IN.LBINORMAL.xyz, IN.LNORMAL.xyz), q3.xyz));
     q16.xyz = mul(float3x3(IN.LTANGENT.xyz, IN.LBINORMAL.xyz, IN.LNORMAL.xyz), eye0.xyz);
     OUT.texcoord_6.xyz = normalize(q16.xyz);
-	OUT.texcoord_5.xyzw = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[0]);
-	OUT.texcoord_7.xyzw = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[1]);
     return OUT;
 };
 

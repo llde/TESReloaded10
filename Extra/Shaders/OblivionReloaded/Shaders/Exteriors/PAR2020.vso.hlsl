@@ -11,9 +11,6 @@ float3 LightDirection[3] : register(c13);
 float4 LightPosition[3] : register(c16);
 row_major float4x4 ModelViewProj : register(c0);
 
-
-row_major float4x4 TESR_ShadowCameraToLightTransform[2] : register(c34);
-
 // Registers:
 //
 //   Name           Reg   Size
@@ -51,8 +48,6 @@ struct VS_OUTPUT {
     float4 texcoord_4 : TEXCOORD4;
     float4 texcoord_5 : TEXCOORD5;
     float3 texcoord_7 : TEXCOORD7;
-    float4 texcoord_8 : TEXCOORD8;
-    float4 texcoord_6 : TEXCOORD6;
 };
 
 // Code:
@@ -79,9 +74,6 @@ VS_OUTPUT main(VS_INPUT IN) {
     OUT.texcoord_5.xyz = compress(lit3.xyz / LightPosition[2].w);	// [-1,+1] to [0,1]
     OUT.texcoord_7.xyz = normalize(mul(TanSpaceProj, normalize(EyePosition.xyz - IN.position.xyz)));
     
-	OUT.texcoord_8.xyzw = mul(OUT.position, TESR_ShadowCameraToLightTransform[0]);
-	OUT.texcoord_6.xyzw = mul(OUT.position, TESR_ShadowCameraToLightTransform[1]);
-
     return OUT;
 };
 

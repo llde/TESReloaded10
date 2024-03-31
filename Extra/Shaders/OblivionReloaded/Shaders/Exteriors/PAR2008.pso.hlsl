@@ -6,13 +6,10 @@
 float4 AmbientColor : register(c1);
 float4 PSLightColor[4] : register(c2);
 float4 Toggles : register(c7);
-float4 TESR_ShadowData : register(c8);
 float4 TESR_ParallaxData : register(c9);
 
 sampler2D BaseMap : register(s0);
 sampler2D NormalMap : register(s1);
-sampler2D TESR_ShadowMapBufferNear : register(s6) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-sampler2D TESR_ShadowMapBufferFar : register(s7) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 // Registers:
 //
@@ -32,9 +29,7 @@ struct VS_INPUT {
     float2 BaseUV : TEXCOORD0;
     float3 texcoord_1 : TEXCOORD1_centroid;
     float3 texcoord_3 : TEXCOORD3_centroid;
-	float4 texcoord_5 : TEXCOORD5;
     float3 texcoord_6 : TEXCOORD6_centroid;
-	float4 texcoord_7 : TEXCOORD7;
     float3 LCOLOR_0 : COLOR0;
     float4 LCOLOR_1 : COLOR1;
 };
@@ -44,7 +39,6 @@ struct VS_OUTPUT {
 };
 
 #include "..\Includes\PAR.hlsl"
-#include "..\Includes\Shadow.hlsl"
 
 VS_OUTPUT main(VS_INPUT IN) {
     VS_OUTPUT OUT;
@@ -62,7 +56,6 @@ VS_OUTPUT main(VS_INPUT IN) {
     float4 r0;
     float3 r1;
     float2 uv;
-	float Shadow;
 	
 	uv.xy = ParallaxMapping(IN.BaseUV, IN.texcoord_6);
     r0.xyzw = tex2D(BaseMap, uv.xy);
@@ -72,8 +65,7 @@ VS_OUTPUT main(VS_INPUT IN) {
     q4.x = dot(q3.xyz, IN.texcoord_1.xyz);
     q6.xyz = saturate((0.2 >= q4.x ? (q5.x * max(q4.x + 0.5, 0)) : q5.x) * PSLightColor[0].rgb);
     r1.xyz = (Toggles.x <= 0.0 ? r0.xyz : (r0.xyz * IN.LCOLOR_0.xyz));
-	Shadow = GetLightAmount(IN.texcoord_5, IN.texcoord_7);	
-    q15.xyz = (r1.xyz * max((Shadow * saturate(q4.x) * PSLightColor[0].rgb) + AmbientColor.rgb, 0)) + (q6.xyz * Shadow);
+    q15.xyz = (r1.xyz * max((saturate(q4.x) * PSLightColor[0].rgb) + AmbientColor.rgb, 0)) + (q6.xyz );
     OUT.color_0.a = AmbientColor.a;
     OUT.color_0.rgb = (Toggles.y <= 0.0 ? q15.xyz : lerp(q15.xyz, IN.LCOLOR_1.xyz, IN.LCOLOR_1.w));
     return OUT;

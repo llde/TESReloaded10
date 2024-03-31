@@ -7,7 +7,6 @@ row_major float4x4 SkinModelViewProj : register(c1);
 float3 LightDirection[3] : register(c13);
 float4 LightPosition[3] : register(c16);
 float4 EyePosition : register(c25);
-row_major float4x4 TESR_InvViewProjectionTransform : register(c34);
 float4 Bones[54] : register(c42);
 //
 //
@@ -51,7 +50,6 @@ struct VS_OUTPUT {
     float4 Att1UV : TEXCOORD4;
 	float4 Att2UV : TEXCOORD5;
     float3 CameraDir : TEXCOORD6;
-	float4 texcoord_7 : TEXCOORD7;
 };
 
 // Code:
@@ -142,7 +140,6 @@ VS_OUTPUT main(VS_INPUT IN) {
 	OUT.Att2UV.w = 0.5;
 	OUT.Att2UV.xyz = compress(lit5.xyz / LightPosition[2].w);
     OUT.CameraDir.xyz = normalize(eye49.xyz);
-	OUT.texcoord_7.xyzw = mul(mdl40.xyzw, TESR_InvViewProjectionTransform);
     return OUT;
 };
 

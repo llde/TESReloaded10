@@ -4,11 +4,7 @@
 // Parameters:
 
 float4 AlphaTestRef : register(c3);
-float4 TESR_ShadowData : register(c5);
-
 sampler2D DiffuseMap : register(s0);
-sampler2D TESR_ShadowMapBufferNear : register(s1) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-sampler2D TESR_ShadowMapBufferFar : register(s2) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 // Registers:
 //
@@ -33,7 +29,7 @@ struct VS_OUTPUT {
     float4 color_0 : COLOR0;
 };
 
-#include "Includes\Shadow.hlsl"
+//#include "Includes\Shadow.hlsl"
 
 VS_OUTPUT main(VS_INPUT IN) {
     VS_OUTPUT OUT;
@@ -42,7 +38,7 @@ VS_OUTPUT main(VS_INPUT IN) {
     float4 r0;
 
     r0.xyzw = tex2D(DiffuseMap, IN.DiffuseUV.xy);
-    q0.xyz = GetLightAmountGrass(IN.texcoord_6) * IN.texcoord_5.xyz + IN.texcoord_4.xyz;
+    q0.xyz = /*GetLightAmountGrass(IN.texcoord_6) * */ IN.texcoord_5.xyz + IN.texcoord_4.xyz;
     OUT.color_0.a = (AlphaTestRef.x >= r0.w ? 0 : IN.texcoord_5.w);
     OUT.color_0.rgb = (r0.xyz * q0.xyz) + ((IN.LCOLOR_0.xyz - (r0.xyz * q0.xyz)) * IN.LCOLOR_0.w);
     return OUT;

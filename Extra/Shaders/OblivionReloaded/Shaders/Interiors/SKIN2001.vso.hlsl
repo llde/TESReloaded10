@@ -8,7 +8,6 @@ float3 LightDirection[3] : register(c13);
 float4 FogParam : register(c23);
 float3 FogColor : register(c24);
 float4 EyePosition : register(c25);
-row_major float4x4 TESR_InvViewProjectionTransform : register(c34);
 float4 Bones[54] : register(c42);
 
 // Registers:
@@ -49,7 +48,6 @@ struct VS_OUTPUT {
     float2 texcoord_0 : TEXCOORD0;
     float3 texcoord_1 : TEXCOORD1;
     float3 texcoord_6 : TEXCOORD6;
-	float4 texcoord_7 : TEXCOORD7;
 };
 
 // Code:
@@ -151,7 +149,6 @@ VS_OUTPUT main(VS_INPUT IN) {
     OUT.texcoord_0.xy = IN.LTEXCOORD_0.xy;
     OUT.texcoord_1.xyz = normalize(r4.xyz);
     OUT.texcoord_6.xyz = eye35.xyz;
-	OUT.texcoord_7.xyzw = mul(mdl14.xyzw, TESR_InvViewProjectionTransform);
     return OUT;
 	
 };

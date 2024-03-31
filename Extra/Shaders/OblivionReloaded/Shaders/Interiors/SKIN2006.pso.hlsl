@@ -7,17 +7,10 @@ float4 AmbientColor : register(c1);
 float4 PSLightColor[4] : register(c2);
 float4 TESR_SkinData : register(c8);
 float4 TESR_SkinColor : register(c9);
-float4 TESR_ShadowData : register(c10);
-float4 TESR_ShadowLightPosition[4] : register(c11);
-float4 TESR_ShadowCubeMapBlend : register(c15);
 
 sampler2D BaseMap : register(s0);
 sampler2D NormalMap : register(s1);
 sampler2D AttenuationMap : register(s4);
-samplerCUBE TESR_ShadowCubeMapBuffer0 : register(s8) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer1 : register(s9) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer2 : register(s10) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer3 : register(s11) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 //
 //
@@ -45,7 +38,6 @@ struct VS_OUTPUT {
     float4 Att1UV : TEXCOORD4;
 	float4 Att2UV : TEXCOORD5;
     float3 CameraDir : TEXCOORD6_centroid;
-	float4 texcoord_7 : TEXCOORD7;
 };
 
 struct PS_OUTPUT {
@@ -55,7 +47,6 @@ struct PS_OUTPUT {
 // Code:
 
 #include "..\Includes\Skin.hlsl"
-#include "..\Includes\ShadowCube.hlsl"
 
 PS_OUTPUT main(VS_OUTPUT IN) {
     PS_OUTPUT OUT;
@@ -80,13 +71,8 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     float3 q9;
     float4 r0;
     float3 r3;
-	float Shadow = 1.0f;
 
-	if (TESR_ShadowLightPosition[0].w) Shadow *= GetLightAmountSkin(TESR_ShadowCubeMapBuffer0, IN.texcoord_7, TESR_ShadowLightPosition[0], TESR_ShadowCubeMapBlend.x);
-	if (TESR_ShadowLightPosition[1].w) Shadow *= GetLightAmountSkin(TESR_ShadowCubeMapBuffer1, IN.texcoord_7, TESR_ShadowLightPosition[1], TESR_ShadowCubeMapBlend.y);
-	if (TESR_ShadowLightPosition[2].w) Shadow *= GetLightAmountSkin(TESR_ShadowCubeMapBuffer2, IN.texcoord_7, TESR_ShadowLightPosition[2], TESR_ShadowCubeMapBlend.z);
-	if (TESR_ShadowLightPosition[3].w) Shadow *= GetLightAmountSkin(TESR_ShadowCubeMapBuffer3, IN.texcoord_7, TESR_ShadowLightPosition[3], TESR_ShadowCubeMapBlend.w);	
-    norm = normalize(expand(tex2D(NormalMap, IN.BaseUV.xy).xyz));
+	norm = normalize(expand(tex2D(NormalMap, IN.BaseUV.xy).xyz));
     r0 = tex2D(BaseMap, IN.BaseUV.xy);
     att4 = tex2D(AttenuationMap, IN.Att1UV.xy).x;
     att12 = tex2D(AttenuationMap, IN.Att1UV.zw).x;
@@ -107,7 +93,7 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     r3 += saturate(1 - att4 - att12) * q8;
     r3 += saturate(1 - att0 - att13) * q11;
     OUT.Color.a = r0.w;
-    OUT.Color.rgb = Shadow * r3 + AmbientColor.rgb;
+    OUT.Color.rgb = r3 + AmbientColor.rgb;
     return OUT;
 };
 

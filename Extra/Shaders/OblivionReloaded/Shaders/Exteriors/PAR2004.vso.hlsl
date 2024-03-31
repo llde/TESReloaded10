@@ -9,7 +9,6 @@ float4 LightPosition[3] : register(c16);
 float4 FogParam : register(c23);
 float3 FogColor : register(c24);
 float4 EyePosition : register(c25);
-row_major float4x4 TESR_ShadowCameraToLightTransform[2] : register(c34);
 
 // Registers:
 //
@@ -47,9 +46,7 @@ struct VS_OUTPUT {
     float3 texcoord_1 : TEXCOORD1;
     float3 texcoord_2 : TEXCOORD2;
     float4 texcoord_4 : TEXCOORD4;
-	float4 texcoord_5 : TEXCOORD5;
     float3 texcoord_6 : TEXCOORD6;
-	float4 texcoord_7 : TEXCOORD7;
 };
 
 // Code:
@@ -81,8 +78,6 @@ VS_OUTPUT main(VS_INPUT IN) {
     OUT.texcoord_4.w = 0.5;
     OUT.texcoord_4.xyz = compress(lit1.xyz / LightPosition[1].w);	// [-1,+1] to [0,1]
     OUT.texcoord_6.xyz = normalize(m10.xyz);
-	OUT.texcoord_5.xyzw = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[0]);
-	OUT.texcoord_7.xyzw = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[1]);
     return OUT;
 	
 };

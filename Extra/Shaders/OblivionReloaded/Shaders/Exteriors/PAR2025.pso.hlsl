@@ -12,11 +12,7 @@ sampler2D NormalMap : register(s0);
 float4 PSLightColor[4] : register(c2);
 float4 Toggles : register(c7);
 
-float4 TESR_ShadowData : register(c8);
 float4 TESR_ParallaxData : register(c9);
-
-sampler2D TESR_ShadowMapBufferNear : register(s6) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-sampler2D TESR_ShadowMapBufferFar : register(s7) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 // Registers:
 //
@@ -38,8 +34,6 @@ struct VS_OUTPUT {
     float3 texcoord_3 : TEXCOORD3_centroid;			// partial precision
     float4 texcoord_5 : TEXCOORD5;			// partial precision
     float3 texcoord_7 : TEXCOORD7_centroid;			// partial precision
-    float4 texcoord_8 : TEXCOORD8;
-    float4 texcoord_6 : TEXCOORD6;
 
 };
 
@@ -49,7 +43,6 @@ struct PS_OUTPUT {
 
 // Code:
 #include "..\Includes\PAR.hlsl"
-#include "..\Includes\Shadow.hlsl"
 
 PS_OUTPUT main(VS_OUTPUT IN) {
     PS_OUTPUT OUT;
@@ -82,7 +75,7 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     r0.w = saturate((1 - att2.x) - att3.x);			// partial precision
     q1.x = dot(normalize(expand(r2.xyz)), normalize(IN.texcoord_1.xyz));			// partial precision
     q12.x = r2.w * pow(abs(shades(normalize(expand(r2.xyz)), normalize(IN.texcoord_3.xyz))), Toggles.z);			// partial precision
-    q13.xyz = ((0.2 >= q1.x ? (q12.x * max(q1.x + 0.5, 0)) : q12.x) * PSLightColor[0].rgb * GetLightAmount(IN.texcoord_8, IN.texcoord_6)) * r0.w;			// partial precision
+    q13.xyz = ((0.2 >= q1.x ? (q12.x * max(q1.x + 0.5, 0)) : q12.x) * PSLightColor[0].rgb) * r0.w;			// partial precision
     OUT.color_0.a = weight(q13.xyz);			// partial precision
     OUT.color_0.rgb = saturate(q13.xyz);			// partial precision
 //OUT.color_0.rgb = float3(1,1,1);

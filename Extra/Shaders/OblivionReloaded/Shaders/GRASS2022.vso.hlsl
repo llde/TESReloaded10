@@ -15,7 +15,6 @@ float4 FogColor : register(c14);
 float4 FogParam : register(c15);
 float4 InstanceData[228] : register(c20);
 float4 TESR_GrassScale : register(c248);
-row_major float4x4 TESR_ShadowCameraToLightTransform : register(c249);
 
 // Registers:
 //
@@ -54,7 +53,6 @@ struct VS_OUTPUT {
     float2 texcoord_0 : TEXCOORD0;
     float4 texcoord_4 : TEXCOORD4;
     float4 texcoord_5 : TEXCOORD5;
-	float4 texcoord_6 : TEXCOORD6;
 };
 
 // Code:
@@ -118,7 +116,6 @@ VS_OUTPUT main(VS_INPUT IN) {
     OUT.texcoord_4.xyzw = AmbientColor.rgba;
     OUT.texcoord_5.w = r1.x * (1 - r1.y);
     OUT.texcoord_5.xyz = r2.xyz * AddlParams.x;
-	OUT.texcoord_6.xyzw = mul(r0, TESR_ShadowCameraToLightTransform);
     return OUT;
 };
 

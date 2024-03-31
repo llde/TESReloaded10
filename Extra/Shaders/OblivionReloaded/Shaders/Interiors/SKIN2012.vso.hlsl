@@ -7,7 +7,6 @@ row_major float4x4 ModelViewProj : register(c0);
 float3 LightDirection[3] : register(c13);
 float4 LightPosition[3] : register(c16);
 float4 EyePosition : register(c25);
-row_major float4x4 TESR_InvViewProjectionTransform : register(c34);
 //
 //
 // Registers:
@@ -47,7 +46,6 @@ struct VS_OUTPUT {
     float4 Att1UV : TEXCOORD4;
     float4 Att2UV : TEXCOORD5;
     float3 CameraDir : TEXCOORD6;
-	float4 texcoord_7 : TEXCOORD7;
 };
 
 // Code:
@@ -75,7 +73,6 @@ VS_OUTPUT main(VS_INPUT IN) {
     OUT.Att2UV.w = 0.5;
     OUT.Att2UV.xyz = compress(lit3.xyz / LightPosition[2].w);
     OUT.CameraDir.xyz = normalize(mul(TanSpaceProj, normalize(EyePosition.xyz - IN.Position.xyz)));
-	OUT.texcoord_7.xyzw = mul(r0.xyzw, TESR_InvViewProjectionTransform);
     return OUT;
 };
 

@@ -7,7 +7,6 @@ row_major float4x4 ModelViewProj : register(c0);
 float3 LightDirection[3] : register(c13);
 //float4 TESR_FogData : register(c23);
 //float4 TESR_FogColor : register(c24);
-row_major float4x4 TESR_ShadowCameraToLightTransform[2] : register(c34);
 
 // Registers:
 //
@@ -38,8 +37,6 @@ struct VS_OUTPUT {
     float2 texcoord_1 : TEXCOORD1;
     float4 texcoord_2 : TEXCOORD2;
     float3 texcoord_3 : TEXCOORD3;
-    float4 texcoord_6 : TEXCOORD6;
-	float4 texcoord_7 : TEXCOORD7;
 };
 
 // Code:
@@ -62,8 +59,6 @@ VS_OUTPUT main(VS_INPUT IN) {
     OUT.texcoord_1.xy = IN.LTEXCOORD_0.xy;
     OUT.texcoord_2.xyzw = (IN.LCOLOR_0.xyzx * const_4.yyyz) + const_4.zzzy;
     OUT.texcoord_3.xyz = compress(q0.xyz);	// [-1,+1] to [0,1]
-	OUT.texcoord_6.xyzw = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[0]);
-	OUT.texcoord_7.xyzw = mul(r0.xyzw, TESR_ShadowCameraToLightTransform[1]);
     return OUT;
 	
 };

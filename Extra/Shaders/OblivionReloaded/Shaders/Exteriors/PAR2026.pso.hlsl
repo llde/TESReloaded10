@@ -13,10 +13,7 @@ sampler2D NormalMap : register(s1);
 float4 PSLightColor[4] : register(c2);
 float4 Toggles : register(c7);
 float4 TESR_ParallaxData : register(c9);
-float4 TESR_ShadowData : register(c8);
 
-sampler2D TESR_ShadowMapBufferNear : register(s6) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-sampler2D TESR_ShadowMapBufferFar : register(s7) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 // Registers:
 //
@@ -42,7 +39,6 @@ struct VS_OUTPUT {
     float3 texcoord_4 : TEXCOORD4_centroid;			// partial precision
     float4 texcoord_5 : TEXCOORD5;			// partial precision
     float3 texcoord_6 : TEXCOORD6_centroid;			// partial precision
-    float4 texcoord_7 : TEXCOORD7; 
     float3 color_0 : COLOR0;
     float4 color_1 : COLOR1;
 };
@@ -53,7 +49,6 @@ struct PS_OUTPUT {
 
 // Code:
 #include "..\Includes\PAR.hlsl"
-#include "..\Includes\Shadow.hlsl"
 
 PS_OUTPUT main(VS_OUTPUT IN) {
     PS_OUTPUT OUT;
@@ -79,8 +74,6 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     float4 r0;
     float4 r1;
     float2 uv2;
-    float4 ShadowNear = IN.texcoord_7;
-    float4 ShadowFar = float4(IN.BaseUV.xy, IN.texcoord_1.w, IN.texcoord_2.w);
     
   //  r0.xyzw = tex2D(BaseMap, IN.BaseUV.xy);			// partial precision
     att1.x = tex2D(AttenuationMap, IN.texcoord_5.zw).x;			// partial precision
@@ -96,9 +89,8 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     q6.x = dot(q3.xyz, normalize(IN.texcoord_2.xyz));			// partial precision
     q9.xyz = saturate(q7.x * ((0.2 >= q6.x ? (q4.x * max(q6.x + 0.5, 0)) : q4.x) * PSLightColor[1].rgb));			// partial precision
     q8.x = dot(q3.xyz, IN.texcoord_1.xyz);			// partial precision
-    float Shadow = GetLightAmount(ShadowNear, ShadowFar);
-    q10.xyz = saturate((0.2 >= q8.x ? (q17.x * max(q8.x + 0.5, 0)) : q17.x) * PSLightColor[0].rgb *Shadow);			// partial precision
-    q11.xyz = (saturate(q8.x) * PSLightColor[0].rgb * Shadow) + (q7.x * (saturate(q6.x) * PSLightColor[1].rgb));			// partial precision
+    q10.xyz = saturate((0.2 >= q8.x ? (q17.x * max(q8.x + 0.5, 0)) : q17.x) * PSLightColor[0].rgb);			// partial precision
+    q11.xyz = (saturate(q8.x) * PSLightColor[0].rgb ) + (q7.x * (saturate(q6.x) * PSLightColor[1].rgb));			// partial precision
     r1.xyz = (Toggles.x <= 0.0 ? r0.xyz : (r0.xyz * IN.color_0.rgb));			// partial precision
     q26.xyz = (r1.xyz * max(q11.xyz + AmbientColor.rgb, 0)) + (q9.xyz + q10.xyz);			// partial precision
     OUT.color_0.a = AmbientColor.a;			// partial precision

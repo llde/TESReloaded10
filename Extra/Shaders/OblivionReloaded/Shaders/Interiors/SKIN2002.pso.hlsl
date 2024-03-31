@@ -8,17 +8,12 @@ float4 PSLightColor[4] : register(c2);
 float4 Toggles : register(c7);
 float4 TESR_SkinData : register(c8);
 float4 TESR_SkinColor : register(c9);
-float4 TESR_ShadowData : register(c10);
-float4 TESR_ShadowLightPosition[4] : register(c11);
-float4 TESR_ShadowCubeMapBlend : register(c15);
 
 sampler2D BaseMap : register(s0);
 sampler2D NormalMap : register(s1);
 sampler2D FaceGenMap0 : register(s2);
 sampler2D FaceGenMap1 : register(s3);
 sampler2D AttenuationMap : register(s5);
-samplerCUBE TESR_ShadowCubeMapBuffer0 : register(s8) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
-samplerCUBE TESR_ShadowCubeMapBuffer1 : register(s9) = sampler_state { ADDRESSU = CLAMP; ADDRESSV = CLAMP; ADDRESSW = CLAMP; MAGFILTER = LINEAR; MINFILTER = LINEAR; MIPFILTER = LINEAR; };
 
 //
 //
@@ -46,7 +41,6 @@ struct VS_OUTPUT {
     float3 Light1Dir : TEXCOORD2_centroid;
     float4 Att1UV : TEXCOORD4;
     float3 CameraDir : TEXCOORD6_centroid;
-	float4 texcoord_7 : TEXCOORD7;
     float3 Color : COLOR0;
     float4 Fog : COLOR1;
 };
@@ -58,7 +52,6 @@ struct PS_OUTPUT {
 // Code:
 
 #include "..\Includes\Skin.hlsl"
-#include "..\Includes\ShadowCube.hlsl"
 
 PS_OUTPUT main(VS_OUTPUT IN) {
     PS_OUTPUT OUT;
@@ -86,10 +79,6 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     float4 r0;
     float3 r1;
     float3 r2;
-	float Shadow = 1.0f;
-
-	if (TESR_ShadowLightPosition[0].w) Shadow *= GetLightAmountSkin(TESR_ShadowCubeMapBuffer0, IN.texcoord_7, TESR_ShadowLightPosition[0], TESR_ShadowCubeMapBlend.x);
-	if (TESR_ShadowLightPosition[1].w) Shadow *= GetLightAmountSkin(TESR_ShadowCubeMapBuffer1, IN.texcoord_7, TESR_ShadowLightPosition[1], TESR_ShadowCubeMapBlend.y);
     norm = normalize(expand(tex2D(NormalMap, IN.BaseUV.xy).xyz));
     r2 = tex2D(FaceGenMap1, IN.BaseUV.xy).rgb;
     r1 = tex2D(FaceGenMap0, IN.BaseUV.xy).rgb;
@@ -106,7 +95,7 @@ PS_OUTPUT main(VS_OUTPUT IN) {
     q9 = Skin(q9, PSLightColor[0].rgb, camera, IN.Light0Dir.xyz, norm);
     q7 = Skin(q7, PSLightColor[1].rgb, camera, IN.Light1Dir.xyz, norm);
 	
-    q10 = max(Shadow * ((saturate(1 - att6 - att8) * q7) + q9) + AmbientColor.rgb, 0);
+    q10 = max(((saturate(1 - att6 - att8) * q7) + q9) + AmbientColor.rgb, 0);
     q11 = (Toggles.x <= 0.0 ? q23 : (q23 * IN.Color.rgb));
     q12 = q10 * q11;
     q13 = (Toggles.y <= 0.0 ? q12 : ((IN.Fog.a * (IN.Fog.rgb - (q11 * q10))) + q12));

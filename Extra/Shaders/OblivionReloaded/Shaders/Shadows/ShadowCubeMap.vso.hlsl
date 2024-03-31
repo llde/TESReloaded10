@@ -46,7 +46,7 @@ VS_OUTPUT main(VS_INPUT IN) {
 		q7.xyz = (IN.blendweight.z * q6.xyz) + ((IN.blendweight.x * q5.xyz) + (q4.xyz * IN.blendweight.y));
 		r0.xyz = ((1 - weight(IN.blendweight.xyz)) * q8.xyz) + q7.xyz;
 	}
-    r0 = mul(r0, TESR_ShadowWorldTransform);
+    if (TESR_ShadowData.x != 1.0f) r0 = mul(r0, TESR_ShadowWorldTransform);
 	r1.xyz = TESR_ShadowCubeMapLightPosition.xyz - r0.xyz;
 	r0 = mul(r0, TESR_ShadowViewProjTransform);
 	OUT.position = r0;
