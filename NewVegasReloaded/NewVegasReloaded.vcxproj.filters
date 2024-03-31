@@ -164,6 +164,9 @@
     <ClInclude Include="..\TESReloaded\Core\Hooks\NewVegas\Render.h">
       <Filter>Core\Hooks\NewVegas</Filter>
     </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\DebugManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -261,6 +264,9 @@
     </ClCompile>
     <ClCompile Include="..\TESReloaded\Core\Hooks\NewVegas\Render.cpp">
       <Filter>Core\Hooks\NewVegas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\DebugManager.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
