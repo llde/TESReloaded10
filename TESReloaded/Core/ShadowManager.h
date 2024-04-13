@@ -23,21 +23,36 @@ public:
 		PlaneTop	= 4,
 		PlaneBottom	= 5,
 	};
+	enum ShadowMapVisibility {
+		None = 0x0,
+		Near = 0x1,
+		Middle = 0x10,
+		Far = 0x100,
+		Lod = 0x1000,
+		Ortho = 0x10000
+	};
 
 	struct ShadowMapFeatures {
 		float MinRadius;
 	};
-
 	void					SetFrustum(ShadowMapTypeEnum ShadowMapType, D3DMATRIX* Matrix);
-	bool					InFrustum(ShadowMapTypeEnum ShadowMapType, NiNode* Node);
+	bool					InFrustum(ShadowMapTypeEnum ShadowMapType, NiAVObject* Node);
+	bool					IsOutAllFrustums(NiNode* node);
+	bool					IsVisible(ShadowMapTypeEnum type, UInt32 visibility);
+	bool					ExcludeFromAllRadius(NiAVObject* node);
 	TESObjectREFR*			GetRef(TESObjectREFR* Ref, ffi::ShadowFormsStruct* Forms);
-	void					RenderExterior(NiAVObject* Object, float MinRadius);
+	void					AccumulateGeometry(NiAVObject* accum);
+	void					SelectGeometry(NiGeometry* geo);
 	void					RenderInterior(NiAVObject* Object, float MinRadius);
-	void					RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType);
-	void					RenderLod(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType);
 	void					RenderGeometry(NiGeometry* Geo);
 	void					Render(NiGeometry* Geo);
-	void					RenderShadowMap(ShadowMapTypeEnum ShadowMapType, ffi::ShadowsExteriorStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir);
+	void					RenderNormalPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType);
+	void					RenderAlphaPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType);
+	void					RenderSkinnedPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType);
+	void					RenderSkinnedAlphaPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType);
+	void					RenderSpeedTreePass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType);
+
+	void					RenderShadowExteriorMaps(ffi::ShadowsExteriorStruct* ShadowsExteriors, D3DXVECTOR3* At);
 	void					RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, ffi::ShadowsInteriorStruct* ShadowsInteriors);
 	void					RenderShadowMaps();
 	void					CalculateBlend(NiPointLight** Lights, int LightIndex);
@@ -68,4 +83,10 @@ public:
 	ShaderRecordVertex*		CurrentVertex;
 	ShaderRecordPixel*		CurrentPixel;
 	bool					AlphaEnabled;
+	std::vector<std::tuple<NiGeometry*, UInt32>> alphaObjects;
+	std::vector<std::tuple<NiGeometry*, UInt32>> speedtreeObjects;
+	std::vector<std::tuple<NiGeometry*, UInt32>> normalObjects;
+	std::vector<std::tuple<NiGeometry*, UInt32>> skinnedObjects;
+	std::vector<std::tuple<NiGeometry*, UInt32>> skinnedAlphaObjects;
+
 };

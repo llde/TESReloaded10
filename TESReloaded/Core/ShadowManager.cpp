@@ -1,3 +1,4 @@
+#include "ShadowManager.h"
 /*
 * Initializes the Shadow Manager by grabbing the relevant settings and shaders, and setting up map sizes.
 */
@@ -111,7 +112,7 @@ void ShadowManager::SetFrustum(ShadowMapTypeEnum ShadowMapType, D3DMATRIX* Matri
 /*
 * Checks wether the given node is in the frustrum using its radius for the current type of Shadow map.
 */
-bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiNode* Node) {
+bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiAVObject* Node) {
 	float Distance = 0.0f;
 	bool R = false;
 	NiBound* Bound = Node->GetWorldBound();
@@ -141,6 +142,18 @@ bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiNode* Node) {
 	}
 	return R;
 
+}
+/*
+* Return true if the NiNode is outsidethe frustum of all shadowmaps
+*/
+bool ShadowManager::IsOutAllFrustums(NiNode* node)
+{
+	return !InFrustum(ShadowMapTypeEnum::MapLod,node) && !InFrustum(ShadowMapTypeEnum::MapOrtho, node);
+}
+
+bool ShadowManager::ExcludeFromAllRadius(NiAVObject* node)
+{
+	return  node->GetWorldBoundRadius() <  this->ShadowMapRadius[ShadowMapTypeEnum::MapNear];
 }
 
 /*
@@ -175,6 +188,74 @@ TESObjectREFR* ShadowManager::GetRef(TESObjectREFR* Ref, ffi::ShadowFormsStruct*
 
 }
 
+void ShadowManager::SelectGeometry(NiGeometry* Geo) {
+
+	if (!Geo->shader) return;
+	
+	UInt32 visibility = ShadowMapVisibility::None;
+	if (InFrustum(ShadowMapTypeEnum::MapNear, Geo)) visibility = ShadowMapVisibility::Near;
+	else if (InFrustum(ShadowMapTypeEnum::MapMiddle, Geo)) visibility = ShadowMapVisibility::Middle;
+	else if (InFrustum(ShadowMapTypeEnum::MapFar, Geo)) visibility = ShadowMapVisibility::Far;
+	else if (InFrustum(ShadowMapTypeEnum::MapLod, Geo)) visibility = ShadowMapVisibility::Lod;
+	if (InFrustum(ShadowMapTypeEnum::MapOrtho, Geo)) visibility |= ShadowMapVisibility::Ortho;
+
+	BSShaderProperty* ShaderProperty = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
+	if (ShaderProperty && ShaderProperty->IsLightingProperty()) {
+		BSShaderPPLightingProperty* lightProperty = (BSShaderPPLightingProperty*)ShaderProperty;
+			/*Only seen 0.0 or 0.208. IS the structure actually corrrect?*/
+		if (lightProperty->refractionPower >= 0.1f) return; //Configure,also check for actors, they are skinned
+	}
+	bool alphaObject = false;
+	if (AlphaEnabled) {
+		NiAlphaProperty* AProp = (NiAlphaProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Alpha);
+		if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) alphaObject = true;
+	}
+	if(Geo->skinInstance && !Geo->geomData->BuffData  && Geo->skinInstance->SkinPartition->Partitions[0].BuffData) {
+		if (alphaObject) skinnedAlphaObjects.push_back(std::make_tuple(Geo, visibility));
+		else skinnedObjects.push_back(std::make_tuple(Geo, visibility));
+		return;
+	}
+	else if(Geo->skinInstance && !Geo->geomData->BuffData){
+//		Logger::Log("Skinned but no partition: %s   %s", Geo->m_pcName, Geo->m_parent ? Geo->m_parent->m_pcName : "<No parent>");
+		return;
+	}
+	if(!Geo->geomData->BuffData) TheRenderManager->unsharedGeometryGroup->AddObject(Geo->geomData, nullptr, nullptr);
+	if (Geo->geomData->BuffData) {
+		if (Geo->m_parent->m_pcName && !memcmp(Geo->m_parent->m_pcName, "Leaves", 6)) speedtreeObjects.push_back(std::make_tuple(Geo, visibility));
+		else if (alphaObject) alphaObjects.push_back(std::make_tuple(Geo, visibility));
+		else normalObjects.push_back(std::make_tuple(Geo, visibility));
+	}
+	else {
+	//	Logger::Log("%s   %s", Geo->m_pcName, Geo->m_parent ? Geo->m_parent->m_pcName : "<No parent>");
+	}
+}
+
+void ShadowManager::AccumulateGeometry(NiAVObject* accum){
+	if (accum) {
+		if (!(accum->m_flags & NiAVObject::kFlag_AppCulled)) {
+			void* VFT = *(void**)accum;
+			if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode
+				|| VFT == Pointers::VirtualTables::BSTreeNode || VFT == Pointers::VirtualTables::BSMultiBoundNode
+				|| VFT == Pointers::VirtualTables::NiBillBoardNode) {
+				if (VFT == Pointers::VirtualTables::BSFadeNode && ((BSFadeNode*)accum)->FadeAlpha < 0.75f) return;
+				NiNode* Node = (NiNode*)accum;
+				if (Node) {
+					for (int i = 0; i < Node->m_children.numObjs; i++) {
+						AccumulateGeometry(Node->m_children.data[i]);
+					}
+				}
+			}
+			else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
+				SelectGeometry((NiGeometry*)accum);
+
+			}
+			else if (VFT != Pointers::VirtualTables::NiPointLight /*TODO attenuaton map?Test for the affecedNode list*/ && VFT != Pointers::VirtualTables::NiParticleSystem) {
+				Logger::Log("Unknown %0X", VFT);
+			}
+		}
+	}
+}
+
 void ShadowManager::RenderInterior(NiAVObject* Object, float MinRadius) {
 	
 	if (Object) {
@@ -195,54 +276,6 @@ void ShadowManager::RenderInterior(NiAVObject* Object, float MinRadius) {
 
 }
 
-void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType) {
-	float Radius = Object->GetWorldBoundRadius();
-	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled) && Radius >= this->ShadowMapsFeatures[ShadowMapType].MinRadius) {
-		void* VFT = *(void**)Object;
-		if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode 
-				|| VFT == Pointers::VirtualTables::BSTreeNode || VFT == Pointers::VirtualTables::BSMultiBoundNode  
-				|| VFT == Pointers::VirtualTables::NiBillBoardNode) {
-			if (VFT == Pointers::VirtualTables::BSFadeNode && ((BSFadeNode*)Object)->FadeAlpha < 0.75f) return;
-			NiNode* Node = (NiNode*)Object;
-			if (InFrustum(ShadowMapType, Node)) {
-				for (int i = 0; i < Node->m_children.numObjs; i++) {
-					RenderTerrain(Node->m_children.data[i], ShadowMapType);
-				}
-			}
-		}
-		else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
-			RenderGeometry((NiGeometry*)Object);
-		}
-        else if (VFT != Pointers::VirtualTables::NiPointLight /*TODO attenuaton map?Test for the affecedNode list*/ && VFT != Pointers::VirtualTables::NiParticleSystem) {
-           Logger::Log("Unknown %0X", VFT);                
-        }
-	}
-
-}
-
-void ShadowManager::RenderLod(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType){
-    NiPoint2 BoundSize;
-	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
-		void* VFT = *(void**)Object;
-		if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode ||  VFT == Pointers::VirtualTables::BSMultiBoundNode ) {
-			NiNode* Node = (NiNode*)Object;
-			NiBound* Bound = Node->GetWorldBound();
-            if (TheRenderManager->GetObjectDistance(Bound) > 16000.0f)
-			TheRenderManager->GetScreenSpaceBoundSize(&BoundSize, Bound);
-			float BoundBox = (BoundSize.x * 100.f) * (BoundSize.y * 100.0f);
-            
-			if (InFrustum(ShadowMapType, Node) && BoundBox >= 1000.0f) {
-				for (int i = 0; i < Node->m_children.numObjs; i++) {
-					RenderLod(Node->m_children.data[i], ShadowMapType);
-				}
-			}
-		}
-		else if ((VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
-			RenderGeometry((NiGeometry*)Object);
-		}
-    }    
-}
-
 void ShadowManager::RenderGeometry(NiGeometry* Geo) {
 
 	NiGeometryBufferData* GeoData = NULL;
@@ -259,11 +292,6 @@ void ShadowManager::RenderGeometry(NiGeometry* Geo) {
 	}
 
 }
-/*
-void ShadowManager::SelectGeometry(NiGeometry* Geo){
-    
-}
-*/
 void ShadowManager::Render(NiGeometry* Geo) {
 	
 	IDirect3DDevice9* Device = TheRenderManager->device;
@@ -323,6 +351,7 @@ void ShadowManager::Render(NiGeometry* Geo) {
 			}
 		}
 		TheRenderManager->PackGeometryBuffer(GeoData, ModelData, NULL, ShaderDeclaration);
+		if(GeoData->StreamCount != 1) Logger::Log("%s %s  %i", Geo->m_pcName, Geo->m_parent->m_pcName, GeoData->StreamCount);
 		for (UInt32 i = 0; i < GeoData->StreamCount; i++) {
 			Device->SetStreamSource(i, GeoData->VBChip[i]->VB, 0, GeoData->VertexStride[i]);
 		}
@@ -333,6 +362,7 @@ void ShadowManager::Render(NiGeometry* Geo) {
 			RenderState->SetVertexDeclaration(GeoData->VertexDeclaration, false);
 		CurrentVertex->SetCT();
 		CurrentPixel->SetCT();
+		if(GeoData->NumArrays != 1) Logger::Log("%i   %i", GeoData->NumArrays, GeoData->ArrayLengths);
 		for (UInt32 i = 0; i < GeoData->NumArrays; i++) {
 			if (GeoData->ArrayLengths)
 				PrimitiveCount = GeoData->ArrayLengths[i] - 2;
@@ -488,7 +518,28 @@ D3DXMATRIX ShadowManager::GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, ff
 	return View * Proj;
 }
 
-void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, ffi::ShadowsExteriorStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir) {
+void CreateViewFrom(D3DXMATRIX* View, D3DXVECTOR3* At, D3DXVECTOR4* Dir, float FarPlane) {
+	D3DXVECTOR3 Up = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
+	D3DXVECTOR3 Eye;
+	Eye.x = At->x - FarPlane * Dir->x * -1;
+	Eye.y = At->y - FarPlane * Dir->y * -1;
+	Eye.z = At->z - FarPlane * Dir->z * -1;
+
+	// calculating the projection matrix for point of view of the light
+	D3DXMatrixLookAtRH(View, &Eye, At, &Up);
+
+}
+bool ShadowManager::IsVisible(ShadowMapTypeEnum type, UInt32 visibility) {
+	if (type == ShadowMapTypeEnum::MapOrtho) return (visibility & ShadowMapVisibility::Ortho) == ShadowMapVisibility::Ortho;
+	ShadowMapVisibility clean = (ShadowMapVisibility)(visibility & ~ShadowMapVisibility::Ortho);
+	if (type == ShadowMapTypeEnum::MapLod) return  clean != ShadowMapVisibility::None;
+	if (type == ShadowMapTypeEnum::MapFar) return  clean <= ShadowMapVisibility::Far && clean != ShadowMapVisibility::None;
+	if (type == ShadowMapTypeEnum::MapMiddle) return  clean <= ShadowMapVisibility::Middle && clean != ShadowMapVisibility::None;
+	if (type == ShadowMapTypeEnum::MapNear) return  clean == ShadowMapVisibility::Near;
+	return false;
+}
+
+void ShadowManager::RenderShadowExteriorMaps(ffi::ShadowsExteriorStruct* ShadowsExteriors, D3DXVECTOR3* At) {
 	
 	ShaderConstants::ShadowMapStruct* ShadowMap = &TheShaderManager->ShaderConst.ShadowMap;
 	ffi::ShadowFormsStruct* Forms = &TheSettingManager->Config->ShadowsForm;
@@ -497,64 +548,82 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, ffi::Shadow
 	GridCellArray* CellArray = Tes->gridCellArray;
 	UInt32 CellArraySize = CellArray->size * CellArray->size;
 	float FarPlane = ShadowsExteriors->ShadowMapFarPlane;
-	float MinRadius = ShadowMapsFeatures[ShadowMapType].MinRadius;
 	D3DXVECTOR3 Up = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-	D3DXMATRIX View;
-	D3DXVECTOR3 Eye;
+	D3DXMATRIX ViewSun, ViewOrtho;
+	D3DXVECTOR4 OrthoDir = D3DXVECTOR4(0.05f, 0.05f, 1.0f, 0.0f);
+	D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
+	CreateViewFrom(&ViewSun, At, SunDir, FarPlane);
+	CreateViewFrom(&ViewOrtho, At, &OrthoDir, FarPlane);
 	AlphaEnabled = TheSettingManager->Config->ShadowsForm.Alpha;
-	Eye.x = At->x - FarPlane * SunDir->x * -1;
-	Eye.y = At->y - FarPlane * SunDir->y * -1;
-	Eye.z = At->z - FarPlane * SunDir->z * -1;
 
-	// calculating the projection matrix for point of view of the light
-	D3DXMatrixLookAtRH(&View, &Eye, At, &Up);
-	ShadowMap->ShadowViewProj = GetCascadeViewProj(ShadowMapType, ShadowsExteriors, View); // calculating the size of the shadow cascade
-	ShadowMap->ShadowCameraToLight[ShadowMapType] = TheRenderManager->InvViewProjMatrix * ShadowMap->ShadowViewProj;
+	for (UInt32 i = ShadowMapTypeEnum::MapNear; i < ShadowMapTypeEnum::MapOrtho; i++) {
+		D3DMATRIX ViewProj = GetCascadeViewProj((ShadowMapTypeEnum)i, ShadowsExteriors, ViewSun);
+		SetFrustum((ShadowMapTypeEnum)i, &ViewProj);
+	}
+	D3DMATRIX ViewProj = GetCascadeViewProj(ShadowMapTypeEnum::MapOrtho, ShadowsExteriors, ViewOrtho);
+	SetFrustum(ShadowMapTypeEnum::MapOrtho, &ViewProj);
 
-	BillboardRight = { View._11, View._21, View._31, 0.0f };
-	BillboardUp = { View._12, View._22, View._32, 0.0f };
-	SetFrustum(ShadowMapType, &ShadowMap->ShadowViewProj);
-    if(ShadowsExteriors->BlurShadowMaps || ShadowMapType == MapOrtho){
-        Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurface[ShadowMapType]);
-    }
-    else{
-        Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurfaceBlurred[ShadowMapType]);        
-    }
-	Device->SetDepthStencilSurface(TheTextureManager->ShadowMapDepthSurface[ShadowMapType]);
-	Device->SetViewport(&ShadowMapViewPort[ShadowMapType]);
 
-	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
-
-	if (SunDir->z > 0.0f) {
-		RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE, RenderStateArgs);
-		RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE, RenderStateArgs);
-		RenderState->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE, RenderStateArgs);
-		RenderState->SetRenderState(D3DRS_ALPHABLENDENABLE, 0, RenderStateArgs);
-		RenderState->SetVertexShader(ShadowMapVertex->ShaderHandle, false);
-		RenderState->SetPixelShader(ShadowMapPixel->ShaderHandle, false);
-		Device->BeginScene();
-		for (UInt32 i = 0; i < CellArraySize; i++) {
-			if (TESObjectCELL* Cell = CellArray->GetCell(i)) {
-				NiNode* CellNode = Cell->GetNode();
-	//			if (ShadowsExteriors->Forms[ShadowMapType].Lod) RenderLod(Tes->landLOD, ShadowMapType); //Render terrain LOD
-				for (UInt32 i = 0; i < CellNode->m_children.numObjs; i++) {
-					//For NewVegas: 0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker
-					//Not valid for Oblivion.
-					NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[i]; 
-					RenderTerrain(TerrainNode, ShadowMapType);
-				}
-				/*TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
-				while (Entry) {
-					if (TESObjectREFR* Ref = GetRef(Entry->item, Forms)) {
-						NiNode* RefNode = Ref->GetNode();
-						if (InFrustum(ShadowMapType, RefNode)) RenderTerrain(RefNode, ShadowMapType);
-					}
-					Entry = Entry->next;
-				}*/
+	normalObjects.clear();
+	alphaObjects.clear();
+	speedtreeObjects.clear();
+	skinnedObjects.clear();
+	skinnedAlphaObjects.clear();
+	for (UInt32 i = 0; i < CellArraySize; i++) {
+		if (TESObjectCELL* Cell = CellArray->GetCell(i)) {
+			NiNode* CellNode = Cell->GetNode();
+			//			if (ShadowsExteriors->Forms[ShadowMapType].Lod) RenderLod(Tes->landLOD, ShadowMapType); //Render terrain LOD
+			for (UInt32 i = 0; i < CellNode->m_children.numObjs; i++) {
+				//For NewVegas: 0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker
+				//Not valid for Oblivion.
+				NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[i];
+				AccumulateGeometry(TerrainNode);
 			}
 		}
-		Device->EndScene();
 	}
+	RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE, RenderStateArgs);
+	RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE, RenderStateArgs);
+	RenderState->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE, RenderStateArgs);
+	RenderState->SetRenderState(D3DRS_ALPHABLENDENABLE, 0, RenderStateArgs);
+	RenderState->SetVertexShader(ShadowMapVertex->ShaderHandle, false);
+	RenderState->SetPixelShader(ShadowMapPixel->ShaderHandle, false);
+	Device->BeginScene();
+
+
+	for (UInt32 i = ShadowMapTypeEnum::MapNear; i <= ShadowMapTypeEnum::MapOrtho; i++) {
+		if (i == MapOrtho) {
+			BillboardRight = { ViewOrtho._11, ViewOrtho._21, ViewOrtho._31, 0.0f };
+			BillboardUp = { ViewOrtho._12, ViewOrtho._22, ViewOrtho._32, 0.0f };
+		}
+		else {
+			BillboardRight = { ViewSun._11, ViewSun._21, ViewSun._31, 0.0f };
+			BillboardUp = { ViewSun._12, ViewSun._22, ViewSun._32, 0.0f };
+		}
+		if (ShadowsExteriors->BlurShadowMaps || i == MapOrtho) {
+			Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurface[i]);
+		}
+		else{
+			Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurfaceBlurred[i]);
+		}
+		Device->SetDepthStencilSurface(TheTextureManager->ShadowMapDepthSurface[i]);
+		Device->SetViewport(&ShadowMapViewPort[i]);
+	
+		Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
+
+		ShadowMap->ShadowViewProj = GetCascadeViewProj((ShadowMapTypeEnum)i, ShadowsExteriors, i == ShadowMapTypeEnum::MapOrtho ? ViewOrtho : ViewSun); // calculating the size of the shadow cascade
+		ShadowMap->ShadowCameraToLight[i] = TheRenderManager->InvViewProjMatrix * ShadowMap->ShadowViewProj;
+		if ((SunDir->z > 0.0f && i <= ShadowMapTypeEnum::MapLod) || i == ShadowMapTypeEnum::MapOrtho) {
+			RenderNormalPass(normalObjects, (ShadowMapTypeEnum) i);
+			RenderAlphaPass(alphaObjects, (ShadowMapTypeEnum)i);
+		//	RenderSpeedTreePass(speedtreeObjects, (ShadowMapTypeEnum)i);
+			RenderSkinnedPass(skinnedObjects, (ShadowMapTypeEnum)i);
+			RenderSkinnedAlphaPass(skinnedAlphaObjects, (ShadowMapTypeEnum)i);
+
+		}
+	}
+
+
+	Device->EndScene();
 }
 
 void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, ffi::ShadowsInteriorStruct* ShadowsInteriors) {
@@ -702,15 +771,11 @@ void ShadowManager::RenderShadowMaps() {
 		CurrentPixel = ShadowMapPixel;
 
 		// render ortho map
-		D3DXVECTOR4 OrthoDir = D3DXVECTOR4(0.05f, 0.05f, 1.0f, 0.0f);
-		RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir);
+		RenderShadowExteriorMaps(ShadowsExteriors, &At);
 
 		// Render all other shadow maps
-		D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
 		for (int i = MapNear; i < MapOrtho; i++) {
-			ShadowMapTypeEnum ShadowMapType = static_cast<ShadowMapTypeEnum>(i);
-			RenderShadowMap(ShadowMapType, ShadowsExteriors, &At, SunDir);
-			if(ShadowsExteriors->BlurShadowMaps) BlurShadowMap(ShadowMapType);
+			if(ShadowsExteriors->BlurShadowMaps) BlurShadowMap((ShadowMapTypeEnum)i);
 		}
 
 		// Update constants used by shadow shaders: x=quality, y=darkness
@@ -842,7 +907,269 @@ float ShadowManager::lerp(float a, float b, float t) {
 	return (1 - t) * a + t * b;
 }
 
+void ShadowManager::RenderNormalPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType) {
+	for (std::tuple<NiGeometry*, UInt32>& obj : geometries) {
+		NiGeometry* Geo = obj._Myfirst._Val;
+		if (IsVisible(ShadowMapType, obj._Get_rest()._Myfirst._Val)) {
+			TheShaderManager->ShaderConst.Shadow.Data.x = 0.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
+			TheShaderManager->ShaderConst.Shadow.Data.y = 0.0f; // Alpha control
+			TheRenderManager->CreateD3DMatrix(&TheShaderManager->ShaderConst.ShadowMap.ShadowWorld, &Geo->m_worldTransform);
+			IDirect3DDevice9* Device = TheRenderManager->device;
+			NiDX9RenderState* RenderState = TheRenderManager->renderState;
+			int StartIndex = 0;
+			int PrimitiveCount = 0;
+			NiGeometryData* ModelData = Geo->geomData;
+			NiGeometryBufferData* GeoData = ModelData->BuffData;
+			NiD3DShaderDeclaration* ShaderDeclaration = (Geo->shader ? Geo->shader->ShaderDeclaration : NULL);
 
+			TheRenderManager->PackGeometryBuffer(GeoData, ModelData, NULL, ShaderDeclaration);
+			for (UInt32 i = 0; i < GeoData->StreamCount; i++) {
+				Device->SetStreamSource(i, GeoData->VBChip[i]->VB, 0, GeoData->VertexStride[i]);
+			}
+			Device->SetIndices(GeoData->IB);
+			if (GeoData->FVF)
+				RenderState->SetFVF(GeoData->FVF, false);
+			else
+				RenderState->SetVertexDeclaration(GeoData->VertexDeclaration, false);
+			CurrentVertex->SetCT();
+			CurrentPixel->SetCT();
+			for (UInt32 i = 0; i < GeoData->NumArrays; i++) {
+				if (GeoData->ArrayLengths)
+					PrimitiveCount = GeoData->ArrayLengths[i] - 2;
+				else
+					PrimitiveCount = GeoData->TriCount;
+				Device->DrawIndexedPrimitive(GeoData->PrimitiveType, GeoData->BaseVertexIndex, 0, GeoData->VertCount, StartIndex, PrimitiveCount);
+				StartIndex += PrimitiveCount + 2;
+			}
+		}
+	}
+}
+
+void ShadowManager::RenderSpeedTreePass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType) {
+	IDirect3DDevice9* Device = TheRenderManager->device;
+	Device->SetVertexShaderConstantF(63, (float*)&BillboardRight, 1);
+	Device->SetVertexShaderConstantF(64, (float*)&BillboardUp, 1);
+	Device->SetVertexShaderConstantF(65, Pointers::ShaderParams::RockParams, 1);
+	Device->SetVertexShaderConstantF(66, Pointers::ShaderParams::RustleParams, 1);
+	Device->SetVertexShaderConstantF(67, Pointers::ShaderParams::WindMatrixes, 16);
+
+	for (std::tuple<NiGeometry*, UInt32>& obj : geometries) {
+		NiGeometry* Geo = obj._Myfirst._Val;
+		if (IsVisible(ShadowMapType, obj._Get_rest()._Myfirst._Val)) {
+			TheShaderManager->ShaderConst.Shadow.Data.x = 2.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
+			TheShaderManager->ShaderConst.Shadow.Data.y = 0.0f; // Alpha control
+			TheRenderManager->CreateD3DMatrix(&TheShaderManager->ShaderConst.ShadowMap.ShadowWorld, &Geo->m_worldTransform);
+			SpeedTreeLeafShaderProperty* STProp = (SpeedTreeLeafShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
+			BSTreeNode* Node = (BSTreeNode*)Geo->m_parent->m_parent;
+			NiDX9SourceTextureData* Texture = (NiDX9SourceTextureData*)Node->TreeModel->LeavesTexture->rendererData;
+			NiDX9RenderState* RenderState = TheRenderManager->renderState;
+			int StartIndex = 0;
+			int PrimitiveCount = 0;
+			NiGeometryData* ModelData = Geo->geomData;
+			NiGeometryBufferData* GeoData = ModelData->BuffData;
+			NiD3DShaderDeclaration* ShaderDeclaration = (Geo->shader ? Geo->shader->ShaderDeclaration : NULL);
+			Device->SetVertexShaderConstantF(83, STProp->leafData->leafBase, 48);
+			RenderState->SetTexture(0, Texture->dTexture);
+			RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
+			RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
+			RenderState->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT, false);
+			RenderState->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT, false);
+			RenderState->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT, false);
+
+			TheRenderManager->PackGeometryBuffer(GeoData, ModelData, NULL, ShaderDeclaration);
+			for (UInt32 i = 0; i < GeoData->StreamCount; i++) {
+				Device->SetStreamSource(i, GeoData->VBChip[i]->VB, 0, GeoData->VertexStride[i]);
+			}
+			Device->SetIndices(GeoData->IB);
+			if (GeoData->FVF)
+				RenderState->SetFVF(GeoData->FVF, false);
+			else
+				RenderState->SetVertexDeclaration(GeoData->VertexDeclaration, false);
+			CurrentVertex->SetCT();
+			CurrentPixel->SetCT();
+			for (UInt32 i = 0; i < GeoData->NumArrays; i++) {
+				if (GeoData->ArrayLengths)
+					PrimitiveCount = GeoData->ArrayLengths[i] - 2;
+				else
+					PrimitiveCount = GeoData->TriCount;
+				Device->DrawIndexedPrimitive(GeoData->PrimitiveType, GeoData->BaseVertexIndex, 0, GeoData->VertCount, StartIndex, PrimitiveCount);
+				StartIndex += PrimitiveCount + 2;
+			}
+		}
+	}
+}
+void ShadowManager::RenderAlphaPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType) {
+	for (std::tuple<NiGeometry*, UInt32>& obj : geometries) {
+		NiGeometry* Geo = obj._Myfirst._Val;
+		if (IsVisible(ShadowMapType, obj._Get_rest()._Myfirst._Val)) {
+			TheShaderManager->ShaderConst.Shadow.Data.x = 0.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
+			TheShaderManager->ShaderConst.Shadow.Data.y = 1.0f; // Alpha Control
+			TheRenderManager->CreateD3DMatrix(&TheShaderManager->ShaderConst.ShadowMap.ShadowWorld, &Geo->m_worldTransform);
+			IDirect3DDevice9* Device = TheRenderManager->device;
+			NiDX9RenderState* RenderState = TheRenderManager->renderState;
+			int StartIndex = 0;
+			int PrimitiveCount = 0;
+			NiGeometryData* ModelData = Geo->geomData;
+			NiGeometryBufferData* GeoData = ModelData->BuffData;
+			NiD3DShaderDeclaration* ShaderDeclaration = (Geo->shader ? Geo->shader->ShaderDeclaration : NULL);
+
+			TheRenderManager->PackGeometryBuffer(GeoData, ModelData, NULL, ShaderDeclaration);
+			for (UInt32 i = 0; i < GeoData->StreamCount; i++) {
+				Device->SetStreamSource(i, GeoData->VBChip[i]->VB, 0, GeoData->VertexStride[i]);
+			}
+			Device->SetIndices(GeoData->IB);
+			if (GeoData->FVF)
+				RenderState->SetFVF(GeoData->FVF, false);
+			else
+				RenderState->SetVertexDeclaration(GeoData->VertexDeclaration, false);
+			CurrentVertex->SetCT();
+			CurrentPixel->SetCT();
+			BSShaderProperty* ShaderProperty = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
+			BSShaderPPLightingProperty* lightProperty = (BSShaderPPLightingProperty*)ShaderProperty;
+			if (NiTexture* Texture = *(lightProperty->textures[0])) {
+				TheShaderManager->ShaderConst.Shadow.Data.y = 1.0f; // Alpha Control
+				RenderState->SetTexture(0, Texture->rendererData->dTexture);
+				RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
+				RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
+				RenderState->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT, false);
+				RenderState->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT, false);
+				RenderState->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT, false);
+			}
+			
+			for (UInt32 i = 0; i < GeoData->NumArrays; i++) {
+				if (GeoData->ArrayLengths)
+					PrimitiveCount = GeoData->ArrayLengths[i] - 2;
+				else
+					PrimitiveCount = GeoData->TriCount;
+				Device->DrawIndexedPrimitive(GeoData->PrimitiveType, GeoData->BaseVertexIndex, 0, GeoData->VertCount, StartIndex, PrimitiveCount);
+				StartIndex += PrimitiveCount + 2;
+			}
+		}
+	}
+}
+void ShadowManager::RenderSkinnedAlphaPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType) {
+	for (std::tuple<NiGeometry*, UInt32>& obj : geometries) {
+		NiGeometry* Geo = obj._Myfirst._Val;
+		if (IsVisible(ShadowMapType, obj._Get_rest()._Myfirst._Val)) {
+			TheShaderManager->ShaderConst.Shadow.Data.x = 1.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
+			TheShaderManager->ShaderConst.Shadow.Data.y = 1.0f; // Alpha Control
+			IDirect3DDevice9* Device = TheRenderManager->device;
+			NiDX9RenderState* RenderState = TheRenderManager->renderState;
+			int StartIndex = 0;
+			int PrimitiveCount = 0;
+			int StartRegister = 9;
+			NiGeometryData* ModelData = Geo->geomData;
+			NiGeometryBufferData* GeoData = ModelData->BuffData;
+			NiSkinInstance* SkinInstance = Geo->skinInstance;
+			NiD3DShaderDeclaration* ShaderDeclaration = (Geo->shader ? Geo->shader->ShaderDeclaration : NULL);
+			NiSkinPartition* SkinPartition = SkinInstance->SkinPartition;
+			D3DPRIMITIVETYPE PrimitiveType = (SkinPartition->Partitions[0].Strips == 0) ? D3DPT_TRIANGLELIST : D3DPT_TRIANGLESTRIP;
+			TheRenderManager->CalculateBoneMatrixes(SkinInstance, &Geo->m_worldTransform);
+			if (SkinInstance->SkinToWorldWorldToSkin) memcpy(&TheShaderManager->ShaderConst.ShadowMap.ShadowWorld, SkinInstance->SkinToWorldWorldToSkin, 0x40);
+			BSShaderProperty* ShaderProperty = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
+			BSShaderPPLightingProperty* lightProperty = (BSShaderPPLightingProperty*)ShaderProperty;
+			if (NiTexture* Texture = *(lightProperty->textures[0])) {
+				TheShaderManager->ShaderConst.Shadow.Data.y = 1.0f; // Alpha Control
+				RenderState->SetTexture(0, Texture->rendererData->dTexture);
+				RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
+				RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
+				RenderState->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT, false);
+				RenderState->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT, false);
+				RenderState->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT, false);
+			}
+
+			for (UInt32 p = 0; p < SkinPartition->PartitionsCount; p++) {
+
+				if (!SkinInstance->IsPartitionEnabled(p)) continue;
+
+				StartIndex = 0;
+				StartRegister = 9;
+				NiSkinPartition::Partition* Partition = &SkinPartition->Partitions[p];
+				for (int i = 0; i < Partition->Bones; i++) {
+					UInt16 NewIndex = (Partition->pBones == NULL) ? i : Partition->pBones[i];
+					Device->SetVertexShaderConstantF(StartRegister, ((float*)SkinInstance->BoneMatrixes) + (NewIndex * 3 * 4), 3);
+					StartRegister += 3;
+				}
+				GeoData = Partition->BuffData;
+				TheRenderManager->PackSkinnedGeometryBuffer(GeoData, ModelData, SkinInstance, Partition, ShaderDeclaration);
+				for (UInt32 i = 0; i < GeoData->StreamCount; i++) {
+					Device->SetStreamSource(i, GeoData->VBChip[i]->VB, 0, GeoData->VertexStride[i]);
+				}
+				Device->SetIndices(GeoData->IB);
+				if (GeoData->FVF)
+					RenderState->SetFVF(GeoData->FVF, false);
+				else
+					RenderState->SetVertexDeclaration(GeoData->VertexDeclaration, false);
+				CurrentVertex->SetCT();
+				CurrentPixel->SetCT();
+				for (UInt32 i = 0; i < GeoData->NumArrays; i++) {
+					if (GeoData->ArrayLengths)
+						PrimitiveCount = GeoData->ArrayLengths[i] - 2;
+					else
+						PrimitiveCount = GeoData->TriCount;
+					Device->DrawIndexedPrimitive(PrimitiveType, GeoData->BaseVertexIndex, 0, Partition->Vertices, StartIndex, PrimitiveCount);
+					StartIndex += PrimitiveCount + 2;
+				}
+			}
+		}
+	}
+}
+
+void ShadowManager::RenderSkinnedPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType) {
+	for (std::tuple<NiGeometry*, UInt32>& obj : geometries) {
+		NiGeometry* Geo = obj._Myfirst._Val;
+		if (IsVisible(ShadowMapType, obj._Get_rest()._Myfirst._Val)) {
+			TheShaderManager->ShaderConst.Shadow.Data.x = 1.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
+			TheShaderManager->ShaderConst.Shadow.Data.y = 0.0f; // Alpha control
+			IDirect3DDevice9* Device = TheRenderManager->device;
+			NiDX9RenderState* RenderState = TheRenderManager->renderState;
+			int StartIndex = 0;
+			int PrimitiveCount = 0;
+			int StartRegister = 9;
+			NiGeometryData* ModelData = Geo->geomData;
+			NiGeometryBufferData* GeoData = ModelData->BuffData;
+			NiSkinInstance* SkinInstance = Geo->skinInstance;
+			NiD3DShaderDeclaration* ShaderDeclaration = (Geo->shader ? Geo->shader->ShaderDeclaration : NULL);
+			NiSkinPartition* SkinPartition = SkinInstance->SkinPartition;
+			D3DPRIMITIVETYPE PrimitiveType = (SkinPartition->Partitions[0].Strips == 0) ? D3DPT_TRIANGLELIST : D3DPT_TRIANGLESTRIP;
+			TheRenderManager->CalculateBoneMatrixes(SkinInstance, &Geo->m_worldTransform);
+			if (SkinInstance->SkinToWorldWorldToSkin) memcpy(&TheShaderManager->ShaderConst.ShadowMap.ShadowWorld, SkinInstance->SkinToWorldWorldToSkin, 0x40);
+			for (UInt32 p = 0; p < SkinPartition->PartitionsCount; p++) {
+
+				if (!SkinInstance->IsPartitionEnabled(p)) continue;
+
+				StartIndex = 0;
+				StartRegister = 9;
+				NiSkinPartition::Partition* Partition = &SkinPartition->Partitions[p];
+				for (int i = 0; i < Partition->Bones; i++) {
+					UInt16 NewIndex = (Partition->pBones == NULL) ? i : Partition->pBones[i];
+					Device->SetVertexShaderConstantF(StartRegister, ((float*)SkinInstance->BoneMatrixes) + (NewIndex * 3 * 4), 3);
+					StartRegister += 3;
+				}
+				GeoData = Partition->BuffData;
+				TheRenderManager->PackSkinnedGeometryBuffer(GeoData, ModelData, SkinInstance, Partition, ShaderDeclaration);
+				for (UInt32 i = 0; i < GeoData->StreamCount; i++) {
+					Device->SetStreamSource(i, GeoData->VBChip[i]->VB, 0, GeoData->VertexStride[i]);
+				}
+				Device->SetIndices(GeoData->IB);
+				if (GeoData->FVF)
+					RenderState->SetFVF(GeoData->FVF, false);
+				else
+					RenderState->SetVertexDeclaration(GeoData->VertexDeclaration, false);
+				CurrentVertex->SetCT();
+				CurrentPixel->SetCT();
+				for (UInt32 i = 0; i < GeoData->NumArrays; i++) {
+					if (GeoData->ArrayLengths)
+						PrimitiveCount = GeoData->ArrayLengths[i] - 2;
+					else
+						PrimitiveCount = GeoData->TriCount;
+					Device->DrawIndexedPrimitive(PrimitiveType, GeoData->BaseVertexIndex, 0, Partition->Vertices, StartIndex, PrimitiveCount);
+					StartIndex += PrimitiveCount + 2;
+				}
+			}
+		}
+	}
+}
 /*
 * Filters the Shadow Map of given index using a 2 pass gaussian blur
 */
