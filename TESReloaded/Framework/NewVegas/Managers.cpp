@@ -9,7 +9,7 @@ GameMenuManager*	TheGameMenuManager	= NULL;
 ShadowManager*		TheShadowManager	= NULL;
 CameraManager*		TheCameraManager	= NULL;
 BinkManager*		TheBinkManager		= NULL;
-
+DebugManager*		TheDebugManager		= nullptr;
 Main*					Global			 = NULL;
 TES*					Tes				 = NULL;
 PlayerCharacter*		Player			 = NULL;

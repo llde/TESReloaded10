@@ -11,6 +11,7 @@ class GameEventManager; extern GameEventManager*	TheGameEventManager;
 class ShadowManager;	extern ShadowManager*		TheShadowManager;
 class CameraManager;	extern CameraManager*		TheCameraManager;
 class BinkManager;		extern BinkManager*			TheBinkManager;
+class DebugManager;     extern DebugManager*		TheDebugManager;
 
 class Main;					extern Main*					Global;
 class TES;					extern TES*						Tes;

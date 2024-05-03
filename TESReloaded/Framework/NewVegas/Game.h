@@ -2193,6 +2193,11 @@ public:
 	float					GetWaterHeight() { return ThisCallF(0x005471E0, this); }
 	ExtraHavok*				GetExtraHavok() { return (ExtraHavok*)extraDataList.GetExtraData(BSExtraData::ExtraDataType::kExtraData_Havok); }
 	NiNode*					GetNode() { return structC4->niNode; }
+	std::vector<NiNode*> GetTerrainNodes() {
+		std::vector<NiNode*> nodes;
+		nodes.push_back((NiNode*)structC4->niNode->m_children.data[2]);
+		return nodes;
+	}
 
 	TESFullName				fullName;			// 018	// 030 in GECK
 	UInt8					flags0;				// 024
@@ -5268,8 +5273,8 @@ namespace Pointers {
 		static const void* BSMultiBoundNode   = (void*)0x010C1D14;
 		static const void* NiParticleNode     = (void*)0x010BD44C;
 		static const void* NiPointLight		  =	(void*)0x0;
-		static const void* NiBillBoardNode   = (void*)0x0;
-		static const void* NiParticleSystem = (void*)0x0;
+		static const void* NiBillBoardNode   = (void*)0x0102BF44;
+		static const void* NiParticleSystem = (void*)0x010BD44C;
 	}
 	namespace Settings {
 		static UInt32* MinGrassSize				= (UInt32*)0x00000000;

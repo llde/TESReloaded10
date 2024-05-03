@@ -1485,6 +1485,14 @@ public:
 						return extraHavok && extraHavok->world ? (hkWorld*)extraHavok->world->hkObject : (hkWorld*)(*((bhkRefObject**)0x00B35C24))->hkObject;
 					}
 
+	std::vector<NiNode*> GetTerrainNodes() {
+		std::vector<NiNode*> nodes;
+		for (int i = 2; i < niNode->m_children.numObjs; i++) {
+			NiNode* node = (NiNode*)niNode->m_children.data[i];
+			if (node->m_children.end) nodes.push_back((NiNode*)node->m_children.data[0]);
+		}
+		return nodes;
+	}
 	TESFullName			 fullName;		// 018
 	UInt8				 flags0;		// 024
 	UInt8				 flags1;		// 025

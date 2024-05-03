@@ -191,25 +191,28 @@ TESObjectREFR* ShadowManager::GetRef(TESObjectREFR* Ref, ffi::ShadowFormsStruct*
 void ShadowManager::SelectGeometry(NiGeometry* Geo) {
 
 	if (!Geo->shader) return;
-	
 	UInt32 visibility = ShadowMapVisibility::None;
 	if (InFrustum(ShadowMapTypeEnum::MapNear, Geo)) visibility = ShadowMapVisibility::Near;
 	else if (InFrustum(ShadowMapTypeEnum::MapMiddle, Geo)) visibility = ShadowMapVisibility::Middle;
 	else if (InFrustum(ShadowMapTypeEnum::MapFar, Geo)) visibility = ShadowMapVisibility::Far;
 	else if (InFrustum(ShadowMapTypeEnum::MapLod, Geo)) visibility = ShadowMapVisibility::Lod;
 	if (InFrustum(ShadowMapTypeEnum::MapOrtho, Geo)) visibility |= ShadowMapVisibility::Ortho;
-
 	BSShaderProperty* ShaderProperty = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
-	if (ShaderProperty && ShaderProperty->IsLightingProperty()) {
+	bool haveLightingProperty = ShaderProperty && ShaderProperty->IsLightingProperty();
+
+	if (haveLightingProperty) { /*Leaves don't have a shade property or is not a LightingProperty*/
 		BSShaderPPLightingProperty* lightProperty = (BSShaderPPLightingProperty*)ShaderProperty;
-			/*Only seen 0.0 or 0.208. IS the structure actually corrrect?*/
-		if (lightProperty->refractionPower >= 0.1f) return; //Configure,also check for actors, they are skinned
+
+		/*Oblivion: Only seen 0.0 or 0.208. IS the structure actually corrrect?*/
+		if (lightProperty->IsRefractive()) return; //Configure,also check for actors, they are skinned
 	}
+
 	bool alphaObject = false;
 	if (AlphaEnabled) {
 		NiAlphaProperty* AProp = (NiAlphaProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Alpha);
 		if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) alphaObject = true;
 	}
+//	if (alphaObject && !haveLightingProperty) return;
 	if(Geo->skinInstance && !Geo->geomData->BuffData  && Geo->skinInstance->SkinPartition->Partitions[0].BuffData) {
 		if (alphaObject) skinnedAlphaObjects.push_back(std::make_tuple(Geo, visibility));
 		else skinnedObjects.push_back(std::make_tuple(Geo, visibility));
@@ -219,7 +222,7 @@ void ShadowManager::SelectGeometry(NiGeometry* Geo) {
 //		Logger::Log("Skinned but no partition: %s   %s", Geo->m_pcName, Geo->m_parent ? Geo->m_parent->m_pcName : "<No parent>");
 		return;
 	}
-	if(!Geo->geomData->BuffData) TheRenderManager->unsharedGeometryGroup->AddObject(Geo->geomData, nullptr, nullptr);
+//	if(!Geo->geomData->BuffData) TheRenderManager->unsharedGeometryGroup->AddObject(Geo->geomData, nullptr, nullptr);
 	if (Geo->geomData->BuffData) {
 		if (Geo->m_parent->m_pcName && !memcmp(Geo->m_parent->m_pcName, "Leaves", 6)) speedtreeObjects.push_back(std::make_tuple(Geo, visibility));
 		else if (alphaObject) alphaObjects.push_back(std::make_tuple(Geo, visibility));
@@ -571,13 +574,24 @@ void ShadowManager::RenderShadowExteriorMaps(ffi::ShadowsExteriorStruct* Shadows
 	skinnedAlphaObjects.clear();
 	for (UInt32 i = 0; i < CellArraySize; i++) {
 		if (TESObjectCELL* Cell = CellArray->GetCell(i)) {
-			NiNode* CellNode = Cell->GetNode();
+			std::vector<NiNode*> TerrainNodes = Cell->GetTerrainNodes();
+			for (NiNode* node : TerrainNodes) {
+				AccumulateGeometry(node);
+			}
 			//			if (ShadowsExteriors->Forms[ShadowMapType].Lod) RenderLod(Tes->landLOD, ShadowMapType); //Render terrain LOD
-			for (UInt32 i = 0; i < CellNode->m_children.numObjs; i++) {
-				//For NewVegas: 0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker
-				//Not valid for Oblivion.
-				NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[i];
+			/*for (UInt32 i = 2; i < Cell->GetNode()->m_children.numObjs; i++) {
+				//For NewVegas: 0 Actor, 2 Land, 3 Static, 4 Dynamic,5 Multibound, 1 Marker 
+				//For Oblivion: 0 Actor, 2-5 Static Terrain is in subnode 0 of every 2-5 node. Node 0 seems to be unstable, some actors aren't rendered sometimes (not present in the node?)
+				NiNode* TerrainNode = (NiNode*)Cell->GetNode()->m_children.data[i];
 				AccumulateGeometry(TerrainNode);
+			} */
+			TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
+			while (Entry) {
+				if (TESObjectREFR* Ref = GetRef(Entry->item, Forms)) {
+					NiNode* RefNode = Ref->GetNode();
+					AccumulateGeometry(RefNode);
+				}
+				Entry = Entry->next;
 			}
 		}
 	}
@@ -615,7 +629,7 @@ void ShadowManager::RenderShadowExteriorMaps(ffi::ShadowsExteriorStruct* Shadows
 		if ((SunDir->z > 0.0f && i <= ShadowMapTypeEnum::MapLod) || i == ShadowMapTypeEnum::MapOrtho) {
 			RenderNormalPass(normalObjects, (ShadowMapTypeEnum) i);
 			RenderAlphaPass(alphaObjects, (ShadowMapTypeEnum)i);
-		//	RenderSpeedTreePass(speedtreeObjects, (ShadowMapTypeEnum)i);
+			RenderSpeedTreePass(speedtreeObjects, (ShadowMapTypeEnum)i);
 			RenderSkinnedPass(skinnedObjects, (ShadowMapTypeEnum)i);
 			RenderSkinnedAlphaPass(skinnedAlphaObjects, (ShadowMapTypeEnum)i);
 
@@ -926,6 +940,7 @@ void ShadowManager::RenderNormalPass(std::vector<std::tuple<NiGeometry*, UInt32>
 			for (UInt32 i = 0; i < GeoData->StreamCount; i++) {
 				Device->SetStreamSource(i, GeoData->VBChip[i]->VB, 0, GeoData->VertexStride[i]);
 			}
+//			Logger::Log("%s %s  %08X", Geo->m_pcName, Geo->m_parent, GeoData->VBChip[0]->VB);
 			Device->SetIndices(GeoData->IB);
 			if (GeoData->FVF)
 				RenderState->SetFVF(GeoData->FVF, false);
@@ -947,14 +962,10 @@ void ShadowManager::RenderNormalPass(std::vector<std::tuple<NiGeometry*, UInt32>
 
 void ShadowManager::RenderSpeedTreePass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType) {
 	IDirect3DDevice9* Device = TheRenderManager->device;
-	Device->SetVertexShaderConstantF(63, (float*)&BillboardRight, 1);
-	Device->SetVertexShaderConstantF(64, (float*)&BillboardUp, 1);
-	Device->SetVertexShaderConstantF(65, Pointers::ShaderParams::RockParams, 1);
-	Device->SetVertexShaderConstantF(66, Pointers::ShaderParams::RustleParams, 1);
-	Device->SetVertexShaderConstantF(67, Pointers::ShaderParams::WindMatrixes, 16);
 
 	for (std::tuple<NiGeometry*, UInt32>& obj : geometries) {
 		NiGeometry* Geo = obj._Myfirst._Val;
+		Logger::Log("%08X", Geo);
 		if (IsVisible(ShadowMapType, obj._Get_rest()._Myfirst._Val)) {
 			TheShaderManager->ShaderConst.Shadow.Data.x = 2.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
 			TheShaderManager->ShaderConst.Shadow.Data.y = 0.0f; // Alpha control
@@ -968,6 +979,12 @@ void ShadowManager::RenderSpeedTreePass(std::vector<std::tuple<NiGeometry*, UInt
 			NiGeometryData* ModelData = Geo->geomData;
 			NiGeometryBufferData* GeoData = ModelData->BuffData;
 			NiD3DShaderDeclaration* ShaderDeclaration = (Geo->shader ? Geo->shader->ShaderDeclaration : NULL);
+			Device->SetVertexShaderConstantF(63, (float*)&BillboardRight, 1);
+			Device->SetVertexShaderConstantF(64, (float*)&BillboardUp, 1);
+			Device->SetVertexShaderConstantF(65, Pointers::ShaderParams::RockParams, 1);
+			Device->SetVertexShaderConstantF(66, Pointers::ShaderParams::RustleParams, 1);
+			Device->SetVertexShaderConstantF(67, Pointers::ShaderParams::WindMatrixes, 16);
+
 			Device->SetVertexShaderConstantF(83, STProp->leafData->leafBase, 48);
 			RenderState->SetTexture(0, Texture->dTexture);
 			RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
@@ -1026,8 +1043,9 @@ void ShadowManager::RenderAlphaPass(std::vector<std::tuple<NiGeometry*, UInt32>>
 			CurrentPixel->SetCT();
 			BSShaderProperty* ShaderProperty = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
 			BSShaderPPLightingProperty* lightProperty = (BSShaderPPLightingProperty*)ShaderProperty;
-			if (NiTexture* Texture = *(lightProperty->textures[0])) {
+			if (lightProperty->textures[0] &&  *(lightProperty->textures[0])) {
 				TheShaderManager->ShaderConst.Shadow.Data.y = 1.0f; // Alpha Control
+				NiTexture* Texture = *(lightProperty->textures[0]);
 				RenderState->SetTexture(0, Texture->rendererData->dTexture);
 				RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
 				RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);

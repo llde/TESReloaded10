@@ -15,6 +15,8 @@ pub struct Config{
     WaterEngine: WaterEngine,
 	#[deserialize_over]
     Develop : DevelopStruct,
+    #[deserialize_over]
+    Culling : CullingEngine,
 	#[deserialize_over]
     FlyCam : FlyCamStruct,
 	#[deserialize_over]
@@ -32,7 +34,7 @@ pub struct Config{
 	#[deserialize_over]
     ShadowsExterior : ShadowsExteriorStruct,
 	#[deserialize_over]
-    ShadowsInterior : ShadowsInteriorStruct
+    ShadowsInterior : ShadowsInteriorStruct,
 }
 
 impl Default for Config{
@@ -41,6 +43,7 @@ impl Default for Config{
             Main : MainStruct::default(),
             WaterEngine : WaterEngine::default(),
             Develop : DevelopStruct::default(),
+            Culling : CullingEngine::default(),
             FlyCam : FlyCamStruct::default(),
             SleepingMode : SleepingModeStruct::default(),
             LowHFSound : LowHFSoundStruct::default(),
@@ -387,6 +390,26 @@ impl Default for ShadowsInteriorStruct{
     }
 }
 
+#[derive(Serialize, Deserialize,DeserializeOver, Debug)]
+#[repr(C)]
+#[allow(non_snake_case)]
+pub struct CullingEngine{
+    EnableMainCulling: bool,
+    EnableRelfectionCulling : bool,
+    CullMinSize : f32,
+    CullReflectionMinSize : f32
+}
+
+impl Default for CullingEngine{
+    fn default() -> Self {
+        CullingEngine {
+            EnableMainCulling : true,
+            EnableRelfectionCulling : true,
+            CullMinSize : 10.0f
+        }
+    }
+
+}
 
 #[repr(C)]
 #[derive(Debug,Serialize,Deserialize,DeserializeOver)]

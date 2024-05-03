@@ -1770,6 +1770,8 @@ public:
 	UInt32		Unk0F8;	// 0F8
 	UInt32		Unk0FC;	// 0FC
 	UInt32		Unk100;	// 100
+
+	bool IsRefractive() { return false; }
 };
 assert(sizeof(BSShaderPPLightingProperty) == 0x104);
 assert(offsetof(BSShaderPPLightingProperty, kHairTint) == 0x84 );

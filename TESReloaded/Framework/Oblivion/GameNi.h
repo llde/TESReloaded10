@@ -2125,6 +2125,8 @@ public:
 	UInt8			pad0E5[3];				// 0E5
 	float			refractionPower;		// 0E8
 	UInt32			refractionPeriod;		// 0EC
+
+	bool IsRefractive() { return refractionPower >= 0.1f; }
 };
 assert(sizeof(BSShaderPPLightingProperty) == 0x0F0);
 

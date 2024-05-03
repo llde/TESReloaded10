@@ -20,7 +20,6 @@ void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* RenderedTe
 
 bool (__thiscall* EndTargetGroup)(BSShaderAccumulator*, NiCamera*, NiRenderTargetGroup*) = (bool (__thiscall*)(BSShaderAccumulator*, NiCamera*, NiRenderTargetGroup*))Hooks::EndTargetGroup;
 bool __fastcall EndTargetGroupHook(BSShaderAccumulator* This, UInt32 edx, NiCamera* Camera, NiRenderTargetGroup* TargetGroup) {
-
  	if(TheRenderManager->BackBuffer) TargetGroup = TheRenderManager->defaultRTGroup;
 	return (*EndTargetGroup)(This, Camera, TargetGroup);
 
@@ -211,7 +210,6 @@ void __cdecl RenderObjectHook(NiCamera* Camera, NiNode* Object, NiCullingProcess
 
 void (__cdecl* ProcessImageSpaceShaders)(NiDX9Renderer*, BSRenderedTexture*, BSRenderedTexture*) = (void (__cdecl*)(NiDX9Renderer*, BSRenderedTexture*, BSRenderedTexture*))Hooks::ProcessImageSpaceShaders;
 void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRenderedTexture* RenderedTexture1, BSRenderedTexture* RenderedTexture2) {
-
 	if(TheRenderManager->BackBuffer) TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->BackBuffer;
 	ProcessImageSpaceShaders(Renderer, RenderedTexture1, RenderedTexture2);
 	TheRenderManager->CheckAndTakeScreenShot(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
