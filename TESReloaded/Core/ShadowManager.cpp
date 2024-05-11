@@ -222,7 +222,7 @@ void ShadowManager::SelectGeometry(NiGeometry* Geo) {
 //		Logger::Log("Skinned but no partition: %s   %s", Geo->m_pcName, Geo->m_parent ? Geo->m_parent->m_pcName : "<No parent>");
 		return;
 	}
-//	if(!Geo->geomData->BuffData) TheRenderManager->unsharedGeometryGroup->AddObject(Geo->geomData, nullptr, nullptr);
+	if(!Geo->geomData->BuffData) TheRenderManager->unsharedGeometryGroup->AddObject(Geo->geomData, nullptr, nullptr);
 	if (Geo->geomData->BuffData) {
 		if (Geo->m_parent->m_pcName && !memcmp(Geo->m_parent->m_pcName, "Leaves", 6)) speedtreeObjects.push_back(std::make_tuple(Geo, visibility));
 		else if (alphaObject) alphaObjects.push_back(std::make_tuple(Geo, visibility));
