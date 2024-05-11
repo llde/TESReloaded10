@@ -405,7 +405,8 @@ impl Default for CullingEngine{
         CullingEngine {
             EnableMainCulling : true,
             EnableRelfectionCulling : true,
-            CullMinSize : 10.0f
+            CullMinSize : 10.0,
+            CullReflectionMinSize : 100.0
         }
     }
 

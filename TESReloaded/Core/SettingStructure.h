@@ -54,6 +54,13 @@ struct DevelopStruct {
   uint8_t TraceShaders;
 };
 
+struct CullingEngine {
+  bool EnableMainCulling;
+  bool EnableRelfectionCulling;
+  float CullMinSize;
+  float CullReflectionMinSize;
+};
+
 struct FlyCamStruct {
   bool Enabled;
   float ScrollMultiplier;
@@ -178,6 +185,7 @@ struct Config {
   MainStruct Main;
   WaterEngine WaterEngine;
   DevelopStruct Develop;
+  CullingEngine Culling;
   FlyCamStruct FlyCam;
   SleepingModeStruct SleepingMode;
   LowHFSoundStruct LowHFSound;
