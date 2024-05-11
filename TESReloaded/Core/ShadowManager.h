@@ -52,6 +52,7 @@ public:
 	void					RenderSkinnedAlphaPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType);
 	void					RenderSpeedTreePass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType);
 
+	void					ClearShadowsMaps();
 	void					RenderShadowExteriorMaps(ffi::ShadowsExteriorStruct* ShadowsExteriors, D3DXVECTOR3* At);
 	void					RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, ffi::ShadowsInteriorStruct* ShadowsInteriors);
 	void					RenderShadowMaps();
@@ -83,6 +84,8 @@ public:
 	ShaderRecordVertex*		CurrentVertex;
 	ShaderRecordPixel*		CurrentPixel;
 	bool					AlphaEnabled;
+	bool					WasEnabledExt;
+	bool					WasEnabledInt;
 	std::vector<std::tuple<NiGeometry*, UInt32>> alphaObjects;
 	std::vector<std::tuple<NiGeometry*, UInt32>> speedtreeObjects;
 	std::vector<std::tuple<NiGeometry*, UInt32>> normalObjects;

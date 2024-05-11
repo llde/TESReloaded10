@@ -542,6 +542,45 @@ bool ShadowManager::IsVisible(ShadowMapTypeEnum type, UInt32 visibility) {
 	return false;
 }
 
+void ShadowManager::ClearShadowsMaps() {
+	bool clearExt = WasEnabledExt || TheSettingManager->Config->ShadowsExterior.Enabled;
+	bool clearInt = WasEnabledInt || TheSettingManager->Config->ShadowsInterior.Enabled;
+	Logger::Log("%u", clearExt);
+	IDirect3DDevice9* Device = TheRenderManager->device;
+	Device->BeginScene();
+	if (clearExt) {
+		for (UInt32 i = ShadowMapTypeEnum::MapNear; i <= ShadowMapTypeEnum::MapOrtho; i++) {
+			Device->SetDepthStencilSurface(TheTextureManager->ShadowMapDepthSurface[i]);
+			Device->SetViewport(&ShadowMapViewPort[i]);
+
+			if ( i == MapOrtho) {
+				Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurface[i]);
+				Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
+
+			}
+			else {
+				Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurface[i]);
+				Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
+				Device->SetRenderTarget(0, TheTextureManager->ShadowMapSurfaceBlurred[i]);
+				Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
+			}
+
+		}
+	}
+	if (clearInt) {
+		Device->SetDepthStencilSurface(TheTextureManager->ShadowCubeMapDepthSurface);
+		for (int L = 0; L < ShadowCubeMapsMax; L++) {
+			for (int Face = 0; Face < 6; Face++) {
+				Device->SetRenderTarget(0, TheTextureManager->ShadowCubeMapSurface[L][Face]);
+				Device->SetViewport(&ShadowCubeMapViewPort);
+				Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
+			}
+		}
+	}
+	Device->EndScene();
+}
+
+
 void ShadowManager::RenderShadowExteriorMaps(ffi::ShadowsExteriorStruct* ShadowsExteriors, D3DXVECTOR3* At) {
 	
 	ShaderConstants::ShadowMapStruct* ShadowMap = &TheShaderManager->ShaderConst.ShadowMap;
@@ -621,8 +660,6 @@ void ShadowManager::RenderShadowExteriorMaps(ffi::ShadowsExteriorStruct* Shadows
 		}
 		Device->SetDepthStencilSurface(TheTextureManager->ShadowMapDepthSurface[i]);
 		Device->SetViewport(&ShadowMapViewPort[i]);
-	
-		Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
 
 		ShadowMap->ShadowViewProj = GetCascadeViewProj((ShadowMapTypeEnum)i, ShadowsExteriors, i == ShadowMapTypeEnum::MapOrtho ? ViewOrtho : ViewSun); // calculating the size of the shadow cascade
 		ShadowMap->ShadowCameraToLight[i] = TheRenderManager->InvViewProjMatrix * ShadowMap->ShadowViewProj;
@@ -702,7 +739,6 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, f
 				ShadowMap->ShadowViewProj = View * Proj;
 				Device->SetRenderTarget(0, TheTextureManager->ShadowCubeMapSurface[L][Face]);
 				Device->SetViewport(&ShadowCubeMapViewPort);
-				Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
 				Device->BeginScene();
 				RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE, RenderStateArgs);
 				RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE, RenderStateArgs);
@@ -740,7 +776,6 @@ void ShadowManager::RenderShadowMaps() {
 	ffi::ShadowsInteriorShaderStruct* ShadowsInteriorShader = &TheSettingManager->Shaders->Shadows.ShadowsInterior;
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
-	if (!ShadowsExteriors->Enabled && !ShadowsInteriors->Enabled) return;
 	IDirect3DSurface9* DepthSurface = NULL;
 	IDirect3DSurface9* RenderSurface = NULL;
 	D3DVIEWPORT9 viewport;
@@ -770,7 +805,9 @@ void ShadowManager::RenderShadowMaps() {
 	RenderState->SetRenderState(D3DRS_STENCILENABLE , 0 ,RenderStateArgs);
 	RenderState->SetRenderState(D3DRS_STENCILREF , 0 ,RenderStateArgs);
  	RenderState->SetRenderState(D3DRS_STENCILFUNC , 8 ,RenderStateArgs);
-    
+	ClearShadowsMaps();
+	WasEnabledExt = ShadowsExteriors->Enabled;
+	WasEnabledInt = ShadowsInteriors->Enabled;
 	TheRenderManager->SetupSceneCamera();
 	if (Player->GetWorldSpace() && ShadowsExteriors->Enabled) {
 		ShadowData->w = ShadowsExteriors->ShadowMode;	// Mode (0:off, 1:VSM, 2:ESM, 3: ESSM);
@@ -965,7 +1002,6 @@ void ShadowManager::RenderSpeedTreePass(std::vector<std::tuple<NiGeometry*, UInt
 
 	for (std::tuple<NiGeometry*, UInt32>& obj : geometries) {
 		NiGeometry* Geo = obj._Myfirst._Val;
-		Logger::Log("%08X", Geo);
 		if (IsVisible(ShadowMapType, obj._Get_rest()._Myfirst._Val)) {
 			TheShaderManager->ShaderConst.Shadow.Data.x = 2.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
 			TheShaderManager->ShaderConst.Shadow.Data.y = 0.0f; // Alpha control
