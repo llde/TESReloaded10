@@ -24,6 +24,14 @@ void RenderManager::CreateD3DMatrix(D3DMATRIX* Matrix, NiTransform* Transform) {
 	Matrix->_44 = 1.0f;
 
 }
+bool RenderManager::IsNode(NiAVObject* node) {
+	void* VFT = *(void**)node;
+
+	return 	VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode
+		|| VFT == Pointers::VirtualTables::BSTreeNode || VFT == Pointers::VirtualTables::BSMultiBoundNode
+		|| VFT == Pointers::VirtualTables::NiBillBoardNode;
+
+}
 
 void RenderManager::GetScreenSpaceBoundSize(NiPoint2* BoundSize, NiBound* Bound, float ZeroTolerance) {
 		
@@ -226,6 +234,11 @@ void RenderManager::Initialize() {
 	SaveGameScreenShotRECT = { 0, 0, 256, 144 };
 	IsSaveGameScreenShot = false;
 	device->GetDirect3D(&D3D);
+	D3DCAPS9 caps = {};
+	D3D->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &caps);
+	if (caps.NumSimultaneousRTs > 1) Logger::Log("Multiple rendertarget supported. Max %u", caps.NumSimultaneousRTs);
+	else Logger::Log("Multiple rendertarget not supported");
+	MaxRenderTargets = caps.NumSimultaneousRTs;
 	D3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &currentDisplayMode);
 	RESZ = D3D->CheckDeviceFormat(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, currentDisplayMode.Format, D3DUSAGE_RENDERTARGET, D3DRTYPE_SURFACE, (D3DFORMAT)MAKEFOURCC('R','E','S','Z')) == D3D_OK;
 	if (RESZ)

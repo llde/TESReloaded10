@@ -10,6 +10,7 @@ public:
 	void				SetupSceneCamera();
 	void				CheckAndTakeScreenShot(IDirect3DSurface9* RenderTarget);
     float               GetObjectDistance(NiBound* Bound);
+	bool				IsNode(NiAVObject* node);
 	D3DXMATRIX			WorldViewProjMatrix;
 	D3DXMATRIX			ViewProjMatrix;
 	D3DXMATRIX			InvViewProjMatrix;
@@ -25,6 +26,7 @@ public:
 	RECT				SaveGameScreenShotRECT;
 	bool				IsSaveGameScreenShot;
 	bool				RESZ;
+	UInt8				MaxRenderTargets;
 };
 
 class DWNode : public NiNode {
