@@ -1,4 +1,15 @@
-// WetWorld fullscreen shader for Oblivion Reloaded
+// WetWorld fullscreen shader for Oblivion/NewVegas Reloaded
+//----------------------------------------------------------
+//Todo:
+//----------------------------------------------------------
+// Fix viewmodel issue
+// Look into adding code from refraction for better looking water(?)
+// Reflection buffer(?)
+// Make better ripple normal(?)
+// Add ripples to other water sources(?)
+// Add world spec multi(?)
+//----------------------------------------------------------
+// Boomstick was here
 
 float4x4 TESR_ViewTransform;
 float4x4 TESR_ProjectionTransform;
@@ -24,11 +35,19 @@ static const float farZ = (TESR_ProjectionTransform._33 * nearZ) / (TESR_Project
 static const float Zmul = nearZ * farZ;
 static const float Zdiff = farZ - nearZ;
 static const float depthRange = nearZ - farZ;
-static const float PI = 3.14159265;
-static const float time1 = TESR_GameTime.z * 1.1f;
-static const float time2 = TESR_GameTime.z * 1.2f;
-static const float time3 = TESR_GameTime.z * 1.3f;
-static const float time4 = TESR_GameTime.z * 1.4f;
+
+//------------------------------------------------------
+// Custimizable
+//------------------------------------------------------
+static const float RipplesIntensity = 2.7f; // Original 3.14159265, changes intensity of the ripples normal
+static const float time1 = TESR_GameTime.z * 0.96f; // Ripple timing, make sure to offset each by atleast a few
+static const float time2 = TESR_GameTime.z * 0.97f; // Ripple timing, original 1.0-1.4
+static const float time3 = TESR_GameTime.z * 0.98f; // Ripple timing
+static const float time4 = TESR_GameTime.z * 0.99f; // Ripple timing
+static const float DrawD = 800.0f; // Max draw distance for puddles 0-1000000
+static const float Darkness = 2.0f; // Darkness of puddles
+static const float Opacity = 0.7; // It's calc with darkness so really it's lightness but whatevs
+//------------------------------------------------------
 
 struct VSOUT
 {
@@ -97,7 +116,7 @@ float3 ComputeRipple(float2 UV, float CurrentTime, float Weight)
     float DropFrac = frac(Ripple.w + CurrentTime);
     float TimeFrac = DropFrac - 1.0f + Ripple.x;
     float DropFactor = saturate(0.2f + Weight * 0.8f - DropFrac);
-    float FinalFactor = DropFactor * Ripple.x * sin( clamp(TimeFrac * 9.0f, 0.0f, 3.0f) * PI);
+    float FinalFactor = DropFactor * Ripple.x * sin( clamp(TimeFrac * 9.0f, 0.0f, 3.0f) * RipplesIntensity);
 
     return float3(Ripple.yz * FinalFactor * 0.35f, 1.0f);
 }
@@ -136,7 +155,7 @@ float4 Wet( VSOUT IN ) : COLOR0
 		fresnel = 0.02 + pow(( 2 * (fresnel - 0.23)), 5) * 0.2;
 		fresnel = saturate( 1-fresnel);
 
-		float3 rain_diffuse = screen_color * lerp(1, 0.3, TESR_WetWorldData.x * 0.3);
+		float3 rain_diffuse = screen_color * lerp(Darkness, Opacity, TESR_WetWorldData.x * 0.3);
 		rain_diffuse = lerp(rain_diffuse, mudp, TESR_WetWorldData.x * 0.4);
 		rain_diffuse = lerp(rain_diffuse * 0.6, TESR_FogColor.rgb * TESR_WetWorldCoeffs.xyz, fresnel * 0.7);
 		
@@ -157,6 +176,8 @@ float4 Wet( VSOUT IN ) : COLOR0
 		rain_diffuse += puddlemask * screen_color;
 		screen_color *= 1 - (saturate(saturate(norm.z * TESR_WetWorldData.x) * 2 - 1) * saturate(lerp(1,0, (depth - TESR_FogData.x) / (TESR_FogData.y - TESR_FogData.x))));
 		rain_diffuse *= saturate(saturate(norm.z * TESR_WetWorldData.x) * 2 - 1) * saturate(lerp(1,0, (depth - TESR_FogData.x) / (TESR_FogData.y - TESR_FogData.x)));
+		
+        color = lerp(color, DrawD, Opacity);
 		
 		color = screen_color + rain_diffuse;
 		
