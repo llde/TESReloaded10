@@ -105,7 +105,7 @@ impl Default for DevelopStruct{
         DevelopStruct{
             CompileShaders : 2,
             CompileEffects : 2,
-            DebugMode : true,
+            DebugMode : false,
             TraceShaders : 25
         }
     }
