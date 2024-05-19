@@ -55,7 +55,7 @@ public:
 	void					ClearShadowsMaps();
 	void					RenderShadowExteriorMaps(ffi::ShadowsExteriorStruct* ShadowsExteriors, D3DXVECTOR3* At);
 	void					RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, ffi::ShadowsInteriorStruct* ShadowsInteriors);
-	void					RenderShadowMaps();
+	bool					RenderShadowMaps();
 	void					CalculateBlend(NiPointLight** Lights, int LightIndex);
     void                    BlurShadowMap(ShadowMapTypeEnum ShadowMapType);    
 	D3DXMATRIX				GetCascadeViewProj(ShadowMapTypeEnum ShadowMapType, ffi::ShadowsExteriorStruct* ShadowsExteriors, D3DXMATRIX View);
@@ -86,6 +86,8 @@ public:
 	bool					AlphaEnabled;
 	bool					WasEnabledExt;
 	bool					WasEnabledInt;
+	NiRenderedTexture*      BackupCanopyMap;
+	NiRenderedTexture*      StubCanopyMap;
 	std::vector<std::tuple<NiGeometry*, UInt32>> alphaObjects;
 	std::vector<std::tuple<NiGeometry*, UInt32>> speedtreeObjects;
 	std::vector<std::tuple<NiGeometry*, UInt32>> normalObjects;

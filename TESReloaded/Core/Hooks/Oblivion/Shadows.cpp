@@ -6,10 +6,34 @@ __declspec(naked) void RenderShadowMapHook() {
 		pushad
 		mov		ecx, TheShadowManager
 		call	ShadowManager::RenderShadowMaps
+		test al,al
+		jnz exec
+		popad
+		mov ecx, edi
+		call    Jumpers::Shadows::OriginalRenderShadowPass
+		jmp		Jumpers::Shadows::RenderShadowMapReturn
+
+		exec:
 		popad
 		jmp		Jumpers::Shadows::RenderShadowMapReturn
 	}
 
+}
+
+NiTexture::FormatPrefs FP = { NiRenderedTexture::PixelLayout::kPixelLayout_TrueColor32, NiRenderedTexture::AlphaFormat::kAlpha_Smooth, NiRenderedTexture::MipMapFlag::kMipMap_Default };
+
+int(__fastcall* RenderCanopyMap)(GridCellArray*) = (int(__fastcall*)(GridCellArray*))0x004826F0;
+int __fastcall RenderCanopyMapHook(GridCellArray* This) {
+	NiRenderedTexture* ni = *(NiRenderedTexture**)0x00B4310C;
+	if (!TheShadowManager->StubCanopyMap) {
+		TheShadowManager->StubCanopyMap = Pointers::Functions::CreateNiRenderedTexture(1, 1, TheRenderManager, &FP);
+		LONG u = InterlockedIncrement(&TheShadowManager->StubCanopyMap->m_uiRefCount);
+		Logger::Log("Intialized Empty Canopy ShadowMap, refs %lu", u );
+	}
+	if (ni == nullptr || !TheSettingManager->Config->ShadowsExterior.Enabled) {
+		return RenderCanopyMap(This);
+	}
+	return 0;
 }
 
 static void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* LightPoint) {

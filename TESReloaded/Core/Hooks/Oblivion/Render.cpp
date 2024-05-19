@@ -165,14 +165,12 @@ void __fastcall WaterCullingProcessHook(TESWaterCullingProcess* This, UInt32 edx
 	NiPoint2 BoundSize;
 	float BoundBox = 0.0f;
 	void* VFT = *(void**)Object;
-#ifdef EXPERIMENTAL_FEATURE	
-	if (VFT == Pointers::VirtualTables::BSFadeNode && TheSettingManager->Config->CullingProcess.EnableReflectionCulling) {
+	if (TheRenderManager->IsNode(Object) && TheSettingManager->Config->Culling.EnableRelfectionCulling) {
 		NiBound* Bound = Object->GetWorldBound();
 		TheRenderManager->GetScreenSpaceBoundSize(&BoundSize, Bound);
 		BoundBox = (BoundSize.x * 100.f) * (BoundSize.y * 100.0f);
-		if (BoundBox < TheSettingManager->Config->CullingProcess.CullMinSizeReflection || Object->m_worldTransform.pos.z + Bound->Radius < TheShaderManager->ShaderConst.Water.waterSettings.x) return;
+		if (BoundBox < TheSettingManager->Config->Culling.CullReflectionMinSize || Object->m_worldTransform.pos.z + Bound->Radius < TheShaderManager->ShaderConst.Water.waterSettings.x) return;
 	}
-#endif
 	(*WaterCullingProcess)(This, Object);
 
 }

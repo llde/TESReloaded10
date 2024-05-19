@@ -1,5 +1,5 @@
 #include "Hooks.h"
-
+#include "Shadows.h"
 HRESULT(__thiscall* RemoveTexture)(NiDX9RenderState*, UInt32 ) = (HRESULT(__thiscall*)(NiDX9RenderState*, UInt32))0x0077B2C0;
 HRESULT _fastcall RemoveTextureH(NiDX9RenderState* state, UInt32 edx, UInt32 sampler) {
 
@@ -132,6 +132,8 @@ void AttachHooks() {
 	if (SettingsMain->FlyCam.Enabled) DetourAttach(&(PVOID&)UpdateFlyCam, &UpdateFlyCamHook);
   //  DetourAttach(&(PVOID&)LoadTextureFile,				&LoadTextureFileHook);
     DetourAttach(&(PVOID&)WaterSurfacePass,				&WaterSurfacePassHook);
+//	DetourAttach(&(PVOID&)RenderCanopyMap, &RenderCanopyMapHook);
+
 	DetourTransactionCommit();
 	
 	SafeWrite8(0x00801BCB,	sizeof(NiD3DVertexShaderEx));
@@ -198,6 +200,14 @@ void AttachHooks() {
 	SafeWriteJump(Jumpers::SetWeatherEditorName::Hook,			(UInt32)SetWeatherEditorNameHook);
 	SafeWriteJump(Jumpers::HitEvent::Hook,						(UInt32)HitEventHook);
 	SafeWriteJump(Jumpers::Shadows::RenderShadowMapHook,		(UInt32)RenderShadowMapHook);
+
+
+	SafeWriteCall(0x0040D650, (UInt32)RenderCanopyMapHook); //Avoid tree canopy shadows rendering. This actually only seems to disable initialization, but not prevent the actual shadowmap to be disabled
+	SafeWriteJump(0x004425F7, 0x00442621); //Skip canopy map deinitialization (the game disposes/recreates the map every cell changed)
+	SafeWriteJump(0x004446FB, 0x00444723); //Skip canopy map deinitialization (the game disposes/recreates the map every cell changed)
+	SafeWriteJump(0x00444CCF, 0x00444CF9); //Skip canopy map deinitialization (the game disposes/recreates the map every cell changed)
+	SafeWriteJump(0x0055F5C9, 0x0055F5ED); //Skip canopy map deinitialization (the game disposes/recreates the map every cell changed)
+
 	SafeWriteJump(Jumpers::Shadows::AddCastShadowFlagHook,		(UInt32)AddCastShadowFlagHook);
 //	SafeWriteJump(Jumpers::WaterHeightMap::Hook,				(UInt32)WaterHeightMapHook);
 	SafeWriteJump(Jumpers::EndProcess::Hook,					(UInt32)EndProcessHook);

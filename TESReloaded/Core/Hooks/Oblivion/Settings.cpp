@@ -15,8 +15,8 @@ bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, GameSett
 		Setting->pValue = (char*)MainMenuMovie;
 	else if ((!strcmp(Setting->Name, "SMainMenuMusic:General") || !strcmp(Setting->Name, "STitleMusic:Loading")) && TheSettingManager->Config->Main.ReplaceIntro)
 		Setting->pValue = (char*)MainMenuMusic;
-	else if (!strcmp(Setting->Name, "bDoCanopyShadowPass:Display") || !strcmp(Setting->Name, "bDoActorShadows:Display") || !strcmp(Setting->Name, "iActorShadowCountExt:Display") || !strcmp(Setting->Name, "iActorShadowCountInt:Display"))
-		Setting->iValue = 0;
+//	else if (!strcmp(Setting->Name, "bDoCanopyShadowPass:Display") || !strcmp(Setting->Name, "bDoActorShadows:Display") || !strcmp(Setting->Name, "iActorShadowCountExt:Display") || !strcmp(Setting->Name, "iActorShadowCountInt:Display"))
+//		Setting->iValue = 0;
 	else if (!strcmp(Setting->Name, "bDoHighDynamicRange:BlurShaderHDR"))
 		Setting->iValue = 1;
 	else if (!strcmp(Setting->Name, "bUseBlurShader:BlurShader"))

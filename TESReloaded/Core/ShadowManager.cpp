@@ -222,7 +222,7 @@ void ShadowManager::SelectGeometry(NiGeometry* Geo) {
 //		Logger::Log("Skinned but no partition: %s   %s", Geo->m_pcName, Geo->m_parent ? Geo->m_parent->m_pcName : "<No parent>");
 		return;
 	}
-	if(!Geo->geomData->BuffData) TheRenderManager->unsharedGeometryGroup->AddObject(Geo->geomData, nullptr, nullptr);
+	if(!Geo->geomData->BuffData) TheRenderManager->AddGeometryToUnsharedGroup(Geo->geomData);  //TODO Oblivion only for now. Find new vegas?
 	if (Geo->geomData->BuffData) {
 		if (Geo->m_parent->m_pcName && !memcmp(Geo->m_parent->m_pcName, "Leaves", 6)) speedtreeObjects.push_back(std::make_tuple(Geo, visibility));
 		else if (alphaObject) alphaObjects.push_back(std::make_tuple(Geo, visibility));
@@ -237,9 +237,7 @@ void ShadowManager::AccumulateGeometry(NiAVObject* accum){
 	if (accum) {
 		if (!(accum->m_flags & NiAVObject::kFlag_AppCulled)) {
 			void* VFT = *(void**)accum;
-			if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode
-				|| VFT == Pointers::VirtualTables::BSTreeNode || VFT == Pointers::VirtualTables::BSMultiBoundNode
-				|| VFT == Pointers::VirtualTables::NiBillBoardNode) {
+			if (TheRenderManager->IsNode(accum)) {
 				if (VFT == Pointers::VirtualTables::BSFadeNode && ((BSFadeNode*)accum)->FadeAlpha < 0.75f) return;
 				NiNode* Node = (NiNode*)accum;
 				if (Node) {
@@ -265,7 +263,7 @@ void ShadowManager::RenderInterior(NiAVObject* Object, float MinRadius) {
 		float Radius = Object->GetWorldBoundRadius();
 		if (!(Object->m_flags & NiAVObject::kFlag_AppCulled) && Radius >= MinRadius) {
 			void* VFT = *(void**)Object;
-			if (VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode) {
+			if (TheRenderManager->IsNode(Object)) {
 				NiNode* Node = (NiNode*)Object;
 				for (int i = 0; i < Node->m_children.numObjs; i++) {
 					RenderInterior(Node->m_children.data[i], MinRadius);
@@ -545,9 +543,40 @@ bool ShadowManager::IsVisible(ShadowMapTypeEnum type, UInt32 visibility) {
 void ShadowManager::ClearShadowsMaps() {
 	bool clearExt = WasEnabledExt || TheSettingManager->Config->ShadowsExterior.Enabled;
 	bool clearInt = WasEnabledInt || TheSettingManager->Config->ShadowsInterior.Enabled;
-	Logger::Log("%u", clearExt);
 	IDirect3DDevice9* Device = TheRenderManager->device;
+	BSTextureManager* manager = *BSTextureManager::Singleton;
+	int id = 0;
 	Device->BeginScene();
+
+	for (NiTList<BSRenderedTexture>::Entry* i = manager->unk30.start; i != nullptr; i = i->next, id++) {
+		if (id > 0 && id % TheRenderManager->MaxRenderTargets  == 0) Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 0L);
+		HRESULT hr = Device->SetRenderTarget(id % TheRenderManager->MaxRenderTargets, i->data->RenderedTexture->buffer->data->Surface);
+		if (FAILED(hr))Logger::Log("%08X", hr);
+		if(id == 0)Device->SetDepthStencilSurface(i->data->RenderTargetGroup->DepthStencilBuffer->data->Surface); //Once, buffers seems the same surface
+		//Logger::Log("%08X", i->data->RenderTargetGroup->DepthStencilBuffer->data->Surface);
+	}
+	if(id > 0) Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 0L);
+	for (int i = 0; i < TheRenderManager->MaxRenderTargets; i++) {
+		Device->SetRenderTarget(i, NULL);
+	}
+	/*std::string filename = std::string("shadowMaps") + std::to_string(0x00B4310C);
+	filename += ".jpg";
+	if (ni && TheSettingManager->Config->ShadowsExterior.Enabled) {
+		TheDebugManager->SaveRenderTarget(filename, ni->buffer->data->Surface);
+		Device->SetRenderTarget(0, ni->buffer->data->Surface);
+		Device->Clear(0L, NULL, D3DCLEAR_TARGET, D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0L);
+		
+	}*/
+	NiRenderedTexture** ni = (NiRenderedTexture**)0x00B4310C;
+	if (*ni) {
+		if (*ni != TheShadowManager->BackupCanopyMap && *ni != TheShadowManager->StubCanopyMap) {
+			TheShadowManager->BackupCanopyMap = *ni;
+		}
+		Logger::Log("%08X  %08X   %08X", *ni, TheShadowManager->BackupCanopyMap, TheShadowManager->StubCanopyMap);
+		if (TheSettingManager->Config->ShadowsExterior.Enabled) Pointers::Functions::SetTextureCanopyMap(TheShadowManager->StubCanopyMap);
+		else Pointers::Functions::SetTextureCanopyMap(TheShadowManager->BackupCanopyMap);
+	}
+
 	if (clearExt) {
 		for (UInt32 i = ShadowMapTypeEnum::MapNear; i <= ShadowMapTypeEnum::MapOrtho; i++) {
 			Device->SetDepthStencilSurface(TheTextureManager->ShadowMapDepthSurface[i]);
@@ -668,7 +697,7 @@ void ShadowManager::RenderShadowExteriorMaps(ffi::ShadowsExteriorStruct* Shadows
 			RenderAlphaPass(alphaObjects, (ShadowMapTypeEnum)i);
 			RenderSpeedTreePass(speedtreeObjects, (ShadowMapTypeEnum)i);
 			RenderSkinnedPass(skinnedObjects, (ShadowMapTypeEnum)i);
-			RenderSkinnedAlphaPass(skinnedAlphaObjects, (ShadowMapTypeEnum)i);
+	//		RenderSkinnedAlphaPass(skinnedAlphaObjects, (ShadowMapTypeEnum)i);
 
 		}
 	}
@@ -767,7 +796,7 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, f
 /*
 * Renders the different shadow maps: Near, Far, Ortho.
 */
-void ShadowManager::RenderShadowMaps() {
+bool ShadowManager::RenderShadowMaps() {
 	
 	ffi::ShadowsExteriorStruct* ShadowsExteriors = &TheSettingManager->Config->ShadowsExterior;
 	ffi::ShadowsInteriorStruct* ShadowsInteriors = &TheSettingManager->Config->ShadowsInterior;
@@ -779,6 +808,7 @@ void ShadowManager::RenderShadowMaps() {
 	IDirect3DSurface9* DepthSurface = NULL;
 	IDirect3DSurface9* RenderSurface = NULL;
 	D3DVIEWPORT9 viewport;
+	bool TESRshadowsRendered = false;
 	/*	if(RenderStateSettings == nullptr){
 		RenderStateSettings = (NiDX9RenderState::NiRenderStateSetting*)malloc(sizeof(NiDX9RenderState::NiRenderStateSetting) * 256);
 		memcpy(RenderStateSettings, RenderState->RenderStateSettings, sizeof(NiDX9RenderState::NiRenderStateSetting) * 256);
@@ -806,6 +836,10 @@ void ShadowManager::RenderShadowMaps() {
 	RenderState->SetRenderState(D3DRS_STENCILREF , 0 ,RenderStateArgs);
  	RenderState->SetRenderState(D3DRS_STENCILFUNC , 8 ,RenderStateArgs);
 	ClearShadowsMaps();
+	Device->SetDepthStencilSurface(DepthSurface);
+	Device->SetRenderTarget(0, RenderSurface);
+	Device->SetViewport(&viewport);
+
 	WasEnabledExt = ShadowsExteriors->Enabled;
 	WasEnabledInt = ShadowsInteriors->Enabled;
 	TheRenderManager->SetupSceneCamera();
@@ -820,7 +854,6 @@ void ShadowManager::RenderShadowMaps() {
 
 		CurrentVertex = ShadowMapVertex;
 		CurrentPixel = ShadowMapPixel;
-
 		// render ortho map
 		RenderShadowExteriorMaps(ShadowsExteriors, &At);
 
@@ -833,7 +866,7 @@ void ShadowManager::RenderShadowMaps() {
 		ShadowData->x = ShadowsExteriorShader->Quality;
 		if (TheSettingManager->Config->Effects.ShadowsExteriors) ShadowData->x = -1; // Disable the forward shadowing
 		ShadowData->y = ShadowsExteriorShader->Darkness;
-
+		TESRshadowsRendered = true;
 		// fade shadows when sun is nearing the horizon
 		/*if (SunDir->z < 0.1f) {
 			if (ShadowData->y == 0.0f) ShadowData->y = 0.1f;
@@ -885,28 +918,22 @@ void ShadowManager::RenderShadowMaps() {
 		if (TheSettingManager->Config->Effects.ShadowsInteriors) ShadowData->x = -1; // Disable the forward shadowing
 		ShadowData->y = ShadowsInteriorShader->Darkness;
 		ShadowData->z = 1.0f / (float)ShadowsInteriors->ShadowCubeMapResolution;
+		TESRshadowsRendered = true;
 	}
 	Device->SetDepthStencilSurface(DepthSurface);
 	Device->SetRenderTarget(0, RenderSurface);
 	Device->SetViewport(&viewport);
+	for (int i = MapNear; i < MapLod; i++) {
+		std::string filename = "shadowmap" + std::to_string(i);
+		filename += ".jpg";
+		TheDebugManager->SaveRenderTarget(filename, TheTextureManager->ShadowMapSurface[i]);
+		std::string filename1 = "shadowmap" + std::to_string(i);
+		filename += "B.jpg";
+		TheDebugManager->SaveRenderTarget(filename, TheTextureManager->ShadowMapSurfaceBlurred[i]);
 
+	}
 	if (TheSettingManager->Config->Develop.DebugMode) {
 		if (Global->OnKeyDown(0x17)) { // TODO: setting for debug key ?
-			char Filename[MAX_PATH];
-
-			time_t CurrentTime = time(NULL);
-			GetCurrentDirectoryA(MAX_PATH, Filename);
-			strcat(Filename, "\\Test");
-			if (GetFileAttributesA(Filename) == INVALID_FILE_ATTRIBUTES) CreateDirectoryA(Filename, NULL);
-			D3DXSaveSurfaceToFileA(".\\Test\\shadowmap0.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapNear], NULL, NULL);
-			D3DXSaveSurfaceToFileA(".\\Test\\shadowmap1.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapMiddle], NULL, NULL);
-			D3DXSaveSurfaceToFileA(".\\Test\\shadowmap2.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapFar], NULL, NULL);
-		//	D3DXSaveSurfaceToFileA(".\\Test\\shadowmap3.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapLod], NULL, NULL);
-		//	D3DXSaveSurfaceToFileA(".\\Test\\shadowmap4.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurface[MapOrtho], NULL, NULL);
-			D3DXSaveSurfaceToFileA(".\\Test\\shadowmap0B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[0], NULL, NULL);
-			D3DXSaveSurfaceToFileA(".\\Test\\shadowmap1B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[1], NULL, NULL);
-			D3DXSaveSurfaceToFileA(".\\Test\\shadowmap2B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[2], NULL, NULL);
-	//		D3DXSaveSurfaceToFileA(".\\Test\\shadowmap3B.jpg", D3DXIFF_JPG, TheTextureManager->ShadowMapSurfaceBlurred[3], NULL, NULL);
 			for (size_t i = 0; i < 256; i++) {
 					Logger::Log("Different state between iterations: State %u is %0X", i, RenderState->RenderStateSettings[i].CurrentValue);
 			}
@@ -914,6 +941,7 @@ void ShadowManager::RenderShadowMaps() {
 			InterfaceManager->ShowMessage("Textures taken!");
 		}
 	}
+	return TESRshadowsRendered;
 
 }
 
@@ -1206,9 +1234,9 @@ void ShadowManager::RenderSkinnedPass(std::vector<std::tuple<NiGeometry*, UInt32
 					Device->SetStreamSource(i, GeoData->VBChip[i]->VB, 0, GeoData->VertexStride[i]);
 				}
 				Device->SetIndices(GeoData->IB);
-				if (GeoData->FVF)
+				if (GeoData->FVF) 
 					RenderState->SetFVF(GeoData->FVF, false);
-				else
+				else 
 					RenderState->SetVertexDeclaration(GeoData->VertexDeclaration, false);
 				CurrentVertex->SetCT();
 				CurrentPixel->SetCT();
