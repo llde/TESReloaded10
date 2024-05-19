@@ -496,7 +496,7 @@ public:
 	float GetDistance(NiPoint3* Point);
 	NiBound*	GetWorldBound();
 	float		GetWorldBoundRadius();
-    
+
 	NiNode*					m_parent;				// 018
 	UInt32					unk001C;				// 01C
 	NiBound*				m_kWorldBound;			// 020
@@ -1465,7 +1465,8 @@ public:
 	void							PackGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiD3DShaderDeclaration* ShaderDeclaration);
 	void							PackSkinnedGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiSkinPartition::Partition* Partition, NiD3DShaderDeclaration* ShaderDeclaration);
 	void							CalculateBoneMatrixes(NiSkinInstance* SkinInstance, NiTransform* WorldTrasform);
-
+	void							AddGeometryToUnsharedGroup(NiGeometryData* data) {}
+	void							OriginalShadowPass() {}   //Stubbed
 	UInt32							pad210[(0x288 - 0x210) >> 2];	// 210
 	IDirect3DDevice9*				device;							// 288
 	D3DCAPS9						caps;							// 28C

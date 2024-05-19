@@ -4148,6 +4148,8 @@ namespace Pointers {
 		static void  (__cdecl* BeginRendering)(UInt32, NiRenderTargetGroup*) = (void (__cdecl*)(UInt32, NiRenderTargetGroup*))0x007D7280;
 		static void  (* EndRendering)() = (void (*)())0x007D72D0;
 		static NiSourceTexture* (__cdecl* TextureLoadByFilename)(const char*, NiTexture::FormatPrefs*, bool) = (NiSourceTexture* (__cdecl*)(const char*, NiTexture::FormatPrefs*, bool))0x00701E00;
+		static void(__cdecl* SetTextureCanopyMap)(NiRenderedTexture*) = (void(__cdecl*)(NiRenderedTexture*))0x00441850;
+		static NiRenderedTexture* (__cdecl* CreateNiRenderedTexture)(UInt32, UInt32, NiRenderer*, NiTexture::FormatPrefs*) = (NiRenderedTexture * (__cdecl*)(UInt32, UInt32, NiRenderer*, NiTexture::FormatPrefs*))0x0072A9B0;
 
 	}
 	namespace VirtualTables {

@@ -122,6 +122,7 @@ public:
 	struct Shadows {
 		static const UInt32 RenderShadowMapHook			= 0x0040C919;
 		static const UInt32 RenderShadowMapReturn		= 0x0040C920;
+		static const UInt32 OriginalRenderShadowPass	= 0x004073D0;
 		static const UInt32 AddCastShadowFlagHook		= 0x004B1A25;
 		static const UInt32 AddCastShadowFlagReturn		= 0x004B1A2A;
 		static const UInt32 EditorCastShadowFlagHook	= 0x005498DD;

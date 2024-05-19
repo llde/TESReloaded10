@@ -1728,6 +1728,11 @@ public:
 	void				PackGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiD3DShaderDeclaration* ShaderDeclaration) { ThisCall(0x00767B40, this, GeoData, ModelData, SkinInstance, ShaderDeclaration, 0); }
 	void				PackSkinnedGeometryBuffer(NiGeometryBufferData* GeoData, NiGeometryData* ModelData, NiSkinInstance* SkinInstance, NiSkinPartition::Partition* Partition, NiD3DShaderDeclaration* ShaderDeclaration) { ThisCall(0x00763130, this, GeoData, ModelData, SkinInstance, Partition, ShaderDeclaration, 0); }
 	void				CalculateBoneMatrixes(NiSkinInstance* SkinInstance, NiTransform* WorldTrasform) { ThisCall(0x007655F0, this, SkinInstance, WorldTrasform, false, 3, true); }
+	void				CalculateBoneMatrixes(NiSkinInstance* SkinInstance, NiTransform* WorldTrasform, bool unk3, UInt8 unk4,bool unk5) { ThisCall(0x007655F0, this, SkinInstance, WorldTrasform, unk3, unk4, unk5); }
+
+	void AddGeometryToUnsharedGroup(NiGeometryData* data) {
+		this->unsharedGeometryGroup->AddObject(data, nullptr, nullptr);
+	}
 
 	UInt32								pad210[(0x280 - 0x210) >> 2];	// 210
 	IDirect3DDevice9*					device;							// 280
@@ -1838,6 +1843,7 @@ public:
 	NiTArray<void>						lostDeviceCallbacks;			// AB8 LostDeviceCallback
 	NiTArray<void*>						lostDeviceCallbacksRefcons;		// AC8
 	UInt32								padAD0[(0xB00 - 0xAD8) >> 2];	// AD8
+
 };
 assert(sizeof(NiDX9Renderer) == 0xB00);
 
@@ -2278,3 +2284,35 @@ public:
 	UInt8								pad12D[3];			// 12D
 };
 assert(sizeof(ShadowSceneNode) == 0x130);
+
+// manages off-screen render targets
+// 48
+class BSTextureManager
+{
+public:
+	// ?
+	struct RenderedTextureData
+	{
+		UInt32		unk00;
+	};
+
+	NiTList<RenderedTextureData>				unk00;				// 00
+	NiTList<RenderedTextureData>				unk10;				// 10
+	NiTList<BSRenderedTexture>				shadowMaps;			// 20
+	NiTList<BSRenderedTexture>				unk30;				// 30
+	void*											unk40;				// 40 - smart pointer, screenshot rendertarget?
+	void*											unk44;				// 44 - smart pointer
+
+	// methods
+	BSRenderedTexture*								FetchShadowMap(void);
+	void											DiscardShadowMap(BSRenderedTexture* Texture);
+	void											ReserveShadowMaps(UInt32 Count);
+
+	BSRenderedTexture*								GetDefaultRenderTarget(UInt32 Type);
+
+	static BSTextureManager*						CreateInstance(void);
+	void											DeleteInstance(void);
+
+	static BSTextureManager**						Singleton;
+};
+assert(sizeof(BSTextureManager) == 0x48);
