@@ -358,6 +358,9 @@
     <ClCompile Include="..\TESReloaded\Core\DebugManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Oblivion\GameNi.cpp">
+      <Filter>Framework\Oblivion</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Exports.def">

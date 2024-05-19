@@ -229,6 +229,7 @@
     <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\ShadowManager.cpp" />
     <ClCompile Include="..\TESReloaded\Core\TextureManager.cpp" />
+    <ClCompile Include="..\TESReloaded\Framework\Oblivion\GameNi.cpp" />
     <ClCompile Include="..\TESReloaded\Framework\Oblivion\Managers.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
