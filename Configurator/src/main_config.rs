@@ -128,7 +128,7 @@ impl Default for LowHFSoundStruct{
             HealthEnabled : true,
             FatigueEnabled : true,
             HealthCoeff : 0.5,
-            FatigueCoeff : 0.5
+            FatigueCoeff : 0.5,
         }
     }
 }
