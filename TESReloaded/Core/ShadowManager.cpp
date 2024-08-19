@@ -572,7 +572,6 @@ void ShadowManager::ClearShadowsMaps() {
 		if (*ni != TheShadowManager->BackupCanopyMap && *ni != TheShadowManager->StubCanopyMap) {
 			TheShadowManager->BackupCanopyMap = *ni;
 		}
-		Logger::Log("%08X  %08X   %08X", *ni, TheShadowManager->BackupCanopyMap, TheShadowManager->StubCanopyMap);
 		if (TheSettingManager->Config->ShadowsExterior.Enabled) Pointers::Functions::SetTextureCanopyMap(TheShadowManager->StubCanopyMap);
 		else Pointers::Functions::SetTextureCanopyMap(TheShadowManager->BackupCanopyMap);
 	}
