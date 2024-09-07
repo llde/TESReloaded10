@@ -17,6 +17,11 @@ void __cdecl NameThread(int threadID, const char* name) {
 
 }
 
+int(__thiscall* RemoveTextureList)(NiDX9RenderState*) = (int(__thiscall*)(NiDX9RenderState*)) 0x0077B210;
+int __fastcall RemoveTextureListH(NiDX9RenderState* This) {
+	return 0;
+}
+
 static const UInt32 kRetU = 0x0053B175;
 static const UInt32 kRet = 0x0053B20C;
 void __declspec(naked) SetAtmosphereUnderwater() {
@@ -46,8 +51,10 @@ void AttachHooks() {
 	ffi::Config* SettingsMain = TheSettingManager->Config;
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&(PVOID&)RemoveTexture, &RemoveTextureH);
-	DetourAttach(&(PVOID&)SetTexture, &SetTextureH);
+//	DetourAttach(&(PVOID&)RemoveTexture, &RemoveTextureH);
+//	DetourAttach(&(PVOID&)SetTexture, &SetTextureH);
+//	DetourAttach(&(PVOID&)RemoveTextureList, &RemoveTextureListH);
+
 	DetourAttach(&(PVOID&)SetNameThread, &NameThread);
 
 	DetourAttach(&(PVOID&)ReadSetting,					&ReadSettingHook);

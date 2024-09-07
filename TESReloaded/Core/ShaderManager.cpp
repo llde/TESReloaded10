@@ -635,7 +635,7 @@ void EffectRecord::SetCT() {
 	for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
 		Value = &TextureShaderValues[c];
 		if (Value->Texture->Texture) { //Don't set the states if texture cannot be bound beocuse it's null
-			TheRenderManager->renderState->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
+			TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
 			for (int i = 1; i < SamplerStatesMax; i++) {
 				TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
 			}

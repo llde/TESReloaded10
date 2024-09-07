@@ -95,7 +95,7 @@ UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiGeometry
 			DWNode::AddNode(Name, Geometry->m_parent, Geometry);
 		}
 	}
-	UInt32 result =  (*SetupShaderPrograms)(This, Geometry, SkinInstance, SkinPartition, GeometryBufferData, PropertyState, EffectState, WorldTransform, WorldBound);
+	UInt32 result = (*SetupShaderPrograms)(This, Geometry, SkinInstance, SkinPartition, GeometryBufferData, PropertyState, EffectState, WorldTransform, WorldBound);
 	if (PassIndex == 380  || PassIndex == 409 || PassIndex == 410){ //WaterLOD
         //data[2] difuse, data[1] nothing
  //       Logger::Log("Pass %u : %u",  PassIndex, *IsLava);
