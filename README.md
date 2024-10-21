@@ -138,14 +138,7 @@ Solution: Disable "First Person Shadow" setting in Enhanced Camera .ini.
 
 ----
 ## License
-The project uses the GNU public license.
-
-The redistribution and use of the binaries, with or without modification, are permitted and publishing binaries is allowed, but the following conditions MUST be met:
- - the current license MUST be included in the redistribution of the binaries and it cannot be modified
- - the distributed binaries MUST report the word "UNOFFICIAL" (or a branch name) in the product description
- - the distributer MUST state that the official channels cannot be used for unofficial versions.
- - the source MUST be provided (included or separated)
-
+Check [License](License.md) for the licensing terms.
 
 ----
 ## Contributing
