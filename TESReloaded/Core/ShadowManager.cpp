@@ -188,21 +188,24 @@ TESObjectREFR* ShadowManager::GetRef(TESObjectREFR* Ref, ffi::ShadowFormsStruct*
 
 }
 
-void ShadowManager::SelectGeometry(NiGeometry* Geo) {
+void ShadowManager::SelectGeometry(NiGeometry* Geo, bool IsFaceGen) {
+	if (!Geo->shader  || !Geo->shader->ShaderDeclaration) return;
 
-	if (!Geo->shader) return;
 	UInt32 visibility = ShadowMapVisibility::None;
 	if (InFrustum(ShadowMapTypeEnum::MapNear, Geo)) visibility = ShadowMapVisibility::Near;
 	else if (InFrustum(ShadowMapTypeEnum::MapMiddle, Geo)) visibility = ShadowMapVisibility::Middle;
 	else if (InFrustum(ShadowMapTypeEnum::MapFar, Geo)) visibility = ShadowMapVisibility::Far;
 	else if (InFrustum(ShadowMapTypeEnum::MapLod, Geo)) visibility = ShadowMapVisibility::Lod;
 	if (InFrustum(ShadowMapTypeEnum::MapOrtho, Geo)) visibility |= ShadowMapVisibility::Ortho;
+	if(visibility == ShadowMapVisibility::None) return;
+	visibility |= ShadowMapVisibility::FaceGenQuirk;
+
 	BSShaderProperty* ShaderProperty = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Shade);
 	bool haveLightingProperty = ShaderProperty && ShaderProperty->IsLightingProperty();
-
+	NiTexture* materialText = nullptr;
 	if (haveLightingProperty) { /*Leaves don't have a shade property or is not a LightingProperty*/
 		BSShaderPPLightingProperty* lightProperty = (BSShaderPPLightingProperty*)ShaderProperty;
-
+		materialText = lightProperty->textures[0]  ? *lightProperty->textures[0] : nullptr;
 		/*Oblivion: Only seen 0.0 or 0.208. IS the structure actually corrrect?*/
 		if (lightProperty->IsRefractive()) return; //Configure,also check for actors, they are skinned
 	}
@@ -212,8 +215,8 @@ void ShadowManager::SelectGeometry(NiGeometry* Geo) {
 		NiAlphaProperty* AProp = (NiAlphaProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Alpha);
 		if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) alphaObject = true;
 	}
-//	if (alphaObject && !haveLightingProperty) return;
 	if(Geo->skinInstance && !Geo->geomData->BuffData  && Geo->skinInstance->SkinPartition->Partitions[0].BuffData) {
+		if (!materialText) return;
 		if (alphaObject) skinnedAlphaObjects.push_back(std::make_tuple(Geo, visibility));
 		else skinnedObjects.push_back(std::make_tuple(Geo, visibility));
 		return;
@@ -222,35 +225,32 @@ void ShadowManager::SelectGeometry(NiGeometry* Geo) {
 //		Logger::Log("Skinned but no partition: %s   %s", Geo->m_pcName, Geo->m_parent ? Geo->m_parent->m_pcName : "<No parent>");
 		return;
 	}
-	if(!Geo->geomData->BuffData) TheRenderManager->AddGeometryToUnsharedGroup(Geo->geomData);  //TODO Oblivion only for now. Find new vegas?
-	if (Geo->geomData->BuffData) {
+	if(Geo->geomData->BuffData){
 		if (Geo->m_parent->m_pcName && !memcmp(Geo->m_parent->m_pcName, "Leaves", 6)) speedtreeObjects.push_back(std::make_tuple(Geo, visibility));
-		else if (alphaObject) alphaObjects.push_back(std::make_tuple(Geo, visibility));
+		else if (alphaObject  && materialText) alphaObjects.push_back(std::make_tuple(Geo, visibility));
 		else normalObjects.push_back(std::make_tuple(Geo, visibility));
-	}
-	else {
-	//	Logger::Log("%s   %s", Geo->m_pcName, Geo->m_parent ? Geo->m_parent->m_pcName : "<No parent>");
 	}
 }
 
-void ShadowManager::AccumulateGeometry(NiAVObject* accum){
+void ShadowManager::AccumulateGeometry(NiAVObject* accum, bool IsFaceGenNode){
 	if (accum) {
 		if (!(accum->m_flags & NiAVObject::kFlag_AppCulled)) {
 			void* VFT = *(void**)accum;
-			if (TheRenderManager->IsNode(accum)) {
+			if (TheRenderManager->IsNode(accum) || VFT == Pointers::VirtualTables::BSFaceGenNiNode)  {
 				if (VFT == Pointers::VirtualTables::BSFadeNode && ((BSFadeNode*)accum)->FadeAlpha < 0.75f) return;
 				NiNode* Node = (NiNode*)accum;
 				if (Node) {
 					for (int i = 0; i < Node->m_children.numObjs; i++) {
-						AccumulateGeometry(Node->m_children.data[i]);
+						AccumulateGeometry(Node->m_children.data[i], (VFT == Pointers::VirtualTables::BSFaceGenNiNode) || (IsFaceGenNode == true) ? true : false);
 					}
 				}
 			}
 			else if (VFT == Pointers::VirtualTables::NiTriShape || VFT == Pointers::VirtualTables::NiTriStrips) {
-				SelectGeometry((NiGeometry*)accum);
+				SelectGeometry((NiGeometry*)accum, IsFaceGenNode);
 
 			}
-			else if (VFT != Pointers::VirtualTables::NiPointLight /*TODO attenuaton map?Test for the affecedNode list*/ && VFT != Pointers::VirtualTables::NiParticleSystem) {
+			else if (VFT != Pointers::VirtualTables::NiPointLight /*TODO attenuaton map?Test for the affecedNode list*/ && VFT != Pointers::VirtualTables::NiParticleSystem	)
+			{
 				Logger::Log("Unknown %0X", VFT);
 			}
 		}
@@ -531,6 +531,7 @@ void CreateViewFrom(D3DXMATRIX* View, D3DXVECTOR3* At, D3DXVECTOR4* Dir, float F
 
 }
 bool ShadowManager::IsVisible(ShadowMapTypeEnum type, UInt32 visibility) {
+	visibility &= ~ShadowMapVisibility::FaceGenQuirk;
 	if (type == ShadowMapTypeEnum::MapOrtho) return (visibility & ShadowMapVisibility::Ortho) == ShadowMapVisibility::Ortho;
 	ShadowMapVisibility clean = (ShadowMapVisibility)(visibility & ~ShadowMapVisibility::Ortho);
 	if (type == ShadowMapTypeEnum::MapLod) return  clean != ShadowMapVisibility::None;
@@ -639,11 +640,12 @@ void ShadowManager::RenderShadowExteriorMaps(ffi::ShadowsExteriorStruct* Shadows
 	speedtreeObjects.clear();
 	skinnedObjects.clear();
 	skinnedAlphaObjects.clear();
+
 	for (UInt32 i = 0; i < CellArraySize; i++) {
 		if (TESObjectCELL* Cell = CellArray->GetCell(i)) {
 			std::vector<NiNode*> TerrainNodes = Cell->GetTerrainNodes();
 			for (NiNode* node : TerrainNodes) {
-				AccumulateGeometry(node);
+				AccumulateGeometry(node, false);
 			}
 			//			if (ShadowsExteriors->Forms[ShadowMapType].Lod) RenderLod(Tes->landLOD, ShadowMapType); //Render terrain LOD
 			/*for (UInt32 i = 2; i < Cell->GetNode()->m_children.numObjs; i++) {
@@ -656,20 +658,23 @@ void ShadowManager::RenderShadowExteriorMaps(ffi::ShadowsExteriorStruct* Shadows
 			while (Entry) {
 				if (TESObjectREFR* Ref = GetRef(Entry->item, Forms)) {
 					NiNode* RefNode = Ref->GetNode();
-					AccumulateGeometry(RefNode);
+					AccumulateGeometry(RefNode, false);
 				}
 				Entry = Entry->next;
 			}
 		}
 	}
+
+
 	RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE, RenderStateArgs);
 	RenderState->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_TRUE, RenderStateArgs);
 	RenderState->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE, RenderStateArgs);
 	RenderState->SetRenderState(D3DRS_ALPHABLENDENABLE, 0, RenderStateArgs);
+	//	RenderState->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS, RenderStateArgs);
+
 	RenderState->SetVertexShader(ShadowMapVertex->ShaderHandle, false);
 	RenderState->SetPixelShader(ShadowMapPixel->ShaderHandle, false);
 	Device->BeginScene();
-
 
 	for (UInt32 i = ShadowMapTypeEnum::MapNear; i <= ShadowMapTypeEnum::MapOrtho; i++) {
 		if (i == MapOrtho) {
@@ -696,7 +701,7 @@ void ShadowManager::RenderShadowExteriorMaps(ffi::ShadowsExteriorStruct* Shadows
 			RenderAlphaPass(alphaObjects, (ShadowMapTypeEnum)i);
 			RenderSpeedTreePass(speedtreeObjects, (ShadowMapTypeEnum)i);
 			RenderSkinnedPass(skinnedObjects, (ShadowMapTypeEnum)i);
-	//		RenderSkinnedAlphaPass(skinnedAlphaObjects, (ShadowMapTypeEnum)i);
+			RenderSkinnedAlphaPass(skinnedAlphaObjects, (ShadowMapTypeEnum)i);
 
 		}
 	}
@@ -922,7 +927,7 @@ bool ShadowManager::RenderShadowMaps() {
 	Device->SetDepthStencilSurface(DepthSurface);
 	Device->SetRenderTarget(0, RenderSurface);
 	Device->SetViewport(&viewport);
-	for (int i = MapNear; i < MapLod; i++) {
+	/*for (int i = MapNear; i < MapLod; i++) {
 		std::string filename = "shadowmap" + std::to_string(i);
 		filename += ".jpg";
 		TheDebugManager->SaveRenderTarget(filename, TheTextureManager->ShadowMapSurface[i]);
@@ -930,7 +935,7 @@ bool ShadowManager::RenderShadowMaps() {
 		filename += "B.jpg";
 		TheDebugManager->SaveRenderTarget(filename, TheTextureManager->ShadowMapSurfaceBlurred[i]);
 
-	}
+	}*/
 	if (TheSettingManager->Config->Develop.DebugMode) {
 		if (Global->OnKeyDown(0x17)) { // TODO: setting for debug key ?
 			for (size_t i = 0; i < 256; i++) {
@@ -985,10 +990,35 @@ float ShadowManager::lerp(float a, float b, float t) {
 	return (1 - t) * a + t * b;
 }
 
+//static bool gen = true;
+bool ShadowManager::SetupGeometryRender(NiGeometry* Geo){
+	/*
+	 Somehow adding a geometry to a geometry group cause all sort of issues when then we call PackGeometryBuffers if reflections are disabled or some critical node is culled on reflection pass
+	 That call seems required only for BSFaceGenNodes and only when relfections are off for some reasons
+	 */
+//	gen = true;
+	if (!Geo->geomData->BuffData) {
+		//TheRenderManager->BatchRenderShape(Geo);
+		if((Geo->geomData->DataFlags & NiGeometryData::Consistency::CONSISTENCY_MASK) == NiGeometryData::Consistency::VOLATILE  ) {
+//			gen = false;
+			return false;
+		}
+//		TheRenderManager->unsharedGeometryGroup->AddObject(Geo->geomData, nullptr, nullptr);  //TODO Oblivion only for now. Find new vegas?
+//		for(int i = 0; i < Geo->geomData->BuffData->StreamCount; i++){
+//			TheRenderManager->unsharedGeometryGroup->CreateChip(Geo->geomData->BuffData, i);
+//		}
+	//	TheRenderManager->PrecacheGeometryData(Geo, 0,0 ,Geo->shader->ShaderDeclaration);
+	//	TheRenderManager->BatchRenderShape(Geo);
+		return true;
+	}
+	return false;
+}
+
 void ShadowManager::RenderNormalPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType) {
 	for (std::tuple<NiGeometry*, UInt32>& obj : geometries) {
 		NiGeometry* Geo = obj._Myfirst._Val;
-		if (IsVisible(ShadowMapType, obj._Get_rest()._Myfirst._Val)) {
+		UInt32 visibility = obj._Get_rest()._Myfirst._Val;
+		if (IsVisible(ShadowMapType,visibility) && Geo->geomData->BuffData) {
 			TheShaderManager->ShaderConst.Shadow.Data.x = 0.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
 			TheShaderManager->ShaderConst.Shadow.Data.y = 0.0f; // Alpha control
 			TheRenderManager->CreateD3DMatrix(&TheShaderManager->ShaderConst.ShadowMap.ShadowWorld, &Geo->m_worldTransform);
@@ -996,11 +1026,12 @@ void ShadowManager::RenderNormalPass(std::vector<std::tuple<NiGeometry*, UInt32>
 			NiDX9RenderState* RenderState = TheRenderManager->renderState;
 			int StartIndex = 0;
 			int PrimitiveCount = 0;
+		//	bool generated = SetupGeometryRender(Geo);
 			NiGeometryData* ModelData = Geo->geomData;
 			NiGeometryBufferData* GeoData = ModelData->BuffData;
-			NiD3DShaderDeclaration* ShaderDeclaration = (Geo->shader ? Geo->shader->ShaderDeclaration : NULL);
+//Pack doesn't seems required when reflections are off'
+		   if((visibility & ShadowMapVisibility::FaceGenQuirk) == ShadowMapVisibility::FaceGenQuirk) 	TheRenderManager->PackGeometryBuffer(Geo->geomData->BuffData, Geo->geomData, NULL, Geo->shader->ShaderDeclaration);
 
-			TheRenderManager->PackGeometryBuffer(GeoData, ModelData, NULL, ShaderDeclaration);
 			for (UInt32 i = 0; i < GeoData->StreamCount; i++) {
 				Device->SetStreamSource(i, GeoData->VBChip[i]->VB, 0, GeoData->VertexStride[i]);
 			}
@@ -1042,6 +1073,8 @@ void ShadowManager::RenderSpeedTreePass(std::vector<std::tuple<NiGeometry*, UInt
 			NiGeometryData* ModelData = Geo->geomData;
 			NiGeometryBufferData* GeoData = ModelData->BuffData;
 			NiD3DShaderDeclaration* ShaderDeclaration = (Geo->shader ? Geo->shader->ShaderDeclaration : NULL);
+	//		TheRenderManager->PackGeometryBuffer(Geo->geomData->BuffData, Geo->geomData, NULL, Geo->shader->ShaderDeclaration);
+
 			Device->SetVertexShaderConstantF(63, (float*)&BillboardRight, 1);
 			Device->SetVertexShaderConstantF(64, (float*)&BillboardUp, 1);
 			Device->SetVertexShaderConstantF(65, Pointers::ShaderParams::RockParams, 1);
@@ -1056,7 +1089,6 @@ void ShadowManager::RenderSpeedTreePass(std::vector<std::tuple<NiGeometry*, UInt
 			RenderState->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT, false);
 			RenderState->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT, false);
 
-			TheRenderManager->PackGeometryBuffer(GeoData, ModelData, NULL, ShaderDeclaration);
 			for (UInt32 i = 0; i < GeoData->StreamCount; i++) {
 				Device->SetStreamSource(i, GeoData->VBChip[i]->VB, 0, GeoData->VertexStride[i]);
 			}
@@ -1081,7 +1113,8 @@ void ShadowManager::RenderSpeedTreePass(std::vector<std::tuple<NiGeometry*, UInt
 void ShadowManager::RenderAlphaPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType) {
 	for (std::tuple<NiGeometry*, UInt32>& obj : geometries) {
 		NiGeometry* Geo = obj._Myfirst._Val;
-		if (IsVisible(ShadowMapType, obj._Get_rest()._Myfirst._Val)) {
+		UInt32 visibility = obj._Get_rest()._Myfirst._Val;
+		if (IsVisible(ShadowMapType,visibility) && Geo->geomData->BuffData) {
 			TheShaderManager->ShaderConst.Shadow.Data.x = 0.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
 			TheShaderManager->ShaderConst.Shadow.Data.y = 1.0f; // Alpha Control
 			TheRenderManager->CreateD3DMatrix(&TheShaderManager->ShaderConst.ShadowMap.ShadowWorld, &Geo->m_worldTransform);
@@ -1089,11 +1122,13 @@ void ShadowManager::RenderAlphaPass(std::vector<std::tuple<NiGeometry*, UInt32>>
 			NiDX9RenderState* RenderState = TheRenderManager->renderState;
 			int StartIndex = 0;
 			int PrimitiveCount = 0;
+		//	bool shouldAvoidPack = SetupGeometryRender(Geo);
+
 			NiGeometryData* ModelData = Geo->geomData;
 			NiGeometryBufferData* GeoData = ModelData->BuffData;
 			NiD3DShaderDeclaration* ShaderDeclaration = (Geo->shader ? Geo->shader->ShaderDeclaration : NULL);
+			if((visibility & ShadowMapVisibility::FaceGenQuirk) == ShadowMapVisibility::FaceGenQuirk) 	TheRenderManager->PackGeometryBuffer(Geo->geomData->BuffData, Geo->geomData, NULL, Geo->shader->ShaderDeclaration);
 
-			TheRenderManager->PackGeometryBuffer(GeoData, ModelData, NULL, ShaderDeclaration);
 			for (UInt32 i = 0; i < GeoData->StreamCount; i++) {
 				Device->SetStreamSource(i, GeoData->VBChip[i]->VB, 0, GeoData->VertexStride[i]);
 			}

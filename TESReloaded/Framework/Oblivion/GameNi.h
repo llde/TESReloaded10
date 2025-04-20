@@ -616,6 +616,10 @@ public:
 };
 assert(sizeof(NiCullingProcess) == 0x90);
 
+class TESWaterCullingProcess : public NiCullingProcess {
+
+};
+
 class SceneGraph : public NiNode {
 public:
 	void				UpdateParticleShaderFoV(float FoV) { void (__cdecl* UpdateParticleShaderFoVData)(float) = (void (__cdecl*)(float))0x007B70E0; ThisCall(0x00411160, this, FoV, 0); UpdateParticleShaderFoVData(FoV); }
@@ -839,8 +843,8 @@ assert(sizeof(NiSkinInstance) == 0x02C);
 
 class NiGeometry : public NiAVObject {
 public:
-	virtual void	Render(NiRenderer* arg);
-	virtual void	Unk_22(NiRenderer* arg);
+	virtual void	Render(NiRenderer* arg);//Render, use the Renderer
+	virtual void	Unk_22(NiRenderer* arg);   //Do stuff using controllers
 	virtual void	SetGeomData(NiObject* obj);
 	virtual void	Unk_24();
 	virtual void	Unk_25(NiRenderer* arg);
@@ -1370,7 +1374,7 @@ assert(sizeof(NiRenderTargetGroup) == 0x024);
 class NiGeometryGroup {
 public:
 	virtual void		Destructor(bool freeThis);
-	virtual void		Unk_01();
+	virtual void		Unk_01(void* unk00);
 	virtual void		AddObject(NiGeometryData* GeometryData, NiSkinInstance* SkinInstance, NiSkinPartition::Partition* Partition);
 	virtual void		Unk_03();
 	virtual void		RemoveObject(NiSkinPartition::Partition* Partition);
@@ -1474,7 +1478,8 @@ public:
 	NiRenderStateSetting			RenderStateSettings[256];		// 0120
 	NiRenderStateSetting			TextureStageStateSettings[128];	// 0920
 	NiRenderStateSetting			SamplerStateSettings[80];		// 0D20
-	UInt32							unk0FA0[20];					// 0FA0
+	IDirect3DBaseTexture9*			SourceTextures[16];					// 0FA0
+	UInt32							Unk0FB0[4];						// 0FB=
 	NiDX9ShaderConstantManager*		ShaderConstantManager;			// 0FF0
 	UInt8							ForceNormalizeNormals;			// 0FF4
 	UInt8							InternalNormalizeNormals;		// 0FF5
@@ -1540,7 +1545,7 @@ public:
 	virtual void			Unk_29();			
 	virtual bool			SetMipmapSkipLevel(UInt32 arg);
 	virtual UInt32			GetMipmapSkipLevel();
-	virtual bool			Unk_2C(UInt32 arg0, UInt32 arg1, UInt32 arg2, UInt32 arg3);
+	virtual bool			PrecacheGeometryData(NiGeometry* arg0,  UInt32 arg2, UInt32 arg3, NiD3DShaderDeclaration* shader); //Maybe? it do somethign to precached data and geometry groups
 	virtual void			PurgeGeometryData(NiGeometryData* geo);
 	virtual void			PurgeMaterial(NiMaterialProperty* material);			
 	virtual void			PurgeEffect(NiDynamicEffect* effect);

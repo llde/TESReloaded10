@@ -1,3 +1,4 @@
+#include "RenderManager.h"
 #define RESZ_CODE 0x7FA05000
 
 void RenderManager::CreateD3DMatrix(D3DMATRIX* Matrix, NiTransform* Transform) {
@@ -27,7 +28,7 @@ void RenderManager::CreateD3DMatrix(D3DMATRIX* Matrix, NiTransform* Transform) {
 bool RenderManager::IsNode(NiAVObject* node) {
 	void* VFT = *(void**)node;
 
-	return 	VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode
+	return 	VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode  /* || VFT == Pointers::VirtualTables::BSFaceGenNiNode //No cause glitches. */ 
 		|| VFT == Pointers::VirtualTables::BSTreeNode || VFT == Pointers::VirtualTables::BSMultiBoundNode
 		|| VFT == Pointers::VirtualTables::NiBillBoardNode;
 
@@ -56,11 +57,40 @@ void RenderManager::GetScreenSpaceBoundSize(NiPoint2* BoundSize, NiBound* Bound,
 
 }
 
+void RenderManager::GetScreenSpaceBoundSize(NiPoint2* BoundSize, NiBound* Bound, NiCamera* Camera ,float ZeroTolerance) {
+
+	NiMatrix33* WorldRotate = &Camera->m_worldTransform.rot;
+	NiPoint3 BoundPos = { Bound->Center.x - Camera->m_worldTransform.pos.x, Bound->Center.y - Camera->m_worldTransform.pos.y, Bound->Center.z - Camera->m_worldTransform.pos.z };
+	float BoundViewDist = BoundPos * BoundPos;
+	float Ratio = Bound->Radius;
+
+	if (BoundViewDist < ZeroTolerance) {
+		if (BoundViewDist > -ZeroTolerance) {
+			BoundSize->x = FLT_MAX;
+			BoundSize->y = FLT_MAX;
+			return;
+		}
+		BoundViewDist = -BoundViewDist;
+	}
+
+	if (!Camera->Frustum.Ortho) Ratio /= BoundViewDist;
+	BoundSize->x = Ratio * 2.0f / (Camera->Frustum.Right - Camera->Frustum.Left);
+	BoundSize->y = Ratio * 2.0f / (Camera->Frustum.Top - Camera->Frustum.Bottom);
+
+}
+
+
 float RenderManager::GetObjectDistance(NiBound* Bound){
 	NiCamera* Camera = WorldSceneGraph->camera;
 	NiMatrix33* WorldRotate = &Camera->m_worldTransform.rot;
 	NiPoint3 BoundPos = { Bound->Center.x - Camera->m_worldTransform.pos.x, Bound->Center.y - Camera->m_worldTransform.pos.y, Bound->Center.z - Camera->m_worldTransform.pos.z };
     return sqrt(BoundPos * BoundPos);
+}
+
+float RenderManager::GetObjectDistance(NiBound* Bound, NiCamera* Camera) {
+	NiMatrix33* WorldRotate = &Camera->m_worldTransform.rot;
+	NiPoint3 BoundPos = { Bound->Center.x - Camera->m_worldTransform.pos.x, Bound->Center.y - Camera->m_worldTransform.pos.y, Bound->Center.z - Camera->m_worldTransform.pos.z };
+	return sqrt(BoundPos * BoundPos);
 }
 
 void RenderManager::UpdateSceneCameraData() {

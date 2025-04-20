@@ -32,8 +32,8 @@ bool __fastcall ReadSettingHook(INISettingCollection* This, UInt32 edx, GameSett
             Setting->iValue = 0; 
         else if (!strcmp(Setting->Name, "bUseWaterDisplacements:Water"))  //TODO ENB require 0. WHY?
             Setting->iValue = 1;
-        else if (!strcmp(Setting->Name, "bUseWaterReflections:Water")) //TODO rmeove and implement proper shaders
-            Setting->iValue = 1;
+ //       else if (!strcmp(Setting->Name, "bUseWaterReflections:Water")) //TODO rmeove and implement proper shaders
+ //           Setting->iValue = 1;
         else if (!strcmp(Setting->Name, "bUseWaterHiRes:Water"))
             Setting->iValue = 1;
         else if (!strcmp(Setting->Name, "bUseWaterShader:Water"))

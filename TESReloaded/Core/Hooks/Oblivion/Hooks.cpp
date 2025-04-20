@@ -51,8 +51,8 @@ void AttachHooks() {
 	ffi::Config* SettingsMain = TheSettingManager->Config;
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
-//	DetourAttach(&(PVOID&)RemoveTexture, &RemoveTextureH);
-//	DetourAttach(&(PVOID&)SetTexture, &SetTextureH);
+	//DetourAttach(&(PVOID&)RemoveTexture, &RemoveTextureH);
+	//DetourAttach(&(PVOID&)SetTexture, &SetTextureH);
 //	DetourAttach(&(PVOID&)RemoveTextureList, &RemoveTextureListH);
 
 	DetourAttach(&(PVOID&)SetNameThread, &NameThread);

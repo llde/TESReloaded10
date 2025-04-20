@@ -4,7 +4,6 @@ void (__thiscall* Render)(Main*, BSRenderedTexture*) = (void (__thiscall*)(Main*
 void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* RenderedTexture) {
 	
 	ffi::Config* SettingsMain = TheSettingManager->Config;
-	
 	TheFrameRateManager->UpdatePerformance();
 	TheCameraManager->SetSceneGraph();
 	TheShaderManager->UpdateConstants();
@@ -15,7 +14,6 @@ void __fastcall RenderHook(Main* This, UInt32 edx, BSRenderedTexture* RenderedTe
 	if(TheRenderManager->BackBuffer) TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->defaultRTGroup->RenderTargets[1]->data->Surface;
 	if (SettingsMain->Develop.TraceShaders && InterfaceManager->IsActive(Menu::MenuType::kMenuType_None) && Global->OnKeyDown(SettingsMain->Develop.TraceShaders) && DWNode::Get() == NULL) DWNode::Create();
 	(*Render)(This, RenderedTexture);
-
 }
 
 bool (__thiscall* EndTargetGroup)(BSShaderAccumulator*, NiCamera*, NiRenderTargetGroup*) = (bool (__thiscall*)(BSShaderAccumulator*, NiCamera*, NiRenderTargetGroup*))Hooks::EndTargetGroup;
@@ -30,6 +28,7 @@ void __fastcall HDRRenderHook(HDRShader* This, UInt32 edx, NiScreenElements* Scr
 	
 	TheRenderManager->clearColor = D3DCOLOR_ARGB(0, 0, 0, 0);
 	(HDRRender)(This, ScreenElements, RenderedTexture1, RenderedTexture2, Arg4);
+
 	if (TheRenderManager->currentRTGroup) TheShaderManager->RenderEffects(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
 
 }
@@ -156,8 +155,11 @@ void __fastcall RenderReflectionsHook(WaterManager* This, UInt32 edx, NiCamera* 
 		ParallaxData->y = ParallaxDataBackup;
 	}
 	if (DWNode::Get()) DWNode::AddNode("END REFLECTIONS RENDERING", NULL, NULL);
+//	TheShadowManager->RenderShadowMaps();
 
 }
+
+
 
 void (__thiscall* WaterCullingProcess)(TESWaterCullingProcess*, NiAVObject*) = (void (__thiscall*)(TESWaterCullingProcess*, NiAVObject*))Hooks::WaterCullingProcess;
 void __fastcall WaterCullingProcessHook(TESWaterCullingProcess* This, UInt32 edx, NiAVObject* Object) {
@@ -165,13 +167,21 @@ void __fastcall WaterCullingProcessHook(TESWaterCullingProcess* This, UInt32 edx
 	NiPoint2 BoundSize;
 	float BoundBox = 0.0f;
 	void* VFT = *(void**)Object;
-	if (TheRenderManager->IsNode(Object) && TheSettingManager->Config->Culling.EnableRelfectionCulling) {
+	bool culled = false;
+	if ((VFT == Pointers::VirtualTables::NiNode || VFT == Pointers::VirtualTables::BSFadeNode || VFT == Pointers::VirtualTables::BSFaceGenNiNode  && (Object->m_flags & NiAVObject::kFlag_AppCulled) == NiAVObject::kFlag_AppCulled)
+		 && TheSettingManager->Config->Culling.EnableRelfectionCulling) {
 		NiBound* Bound = Object->GetWorldBound();
 		TheRenderManager->GetScreenSpaceBoundSize(&BoundSize, Bound);
 		BoundBox = (BoundSize.x * 100.f) * (BoundSize.y * 100.0f);
-		if (BoundBox < TheSettingManager->Config->Culling.CullReflectionMinSize || Object->m_worldTransform.pos.z + Bound->Radius < TheShaderManager->ShaderConst.Water.waterSettings.x) return;
+	//	ThisCall(0x00707370,Object, 0.0f, true );
+	//	Logger::Log("%f   %s", BoundBox, Object->m_pcName);
+		if (BoundBox < TheSettingManager->Config->Culling.CullReflectionMinSize || Object->m_worldTransform.pos.z + Bound->Radius < TheShaderManager->ShaderConst.Water.waterSettings.x) {
+		//	Object->OnVisible(This);
+			return;
+		}
 	}
 	(*WaterCullingProcess)(This, Object);
+//	if (culled) Object->m_flags &= NiAVObject::kFlag_IsOccluded;
 
 }
 
@@ -203,12 +213,13 @@ void __cdecl RenderObjectHook(NiCamera* Camera, NiNode* Object, NiCullingProcess
 		TheRenderManager->Clear(NULL, NiRenderer::kClear_ZBUFFER);
 		RenderObject(Camera, Object, CullingProcess, VisibleArray);
 	}
-
 }
 
 void (__cdecl* ProcessImageSpaceShaders)(NiDX9Renderer*, BSRenderedTexture*, BSRenderedTexture*) = (void (__cdecl*)(NiDX9Renderer*, BSRenderedTexture*, BSRenderedTexture*))Hooks::ProcessImageSpaceShaders;
 void __cdecl ProcessImageSpaceShadersHook(NiDX9Renderer* Renderer, BSRenderedTexture* RenderedTexture1, BSRenderedTexture* RenderedTexture2) {
+
 	if(TheRenderManager->BackBuffer) TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->BackBuffer;
+
 	ProcessImageSpaceShaders(Renderer, RenderedTexture1, RenderedTexture2);
 	TheRenderManager->CheckAndTakeScreenShot(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
 	if (TheRenderManager->IsSaveGameScreenShot) {

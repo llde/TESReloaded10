@@ -70,7 +70,7 @@ pub struct MainStruct {
     AnisotropicFilter : u8,
     ScreenshotKey : u32,
     FarPlaneDistance : f32,
-	TestDirectionLight : bool
+	TestDirectionLight : bool,
 }
 
 impl Default for MainStruct{
@@ -85,7 +85,7 @@ impl Default for MainStruct{
             AnisotropicFilter : 4,
             ScreenshotKey : 87,
             FarPlaneDistance : 283840.0,
-			TestDirectionLight : false 
+			TestDirectionLight : false,
         }
     }
 }

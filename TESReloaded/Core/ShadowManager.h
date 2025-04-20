@@ -23,13 +23,15 @@ public:
 		PlaneTop	= 4,
 		PlaneBottom	= 5,
 	};
-	enum ShadowMapVisibility {
+	enum ShadowMapVisibility :UInt32 {
 		None = 0x0,
 		Near = 0x1,
 		Middle = 0x10,
 		Far = 0x100,
 		Lod = 0x1000,
-		Ortho = 0x10000
+		Ortho = 0x10000,
+		FaceGenQuirk = 0x100000
+
 	};
 
 	struct ShadowMapFeatures {
@@ -41,11 +43,12 @@ public:
 	bool					IsVisible(ShadowMapTypeEnum type, UInt32 visibility);
 	bool					ExcludeFromAllRadius(NiAVObject* node);
 	TESObjectREFR*			GetRef(TESObjectREFR* Ref, ffi::ShadowFormsStruct* Forms);
-	void					AccumulateGeometry(NiAVObject* accum);
-	void					SelectGeometry(NiGeometry* geo);
+	void					AccumulateGeometry(NiAVObject* accum, bool IsFaceGenNode);
+	void					SelectGeometry(NiGeometry* geo, bool IsFaceGenNode);
 	void					RenderInterior(NiAVObject* Object, float MinRadius);
 	void					RenderGeometry(NiGeometry* Geo);
 	void					Render(NiGeometry* Geo);
+	bool 					SetupGeometryRender(NiGeometry* Geo);
 	void					RenderNormalPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType);
 	void					RenderAlphaPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType);
 	void					RenderSkinnedPass(std::vector<std::tuple<NiGeometry*, UInt32>>& geometries, ShadowMapTypeEnum ShadowMapType);

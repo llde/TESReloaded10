@@ -416,8 +416,11 @@ void ShaderRecord::SetCT() {
 	if (HasDepthBuffer) TheRenderManager->ResolveDepthBuffer();
 	for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
 		Value = &TextureShaderValues[c];
-		if (Value->Texture->Texture) {
-			TheRenderManager->renderState->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
+		if (Value->Texture) {
+			if(TheRenderManager->renderState->SourceTextures[Value->RegisterIndex] == nullptr)
+				TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
+			else
+				TheRenderManager->renderState->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
 			for (int i = 1; i < SamplerStatesMax; i++) {
 				TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
 			}
@@ -634,8 +637,11 @@ void EffectRecord::SetCT() {
 	if (!Enabled || Effect == nullptr) return;
 	for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
 		Value = &TextureShaderValues[c];
-		if (Value->Texture->Texture) { //Don't set the states if texture cannot be bound beocuse it's null
-			TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
+		if (Value->Texture) {
+			if (TheRenderManager->renderState->SourceTextures[Value->RegisterIndex] == nullptr)
+				TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
+			else
+				TheRenderManager->renderState->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
 			for (int i = 1; i < SamplerStatesMax; i++) {
 				TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
 			}

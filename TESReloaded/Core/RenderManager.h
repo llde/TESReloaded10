@@ -6,10 +6,12 @@ public:
 	void				ResolveDepthBuffer();
 	void				CreateD3DMatrix(D3DMATRIX* Matrix, NiTransform* Transform);
 	void				GetScreenSpaceBoundSize(NiPoint2* BoundSize, NiBound* Bound, float ZeroTolerance = 1e-5f);
+	void				GetScreenSpaceBoundSize(NiPoint2* BoundSize, NiBound* Bound, NiCamera* Camera, float ZeroTolerance = 1e-5f);
 	void				UpdateSceneCameraData();
 	void				SetupSceneCamera();
 	void				CheckAndTakeScreenShot(IDirect3DSurface9* RenderTarget);
     float               GetObjectDistance(NiBound* Bound);
+	float				GetObjectDistance(NiBound* Bound, NiCamera* Camera);
 	bool				IsNode(NiAVObject* node);
 	D3DXMATRIX			WorldViewProjMatrix;
 	D3DXMATRIX			ViewProjMatrix;
