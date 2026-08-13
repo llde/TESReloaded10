@@ -4,14 +4,17 @@ use crate::sys_string::{SysString};
 use bevy_reflect::Reflect;
 use serde::{Serialize, Deserialize};
 use serde_deserialize_over::DeserializeOver;
+use toml_comment::TomlComment;
 
 /*Configuration for the Main Configuration file*/
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct Config{
+    /// Main configuration settings
 	#[deserialize_over]
     Main : MainStruct,
+    /// Water (non shader related) settings
     #[deserialize_over]
     WaterEngine: WaterEngine,
 	#[deserialize_over]
@@ -58,7 +61,7 @@ impl Default for Config{
     }
 }
 
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct MainStruct {
@@ -91,13 +94,17 @@ impl Default for MainStruct{
     }
 }
 /*Some settings are related to OR only, while CameraMode will be removed from NVR*/
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
-pub	struct DevelopStruct {
-    CompileShaders : u8,  // 1 Compile All, 2 Compile modified or missing only, 3 Compile only in menu
+pub struct DevelopStruct {
+    /// 0 disable effects compilation, 1 Compile All effects when enabled, 2 Compile modified or missing only, 3 Compile only in menu
     CompileEffects : u8,
-    DebugMode : bool,       // enables hotkeys to print textures
+    /// 0 disable shaders compilation, 1 Compile All shaders when enabled, 2 Compile modified or missing only, 3 Compile only in menu
+    CompileShaders : u8,
+    /// enables hotkeys to print reneder data (may change between versions)
+    DebugMode : bool,
+    /// Key (in dx scancodes) to toggle debug log for the frame and the render window
     TraceShaders : u8,
 }
 
@@ -113,7 +120,7 @@ impl Default for DevelopStruct{
 
 }
 
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub	struct LowHFSoundStruct {
@@ -133,7 +140,7 @@ impl Default for LowHFSoundStruct{
         }
     }
 }
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub	struct FlyCamStruct {
@@ -155,7 +162,7 @@ impl Default for FlyCamStruct{
         }
     }
 }
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct ShadersStruct {
@@ -185,7 +192,7 @@ impl Default for ShadersStruct{
         }
     }
 }
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 struct EffectsStruct {
@@ -240,11 +247,13 @@ impl Default for EffectsStruct{
     }
 }
 
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct MenuStruct {
+    #[toml_comment(inline)]
     TextFont : SysString,
+    #[toml_comment(inline)]
     TextFontStatus : SysString,
     TextSize : u8,
     TextSizeStatus : u8,
@@ -292,7 +301,7 @@ impl Default for MenuStruct{
 }
 
 #[repr(C)]
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct SleepingModeStruct{
     Enabled : bool,
@@ -309,7 +318,7 @@ impl Default for SleepingModeStruct{
 }
 
 #[repr(C)]
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct ShadowFormsStruct {
 	Activators : bool,
@@ -348,11 +357,15 @@ enum ShadowType {
 }
 
 #[repr(C)]
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct ShadowsExteriorStruct{
+    /// Shadows engine enabled (true or false)
 	Enabled : bool,
+    /// Shadow engine type (DISABLED, VSM, ESM, ESSM)
+    #[toml_comment(inline)]
 	ShadowMode : ShadowType,
+    /// Shadow map resolution (prefers power of 2 sizes)
     ShadowMapResolution : u32,
     ShadowMapRadius : f32,
     ShadowMapFarPlane : f32,
@@ -377,7 +390,7 @@ impl Default for ShadowsExteriorStruct{
 
 
 #[repr(C)]
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct ShadowsInteriorStruct{
 	Enabled : bool,
@@ -401,7 +414,7 @@ impl Default for ShadowsInteriorStruct{
     }
 }
 
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct CullingEngine{
@@ -424,7 +437,7 @@ impl Default for CullingEngine{
 }
 
 #[repr(C)]
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct WaterEngine{
     ReflectionMapSize : u16,

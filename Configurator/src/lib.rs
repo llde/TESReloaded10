@@ -1,4 +1,4 @@
-#![feature(float_algebraic)]
+#![feature(ascii_char)]
 #![allow(non_snake_case)]
 extern crate  memchr;
 extern crate alloc;
@@ -24,6 +24,7 @@ use serde::de::DeserializeOwned;
 use serde::{Serialize,Deserialize};
 use toml::de::Deserializer;
 use toml::Table;
+use toml_comment::TomlComment;
 
 use serde_deserialize_over::DeserializeOver;
 
@@ -79,7 +80,7 @@ pub static mut LOGGER : Option<CFile> = None;
 
 pub fn log<S: AsRef<str>>(message : S) -> () {
 	let log = get_static_ref(&raw mut LOGGER);
-	log.write(message.as_ref().as_bytes());
+	let _ = log.write(message.as_ref().as_bytes());
 }
 
 
@@ -103,28 +104,40 @@ pub fn read_config_from_file<T:AsRef<Path>>(file : T) -> Result<String,io::Error
 	}
 }
 
-pub fn deserialize_config_from_string<'a,C >(file_buf : &str) -> Result<(C, bool) ,ConfigurationError> where C : Deserialize<'a> + DeserializeOver<'a> + Default{
-	let parser = Deserializer::new(&file_buf);
-	match C::deserialize(Deserializer::new(&file_buf)){
-		Ok(config) => Ok((config, true)),
-		Err(_) => {
-			let mut config = C::default();
-			match config.deserialize_over(parser){
-				Err(err) =>{
-					log(format!("Cannot Parse Configuration {}",err));
-					Err(Deserialization)
-				},
-				Ok(()) => Ok((config, false))
+pub fn deserialize_config_from_string<'de, C>(file_buf : &'de str) -> Result<(C, bool) ,ConfigurationError>
+where
+    C: Deserialize<'de> + DeserializeOver<'de> + Default,
+{
+	match Deserializer::parse(file_buf){
+		Ok(parsed) => {
+			match C::deserialize(parsed){
+				Ok(config) => Ok((config, true)),
+				Err(_) => {
+					/*the file isn't fully mappable to the struct. Can mean some values are missing some are different types, etc. Configuration may be from a different version*/
+					let mut config = C::default();
+					let parser  = Deserializer::parse(file_buf).unwrap(); /*should be safe here the file_buf is the same */
+					match config.deserialize_over(parser){
+						Err(err) =>{
+							log(format!("Cannot Parse Configuration {}",err));
+							Err(Deserialization)
+						},
+						Ok(()) => Ok((config, false))
+					}
+				}
 			}
-		}
+		},
+		Err(err) =>{
+			log(format!("Cannot Parse Configuration {}",err));
+			Err(Deserialization)
+		},
 	}
 }
 
-pub fn  write_config_to_file<T : AsRef<Path>, C>(file : T, config : C) where C : Serialize{
+pub fn  write_config_to_file<T : AsRef<Path>, C>(file : T, config : C) where C : Serialize + TomlComment{
     let file = File::create(file);
 	match file {
 		Ok(mut file) => {
-			let toml = toml::to_string(&config).unwrap();
+			let toml = config.to_commented_toml();
 		    match file.write_all(toml.as_ref()){
 				Ok(_) => {},
 				Err(err) => {
@@ -174,7 +187,11 @@ pub extern "C" fn getShadersConfiguration() -> *mut Shaders {
 	}
 }
 
-pub fn load_config<'a, P : AsRef<Path>, C> (path : P) -> C where C : DeserializeOwned + DeserializeOver<'a> + Default + Serialize{
+pub fn load_config<P : AsRef<Path>, C>(path : P) -> C
+where
+    C: DeserializeOwned + Default + Serialize + TomlComment,
+    for<'de> C: DeserializeOver<'de>,
+{
 	let file_result = read_config_from_file(&path);
 	let mut backup_file = false;
 
@@ -184,8 +201,11 @@ pub fn load_config<'a, P : AsRef<Path>, C> (path : P) -> C where C : Deserialize
 			match  config_res {
 				Ok(conf) => {
 					if conf.1 == false{
-						log("Partial or partially invalid configuration found. Maybe older version?");
+						log(format!("Partial or partially invalid configuration for {} found. Maybe older version? Regenerating configuration file keeping valid options", path.as_ref().display()));
 						backup_file = true;
+					}
+					else {
+						log(format!("Configuration file loaded for {}", path.as_ref().display()));
 					}
 					conf
 				},
@@ -198,10 +218,12 @@ pub fn load_config<'a, P : AsRef<Path>, C> (path : P) -> C where C : Deserialize
 		Err(err) => {
 			match err.kind() {
 				io::ErrorKind::NotFound => {
+					log(format!("Configuration file {} not found. Creating default configuration", path.as_ref().display()));
 					backup_file = false;
 					(C::default(),false)
 				},
 				_ => {
+					log(format!("Configuration file {} cannot be read. Creating default configuration", path.as_ref().display()));
 					backup_file = true;
 					(C::default(),false)
 				}
@@ -214,7 +236,7 @@ pub fn load_config<'a, P : AsRef<Path>, C> (path : P) -> C where C : Deserialize
 			log(format!("Backup Configuration file to {:?}", path_back));
 			let res = std::fs::rename(&path, path_back);
 			if res.is_err() {
-				log("Failed to move file")
+				log(format!("Failed to move configuration file {}", path.as_ref().display()));
 			}
 		}
 		write_config_to_file(path, &config.0);
@@ -251,7 +273,7 @@ pub extern "C" fn LoadConfiguration() -> (){
 	static_mut_insert(&raw mut SHADERS_TABLE, shader_table);
 	static_mut_insert(&raw mut EFFECTS_TABLE, effect_table);
 
-	log("Configuration File Loaded");
+	log("All configuration loaded");
 }
 
 
@@ -270,7 +292,7 @@ pub extern "C" fn RenderConfigurationMenu(width: i32, height : i32){
 	panic::set_hook(Box::new(|pi| {
 		log(pi.to_string());
 	} ));
-	catch_unwind( ||  {
+	let _ = catch_unwind( ||  {
 		menu::RenderMenu(width, height );
 	} );
 }
@@ -324,12 +346,26 @@ pub extern "C" fn SaveConfigurations(){
 
 #[unsafe(no_mangle)]
 pub extern  "C" fn EnterEditorMode(){
-
+	menu::EnterEditorMode();
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn IsEditorMode() {
+pub extern "C" fn IsEditorMode() -> bool {
+	menu::IsEditorMode()
+}
 
+#[unsafe(no_mangle)]
+pub extern "C" fn CloseEditorMode() {
+	menu::CloseEditorMode()
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn AddCharToEditor(ch : libc::c_char) {
+	let cha = std::ascii::Char::from_u8(ch.try_into().unwrap());
+//	log(format!("{:?} {:?}", cha,ch));
+	if let Some(ascii_chara) = cha {
+		menu::AddCharacterToEditorMode(ascii_chara);
+	}
 }
 
 #[repr(C)]
@@ -343,6 +379,12 @@ pub enum Errors {
 #[derive(Debug)]
 pub enum MoveCursor{
 	Up,Down,Left,Right
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub enum MessageType{
+	Message,Messagebox
 }
 
 #[unsafe(no_mangle)]

@@ -1,3 +1,15 @@
-Cannot open Configuration file "./test.ini"  File non trovato. (os error 2)
-Cannot open Configuration file "./effect.ini"  File non trovato. (os error 2)
-Cannot open Configuration file "./shader.ini"  File non trovato. (os error 2)
+Cannot Parse Configuration TOML parse error at line 104, column 14
+    |
+104 | Activators = true dsadsD
+    |              ^^^^^^^^^^^
+string values must be quoted, expected literal string
+
+Backup Configuration file to "./test.ini.bak"
+Cannot Parse Configuration TOML parse error at line 24, column 25
+   |
+24 | StrengthMultiplier = 1.0defwdsfsafsa
+   |                         ^^^^^^^^^^^^
+invalid float, expected nothing
+
+Backup Configuration file to "./effect.ini.bak"
+Configuration file loaded for ./shader.ini

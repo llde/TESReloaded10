@@ -3,10 +3,11 @@ use bevy_reflect::Reflect;
 
 use serde::{Serialize, Deserialize};
 use serde_deserialize_over::DeserializeOver;
+use toml_comment::TomlComment;
 
 //TODO SPlit config into multiple files
 #[repr(C)]
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct BloodLens{
     Chance : u32,
@@ -24,7 +25,7 @@ impl Default for BloodLens{
 }
 
 #[repr(C)]
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct AmbientOcclusionInner{
 	Enabled : bool,
@@ -38,12 +39,14 @@ pub struct AmbientOcclusionInner{
 	BlurRadiusMultiplier : f64
 }
 
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct AmbientOcclusion{
+	#[toml_comment("Ambient Occlusion is a post processing effect that darkens corners and crevices, simulating the way light behaves in real life. It can add depth and realism to the scene, but it can also be performance intensive.")]
 	#[deserialize_over]
 	Exterior : AmbientOcclusionInner,
+	#[toml_comment("Ambient Occlusion is a post processing effect that darkens corners and crevices, simulating the way light behaves in real life. It can add depth and realism to the scene, but it can also be performance intensive.")]
 	#[deserialize_over]
 	Interior : AmbientOcclusionInner
 }
@@ -55,7 +58,7 @@ impl Default for AmbientOcclusion{
 	    Self { Exterior: exterior, Interior:  interior }
 	}
 }
-#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect)]
+#[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct Bloom{
@@ -74,7 +77,7 @@ impl  Default for Bloom {
 	}
 } 
 
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct GodRays{
@@ -99,7 +102,7 @@ impl  Default for GodRays {
 	}
 } 
 
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct WaterLens {
@@ -118,7 +121,7 @@ impl Default for WaterLens{
 
 
 
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct SnowAccumulation {
@@ -137,7 +140,7 @@ impl Default for SnowAccumulation {
 }
 
 
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct WetWorld {
@@ -156,7 +159,7 @@ impl Default for  WetWorld {
 	}
 }			
 
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct LowHF{
@@ -175,7 +178,7 @@ impl Default for  LowHF {
 }
 
 
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct DepthOfFieldInner{
@@ -191,7 +194,7 @@ pub struct DepthOfFieldInner{
 	NearBlurCutOff : f64
 }
 
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct DepthOfField{
@@ -213,7 +216,7 @@ impl Default for DepthOfField {
 	}
 }
 
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct Cinema {
@@ -228,7 +231,7 @@ impl Default for Cinema {
 	}
 }
 
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct MotionBlurInner{
@@ -239,7 +242,7 @@ pub struct MotionBlurInner{
 	BlurCutOff : f64
 }
 
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct MotionBlur {
@@ -257,7 +260,7 @@ impl Default for MotionBlur {
 	}
 }
 
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct Sharpening {
@@ -273,7 +276,7 @@ impl Default for Sharpening {
 	}
 }
 #[repr(C)]
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct SpecularInner{
 	Strength : f64,
@@ -283,7 +286,7 @@ pub struct SpecularInner{
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct Specular {
 	#[deserialize_over]
@@ -301,7 +304,7 @@ impl Default for Specular{
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct VolumetricFog{
 	Exponent : f64,
@@ -317,7 +320,7 @@ impl Default for VolumetricFog  {
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct Coloring{
 	Strength : f64,
@@ -345,7 +348,7 @@ impl Default for Coloring  {
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect)]
+#[derive(Serialize, Deserialize,DeserializeOver, Debug,Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct Effects{
 	#[deserialize_over]

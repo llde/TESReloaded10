@@ -9,16 +9,17 @@ crate-type = ["cdylib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serde = { version = "*", features = ["derive"]}
-serde-deserialize-over = "*"
-toml = { version = "0.8.23", features = ["preserve_order"] }
-libc = "*"
-memchr = "*"
-hex-serde-util = "*"
-once_cell = "*"
+serde = { version = "1.0.229", features = ["derive"]}
+serde-deserialize-over = {version = "0.5.0", git = "https://github.com/llde/serde-deserialize-over.git" }
+toml = { version = "1.1.4", features = ["preserve_order"] }
+libc = "0.2.189"
+memchr = "2.8.3"
+hex-serde-util = "0.1.0"
+once_cell = "1.21.4"
 winapi = { version = "0.3", features = ["std", "d3d9", "d3d9types", "wtypes", "wtypesbase", "winuser"] }
-bevy_reflect ="*"
-strum = { version = "0.27", features = ["derive"] }
+bevy_reflect ="0.19.0"
+strum = { version = "0.28", features = ["derive"] }
+toml-comment = {version = "0.3.0", git = "https://github.com/llde/toml-comment.git" }
 [build-dependencies]
-cbindgen = "0.29.0"
-embed-resource = "*"
+cbindgen = "0.29.4"
+embed-resource = "3.0.11"

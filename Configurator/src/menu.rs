@@ -1,8 +1,10 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 //#![allow(nonstandard_style)]
-
-use bevy_reflect::{Array, DynamicVariant, Enum, NamedField, PartialReflect, Reflect, Struct};
+use bevy_reflect::array::Array;
+use bevy_reflect::enums::{Enum, DynamicVariant};
+use bevy_reflect::structs::Struct;
+use bevy_reflect::{NamedField, PartialReflect, Reflect};
 use bevy_reflect::OpaqueInfo;
 
 use serde::Deserialize;
@@ -161,11 +163,12 @@ pub struct MenuState<'a> {
 	first_element : RefCell<Option<(&'a dyn PartialReflect,usize)>>,
 	second_element : RefCell<Option<(&'a dyn PartialReflect,usize)>>,
 	third_element : RefCell<Option<(&'a dyn PartialReflect,usize)>>,
+	edit_holder : RefCell<Option<String>>
 }
 
 impl <'a>  MenuState<'a> {
     pub fn new() -> MenuState<'a> {
-		MenuState { active_config: RefCell::new(MenuSelected::Main), first_element : RefCell::new(None),second_element:RefCell::new(None), third_element : RefCell::new(None) }
+		MenuState { active_config: RefCell::new(MenuSelected::Main), first_element : RefCell::new(None),second_element:RefCell::new(None), third_element : RefCell::new(None), edit_holder : RefCell::new(None) }
 	}
 
 	pub fn get_active_configuration(&self) -> Ref<'_,MenuSelected>{
@@ -179,6 +182,74 @@ impl <'a>  MenuState<'a> {
 			ActiveColumn::Second => self.second_element.borrow(),
 			ActiveColumn::Third => self.third_element.borrow()
 		}
+	}
+
+	pub fn is_editor_mode(&self) -> bool {
+		self.edit_holder.borrow().is_some()
+	}
+
+	pub fn set_editor_mode(&self){
+		if self.get_terminal_field().is_some(){
+			self.edit_holder.replace(Some(String::new()));
+		}
+	}
+
+	pub fn add_character_to_edit(&self, ch : char){
+		self.edit_holder.borrow_mut().as_mut().unwrap().push(ch);
+	}
+
+
+	pub fn close_editor_mode(&self) {
+		let terminal_field = self.get_terminal_field();
+		if let Some((term, _)) = terminal_field {
+			match term.get_represented_type_info().unwrap(){
+				bevy_reflect::TypeInfo::Opaque(opaque_info) => {
+					let id = opaque_info.type_id();
+					if id  == TypeId::of::<u32>() {
+						match self.edit_holder.borrow().as_ref().unwrap().parse::<u32>() {
+							Ok(ref res) => term.apply(res),
+							Err(_) => {},
+						}
+					}
+					else if id  == TypeId::of::<u8>() {
+						match self.edit_holder.borrow().as_ref().unwrap().parse::<u8>() {
+							Ok(ref res) => term.apply(res),
+							Err(_) => {},
+						}
+					}
+					else if id  == TypeId::of::<u16>() {
+						match self.edit_holder.borrow().as_ref().unwrap().parse::<u16>() {
+							Ok(ref res) => term.apply(res),
+							Err(_) => {},
+						}
+					}
+					else if id  == TypeId::of::<u64>() {
+						match self.edit_holder.borrow().as_ref().unwrap().parse::<u64>() {
+							Ok(ref res) => term.apply(res),
+							Err(_) => {},
+						}
+					}
+					else if id  == TypeId::of::<f32>() {
+						match self.edit_holder.borrow().as_ref().unwrap().parse::<f32>() {
+							Ok(ref res) => term.apply(res),
+							Err(_) => {},
+						}
+					}
+					else if id  == TypeId::of::<f64>() {
+						match self.edit_holder.borrow().as_ref().unwrap().parse::<f64>() {
+							Ok(ref res) => term.apply(res),
+							Err(_) => {},
+						}
+					}
+				},
+				_ => {}
+			}
+		}
+		self.edit_holder.replace(None);
+	}
+
+	pub fn get_editor_string(&'a self) -> Ref<'a, Option<String>> {
+		self.edit_holder.borrow()
 	}
 
 	pub fn get_active_table(&self) -> &dyn Struct {
@@ -437,8 +508,18 @@ impl MenuRect {
 
 	pub fn draw_opt<'a, S : Into<&'a str>>(&mut self, arg : S, opt : S,  align : Align, rendering : RenderingZone) {
 		let it = arg.into().to_string();
-		let nulled = CString::new(it.clone() + " = " + opt.into()).unwrap();
 		let active_node =  get_global_menu_state().is_node_active(&it, rendering);
+		let nulled = if active_node {
+			if let Some(ref edit) = (*get_global_menu_state().get_editor_string()){
+				CString::new(it.clone() + " = " + edit ).unwrap()
+			}
+			else{
+				CString::new(it.clone() + " = " + opt.into()).unwrap()
+			}
+		}
+		else {
+			 CString::new(it.clone() + " = " + opt.into()).unwrap()
+		};
 		let color = if active_node {(10,240,180)} else {(250,240,180)};
 		DrawText(self.renderer, &mut self.rect, nulled.as_ptr() as *const i8, color , align);
 	}
@@ -499,10 +580,10 @@ fn downcast_type(opaque_info : OpaqueInfo, field: &dyn PartialReflect) -> String
 	}
 }
 
-fn render_reflected_struct(namedField: &NamedField, field: &dyn PartialReflect, zone : RenderingZone, rect : &mut MenuRect){
-	match namedField.type_info().unwrap(){
+fn render_reflected_struct(namedField: &str, field: &dyn PartialReflect, zone : RenderingZone, rect : &mut MenuRect){
+	match field.get_represented_type_info().unwrap(){
 		bevy_reflect::TypeInfo::Struct(_struct_info) => {
-			rect.draw(namedField.name(), Align::Left ,zone);
+			rect.draw(namedField, Align::Left ,zone);
 		}
 		bevy_reflect::TypeInfo::TupleStruct(tuple_struct_info) => todo!(),
 		bevy_reflect::TypeInfo::Tuple(tuple_info) => todo!(),
@@ -517,17 +598,17 @@ fn render_reflected_struct(namedField: &NamedField, field: &dyn PartialReflect, 
 					text
 				}
 				_ => {
-					log(format!("{:?}", namedField));
+					log(format!("{}", namedField));
 					"<Array>".to_owned()
 				}
 			};
-			rect.draw_opt(namedField.name(), &text,  Align::Left ,zone);
+			rect.draw_opt(namedField, &text,  Align::Left ,zone);
 		}
 		bevy_reflect::TypeInfo::Map(_map_info) => todo!(),
 		bevy_reflect::TypeInfo::Set(_set_info) => todo!(),
 		bevy_reflect::TypeInfo::Enum(_enum_info) => {
 			let variant = field.reflect_ref().as_enum().unwrap();
-			rect.draw_opt(namedField.name(), variant.variant_name() ,  Align::Left ,zone);
+			rect.draw_opt(namedField, variant.variant_name() ,  Align::Left ,zone);
 		},
 		bevy_reflect::TypeInfo::Opaque(opaque_info) => {
 			let id = opaque_info.type_id();
@@ -556,10 +637,10 @@ fn render_reflected_struct(namedField: &NamedField, field: &dyn PartialReflect, 
 				field.try_downcast_ref::<SysString>().unwrap().to_string()
 			}
 			else {
-				log(format!("{:?}", namedField));
+				log(format!("{}", namedField));
 				"<opaque>".to_owned()
 			};
-			rect.draw_opt(namedField.name(), &v,  Align::Left ,zone);
+			rect.draw_opt(namedField, &v,  Align::Left ,zone);
 		}
 	}
 }
@@ -581,7 +662,7 @@ pub fn RenderMenu(width: i32, height : i32){
 	if let Some(ref first_col) = *first {
 		let stru = first_col.0.reflect_ref().as_struct().unwrap();
 		let type_first_selected = stru.get_represented_type_info().unwrap().as_struct().unwrap();
-		for  (field, namedField) in stru.iter_fields().zip(type_first_selected.iter()) {
+		for  (namedField, field) in stru.iter_fields() {
 			render_reflected_struct(namedField, field, RenderingZone::ActiveSecond, &mut rect );
 			rect.next_row();
 		}
@@ -594,7 +675,7 @@ pub fn RenderMenu(width: i32, height : i32){
 		match second_col.0.reflect_ref().as_struct() {
 			Ok(structure) =>{
 				let type_first_selected = structure.get_represented_type_info().unwrap().as_struct().unwrap();
-				for  (field, namedField) in structure.iter_fields().zip(type_first_selected.iter()) {
+				for  (namedField, field) in structure.iter_fields() {
 					render_reflected_struct(namedField, field, RenderingZone::ActiveThird, &mut rect );
 					rect.next_row();
 				}
@@ -669,16 +750,16 @@ fn update_selected_value(op: OperationSetting, value : &mut dyn PartialReflect){
 			else if id  == TypeId::of::<f32>() {
 				let val =  opaque_value.try_downcast_ref::<f32>().unwrap();
 				let new_val = match  op {
-					OperationSetting::Add => ((val * 100.0f32).trunc()  + 1.0f32) / 100.0f32,
-					OperationSetting::Sub => ((val * 100.0f32).trunc()  - 1.0f32) / 100.0f32,
+					OperationSetting::Add => ((val * 100.0f32).round()  + 1.0f32) / 100.0f32,
+					OperationSetting::Sub => ((val * 100.0f32).round()  - 1.0f32) / 100.0f32,
 				};
 				opaque_value.apply(&new_val);
 			}
 			else if id  == TypeId::of::<f64>() {
 				let val =  opaque_value.try_downcast_ref::<f64>().unwrap();
 				let new_val = match  op {
-					OperationSetting::Add => ((val * 100.0f64).trunc()  + 1.0f64) / 100.0f64,
-					OperationSetting::Sub => ((val * 100.0f64).trunc()  - 1.0f64) / 100.0f64,
+					OperationSetting::Add => ((val * 100.0f64).round()  + 1.0f64) / 100.0f64,
+					OperationSetting::Sub => ((val * 100.0f64).round()  - 1.0f64) / 100.0f64,
 				};
 				opaque_value.apply(&new_val);
 			}
@@ -700,3 +781,20 @@ pub fn ChangeCurrentSetting(op : OperationSetting) -> Option<String> {
 		},
 	}
 }
+
+pub fn IsEditorMode() -> bool {
+	get_global_menu_state().is_editor_mode()
+}
+
+pub fn EnterEditorMode() {
+	get_global_menu_state().set_editor_mode();
+}
+
+pub fn CloseEditorMode() {
+	get_global_menu_state().close_editor_mode();
+}
+
+pub fn AddCharacterToEditorMode(ascii_c : std::ascii::Char) {
+	get_global_menu_state().add_character_to_edit(ascii_c.to_char());
+}
+
