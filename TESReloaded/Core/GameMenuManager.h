@@ -2,10 +2,10 @@
 
 class GameMenuManager { // Never disposed
 public:
-	static void Initialize();
+	static void Initialize(PluginInterface* Interface);
 
 	void					Render();
-	void					GetMidSection(char* MidSection);
+	bool 					OnKeyDown(UInt16 keyIdx);
 
 	bool										Enabled;
 	bool										EditingMode;
@@ -21,4 +21,5 @@ public:
 	ID3DXFont*									FontStatus;
 	RECT										Rect;
 	RECT										RectShadow;
+	OBSEInputInterface* 						InputInterface;
 };

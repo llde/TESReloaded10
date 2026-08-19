@@ -29,11 +29,14 @@ void InitializeManagers() {
 	TextureManager::Initialize();
 	ShaderManager::Initialize();
 	FrameRateManager::Initialize();
-	GameMenuManager::Initialize();
 	GameEventManager::Initialize();
 	ShadowManager::Initialize();
 	OcclusionManager::Initialize();
 	EquipmentManager::Initialize();
 	ScriptManager::Initialize();
 	CameraManager::Initialize();
+}
+
+void InitializeManagersWithInterface(PluginInterface* Interface) {
+	GameMenuManager::Initialize(Interface);
 }

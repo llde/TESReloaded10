@@ -16,7 +16,7 @@ extern "C" {
 
 	}
 
-	bool OBSEPlugin_Load(const PluginInterface* Interface) {
+	bool OBSEPlugin_Load(PluginInterface* Interface) {
 
 #if _DEBUG
 	#if WaitForDebugger
@@ -29,12 +29,12 @@ extern "C" {
 
 		Logger::Initialize("OblivionReloaded.log");
 		CommandManager::Initialize(Interface);
-
 		if (!Interface->IsEditor) {
 			PluginVersion::CreateVersionString();
 			SettingManager::Initialize();
 			TheSettingManager->SetGame(ffi::Game::Oblivion);
 			TheSettingManager->LoadSettings();
+			TheSettingManager->Interface = Interface;
 			DebugManager::Initialize(Interface);
 			AttachHooks();
 		}

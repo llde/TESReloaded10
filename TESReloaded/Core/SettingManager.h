@@ -8,6 +8,8 @@ public:
 	ffi::Config*					Config;
 	ffi::Effects*					Effects;
 	ffi::Shaders*					Shaders;
+	PluginInterface*				Interface;
+
 	void LoadSettings();
 	bool GetMenuShaderEnabled(const char* Name);
 	void SetGame(ffi::Game game);

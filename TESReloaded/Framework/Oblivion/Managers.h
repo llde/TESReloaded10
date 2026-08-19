@@ -47,3 +47,5 @@ class ShadowSceneNode;		extern ShadowSceneNode*			SceneNode;
 #include "DebugManager.h"
 
 void InitializeManagers();
+
+void InitializeManagersWithInterface(PluginInterface* Interface);

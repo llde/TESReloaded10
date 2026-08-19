@@ -24,6 +24,12 @@ public:
 		kInterface_ArrayVar,
 		kInterface_CommandTable,
 		kInterface_Script,
+		//xOBSE additions
+		kInterface_Tasks,
+		kInterface_Input,
+		kInterface_EventManager,
+		kInterface_Tasks2,
+
 	};
 
 	UInt32	Version;
@@ -82,4 +88,15 @@ struct OBSEMessagingInterface
 	UInt32	version;
 	bool	(*RegisterListener)(UInt32 listener, const char* sender, EventCallback handler);
 	bool	(*Dispatch)(UInt32 sender, UInt32 messageType, void* data, UInt32 dataLen, const char* receiver);
+};
+
+struct OBSEInputInterface {
+	void (*DisableInputKey)(UInt16 dxCode);
+	void (*EnableInputKey)(UInt16 dxCode);
+	void (*DisableInputControl)(UInt16 controlCode);
+	void (*EnableInputControl)(UInt16 controlCode);
+	bool (*IsKeyPressedReal)(UInt16 dxCode);
+	bool (*IsKeyPressedSimulated)(UInt16 dxCode);
+	bool (*IsControlPressedReal)(UInt16 controlCode);
+	bool (*IsControlPressedSimulated)(UInt16 controlCode);
 };
