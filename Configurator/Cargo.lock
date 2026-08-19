@@ -885,7 +885,7 @@ dependencies = [
 [[package]]
 name = "toml-comment"
 version = "0.3.0"
-source = "git+https://github.com/llde/toml-comment.git#ab2677e84182e48c419fe21d47a7976dbd601b4d"
+source = "git+https://github.com/llde/toml-comment.git#bd0b662234b5e2520b5bb14146027cc51bcaedbe"
 dependencies = [
  "serde",
  "toml 1.1.4+spec-1.1.0",
@@ -895,7 +895,7 @@ dependencies = [
 [[package]]
 name = "toml-comment-derive"
 version = "0.3.0"
-source = "git+https://github.com/llde/toml-comment.git#ab2677e84182e48c419fe21d47a7976dbd601b4d"
+source = "git+https://github.com/llde/toml-comment.git#bd0b662234b5e2520b5bb14146027cc51bcaedbe"
 dependencies = [
  "proc-macro2",
  "quote",

@@ -37,94 +37,163 @@ enum class Errors {
 };
 
 struct MainStruct {
+  /// Remove vanilla underwater pass effect 
   bool RemoveUnderwater;
+  /// Remove vanilla precipitation pass effect (rain, snow)
   bool RemovePrecipitations;
+  /// Remove vanilla fog pass effect (UNSTABLE)
   bool RemoveFogPass;
+  /// Enable memory texture management (May cause Alt+Tab crash or hangs with full screen mode)
   bool MemoryTextureManagement;
+  /// Enable grass mode. This is separated from the Grass shader
   bool GrassMode;
-  bool ReplaceIntro;
+  /// Replace the intro video and the main menu background video with a custom one
+  bool ReplaceIntroAndMainMenuBackgroundVideos;
+  /// Override the default anisotropic filter value (0-16)
   uint8_t AnisotropicFilter;
+  /// Key (in dx scancodes) to take a screenshot
   uint32_t ScreenshotKey;
+  /// Override the default far plane distance (in game units)
   float FarPlaneDistance;
+  /// Enable directional light  as sun source instead of the normal sun position (for testing purposes only)
   bool TestDirectionLight;
 };
 
 struct WaterEngine {
+  /// Water reflection map size (prefers power of 2 sizes)
   uint16_t ReflectionMapSize;
+  /// Enable or disable atmosphere  changes when underwater (UNSTABLE).
   bool SetAtmoshpere;
 };
 
 struct DevelopStruct {
-  uint8_t CompileShaders;
+  /// 0 disable effects compilation, 1 Compile All effects when enabled, 2 Compile modified or missing only, 3 Compile only in menu
   uint8_t CompileEffects;
+  /// 0 disable shaders compilation, 1 Compile All shaders when enabled, 2 Compile modified or missing only, 3 Compile only in menu
+  uint8_t CompileShaders;
+  /// enables hotkeys to print reneder data (may change between versions)
   bool DebugMode;
+  /// Key (in dx scancodes) to toggle debug log for the frame and the render window
   uint8_t TraceShaders;
 };
 
 struct CullingEngine {
+  /// Enable or disable the main culling engine. This will cull objects based on their size and distance from the camera.
   bool EnableMainCulling;
+  /// Enable or disable the reflection culling engine. This will cull objects based on their size and distance from the camera when rendering reflections.
   bool EnableRelfectionCulling;
+  /// Minimum size (in game units) for an object to be rendered. Objects smaller than this size will be culled.
   float CullMinSize;
+  /// Minimum size (in game units) for an object to be rendered in reflections. Objects smaller than this size will be culled.
   float CullReflectionMinSize;
 };
 
 struct FlyCamStruct {
+  /// Enable fly camera mode (true or false)
   bool Enabled;
+  /// Multiplier for the scroll wheel to change the fly camera speed
   float ScrollMultiplier;
+  /// Key (in dx scancodes) to increase the fly camera speed
   uint16_t KeyAdd;
+  /// Key (in dx scancodes) to decrease the fly camera speed
   uint16_t KeySubtract;
+  /// Step value for the fly camera speed change
   float StepValue;
 };
 
 struct SleepingModeStruct {
+  /// Enable sleeping mode (true or false)
   bool Enabled;
+  /// Sleeping mode type (0 = Disabled, 1 = Sleep, 2 = Wait)
   uint8_t Mode;
 };
 
 struct LowHFSoundStruct {
+  /// Enable LowHF effect for health
   bool HealthEnabled;
+  /// Enable LowHF effect for fatigue
   bool FatigueEnabled;
+  /// Coefficient for LowHF effect for health (0.0 - 1.0)
   float HealthCoeff;
+  /// Coefficient for LowHF effect for fatigue (0.0 - 1.0)
   float FatigueCoeff;
 };
 
 struct ShadersStruct {
+  /// Eanble OR Blood shader
   bool Blood;
+  /// Enable OR Grass shader
   bool Grass;
+  /// Enable OR HDR shader
   bool HDR;
+  /// Enable OR NightEye shader
   bool NightEye;
+  /// Enable OR POM shader
   bool POM;
+  /// Enable OR Skin shader
   bool Skin;
+  /// Enable OR Terrain shader
   bool Terrain;
+  /// Enable OR Water shader
   bool Water;
+  /// Enable custom extra shaders, if provided in the shaders folder, for shaders not included in the other shaders sets. 
   bool Extra;
 };
 
 struct EffectsStruct {
+  /// Enable OR Ambient Occlusion effect
   bool AmbientOcclusion;
+  /// Enable OR Blood Lens effect
   bool BloodLens;
+  /// Enable OR Bloom effect
   bool Bloom;
+  /// Enable OR Cinema effect
   bool Cinema;
+  /// Enable OR Coloring effect
   bool Coloring;
+  /// Enable OR Depth of Field effect
   bool DepthOfField;
+  /// Enable OR God Rays effect
   bool GodRays;
+  /// Enable OR LowHF effect
   bool LowHF;
+  /// Enable OR Motion Blur effect
   bool MotionBlur;
+  /// Enable OR Rain effect 
   bool Rain;
+  /// Enable OR Snow effect
   bool Snow;
+  /// Enable OR Sharpening effect
   bool Sharpening;
+  /// Enable OR Snow Accumulation effect
   bool SnowAccumulation;
+  /// Enable OR Underwater effect
   bool Underwater;
+  /// Enable OR Water Lens effect
   bool WaterLens;
+  /// Enable OR Wet World effect
   bool WetWorld;
+  /// Enable OR Volumetric Fog effect
   bool VolumetricFog;
+  /// Enable OR Shadows Exteriors effect.  This doesn't disable the underlying system.
   bool ShadowsExteriors;
+  /// Enable OR Shadows Interiors effect. This doesn't disable the underlying system.
   bool ShadowsInteriors;
+  /// Enable OR Specular effect
   bool Specular;
+  /// Enable OR Extra effect. These effects aren't triggered automatically by the engine, but can be triggered by scripts or, in future, by obse plugins.
   bool Extra;
 };
 
-///   * Represent a null terminated string, passable to FFI. Use C structure alignment rules   * Allocated from the LIBC allocator, modifiable from FFI.   * SAFETY:   * Modifying the struct from C++ require care: changing the string require carefully setting   * length and capacity, as well keeping the null terminator and avoid null bytes inside the string,   * and keep character representable as UTF8   * The Rust side should instead take care of avoiding NULL bytes in the middle of the string, as   * c strings use only one NULL byte as string terminator TODO create a FFI API for SysString manipulations
+///   * Represent a null terminated string, passable to FFI. Use C structure alignment rules
+///   * Allocated from the LIBC allocator, modifiable from FFI.
+///   * SAFETY:
+///   * Modifying the struct from C++ require care: changing the string require carefully setting
+///   * length and capacity, as well keeping the null terminator and avoid null bytes inside the string,
+///   * and keep character representable as UTF8
+///   * The Rust side should instead take care of avoiding NULL bytes in the middle of the string, as
+///   * c strings use only one NULL byte as string terminator
+/// TODO create a FFI API for SysString manipulations
 struct SysString {
   char *data;
   uintptr_t length;
@@ -132,64 +201,111 @@ struct SysString {
 };
 
 struct MenuStruct {
+  /// Font used for the menu text
   SysString TextFont;
+  /// Font used for the menu status text
   SysString TextFontStatus;
+  /// Size of the menu text
   uint8_t TextSize;
+  /// Size of the menu status text
   uint8_t TextSizeStatus;
+  /// Color of the menu text in normal state (RGB)
   uint8_t TextColorNormal[3];
+  /// Color of the menu text shadow in normal state (RGB)
   uint8_t TextShadowColorNormal[3];
+  /// Color of the menu text in selected state (RGB)
   uint8_t TextColorSelected[3];
+  /// Color of the menu text shadow in selected state (RGB)
   uint8_t TextShadowColorSelected[3];
+  /// Key (in dx scancodes) to enable the menu
   uint8_t KeyEnable;
+  /// Key (in dx scancodes) to navigate up in the menu
   uint8_t KeyUp;
+  /// Key (in dx scancodes) to navigate down in the menu
   uint8_t KeyDown;
+  /// Key (in dx scancodes) to navigate left in the menu
   uint8_t KeyLeft;
+  /// Key (in dx scancodes) to navigate right in the menu
   uint8_t KeyRight;
+  /// Key (in dx scancodes) to navigate page up in the menu
   uint8_t KeyPageUp;
+  /// Key (in dx scancodes) to navigate page down in the menu
   uint8_t KeyPageDown;
+  /// Key (in dx scancodes) to increase a value in the menu
   uint8_t KeyAdd;
+  /// Key (in dx scancodes) to decrease a value in the menu
   uint8_t KeySubtract;
+  /// Key (in dx scancodes) to save the configuration in the menu or exiting editing mode saving the new value
   uint8_t KeySave;
+  /// Key (in dx scancodes) to enter editing mode in the menu
   uint8_t KeyEditing;
 };
 
 struct ShadowFormsStruct {
+  /// Enable shadow rendering for activators
   bool Activators;
+  /// Enable shadow rendering for actors
   bool Actors;
+  /// Enable shadow rendering for apparatus objects
   bool Apparatus;
+  /// Enable shadow rendering for books
   bool Books;
+  /// Enable shadow rendering for containers
   bool Containers;
+  /// Enable shadow rendering for doors
   bool Doors;
+  /// Enable shadow rendering for furniture objects
   bool Furniture;
+  /// Enable shadow rendering for miscellaneous objects
   bool Misc;
+  /// Enable shadow rendering for static objects
   bool Statics;
+  /// Enable shadow rendering for terrain
   bool Terrain;
+  /// Enable shadow rendering for trees
   bool Trees;
+  /// Enable shadow rendering for LOD objects
   bool Lod;
+  /// Minimum radius for shadow rendering (in game units)
   float MinRadius;
+  /// Enable alpha when rendering shadows 
   bool Alpha;
 };
 
 struct ShadowsExteriorStruct {
+  /// Shadows engine enabled (true or false). This disable both the shadowmaps and the orthomap
   bool Enabled;
+  /// Shadow engine type (DISABLED, VSM, ESM, ESSM)
   ShadowType ShadowMode;
+  /// Shadow map resolution (prefers power of 2 sizes)
   uint32_t ShadowMapResolution;
+  /// Shadow map radius (in game units) for cascade generation
   float ShadowMapRadius;
+  /// Shadow map far plane (in game units) for cascade generation
   float ShadowMapFarPlane;
+  /// Blur shadow maps
   bool BlurShadowMaps;
 };
 
 struct ShadowsInteriorStruct {
+  /// Enable interior shadows. This disable the underlying system. 
   bool Enabled;
+  /// Shadow engine type. 
   uint8_t ShadowMode;
+  /// Shadow cube map resolution (prefers power of 2 sizes)
   uint32_t ShadowCubeMapResolution;
+  /// Number of light points to use for interior shadows (1-8)
   uint8_t LightPoints;
+  /// Enable or disable torches casting shadows in interiors
   bool TorchesCastShadows;
+  /// Multiplier for the light radius used for interior shadows //TODO!!: check
   float LightRadiusMult;
 };
 
 struct Config {
+  /// Main configuration settings
   MainStruct Main;
+  /// Water (non shader related) settings
   WaterEngine WaterEngine;
   DevelopStruct Develop;
   CullingEngine Culling;
@@ -226,7 +342,9 @@ struct AmbientOcclusionInner {
 };
 
 struct AmbientOcclusion {
+  /// Ambient Occlusion is a post processing effect that darkens corners and crevices, simulating the way light behaves in real life. It can add depth and realism to the scene, but it can also be performance intensive. For exterior ambients
   AmbientOcclusionInner Exterior;
+  /// Ambient Occlusion is a post processing effect that darkens corners and crevices, simulating the way light behaves in real life. It can add depth and realism to the scene, but it can also be performance intensive. For Interiors ambient  
   AmbientOcclusionInner Interior;
 };
 
@@ -405,7 +523,9 @@ struct ShadowsInteriorShaderStruct {
 };
 
 struct ShadowStruct {
+  /// Parameters for exterior shadows
   ShadowsExteriorShaderStruct ShadowsExterior;
+  /// Parameters for interior shadows
   ShadowsInteriorShaderStruct ShadowsInterior;
 };
 
@@ -516,7 +636,11 @@ void SaveConfigurations();
 
 void EnterEditorMode();
 
-void IsEditorMode();
+bool IsEditorMode();
+
+void CloseEditorMode();
+
+void AddCharToEditor(char ch);
 
 Errors SetLogFile(FILE *file);
 

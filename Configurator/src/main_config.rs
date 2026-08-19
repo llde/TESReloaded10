@@ -65,15 +65,25 @@ impl Default for Config{
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct MainStruct {
+    /// Remove vanilla underwater pass effect 
     RemoveUnderwater : bool,
+    /// Remove vanilla precipitation pass effect (rain, snow)
     RemovePrecipitations : bool,
+    /// Remove vanilla fog pass effect (UNSTABLE)
 	RemoveFogPass : bool,
+    /// Enable memory texture management (May cause Alt+Tab crash or hangs with full screen mode)
     MemoryTextureManagement : bool,
+    /// Enable grass mode. This is separated from the Grass shader
 	GrassMode : bool,
-    ReplaceIntro : bool,
+    /// Replace the intro video and the main menu background video with a custom one
+    ReplaceIntroAndMainMenuBackgroundVideos : bool,
+    /// Override the default anisotropic filter value (0-16)
     AnisotropicFilter : u8,
+    /// Key (in dx scancodes) to take a screenshot
     ScreenshotKey : u32,
+    /// Override the default far plane distance (in game units)
     FarPlaneDistance : f32,
+    /// Enable directional light  as sun source instead of the normal sun position (for testing purposes only)
 	TestDirectionLight : bool,
 }
 
@@ -85,7 +95,7 @@ impl Default for MainStruct{
             MemoryTextureManagement : true,
 			RemoveFogPass : false,
 			GrassMode : true,
-            ReplaceIntro : false,
+            ReplaceIntroAndMainMenuBackgroundVideos : false,
             AnisotropicFilter : 4,
             ScreenshotKey : 87,
             FarPlaneDistance : 283840.0,
@@ -124,9 +134,13 @@ impl Default for DevelopStruct{
 #[repr(C)]
 #[allow(non_snake_case)]
 pub	struct LowHFSoundStruct {
-    HealthEnabled : bool,  // 1 Compile All, 2 Compile modified or missing only, 3 Compile only in menu
+    /// Enable LowHF effect for health
+    HealthEnabled : bool,
+    /// Enable LowHF effect for fatigue
     FatigueEnabled : bool,
-    HealthCoeff : f32,       // enables hotkeys to print textures
+    /// Coefficient for LowHF effect for health (0.0 - 1.0)
+    HealthCoeff : f32,
+    /// Coefficient for LowHF effect for fatigue (0.0 - 1.0)
     FatigueCoeff : f32,
 }
 
@@ -144,10 +158,15 @@ impl Default for LowHFSoundStruct{
 #[repr(C)]
 #[allow(non_snake_case)]
 pub	struct FlyCamStruct {
+    /// Enable fly camera mode (true or false)
     Enabled : bool,
+    /// Multiplier for the scroll wheel to change the fly camera speed
     ScrollMultiplier : f32,
+    /// Key (in dx scancodes) to increase the fly camera speed
     KeyAdd : u16,
+    /// Key (in dx scancodes) to decrease the fly camera speed
     KeySubtract : u16,
+    /// Step value for the fly camera speed change
     StepValue : f32
 }
 
@@ -166,14 +185,23 @@ impl Default for FlyCamStruct{
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct ShadersStruct {
+    /// Eanble OR Blood shader
     Blood : bool,
+    /// Enable OR Grass shader
     Grass : bool,
+    /// Enable OR HDR shader
     HDR : bool,
+    /// Enable OR NightEye shader
     NightEye : bool,
+    /// Enable OR POM shader
     POM : bool,
+    /// Enable OR Skin shader
     Skin : bool,
+    /// Enable OR Terrain shader
     Terrain : bool,
+    /// Enable OR Water shader
     Water : bool,
+    /// Enable custom extra shaders, if provided in the shaders folder, for shaders not included in the other shaders sets. 
     Extra : bool,
 }
 
@@ -196,26 +224,47 @@ impl Default for ShadersStruct{
 #[repr(C)]
 #[allow(non_snake_case)]
 struct EffectsStruct {
+    /// Enable OR Ambient Occlusion effect
     AmbientOcclusion : bool,
+    /// Enable OR Blood Lens effect
     BloodLens : bool,
+    /// Enable OR Bloom effect
     Bloom : bool,
+    /// Enable OR Cinema effect
     Cinema : bool,
+    /// Enable OR Coloring effect
     Coloring : bool,
+    /// Enable OR Depth of Field effect
     DepthOfField : bool,
+    /// Enable OR God Rays effect
     GodRays : bool,
+    /// Enable OR LowHF effect
     LowHF : bool,
+    /// Enable OR Motion Blur effect
     MotionBlur : bool,
+    /// Enable OR Rain effect 
     Rain : bool,
+    /// Enable OR Snow effect
     Snow : bool,
+    /// Enable OR Sharpening effect
     Sharpening : bool,
+    /// Enable OR Snow Accumulation effect
     SnowAccumulation : bool,
+    /// Enable OR Underwater effect
     Underwater : bool,
+    /// Enable OR Water Lens effect
     WaterLens : bool,
+    /// Enable OR Wet World effect
     WetWorld : bool,
+    /// Enable OR Volumetric Fog effect
     VolumetricFog : bool,
+    /// Enable OR Shadows Exteriors effect.  This doesn't disable the underlying system.
     ShadowsExteriors : bool,
+    /// Enable OR Shadows Interiors effect. This doesn't disable the underlying system.
     ShadowsInteriors : bool,
+    /// Enable OR Specular effect
     Specular : bool,
+    /// Enable OR Extra effect. These effects aren't triggered automatically by the engine, but can be triggered by scripts or, in future, by obse plugins.
     Extra : bool,
 }
 
@@ -252,25 +301,44 @@ impl Default for EffectsStruct{
 #[allow(non_snake_case)]
 pub struct MenuStruct {
     #[toml_comment(inline)]
+    /// Font used for the menu text
     TextFont : SysString,
     #[toml_comment(inline)]
+    /// Font used for the menu status text
     TextFontStatus : SysString,
+    /// Size of the menu text
     TextSize : u8,
+    /// Size of the menu status text
     TextSizeStatus : u8,
+    /// Color of the menu text in normal state (RGB)
 	TextColorNormal : [u8; 3],
+    /// Color of the menu text shadow in normal state (RGB)
 	TextShadowColorNormal : [u8;3],
+    /// Color of the menu text in selected state (RGB)
 	TextColorSelected : [u8; 3],
+    /// Color of the menu text shadow in selected state (RGB)
 	TextShadowColorSelected : [u8 ; 3],
+    /// Key (in dx scancodes) to enable the menu
     KeyEnable : u8,
+    /// Key (in dx scancodes) to navigate up in the menu
     KeyUp : u8,
+    /// Key (in dx scancodes) to navigate down in the menu
     KeyDown : u8,
+    /// Key (in dx scancodes) to navigate left in the menu
     KeyLeft : u8,
+    /// Key (in dx scancodes) to navigate right in the menu
     KeyRight : u8,
+    /// Key (in dx scancodes) to navigate page up in the menu
     KeyPageUp : u8,
+    /// Key (in dx scancodes) to navigate page down in the menu
     KeyPageDown : u8,
+    /// Key (in dx scancodes) to increase a value in the menu
     KeyAdd : u8,
+    /// Key (in dx scancodes) to decrease a value in the menu
     KeySubtract : u8,
+    /// Key (in dx scancodes) to save the configuration in the menu or exiting editing mode saving the new value
     KeySave : u8,
+    /// Key (in dx scancodes) to enter editing mode in the menu
     KeyEditing : u8
 }
 
@@ -304,7 +372,9 @@ impl Default for MenuStruct{
 #[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct SleepingModeStruct{
+    /// Enable sleeping mode (true or false)
     Enabled : bool,
+    /// Sleeping mode type (0 = Disabled, 1 = Sleep, 2 = Wait)
     Mode : u8
 }
 
@@ -321,19 +391,33 @@ impl Default for SleepingModeStruct{
 #[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct ShadowFormsStruct {
+    /// Enable shadow rendering for activators
 	Activators : bool,
+    /// Enable shadow rendering for actors
 	Actors : bool,
+    /// Enable shadow rendering for apparatus objects
 	Apparatus: bool,
+    /// Enable shadow rendering for books
 	Books : bool,
+    /// Enable shadow rendering for containers
 	Containers : bool,
+    /// Enable shadow rendering for doors
 	Doors : bool,
+    /// Enable shadow rendering for furniture objects
 	Furniture : bool,
+    /// Enable shadow rendering for miscellaneous objects
 	Misc : bool,
+    /// Enable shadow rendering for static objects
 	Statics : bool,
+    /// Enable shadow rendering for terrain
 	Terrain : bool,
+    /// Enable shadow rendering for trees
 	Trees : bool,
+    /// Enable shadow rendering for LOD objects
 	Lod : bool, 
+    /// Minimum radius for shadow rendering (in game units)
 	MinRadius : f32,
+    /// Enable alpha when rendering shadows 
 	Alpha : bool,
 }
 
@@ -360,15 +444,18 @@ enum ShadowType {
 #[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct ShadowsExteriorStruct{
-    /// Shadows engine enabled (true or false)
+    /// Shadows engine enabled (true or false). This disable both the shadowmaps and the orthomap
 	Enabled : bool,
     /// Shadow engine type (DISABLED, VSM, ESM, ESSM)
     #[toml_comment(inline)]
 	ShadowMode : ShadowType,
     /// Shadow map resolution (prefers power of 2 sizes)
     ShadowMapResolution : u32,
+    /// Shadow map radius (in game units) for cascade generation
     ShadowMapRadius : f32,
+    /// Shadow map far plane (in game units) for cascade generation
     ShadowMapFarPlane : f32,
+    /// Blur shadow maps
     BlurShadowMaps : bool,
 }
 /*Other Shadows Related settings will be in the Shader configuration
@@ -393,11 +480,17 @@ impl Default for ShadowsExteriorStruct{
 #[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct ShadowsInteriorStruct{
+    /// Enable interior shadows. This disable the underlying system. 
 	Enabled : bool,
+    /// Shadow engine type. 
 	ShadowMode : u8,
+    /// Shadow cube map resolution (prefers power of 2 sizes)
     ShadowCubeMapResolution : u32,
+    /// Number of light points to use for interior shadows (1-8)
     LightPoints : u8,
+    /// Enable or disable torches casting shadows in interiors
     TorchesCastShadows : bool,
+    /// Multiplier for the light radius used for interior shadows //TODO!!: check
 	LightRadiusMult : f32
 }
 
@@ -418,9 +511,13 @@ impl Default for ShadowsInteriorStruct{
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct CullingEngine{
+    /// Enable or disable the main culling engine. This will cull objects based on their size and distance from the camera.
     EnableMainCulling: bool,
+    /// Enable or disable the reflection culling engine. This will cull objects based on their size and distance from the camera when rendering reflections.
     EnableRelfectionCulling : bool,
+    /// Minimum size (in game units) for an object to be rendered. Objects smaller than this size will be culled.
     CullMinSize : f32,
+    /// Minimum size (in game units) for an object to be rendered in reflections. Objects smaller than this size will be culled.
     CullReflectionMinSize : f32
 }
 
@@ -440,7 +537,9 @@ impl Default for CullingEngine{
 #[derive(Debug,Serialize,Deserialize,DeserializeOver, Reflect,TomlComment)]
 #[allow(non_snake_case)]
 pub struct WaterEngine{
+    /// Water reflection map size (prefers power of 2 sizes)
     ReflectionMapSize : u16,
+    /// Enable or disable atmosphere  changes when underwater (UNSTABLE).
     SetAtmoshpere : bool,
 }
 

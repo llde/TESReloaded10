@@ -203,6 +203,7 @@ impl Default for Grass {
 #[allow(non_snake_case)]
 pub struct Shaders{
 	#[deserialize_over]
+	#[toml_comment(inner_only)]
 	Shadows :  ShadowStruct,
 	#[deserialize_over]
 	Rain : Rain,

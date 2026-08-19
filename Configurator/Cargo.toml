@@ -20,6 +20,7 @@ winapi = { version = "0.3", features = ["std", "d3d9", "d3d9types", "wtypes", "w
 bevy_reflect ="0.19.0"
 strum = { version = "0.28", features = ["derive"] }
 toml-comment = {version = "0.3.0", git = "https://github.com/llde/toml-comment.git" }
+#toml-comment = {version = "0.3.0", path = "../../toml-comment/toml-comment" }
 [build-dependencies]
 cbindgen = "0.29.4"
 embed-resource = "3.0.11"

@@ -43,10 +43,10 @@ pub struct AmbientOcclusionInner{
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct AmbientOcclusion{
-	#[toml_comment("Ambient Occlusion is a post processing effect that darkens corners and crevices, simulating the way light behaves in real life. It can add depth and realism to the scene, but it can also be performance intensive.")]
+	/// Ambient Occlusion is a post processing effect that darkens corners and crevices, simulating the way light behaves in real life. It can add depth and realism to the scene, but it can also be performance intensive. For exterior ambients
 	#[deserialize_over]
 	Exterior : AmbientOcclusionInner,
-	#[toml_comment("Ambient Occlusion is a post processing effect that darkens corners and crevices, simulating the way light behaves in real life. It can add depth and realism to the scene, but it can also be performance intensive.")]
+	/// Ambient Occlusion is a post processing effect that darkens corners and crevices, simulating the way light behaves in real life. It can add depth and realism to the scene, but it can also be performance intensive. For Interiors ambient  
 	#[deserialize_over]
 	Interior : AmbientOcclusionInner
 }
@@ -354,6 +354,7 @@ pub struct Effects{
 	#[deserialize_over]
     BloodLens :  BloodLens,
     #[deserialize_over]
+	#[toml_comment(inner_only)]
 	AmbientOcclusion : AmbientOcclusion,
     #[deserialize_over]
 	Bloom : Bloom,
@@ -368,14 +369,17 @@ pub struct Effects{
 	#[deserialize_over]
 	LowHF : LowHF,
 	#[deserialize_over]
+	#[toml_comment(inner_only)]
 	DepthOfField : DepthOfField,
 	#[deserialize_over]
 	Cinema : Cinema,
 	#[deserialize_over]
+	#[toml_comment(inner_only)]
 	MotionBlur : MotionBlur,
 	#[deserialize_over]
 	Sharpening : Sharpening,
 	#[deserialize_over]
+	#[toml_comment(inner_only)]
 	Specular : Specular,
 	#[deserialize_over]
 	VolumetricFog : VolumetricFog,
