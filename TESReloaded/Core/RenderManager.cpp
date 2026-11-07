@@ -268,6 +268,11 @@ void RenderManager::Initialize() {
 	D3D->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &caps);
 	if (caps.NumSimultaneousRTs > 1) Logger::Log("Multiple rendertarget supported. Max %u", caps.NumSimultaneousRTs);
 	else Logger::Log("Multiple rendertarget not supported");
+	ID3D9VkInteropDevice* pDxvkInterop = nullptr;
+	HRESULT hr = this->device->QueryInterface(IID_ID3D9VkInteropDevice, (void**)&pDxvkInterop);
+	if (SUCCEEDED(hr) && pDxvkInterop != nullptr) {
+		Logger::Log("DXVK Detected");
+	}
 	MaxRenderTargets = caps.NumSimultaneousRTs;
 	D3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &currentDisplayMode);
 	RESZ = D3D->CheckDeviceFormat(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, currentDisplayMode.Format, D3DUSAGE_RENDERTARGET, D3DRTYPE_SURFACE, (D3DFORMAT)MAKEFOURCC('R','E','S','Z')) == D3D_OK;

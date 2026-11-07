@@ -37,3 +37,13 @@ public:
 	static DWNode*	Get();
 	static void		AddNode(const char* Name, NiAVObject* Child0, NiAVObject* Child1);
 };
+
+constexpr static GUID IID_ID3D9VkInteropDevice{ 0x2eaa4b89, 0x0107, 0x4bdb, { 0x87, 0xf7, 0x0f, 0x54, 0x1c, 0x49, 0x3c, 0xe0 } };
+
+interface ID3D9VkInteropDevice : public IUnknown {
+	virtual void STDMETHODCALLTYPE GetVulkanHandles(
+		void* pInstance,
+		void* pPhysDevice,
+		void* pDevice
+	) = 0;
+};
