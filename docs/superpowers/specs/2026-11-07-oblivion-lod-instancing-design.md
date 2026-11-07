@@ -60,8 +60,12 @@ The public manager operations are:
 Creation traverses the root, rejects null, app-culled, skinned, animated, and
 unsupported nodes/geometries, and groups eligible geometries by shared mesh
 and compatible appearance state. Each source geometry contributes its world
-transform to the batch's instance data. Batches that cannot safely use the
-common vertex layout remain uninstanced.
+transform to the batch's instance data. Before each draw, test its world bound
+against the active culling planes without mutating the game's active-plane
+mask, and upload only visible instance transforms. If no culling process or no
+active planes are available, treat the geometry as visible, matching the
+unculled rendering path. Batches that cannot safely use the common vertex
+layout remain uninstanced.
 
 Rendering uses Direct3D 9 indexed geometry instancing: the source mesh is
 bound as geometry data, the instance transform buffer is bound as per-instance
@@ -122,7 +126,9 @@ scope.
   double-rendered, and vanilla geometry remains visible when batch creation
   fails.
 - Verify stream frequencies, stream bindings, shaders, textures, and culling
-  flags are restored after rendering and after a reported failure.
+  flags are restored after rendering and after a reported failure; confirm
+  off-frustum instances are not submitted and active culling-plane state is
+  unchanged.
 - Verify cached resources are released and rebuilt across worldspace/root
   changes.
 - A runtime smoke test requires the Windows Oblivion environment; source and
