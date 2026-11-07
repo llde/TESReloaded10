@@ -112,8 +112,11 @@ even when a batch fails.
 Add one vertex shader and one pixel shader source under
 `Extra/Shaders/OblivionReloaded/Shaders`, following the existing
 `.vso.hlsl`/`.pso.hlsl` naming and `ShaderRecord::LoadShader` compilation flow.
-Both shaders target shader model 3. No per-material shader variants are in
-scope.
+Both shaders target shader model 3. Treat the `InstanceLOD` pair as built-in
+manager shaders: load them with the manager without a separate shader toggle,
+and exempt only their exact names from the loader's optional `Shaders.Extra`
+filter. `InstanceFarGeometry` continues to control whether the LOD instance
+render path is used. No per-material shader variants are in scope.
 
 ## Validation
 
