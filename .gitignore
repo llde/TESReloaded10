@@ -6,3 +6,4 @@ packages
 *.fx
 /build/*
 Configurator/target
+.worktrees/
