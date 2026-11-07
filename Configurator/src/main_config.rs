@@ -65,7 +65,7 @@ impl Default for Config{
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct MainStruct {
-    /// Remove vanilla underwater pass effect 
+    /// Remove vanilla underwater fog data from Water types 
     RemoveUnderwater : bool,
     /// Remove vanilla precipitation pass effect (rain, snow)
     RemovePrecipitations : bool,
@@ -85,6 +85,7 @@ pub struct MainStruct {
     FarPlaneDistance : f32,
     /// Enable directional light  as sun source instead of the normal sun position (for testing purposes only)
 	TestDirectionLight : bool,
+    InstanceFarGeometry : bool,
 }
 
 impl Default for MainStruct{
@@ -100,6 +101,7 @@ impl Default for MainStruct{
             ScreenshotKey : 87,
             FarPlaneDistance : 283840.0,
 			TestDirectionLight : false,
+            InstanceFarGeometry : false,
         }
     }
 }

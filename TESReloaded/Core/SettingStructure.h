@@ -37,7 +37,7 @@ enum class Errors {
 };
 
 struct MainStruct {
-  /// Remove vanilla underwater pass effect 
+  /// Remove vanilla underwater fog data from Water types 
   bool RemoveUnderwater;
   /// Remove vanilla precipitation pass effect (rain, snow)
   bool RemovePrecipitations;
@@ -57,6 +57,7 @@ struct MainStruct {
   float FarPlaneDistance;
   /// Enable directional light  as sun source instead of the normal sun position (for testing purposes only)
   bool TestDirectionLight;
+  bool InstanceFarGeometry;
 };
 
 struct WaterEngine {

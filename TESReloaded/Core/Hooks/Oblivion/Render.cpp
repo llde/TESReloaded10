@@ -68,6 +68,28 @@ float __fastcall FarPlaneHook(SceneGraph* This, UInt32 edx) {
 
 }
 
+void LogEntry(NiD3DShaderConstantMapEntry* entry) {
+	if (entry && entry->DataSource) {
+		if (entry->DataSize == 4) {
+			Logger::Log("%s %d %d %f", entry->Key, entry->RegisterCount, entry->ShaderRegister, *((float*)entry->DataSource));
+		}
+		if (entry->DataSize == 8) {
+			Logger::Log("%s %d %d %f %f", entry->Key, entry->RegisterCount, entry->ShaderRegister, ((float*)entry->DataSource)[0], ((float*)entry->DataSource)[1]);
+		}
+		if (entry->DataSize == 12) {
+			Logger::Log("%s %d %d %f %f %f %f", entry->Key, entry->RegisterCount, entry->ShaderRegister, ((float*)entry->DataSource)[0], ((float*)entry->DataSource)[1], ((float*)entry->DataSource)[2]);
+		}
+		if (entry->DataSize == 16) {
+			Logger::Log("%s %d %d %f %f %f %f", entry->Key, entry->RegisterCount, entry->ShaderRegister, ((float*)entry->DataSource)[0], ((float*)entry->DataSource)[1], ((float*)entry->DataSource)[2], ((float*)entry->DataSource)[3]);
+		}
+
+	}
+	/*else {
+		Logger::Log("%s %d %d %d", entry->Key, entry->RegisterCount, entry->ShaderRegister, entry->DataSize);
+	}*/
+
+}
+
 
 UInt32 (__thiscall* SetupShaderPrograms)(NiShader*, NiGeometry*, NiSkinInstance*, NiSkinPartition::Partition*, NiGeometryBufferData*, NiPropertyState*, NiDynamicEffectState*, NiTransform*, UInt32) = (UInt32 (__thiscall*)(NiShader*, NiGeometry*, NiSkinInstance*, NiSkinPartition::Partition*, NiGeometryBufferData*, NiPropertyState*, NiDynamicEffectState*, NiTransform*, UInt32))Hooks::SetupShaderPrograms;
 UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiGeometry* Geometry, NiSkinInstance* SkinInstance, NiSkinPartition::Partition* SkinPartition, NiGeometryBufferData* GeometryBufferData, NiPropertyState* PropertyState, NiDynamicEffectState* EffectState, NiTransform* WorldTransform, UInt32 WorldBound) {
@@ -77,13 +99,14 @@ UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiGeometry
 	NiD3DVertexShaderEx* VertexShader = (NiD3DVertexShaderEx*)Pass->VertexShader;
 	NiD3DPixelShaderEx* PixelShader = (NiD3DPixelShaderEx*)Pass->PixelShader;
 	UInt32 PassIndex = *(UInt32*)0x00B42E90;
+	//if (PassIndex == 390) return false;
 //    UInt8* IsLava = (UInt8*)0x00B47844;
 //    *IsLava = 1;  Unlock pass 410 instead of 380/409
 	if (VertexShader && PixelShader) {
 		VertexShader->SetupShader(TheRenderManager->renderState->GetVertexShader());
 		PixelShader->SetupShader(TheRenderManager->renderState->GetPixelShader());
         /*This was 1.0. This code is supposed to make the shader render the fog color on objects, however it lack depth, causing a "washed out" effect. 
-         Also not all shaders consider this Toggle, so there are only some objects that are rnedered that way.
+         Also not all shaders consider this Toggle, so there are only some objects that are rendered that way.
 		 Using 0 it render the normal (non-fog) color, and in case use the volumetric fog shader to render the fog effect. */
 		if(TheSettingManager->Config->Main.RemoveFogPass) Toggles->y = 0.0f; 
 		if (DWNode::Get()) {
@@ -100,15 +123,45 @@ UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiGeometry
  //       Logger::Log("Pass %u : %u",  PassIndex, *IsLava);
     //    TheRenderManager->renderState->SetTexture(1, TheRenderManager->CurrentWaterTexture);
     }
-    //if (PassIndex == 409 && Pass->Stages.numObjs == 1){
-    //	if (TheKeyboardManager->OnKeyDown(44)) {
-      //      NiTArray<NiD3DTextureStage*> stages = Pass->Stages;
-        //    for(UInt32 i = 0; i < Pass->Stages.numObjs; i++){
-          //      IDirect3DBaseTexture9* text = Pass->Stages.data[i]->Texture->rendererData->dTexture; 
-       //         D3DXSaveTextureToFile(".\\0.jpg", D3DXIFF_JPG, text, NULL);
-      //      }
-     //   }
-   // }
+    // 381 sky
+	if (PassIndex == 390 || PassIndex == 388){
+    	if (Global->OnKeyDown(44)) {
+            NiTArray<NiD3DTextureStage*> stages = Pass->Stages;
+            for(UInt32 i = 0; i < Pass->Stages.numObjs; i++){
+                IDirect3DBaseTexture9* text = Pass->Stages.data[i]->Texture->rendererData->dTexture;
+				wchar_t num[20] = { 0 };
+				wchar_t id[60] = { 0 };
+				swprintf(id, 60, L"%s", Geometry->m_pcName);
+				swprintf(num,20, L"%d_%d", PassIndex, i);
+				wchar_t buf[150] = L".\\test_";
+				wcscat(buf, id);
+				wcscat(buf, L"_");
+				wcscat(buf, num);
+				wcscat(buf, L".jpg");
+                D3DXSaveTextureToFile(buf, D3DXIFF_JPG, text, NULL);
+            }
+		/*	ShadowLightShader* sh = (ShadowLightShader*)This;
+			NiD3DShaderConstantMap* constMap = sh->PixelConstantMapSLS2;
+			if (constMap) {
+				Logger::Log("Pixel constant for shader %s", sh->Name);
+				NiTArray<NiD3DShaderConstantMapEntry*>& Entries = constMap->Entries;
+				for (UInt32 i = 0; i < Entries.numObjs; i++) {
+					NiD3DShaderConstantMapEntry* entry = Entries.data[i];
+					LogEntry(entry);
+				}
+			}
+			constMap = sh->VertexConstantMapSLS2;
+			if (constMap) {
+				Logger::Log("Vertex constant for shader %s", sh->Name);
+				NiTArray<NiD3DShaderConstantMapEntry*>& Entries = constMap->Entries;
+				for (UInt32 i = 0; i < Entries.numObjs; i++) {
+					NiD3DShaderConstantMapEntry* entry = Entries.data[i];
+					LogEntry(entry);
+				}
+			}
+			*/
+        }
+    }
     return result;
 
 }
