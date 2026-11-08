@@ -5,7 +5,7 @@ static HRESULT STDMETHODCALLTYPE CreateDevice(IDirect3D9Ex* D3DInterface, UINT A
 //	pPresentationParameters->AutoDepthStencilFormat = D3DFMT_D32;
 	HRESULT R = D3DInterface->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, (IDirect3DDevice9**)ppReturnedDeviceInterface);
 	//HRESULT R = D3DInterface->CreateDeviceEx(Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, NULL, ppReturnedDeviceInterface);
-//	*ppReturnedDeviceInterface = new TESRDirect3DDevice9(D3DInterface, *ppReturnedDeviceInterface);
+	*ppReturnedDeviceInterface = new TESRDirect3DDevice9(D3DInterface, *ppReturnedDeviceInterface);
 	return R;
 	
 }

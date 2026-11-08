@@ -1,25 +1,9 @@
 #include "Hooks.h"
 #include "Shadows.h"
-HRESULT(__thiscall* RemoveTexture)(NiDX9RenderState*, UInt32 ) = (HRESULT(__thiscall*)(NiDX9RenderState*, UInt32))0x0077B2C0;
-HRESULT _fastcall RemoveTextureH(NiDX9RenderState* state, UInt32 edx, UInt32 sampler) {
-
-	return D3D_OK;
-}
-
-HRESULT(__thiscall* SetTexture)(NiDX9RenderState*, UInt32, IDirect3DBaseTexture9*) = (HRESULT(__thiscall*)(NiDX9RenderState*, UInt32, IDirect3DBaseTexture9*))0x0077B280;
-HRESULT _fastcall SetTextureH(NiDX9RenderState* state, UInt32 edx, UInt32 sampler, IDirect3DBaseTexture9* tex) {
-	if (tex == nullptr) return  D3D_OK;
-	return (*SetTexture)(state, sampler, tex);
-}
 
 void(__cdecl* SetNameThread)(int, const char*) = (void(__cdecl*)(int, const char*)) 0x00747830;
 void __cdecl NameThread(int threadID, const char* name) {
 
-}
-
-int(__thiscall* RemoveTextureList)(NiDX9RenderState*) = (int(__thiscall*)(NiDX9RenderState*)) 0x0077B210;
-int __fastcall RemoveTextureListH(NiDX9RenderState* This) {
-	return 0;
 }
 
 static const UInt32 kRetU = 0x0053B175;
@@ -52,7 +36,9 @@ void AttachHooks() {
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	//DetourAttach(&(PVOID&)RemoveTexture, &RemoveTextureH);
-	//DetourAttach(&(PVOID&)SetTexture, &SetTextureH);
+//	SafeWriteJump(0x0077B280, (UInt32)&SetTexturePreventSettingNULL);
+	SafeWriteJump(0x00771790, (UInt32)&StubRemoveTexturesFromSampler);
+	SafeWriteJump(0x00772268, (UInt32)&StubRemoveTextureFromSampler);
 //	DetourAttach(&(PVOID&)RemoveTextureList, &RemoveTextureListH);
 
 	DetourAttach(&(PVOID&)SetNameThread, &NameThread);
@@ -207,7 +193,6 @@ void AttachHooks() {
 	SafeWriteJump(Jumpers::SetWeatherEditorName::Hook,			(UInt32)SetWeatherEditorNameHook);
 	SafeWriteJump(Jumpers::HitEvent::Hook,						(UInt32)HitEventHook);
 	SafeWriteJump(Jumpers::Shadows::RenderShadowMapHook,		(UInt32)RenderShadowMapHook);
-
 
 	SafeWriteCall(0x0040D650, (UInt32)RenderCanopyMapHook); //Avoid tree canopy shadows rendering. This actually only seems to disable initialization, but not prevent the actual shadowmap to be disabled
 	SafeWriteJump(0x004425F7, 0x00442621); //Skip canopy map deinitialization (the game disposes/recreates the map every cell changed)

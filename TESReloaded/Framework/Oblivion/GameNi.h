@@ -1478,7 +1478,7 @@ public:
 	NiRenderStateSetting			RenderStateSettings[256];		// 0120
 	NiRenderStateSetting			TextureStageStateSettings[128];	// 0920
 	NiRenderStateSetting			SamplerStateSettings[80];		// 0D20
-	IDirect3DBaseTexture9*			SourceTextures[16];					// 0FA0
+	IDirect3DBaseTexture9*			SourceTextures[16];				// 0FA0
 	UInt32							Unk0FB0[4];						// 0FB=
 	NiDX9ShaderConstantManager*		ShaderConstantManager;			// 0FF0
 	UInt8							ForceNormalizeNormals;			// 0FF4

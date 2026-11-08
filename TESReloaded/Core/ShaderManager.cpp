@@ -412,15 +412,22 @@ void ShaderRecord::SetCT() {
 	
 	ShaderValue* Value;
 
-	if (HasRenderedBuffer) TheRenderManager->device->StretchRect(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface, NULL, TheTextureManager->RenderedSurface, NULL, D3DTEXF_NONE);
+	if (HasRenderedBuffer) {
+		TheRenderManager->device->StretchRect(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface, NULL, TheTextureManager->RenderedSurface, NULL, D3DTEXF_NONE);
+	}
 	if (HasDepthBuffer) TheRenderManager->ResolveDepthBuffer();
 	for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
 		Value = &TextureShaderValues[c];
+		if(Value->Texture == nullptr) {
+			Logger::Log("Texture %d not found", c);
+			continue;
+		}
 		if (Value->Texture) {
-			if(TheRenderManager->renderState->SourceTextures[Value->RegisterIndex] == nullptr)
-				TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
-			else
-				TheRenderManager->renderState->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
+			if (Value->Texture->Texture == nullptr) {
+				Logger::Log("Texture %08X not found", Value->Texture);
+				continue;
+			}
+			TheRenderManager->renderState->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
 			for (int i = 1; i < SamplerStatesMax; i++) {
 				TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
 			}
@@ -638,10 +645,7 @@ void EffectRecord::SetCT() {
 	for (UInt32 c = 0; c < TextureShaderValuesCount; c++) {
 		Value = &TextureShaderValues[c];
 		if (Value->Texture) {
-			if (TheRenderManager->renderState->SourceTextures[Value->RegisterIndex] == nullptr)
-				TheRenderManager->device->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
-			else
-				TheRenderManager->renderState->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
+			TheRenderManager->renderState->SetTexture(Value->RegisterIndex, Value->Texture->Texture);
 			for (int i = 1; i < SamplerStatesMax; i++) {
 				TheRenderManager->SetSamplerState(Value->RegisterIndex, (D3DSAMPLERSTATETYPE)i, Value->Texture->SamplerStates[i]);
 			}

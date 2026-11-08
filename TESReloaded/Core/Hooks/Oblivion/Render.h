@@ -46,3 +46,6 @@ void DetectorWindowDumpAttributesHook();
 void DetectorWindowConsoleCommandHook();
 
 void DetectorWindowSetNodeName(char* Buffer, char* Format, char* ClassName, char* Name, float LPosX, float LPosY, float LPosZ);
+void StubRemoveTexturesFromSampler();
+void StubRemoveTextureFromSampler();
+HRESULT __fastcall SetTexturePreventSettingNULL(NiDX9RenderState* state, UInt32 edx, DWORD Sampler, IDirect3DBaseTexture9 *pTexture);

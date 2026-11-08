@@ -117,6 +117,15 @@ UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiGeometry
 			DWNode::AddNode(Name, Geometry->m_parent, Geometry);
 		}
 	}
+	//Temporary fix for SM3 passes to not properly clear the texture sampler 3, the shadow mask. 
+	// This mask doesn't seems setted  or resetted, so when a shader bind sampler 3 before (not happen in vanilla)
+	// the shadow mask is still setted, and the shader will use it instead of the correct texture.
+	// unless the shader doesn't bind the mask at all????
+	// Trying to stamp the texture show no texture for sampler 2 and 3
+	if (PassIndex == 314 || PassIndex ==  322){
+		TheRenderManager->renderState->SetTexture(3, nullptr);
+		TheRenderManager->renderState->SetTexture(2, nullptr);
+	}
 	UInt32 result = (*SetupShaderPrograms)(This, Geometry, SkinInstance, SkinPartition, GeometryBufferData, PropertyState, EffectState, WorldTransform, WorldBound);
 	if (PassIndex == 380  || PassIndex == 409 || PassIndex == 410){ //WaterLOD
         //data[2] difuse, data[1] nothing
@@ -124,14 +133,15 @@ UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiGeometry
     //    TheRenderManager->renderState->SetTexture(1, TheRenderManager->CurrentWaterTexture);
     }
     // 381 sky
-	if (PassIndex == 390 || PassIndex == 388){
+	if (PassIndex == 390 || PassIndex == 388 || PassIndex == 314 || PassIndex ==  322){
     	if (Global->OnKeyDown(44)) {
             NiTArray<NiD3DTextureStage*> stages = Pass->Stages;
             for(UInt32 i = 0; i < Pass->Stages.numObjs; i++){
+				if(Pass->Stages.data[i] == nullptr || Pass->Stages.data[i]->Texture == nullptr) continue;
                 IDirect3DBaseTexture9* text = Pass->Stages.data[i]->Texture->rendererData->dTexture;
 				wchar_t num[20] = { 0 };
 				wchar_t id[60] = { 0 };
-				swprintf(id, 60, L"%s", Geometry->m_pcName);
+				swprintf(id, 60, L"%hs", Geometry->m_pcName);
 				swprintf(num,20, L"%d_%d", PassIndex, i);
 				wchar_t buf[150] = L".\\test_";
 				wcscat(buf, id);
@@ -399,4 +409,53 @@ __declspec(naked) void DetectorWindowConsoleCommandHook() {
 		jmp		Jumpers::DetectorWindow::ConsoleCommandReturn
 	}
 
+}
+
+
+/* These 2 function below belong to a game routine used to clean up texture samplers unused by the current pass.
+ * This interfere with our setCT when using the renderState properly. 
+ * This probably lies in the fact these shaders are rendered after the cleanup, that happen after our setCT.
+ * Study it better, in a ideal world we may want to synchronize setCT AFTER the cleanup
+ * or to extend the vanilla NiD3DPass to manager our textures and samplers too.
+ */
+void __declspec(naked) StubRemoveTexturesFromSampler() {
+	__asm {
+		mov eax , 0
+		retn
+	}
+}
+
+UInt32 kContinueLoc = 0x0077226E;
+void __declspec(naked) StubRemoveTextureFromSampler() {
+	__asm {
+		test edi,edi
+		jz loc_continue
+		push edi 
+		push eax
+		call edx
+		test edi,edi
+	loc_continue:
+		jmp [kContinueLoc]
+	}
+}
+
+/* An alternative version,  if we prevent executing when pTexture is NULL then the bug doesn't occur
+  Inverstigate a bit on the more solid version
+  Both versions seems to trigger the bug of having canopy shadows on extraneous objects
+  when the canopy shadows is enabled
+*/
+std::vector<void*>* holder1= new std::vector<void*>();
+HRESULT __fastcall SetTexturePreventSettingNULL(NiDX9RenderState* state, UInt32 edx, DWORD Sampler, IDirect3DBaseTexture9 *pTexture) {
+	void* caller = _ReturnAddress();
+
+	if (pTexture == nullptr){
+		if(std::find(holder1->begin(), holder1->end(), caller) == holder1->end()){
+			Logger::Log("NiDX9RenderState::SetTexture caller %p", caller);
+			holder1->push_back(caller);
+		}		
+		return  D3D_OK;
+	}
+	if(state->SourceTextures[Sampler] == pTexture) return  (HRESULT)Sampler;
+	state->SourceTextures[Sampler] = pTexture;
+	return state->Device->SetTexture(Sampler, pTexture);
 }

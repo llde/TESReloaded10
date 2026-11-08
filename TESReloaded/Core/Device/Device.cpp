@@ -270,8 +270,13 @@ STDMETHODIMP TESRDirect3DDevice9::GetClipStatus(D3DCLIPSTATUS9 *pClipStatus) {
 STDMETHODIMP TESRDirect3DDevice9::GetTexture(DWORD Sampler, IDirect3DBaseTexture9 **ppTexture) {
 	return D3DDevice->GetTexture(Sampler, ppTexture);
 }
-
+std::vector<void*>* holder = new std::vector<void*>();
 STDMETHODIMP TESRDirect3DDevice9::SetTexture(DWORD Sampler, IDirect3DBaseTexture9 *pTexture) {
+	void* caller = _ReturnAddress();
+	if(std::find(holder->begin(), holder->end(), caller) == holder->end()){
+		Logger::Log("TESRDirect3DDevice9::SetTexture caller %p", caller);
+		holder->push_back(caller);
+	}
 	return D3DDevice->SetTexture(Sampler, pTexture);
 }
 
