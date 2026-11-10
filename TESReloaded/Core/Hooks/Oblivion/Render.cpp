@@ -122,7 +122,7 @@ UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiGeometry
 	// the shadow mask is still setted, and the shader will use it instead of the correct texture.
 	// unless the shader doesn't bind the mask at all????
 	// Trying to stamp the texture show no texture for sampler 2 and 3
-	if (PassIndex == 314 || PassIndex ==  322){
+	if (PassIndex == 314 || PassIndex ==  322 || PassIndex == 316 /* TEST*/){
 		TheRenderManager->renderState->SetTexture(3, nullptr);
 		TheRenderManager->renderState->SetTexture(2, nullptr);
 	}
@@ -133,7 +133,7 @@ UInt32 __fastcall SetupShaderProgramsHook(NiShader* This, UInt32 edx, NiGeometry
     //    TheRenderManager->renderState->SetTexture(1, TheRenderManager->CurrentWaterTexture);
     }
     // 381 sky
-	if (PassIndex == 390 || PassIndex == 388 || PassIndex == 314 || PassIndex ==  322){
+	if (PassIndex == 390 || PassIndex == 388 || PassIndex == 314 || PassIndex ==  322 || PassIndex == 316){
     	if (Global->OnKeyDown(44)) {
             NiTArray<NiD3DTextureStage*> stages = Pass->Stages;
             for(UInt32 i = 0; i < Pass->Stages.numObjs; i++){
